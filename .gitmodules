@@ -10,9 +10,6 @@
 [submodule "thirdparty/imgui"]
 	path = thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "thirdparty/imgui-sfml"]
-	path = thirdparty/imgui-sfml
-	url = https://github.com/eliasdaler/imgui-sfml.git
 [submodule "thirdparty/json"]
 	path = thirdparty/json
 	url = https://github.com/nlohmann/json.git
@@ -22,9 +19,6 @@
 [submodule "thirdparty/SDL"]
 	path = thirdparty/SDL
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "thirdparty/SFML"]
-	path = thirdparty/SFML
-	url = https://github.com/SFML/SFML.git
 [submodule "thirdparty/spdlog"]
 	path = thirdparty/spdlog
 	url = https://github.com/gabime/spdlog.git

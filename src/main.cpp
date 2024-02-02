@@ -19,6 +19,20 @@ struct Velocity
     glm::vec2 value;
 };
 
+void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
+{
+    auto view = registry.view<Position>();
+    for ( auto entity : view )
+    {
+        auto& position = view.get<Position>( entity );
+
+        SDL_Rect rect = {
+            static_cast<int>( position.value.x ) - 25, static_cast<int>( position.value.y ) - 25, 50, 50 };
+        SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255 );
+        SDL_RenderFillRect( renderer, &rect );
+    }
+}
+
 int main( int argc, char* args[] )
 {
     if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -85,9 +99,7 @@ int main( int argc, char* args[] )
         SDL_SetRenderDrawColor( renderer, 255, 255, 255, 255 );
         SDL_RenderClear( renderer );
 
-        SDL_Rect ballRect = { static_cast<int>( pos.value.x ) - 25, static_cast<int>( pos.value.y ) - 25, 50, 50 };
-        SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255 );
-        SDL_RenderFillRect( renderer, &ballRect );
+        RenderSystem( registry, renderer );
 
         SDL_RenderPresent( renderer );
 
