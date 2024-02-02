@@ -19,6 +19,80 @@ struct Velocity
     glm::vec2 value;
 };
 
+class SDLInitializer
+{
+public:
+    explicit SDLInitializer( Uint32 flags )
+    {
+        if ( SDL_Init( flags ) < 0 )
+        {
+            throw std::runtime_error( "SDL could not initialize! SDL_Error: " + std::string( SDL_GetError() ) );
+        }
+    }
+
+    ~SDLInitializer() { SDL_Quit(); }
+
+    SDLInitializer( const SDLInitializer& ) = delete;
+    SDLInitializer& operator=( const SDLInitializer& ) = delete;
+};
+
+class SDLWindow
+{
+public:
+    SDLWindow( const std::string& title, int width, int height )
+    {
+        window = SDL_CreateWindow(
+            title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN );
+        if ( !window )
+        {
+            throw std::runtime_error( "Failed to create SDL Window: " + std::string( SDL_GetError() ) );
+        }
+    }
+
+    ~SDLWindow()
+    {
+        if ( window )
+        {
+            SDL_DestroyWindow( window );
+        }
+    }
+
+    [[nodiscard]] SDL_Window* get() const { return window; }
+
+    SDLWindow( const SDLWindow& ) = delete;
+    SDLWindow& operator=( const SDLWindow& ) = delete;
+private:
+    SDL_Window* window = nullptr;
+};
+
+class SDLRenderer
+{
+public:
+    explicit SDLRenderer( SDL_Window* window )
+    {
+        renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
+        if ( !renderer )
+        {
+            throw std::runtime_error( "Failed to create SDL Renderer: " + std::string( SDL_GetError() ) );
+        }
+    }
+
+    ~SDLRenderer()
+    {
+        if ( renderer )
+        {
+            SDL_DestroyRenderer( renderer );
+        }
+    }
+
+    [[nodiscard]] SDL_Renderer* get() const { return renderer; }
+
+    SDLRenderer( const SDLRenderer& ) = delete;
+    SDLRenderer& operator=( const SDLRenderer& ) = delete;
+private:
+    SDL_Renderer* renderer = nullptr;
+};
+
 void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
 {
     auto view = registry.view<Position>();
@@ -62,74 +136,71 @@ void BoundarySystem( entt::registry& registry, float screenWidth, float screenHe
 
 int main( int argc, char* args[] )
 {
-    if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+    try
     {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
+        SDLWindow window( "Bouncing Ball with SDL, EnTT & GLM", WINDOW_WIDTH, WINDOW_HEIGHT );
+        SDLRenderer renderer( window.get() );
+
+        entt::registry registry;
+        auto ball = registry.create();
+        registry.emplace<Position>( ball, glm::vec2( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 ) );
+        registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
+
+        bool quit = false;
+        SDL_Event e;
+
+        while ( !quit )
+        {
+            while ( SDL_PollEvent( &e ) != 0 )
+            {
+                if ( e.type == SDL_QUIT )
+                {
+                    quit = true;
+                }
+            }
+
+            const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
+            if ( currentKeyStates[SDL_SCANCODE_UP] )
+            {
+                registry.get<Velocity>( ball ).value.y = JUMP_VELOCITY;
+            }
+            if ( currentKeyStates[SDL_SCANCODE_LEFT] )
+            {
+                registry.get<Velocity>( ball ).value.x = -MOVE_SPEED;
+            }
+            else if ( currentKeyStates[SDL_SCANCODE_RIGHT] )
+            {
+                registry.get<Velocity>( ball ).value.x = MOVE_SPEED;
+            }
+            else
+            {
+                registry.get<Velocity>( ball ).value.x = 0;
+            }
+
+            // Update physics
+            auto& pos = registry.get<Position>( ball );
+            auto& vel = registry.get<Velocity>( ball );
+
+            vel.value.y += GRAVITY; // Apply gravity
+            pos.value += vel.value; // Update position
+
+            SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
+            SDL_RenderClear( renderer.get() );
+
+            BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
+            RenderSystem( registry, renderer.get() );
+
+            SDL_RenderPresent( renderer.get() );
+
+            SDL_Delay( 16 ); // ~60 frames per second
+        }
+    }
+    catch ( const std::runtime_error& e )
+    {
+        std::cerr << e.what() << std::endl;
         return -1;
     }
-
-    SDL_Window* window = SDL_CreateWindow(
-        "Bouncing Ball with SDL, EnTT & GLM", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH,
-        WINDOW_HEIGHT, SDL_WINDOW_SHOWN );
-    SDL_Renderer* renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
-
-    entt::registry registry;
-    auto ball = registry.create();
-    registry.emplace<Position>( ball, glm::vec2( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 ) );
-    registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
-
-    bool quit = false;
-    SDL_Event e;
-
-    while ( !quit )
-    {
-        while ( SDL_PollEvent( &e ) != 0 )
-        {
-            if ( e.type == SDL_QUIT )
-            {
-                quit = true;
-            }
-        }
-
-        const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
-        if ( currentKeyStates[SDL_SCANCODE_UP] )
-        {
-            registry.get<Velocity>( ball ).value.y = JUMP_VELOCITY;
-        }
-        if ( currentKeyStates[SDL_SCANCODE_LEFT] )
-        {
-            registry.get<Velocity>( ball ).value.x = -MOVE_SPEED;
-        }
-        else if ( currentKeyStates[SDL_SCANCODE_RIGHT] )
-        {
-            registry.get<Velocity>( ball ).value.x = MOVE_SPEED;
-        }
-        else
-        {
-            registry.get<Velocity>( ball ).value.x = 0;
-        }
-
-        // Update physics
-        auto& pos = registry.get<Position>( ball );
-        auto& vel = registry.get<Velocity>( ball );
-
-        vel.value.y += GRAVITY; // Apply gravity
-        pos.value += vel.value; // Update position
-
-        SDL_SetRenderDrawColor( renderer, 255, 255, 255, 255 );
-        SDL_RenderClear( renderer );
-
-        BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
-        RenderSystem( registry, renderer );
-
-        SDL_RenderPresent( renderer );
-
-        SDL_Delay( 16 ); // ~60 frames per second
-    }
-
-    SDL_DestroyRenderer( renderer );
-    SDL_DestroyWindow( window );
-    SDL_Quit();
 
     return 0;
 }
