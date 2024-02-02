@@ -5,9 +5,11 @@
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
-const float GRAVITY = 0.5f;
-const float JUMP_VELOCITY = -15.0f;
-const float MOVE_SPEED = 5.0f;
+const float GRAVITY = 1000.0f;
+const float JUMP_VELOCITY = -600.0f;
+const float MOVE_SPEED = 300.0f;
+const int FPS = 60;
+const int FRAME_DELAY = 1000 / FPS;
 
 struct Position
 {
@@ -162,6 +164,19 @@ void InputSystem( entt::registry& registry )
     }
 }
 
+void PhysicsSystem( entt::registry& registry, float deltaTime )
+{
+    auto view = registry.view<Position, Velocity>();
+    for ( auto entity : view )
+    {
+        auto& pos = view.get<Position>( entity ).value;
+        auto& vel = view.get<Velocity>( entity ).value;
+
+        vel.y += GRAVITY * deltaTime;
+        pos += vel * deltaTime;
+    }
+}
+
 int main( int argc, char* args[] )
 {
     try
@@ -175,11 +190,14 @@ int main( int argc, char* args[] )
         registry.emplace<Position>( ball, glm::vec2( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 ) );
         registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
 
+        Uint32 lastTick = SDL_GetTicks();
         bool quit = false;
         SDL_Event e;
 
         while ( !quit )
         {
+            Uint32 frameStart = SDL_GetTicks();
+
             while ( SDL_PollEvent( &e ) != 0 )
             {
                 if ( e.type == SDL_QUIT )
@@ -190,12 +208,11 @@ int main( int argc, char* args[] )
 
             InputSystem( registry );
 
-            // Update physics
-            auto& pos = registry.get<Position>( ball );
-            auto& vel = registry.get<Velocity>( ball );
+            Uint32 currentTick = SDL_GetTicks();
+            float deltaTime = static_cast<float>( currentTick - lastTick ) / 1000.0f;
+            lastTick = currentTick;
 
-            vel.value.y += GRAVITY; // Apply gravity
-            pos.value += vel.value; // Update position
+            PhysicsSystem( registry, deltaTime );
 
             // Fill the background with white
             SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
@@ -207,7 +224,11 @@ int main( int argc, char* args[] )
             // Render the scene with double buffering
             SDL_RenderPresent( renderer.get() );
 
-            SDL_Delay( 16 ); // ~60 frames per second
+            Uint32 frameTime = SDL_GetTicks() - frameStart;
+            if ( FRAME_DELAY > frameTime )
+            {
+                SDL_Delay( FRAME_DELAY - frameTime );
+            }
         }
     }
     catch ( const std::runtime_error& e )
