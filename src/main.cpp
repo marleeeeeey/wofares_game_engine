@@ -177,53 +177,78 @@ void PhysicsSystem( entt::registry& registry, float deltaTime )
     }
 }
 
+struct QuitEvent
+{};
+
+bool quit = false; // TODO: remove global variable.
+
+void handleQuitEvent( const QuitEvent& )
+{
+    quit = true;
+}
+
+void EventSystem( entt::registry& registry, SDL_Event& e, entt::dispatcher& dispatcher )
+{
+    while ( SDL_PollEvent( &e ) != 0 )
+    {
+        if ( e.type == SDL_QUIT )
+        {
+            dispatcher.trigger<QuitEvent>();
+        }
+    }
+}
+
 int main( int argc, char* args[] )
 {
     try
     {
+        // 1. Initialize SDL, create a window and a renderer.
         SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
         SDLWindow window( "Bouncing Ball with SDL, EnTT & GLM", WINDOW_WIDTH, WINDOW_HEIGHT );
         SDLRenderer renderer( window.get() );
 
+        // 2. Create a registry and add a ball entity with position and velocity components.
         entt::registry registry;
         auto ball = registry.create();
         registry.emplace<Position>( ball, glm::vec2( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 ) );
         registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
 
         Uint32 lastTick = SDL_GetTicks();
-        bool quit = false;
-        SDL_Event e;
+        SDL_Event sdlEvent;
 
+        // 3. Create a dispatcher and connect the QuitEvent.
+        entt::dispatcher dispatcher;
+        dispatcher.sink<QuitEvent>().connect<&handleQuitEvent>();
+
+        // 4. Start the game loop.
         while ( !quit )
         {
             Uint32 frameStart = SDL_GetTicks();
 
-            while ( SDL_PollEvent( &e ) != 0 )
-            {
-                if ( e.type == SDL_QUIT )
-                {
-                    quit = true;
-                }
-            }
+            // 6. Handle events.
+            EventSystem( registry, sdlEvent, dispatcher );
 
+            // 6. Handle input - keyboard state.
             InputSystem( registry );
 
+            // 7. Calculate delta time for physics and apply physics.
             Uint32 currentTick = SDL_GetTicks();
             float deltaTime = static_cast<float>( currentTick - lastTick ) / 1000.0f;
             lastTick = currentTick;
-
             PhysicsSystem( registry, deltaTime );
 
-            // Fill the background with white
+            // 8. Fill the background with white.
             SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
             SDL_RenderClear( renderer.get() );
 
+            // 9. Apply other systems.
             BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
             RenderSystem( registry, renderer.get() );
 
-            // Render the scene with double buffering
+            // 10. Render the scene with double buffering
             SDL_RenderPresent( renderer.get() );
 
+            // 11. Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
             if ( FRAME_DELAY > frameTime )
             {
