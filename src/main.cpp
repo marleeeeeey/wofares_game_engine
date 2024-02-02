@@ -33,6 +33,33 @@ void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
     }
 }
 
+void BoundarySystem( entt::registry& registry, float screenWidth, float screenHeight )
+{
+    auto view = registry.view<Position>();
+    for ( auto entity : view )
+    {
+        auto& position = view.get<Position>( entity );
+
+        if ( position.value.x < 0 )
+        {
+            position.value.x = 0;
+        }
+        else if ( position.value.x > screenWidth )
+        {
+            position.value.x = screenWidth;
+        }
+
+        if ( position.value.y < 0 )
+        {
+            position.value.y = 0;
+        }
+        else if ( position.value.y > screenHeight )
+        {
+            position.value.y = screenHeight;
+        }
+    }
+}
+
 int main( int argc, char* args[] )
 {
     if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -89,16 +116,10 @@ int main( int argc, char* args[] )
         vel.value.y += GRAVITY; // Apply gravity
         pos.value += vel.value; // Update position
 
-        // Collision with ground
-        if ( pos.value.y > WINDOW_HEIGHT - 50 )
-        {
-            pos.value.y = WINDOW_HEIGHT - 50;
-            vel.value.y = 0;
-        }
-
         SDL_SetRenderDrawColor( renderer, 255, 255, 255, 255 );
         SDL_RenderClear( renderer );
 
+        BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
         RenderSystem( registry, renderer );
 
         SDL_RenderPresent( renderer );
