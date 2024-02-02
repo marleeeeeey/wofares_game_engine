@@ -134,6 +134,34 @@ void BoundarySystem( entt::registry& registry, float screenWidth, float screenHe
     }
 }
 
+void InputSystem( entt::registry& registry )
+{
+    const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
+
+    auto view = registry.view<Velocity>();
+    for ( auto entity : view )
+    {
+        auto& vel = view.get<Velocity>( entity );
+
+        if ( currentKeyStates[SDL_SCANCODE_UP] )
+        {
+            vel.value.y = JUMP_VELOCITY;
+        }
+        if ( currentKeyStates[SDL_SCANCODE_LEFT] )
+        {
+            vel.value.x = -MOVE_SPEED;
+        }
+        else if ( currentKeyStates[SDL_SCANCODE_RIGHT] )
+        {
+            vel.value.x = MOVE_SPEED;
+        }
+        else
+        {
+            vel.value.x = 0;
+        }
+    }
+}
+
 int main( int argc, char* args[] )
 {
     try
@@ -160,23 +188,7 @@ int main( int argc, char* args[] )
                 }
             }
 
-            const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
-            if ( currentKeyStates[SDL_SCANCODE_UP] )
-            {
-                registry.get<Velocity>( ball ).value.y = JUMP_VELOCITY;
-            }
-            if ( currentKeyStates[SDL_SCANCODE_LEFT] )
-            {
-                registry.get<Velocity>( ball ).value.x = -MOVE_SPEED;
-            }
-            else if ( currentKeyStates[SDL_SCANCODE_RIGHT] )
-            {
-                registry.get<Velocity>( ball ).value.x = MOVE_SPEED;
-            }
-            else
-            {
-                registry.get<Velocity>( ball ).value.x = 0;
-            }
+            InputSystem( registry );
 
             // Update physics
             auto& pos = registry.get<Position>( ball );
@@ -185,12 +197,14 @@ int main( int argc, char* args[] )
             vel.value.y += GRAVITY; // Apply gravity
             pos.value += vel.value; // Update position
 
+            // Fill the background with white
             SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
             SDL_RenderClear( renderer.get() );
 
             BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
             RenderSystem( registry, renderer.get() );
 
+            // Render the scene with double buffering
             SDL_RenderPresent( renderer.get() );
 
             SDL_Delay( 16 ); // ~60 frames per second
