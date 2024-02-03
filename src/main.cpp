@@ -177,21 +177,27 @@ void PhysicsSystem( entt::registry& registry, float deltaTime )
     }
 }
 
+struct GameState
+{
+    bool quit = false; // Flag to control game loop exit
+};
+
 struct QuitEvent
 {};
 
-bool quit = false; // TODO: remove global variable.
-
-void handleQuitEvent( const QuitEvent& )
+struct QuitEventHandler
 {
-    quit = true;
-}
+    GameState& gameState;
 
-void EventSystem( entt::registry& registry, SDL_Event& e, entt::dispatcher& dispatcher )
+    void handle( const QuitEvent& ) const { gameState.quit = true; }
+};
+
+void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
 {
-    while ( SDL_PollEvent( &e ) != 0 )
+    SDL_Event sdlEvent;
+    while ( SDL_PollEvent( &sdlEvent ) != 0 )
     {
-        if ( e.type == SDL_QUIT )
+        if ( sdlEvent.type == SDL_QUIT )
         {
             dispatcher.trigger<QuitEvent>();
         }
@@ -202,53 +208,51 @@ int main( int argc, char* args[] )
 {
     try
     {
-        // 1. Initialize SDL, create a window and a renderer.
+        // Initialize SDL, create a window and a renderer.
         SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
         SDLWindow window( "Bouncing Ball with SDL, EnTT & GLM", WINDOW_WIDTH, WINDOW_HEIGHT );
         SDLRenderer renderer( window.get() );
 
-        // 2. Create a registry and add a ball entity with position and velocity components.
         entt::registry registry;
+        entt::dispatcher dispatcher;
+
+        // Create a ball entity with position and velocity components.
         auto ball = registry.create();
         registry.emplace<Position>( ball, glm::vec2( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 ) );
         registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
 
+        // Create a game state entity and connect the quit event handler.
+        auto& gameState = registry.emplace<GameState>( registry.create() );
+        QuitEventHandler quitEventHandler{ gameState };
+        dispatcher.sink<QuitEvent>().connect<&QuitEventHandler::handle>( quitEventHandler );
+
         Uint32 lastTick = SDL_GetTicks();
-        SDL_Event sdlEvent;
 
-        // 3. Create a dispatcher and connect the QuitEvent.
-        entt::dispatcher dispatcher;
-        dispatcher.sink<QuitEvent>().connect<&handleQuitEvent>();
-
-        // 4. Start the game loop.
-        while ( !quit )
+        // Start the game loop.
+        while ( !gameState.quit )
         {
             Uint32 frameStart = SDL_GetTicks();
 
-            // 6. Handle events.
-            EventSystem( registry, sdlEvent, dispatcher );
-
-            // 6. Handle input - keyboard state.
+            EventSystem( registry, dispatcher );
             InputSystem( registry );
 
-            // 7. Calculate delta time for physics and apply physics.
+            // Calculate delta time for physics and apply physics.
             Uint32 currentTick = SDL_GetTicks();
             float deltaTime = static_cast<float>( currentTick - lastTick ) / 1000.0f;
             lastTick = currentTick;
             PhysicsSystem( registry, deltaTime );
 
-            // 8. Fill the background with white.
+            // Fill the background with white.
             SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
             SDL_RenderClear( renderer.get() );
 
-            // 9. Apply other systems.
             BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
             RenderSystem( registry, renderer.get() );
 
-            // 10. Render the scene with double buffering
+            // Render the scene with double buffering
             SDL_RenderPresent( renderer.get() );
 
-            // 11. Cap the frame rate.
+            // Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
             if ( FRAME_DELAY > frameTime )
             {
