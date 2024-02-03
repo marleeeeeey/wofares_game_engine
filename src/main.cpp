@@ -27,6 +27,7 @@ struct GameState
     float gravity = 1000.f;
     float worldScale{ 1.0f };
     std::string debugMsg;
+    glm::vec2 cameraCenter;
 };
 
 class SDLInitializer
@@ -194,7 +195,8 @@ void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
     {
         auto& position = view.get<Position>( entity );
 
-        glm::vec2 scaledPosition = position.value * worldScale.worldScale;
+        glm::vec2 renderPosition = position.value - worldScale.cameraCenter;
+        glm::vec2 scaledPosition = renderPosition * worldScale.worldScale;
 
         SDL_Rect rect = {
             static_cast<int>( scaledPosition.x ) - 25, static_cast<int>( scaledPosition.y ) - 25, 50, 50 };
@@ -279,8 +281,6 @@ void PhysicsSystem( entt::registry& registry, float deltaTime )
 
 void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
 {
-    const float scaleSpeed = 0.1f;
-
     auto& gameState = registry.get<GameState>( registry.view<GameState>().front() );
 
     SDL_Event event;
@@ -293,18 +293,20 @@ void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
         }
         else if ( event.type == SDL_MOUSEWHEEL )
         {
-            gameState.debugMsg =
-                "Mouse Motion: " + std::to_string( event.motion.x ) + ", " + std::to_string( event.motion.y );
-
+            const float scaleSpeed = 0.1f;
             if ( event.wheel.y > 0 )
-            {
                 gameState.worldScale += scaleSpeed;
-            }
             else if ( event.wheel.y < 0 )
-            {
                 gameState.worldScale -= scaleSpeed;
-            }
             gameState.worldScale = glm::clamp( gameState.worldScale, 0.5f, 3.0f );
+        }
+        else if ( event.type == SDL_MOUSEMOTION )
+        {
+            gameState.debugMsg =
+                "Mouse moved to (" + std::to_string( event.motion.x ) + ", " + std::to_string( event.motion.y ) + ")";
+            const float cameraSpeed = 0.5f;
+            gameState.cameraCenter.x += event.motion.xrel * cameraSpeed;
+            gameState.cameraCenter.y += event.motion.yrel * cameraSpeed;
         }
     }
 }
