@@ -28,6 +28,7 @@ struct GameState
     float worldScale{ 1.0f };
     std::string debugMsg;
     glm::vec2 cameraCenter;
+    bool isSceneCaptured{ false };
 };
 
 class SDLInitializer
@@ -291,6 +292,7 @@ void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
         {
             gameState.quit = true;
         }
+
         else if ( event.type == SDL_MOUSEWHEEL )
         {
             const float scaleSpeed = 0.1f;
@@ -300,13 +302,21 @@ void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
                 gameState.worldScale -= scaleSpeed;
             gameState.worldScale = glm::clamp( gameState.worldScale, 0.5f, 3.0f );
         }
-        else if ( event.type == SDL_MOUSEMOTION )
+        else if ( event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT )
+        {
+            gameState.isSceneCaptured = true;
+        }
+        else if ( event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_RIGHT )
+        {
+            gameState.isSceneCaptured = false;
+        }
+        else if ( event.type == SDL_MOUSEMOTION && gameState.isSceneCaptured )
         {
             gameState.debugMsg =
                 "Mouse moved to (" + std::to_string( event.motion.x ) + ", " + std::to_string( event.motion.y ) + ")";
             const float cameraSpeed = 0.5f;
-            gameState.cameraCenter.x += event.motion.xrel * cameraSpeed;
-            gameState.cameraCenter.y += event.motion.yrel * cameraSpeed;
+            gameState.cameraCenter.x -= event.motion.xrel * cameraSpeed;
+            gameState.cameraCenter.y -= event.motion.yrel * cameraSpeed;
         }
     }
 }
@@ -323,6 +333,8 @@ void RenderHUDSystem( entt::registry& registry, SDL_Renderer* renderer )
     ImGui::Text( "Gravity: %.2f", gameState.gravity );
     ImGui::Text( "World Scale: %.2f", gameState.worldScale );
     ImGui::Text( "Debug Message: %s", gameState.debugMsg.c_str() );
+    ImGui::Text( "Camera Center: (%.2f, %.2f)", gameState.cameraCenter.x, gameState.cameraCenter.y );
+    ImGui::Text( "Scene Captured: %s", gameState.isSceneCaptured ? "true" : "false" );
 
     if ( ImGui::Button( "Add Random Entity" ) )
     {
