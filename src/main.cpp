@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/random.hpp>
 #include <iostream>
 #include <imgui.h>
 #include "imgui_impl_sdl2.h"
@@ -309,6 +310,18 @@ void RenderHUDSystem( entt::registry& registry, SDL_Renderer* renderer )
     }
 }
 
+void ScatterSystem( entt::registry& registry, const glm::vec2& windowSize )
+{
+    auto view = registry.view<Position>();
+    for ( auto entity : view )
+    {
+        auto& pos = view.get<Position>( entity );
+
+        pos.value.x = glm::linearRand( 0.0f, windowSize.x );
+        pos.value.y = glm::linearRand( 0.0f, windowSize.y );
+    }
+}
+
 int main( int argc, char* args[] )
 {
     try
@@ -331,6 +344,11 @@ int main( int argc, char* args[] )
         auto ball = registry.create();
         registry.emplace<Position>( ball, gameState.windowSize / 2.0f );
         registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
+
+        // Create 10 entities with position components and scatter them randomly.
+        for ( int i = 0; i < 10; ++i )
+            registry.emplace<Position>( registry.create() );
+        ScatterSystem( registry, gameState.windowSize );
 
         Uint32 lastTick = SDL_GetTicks();
 
