@@ -3,14 +3,6 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
-const float GRAVITY = 1000.0f;
-const float JUMP_VELOCITY = -600.0f;
-const float MOVE_SPEED = 300.0f;
-const int FPS = 60;
-const int FRAME_DELAY = 1000 / FPS;
-
 struct Position
 {
     glm::vec2 value;
@@ -19,6 +11,14 @@ struct Position
 struct Velocity
 {
     glm::vec2 value;
+};
+
+struct GameState
+{
+    bool quit{ false }; // Flag to control game loop exit
+    glm::vec2 windowSize{ 800, 600 };
+    unsigned fps{ 60 };
+    float gravity = 1000.f;
 };
 
 class SDLInitializer
@@ -41,14 +41,11 @@ public:
 class SDLWindow
 {
 public:
-    SDLWindow( const std::string& title, int width, int height )
+    SDLWindow( const std::string& title, int width, int height ) { init( title, width, height ); }
+
+    SDLWindow( const std::string& title, glm::vec2 windowSize )
     {
-        window = SDL_CreateWindow(
-            title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN );
-        if ( !window )
-        {
-            throw std::runtime_error( "Failed to create SDL Window: " + std::string( SDL_GetError() ) );
-        }
+        init( title, static_cast<int>( windowSize.x ), static_cast<int>( windowSize.y ) );
     }
 
     ~SDLWindow()
@@ -64,6 +61,16 @@ public:
     SDLWindow( const SDLWindow& ) = delete;
     SDLWindow& operator=( const SDLWindow& ) = delete;
 private:
+    void init( const std::string& title, int width, int height )
+    {
+        window = SDL_CreateWindow(
+            title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN );
+        if ( !window )
+        {
+            throw std::runtime_error( "Failed to create SDL Window: " + std::string( SDL_GetError() ) );
+        }
+    }
+
     SDL_Window* window = nullptr;
 };
 
@@ -109,7 +116,7 @@ void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
     }
 }
 
-void BoundarySystem( entt::registry& registry, float screenWidth, float screenHeight )
+void BoundarySystem( entt::registry& registry, const glm::vec2& windowSize )
 {
     auto view = registry.view<Position>();
     for ( auto entity : view )
@@ -120,25 +127,28 @@ void BoundarySystem( entt::registry& registry, float screenWidth, float screenHe
         {
             position.value.x = 0;
         }
-        else if ( position.value.x > screenWidth )
+        else if ( position.value.x > windowSize.x )
         {
-            position.value.x = screenWidth;
+            position.value.x = windowSize.x;
         }
 
         if ( position.value.y < 0 )
         {
             position.value.y = 0;
         }
-        else if ( position.value.y > screenHeight )
+        else if ( position.value.y > windowSize.y )
         {
-            position.value.y = screenHeight;
+            position.value.y = windowSize.y;
         }
     }
 }
 
 void InputSystem( entt::registry& registry )
 {
-    const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
+    const float jumpVelocity = -600.0f;
+    const float moveSpeed = 300.0f;
+
+    const Uint8* currentKeyStates = SDL_GetKeyboardState( nullptr );
 
     auto view = registry.view<Velocity>();
     for ( auto entity : view )
@@ -147,15 +157,15 @@ void InputSystem( entt::registry& registry )
 
         if ( currentKeyStates[SDL_SCANCODE_UP] )
         {
-            vel.value.y = JUMP_VELOCITY;
+            vel.value.y = jumpVelocity;
         }
         if ( currentKeyStates[SDL_SCANCODE_LEFT] )
         {
-            vel.value.x = -MOVE_SPEED;
+            vel.value.x = -moveSpeed;
         }
         else if ( currentKeyStates[SDL_SCANCODE_RIGHT] )
         {
-            vel.value.x = MOVE_SPEED;
+            vel.value.x = moveSpeed;
         }
         else
         {
@@ -166,21 +176,19 @@ void InputSystem( entt::registry& registry )
 
 void PhysicsSystem( entt::registry& registry, float deltaTime )
 {
+    auto gameStateEntity = registry.view<GameState>().front();
+    const auto& gameState = registry.get<GameState>( gameStateEntity );
+
     auto view = registry.view<Position, Velocity>();
     for ( auto entity : view )
     {
         auto& pos = view.get<Position>( entity ).value;
         auto& vel = view.get<Velocity>( entity ).value;
 
-        vel.y += GRAVITY * deltaTime;
+        vel.y += gameState.gravity * deltaTime;
         pos += vel * deltaTime;
     }
 }
-
-struct GameState
-{
-    bool quit = false; // Flag to control game loop exit
-};
 
 struct QuitEvent
 {};
@@ -208,23 +216,23 @@ int main( int argc, char* args[] )
 {
     try
     {
-        // Initialize SDL, create a window and a renderer.
-        SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
-        SDLWindow window( "Bouncing Ball with SDL, EnTT & GLM", WINDOW_WIDTH, WINDOW_HEIGHT );
-        SDLRenderer renderer( window.get() );
-
         entt::registry registry;
         entt::dispatcher dispatcher;
-
-        // Create a ball entity with position and velocity components.
-        auto ball = registry.create();
-        registry.emplace<Position>( ball, glm::vec2( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 ) );
-        registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
 
         // Create a game state entity and connect the quit event handler.
         auto& gameState = registry.emplace<GameState>( registry.create() );
         QuitEventHandler quitEventHandler{ gameState };
         dispatcher.sink<QuitEvent>().connect<&QuitEventHandler::handle>( quitEventHandler );
+
+        // Initialize SDL, create a window and a renderer.
+        SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
+        SDLWindow window( "Bouncing Ball with SDL, EnTT & GLM", gameState.windowSize );
+        SDLRenderer renderer( window.get() );
+
+        // Create a ball entity with position and velocity components.
+        auto ball = registry.create();
+        registry.emplace<Position>( ball, gameState.windowSize / 2.0f );
+        registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
 
         Uint32 lastTick = SDL_GetTicks();
 
@@ -246,7 +254,7 @@ int main( int argc, char* args[] )
             SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
             SDL_RenderClear( renderer.get() );
 
-            BoundarySystem( registry, WINDOW_WIDTH, WINDOW_HEIGHT );
+            BoundarySystem( registry, gameState.windowSize );
             RenderSystem( registry, renderer.get() );
 
             // Render the scene with double buffering
@@ -254,9 +262,10 @@ int main( int argc, char* args[] )
 
             // Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
-            if ( FRAME_DELAY > frameTime )
+            const Uint32 frameDelay = 1000 / gameState.fps;
+            if ( frameDelay > frameTime )
             {
-                SDL_Delay( FRAME_DELAY - frameTime );
+                SDL_Delay( frameDelay - frameTime );
             }
         }
     }
