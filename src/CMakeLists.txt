@@ -5,6 +5,7 @@ target_link_libraries(YourExecutableName
     glm
     SDL2::SDL2 SDL2::SDL2main
     EnTT::EnTT
+    imgui
 )
 
 target_include_directories(YourExecutableName

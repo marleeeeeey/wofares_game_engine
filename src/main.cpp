@@ -2,6 +2,9 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <imgui.h>
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 struct Position
 {
@@ -102,8 +105,83 @@ private:
     SDL_Renderer* renderer = nullptr;
 };
 
+class ImGuiSDL
+{
+    SDL_Renderer* renderer = nullptr;
+public:
+    ImGuiSDL( SDL_Window* window, SDL_Renderer* renderer ) : renderer( renderer )
+    {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGui::StyleColorsDark();
+
+        if ( !ImGui_ImplSDL2_InitForSDLRenderer( window, renderer ) )
+        {
+            throw std::runtime_error( "Failed to initialize ImGui SDL2 backend" );
+        }
+        if ( !ImGui_ImplSDLRenderer2_Init( renderer ) )
+        {
+            throw std::runtime_error( "Failed to initialize ImGui SDL Renderer backend" );
+        }
+    }
+
+    ~ImGuiSDL()
+    {
+        ImGui_ImplSDLRenderer2_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
+    }
+
+    void startNewFrame() const
+    {
+        // Prepares a new frame for ImGui rendering with SDL_Renderer backend.
+        // This function should be called before any ImGui drawing commands in the new frame.
+        // It sets up necessary state for ImGui rendering with SDL_Renderer.
+        ImGui_ImplSDLRenderer2_NewFrame();
+
+        // Updates ImGui with the latest input events from SDL and starts a new ImGui frame.
+        // This includes processing keyboard, mouse, and other input devices to update ImGui's internal state.
+        // It should be called once per frame, before any ImGui rendering commands.
+        ImGui_ImplSDL2_NewFrame();
+
+        // Starts a new ImGui frame and prepares for new UI rendering in this frame.
+        // This function must be called once per frame before any ImGui rendering commands (e.g., ImGui::Begin(),
+        // ImGui::Button()). It sets up the necessary state for the ImGui frame, handles timing, and processes inputs,
+        // making ImGui ready to accept your UI commands.
+        ImGui::NewFrame();
+    }
+
+    void finishFrame() const
+    {
+        // Renders the ImGui draw commands submitted between ImGui::NewFrame() and ImGui::Render() calls and prepares
+        // the draw data for display. This function does not perform the actual drawing on the screen but instead
+        // generates the draw data that will be used by the rendering backend (e.g., OpenGL, DirectX, SDL_Renderer) to
+        // display the ImGui elements. It should be called after you have finished submitting all your ImGui UI elements
+        // for the current frame and before the rendering backend's function to display ImGui elements on the screen.
+        ImGui::Render();
+
+        // Question: Why is this here?
+        // Render the scene with double buffering
+        // Renders the ImGui draw data using the SDL_Renderer backend.
+        // This function draws all ImGui elements prepared in the current frame onto the screen.
+        // It should be called after all ImGui rendering commands and before SDL_RenderPresent to display ImGui
+        // elements.
+        ImGui_ImplSDLRenderer2_RenderDrawData( ImGui::GetDrawData() );
+
+        // Updates the screen with rendering performed since the last call.
+        // This function presents the final image to the screen, including both your application content and the
+        // ImGui overlay. It should be the last call in your rendering loop to display everything rendered in the
+        // current frame.
+        SDL_RenderPresent( renderer );
+    }
+};
+
 void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
 {
+    // Fill the background with white.
+    SDL_SetRenderDrawColor( renderer, 255, 255, 255, 255 );
+    SDL_RenderClear( renderer );
+
     auto view = registry.view<Position>();
     for ( auto entity : view )
     {
@@ -202,13 +280,32 @@ struct QuitEventHandler
 
 void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
 {
-    SDL_Event sdlEvent;
-    while ( SDL_PollEvent( &sdlEvent ) != 0 )
+    SDL_Event event;
+    while ( SDL_PollEvent( &event ) != 0 )
     {
-        if ( sdlEvent.type == SDL_QUIT )
+        ImGui_ImplSDL2_ProcessEvent( &event );
+        if ( event.type == SDL_QUIT )
         {
             dispatcher.trigger<QuitEvent>();
         }
+    }
+}
+
+void RenderHUDSystem( entt::registry& registry, SDL_Renderer* renderer )
+{
+    auto view = registry.view<GameState>();
+    for ( auto entity : view )
+    {
+        auto& gameState = view.get<GameState>( entity );
+
+        ImGui::Begin( "HUD" );
+        ImGui::Text( "Quit: %s", gameState.quit ? "true" : "false" );
+        ImGui::Text(
+            "Window Size: %dx%d", static_cast<int>( gameState.windowSize.x ),
+            static_cast<int>( gameState.windowSize.y ) );
+        ImGui::Text( "FPS: %u", gameState.fps );
+        ImGui::Text( "Gravity: %.2f", gameState.gravity );
+        ImGui::End();
     }
 }
 
@@ -224,10 +321,11 @@ int main( int argc, char* args[] )
         QuitEventHandler quitEventHandler{ gameState };
         dispatcher.sink<QuitEvent>().connect<&QuitEventHandler::handle>( quitEventHandler );
 
-        // Initialize SDL, create a window and a renderer.
+        // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
-        SDLWindow window( "Bouncing Ball with SDL, EnTT & GLM", gameState.windowSize );
+        SDLWindow window( "Bouncing Ball with SDL, ImGui, EnTT & GLM", gameState.windowSize );
         SDLRenderer renderer( window.get() );
+        ImGuiSDL imguiSDL( window.get(), renderer.get() );
 
         // Create a ball entity with position and velocity components.
         auto ball = registry.create();
@@ -244,21 +342,20 @@ int main( int argc, char* args[] )
             EventSystem( registry, dispatcher );
             InputSystem( registry );
 
-            // Calculate delta time for physics and apply physics.
+            // Calculate delta time.
             Uint32 currentTick = SDL_GetTicks();
             float deltaTime = static_cast<float>( currentTick - lastTick ) / 1000.0f;
             lastTick = currentTick;
+
+            // Update the physics.
             PhysicsSystem( registry, deltaTime );
-
-            // Fill the background with white.
-            SDL_SetRenderDrawColor( renderer.get(), 255, 255, 255, 255 );
-            SDL_RenderClear( renderer.get() );
-
             BoundarySystem( registry, gameState.windowSize );
-            RenderSystem( registry, renderer.get() );
 
-            // Render the scene with double buffering
-            SDL_RenderPresent( renderer.get() );
+            // Render the scene and the HUD.
+            imguiSDL.startNewFrame();
+            RenderSystem( registry, renderer.get() );
+            RenderHUDSystem( registry, renderer.get() );
+            imguiSDL.finishFrame();
 
             // Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
