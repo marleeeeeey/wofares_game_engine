@@ -4,6 +4,8 @@
 #include <glm/gtc/random.hpp>
 #include <iostream>
 #include <imgui.h>
+#include <string>
+
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
 
@@ -23,6 +25,8 @@ struct GameState
     glm::vec2 windowSize{ 800, 600 };
     unsigned fps{ 60 };
     float gravity = 1000.f;
+    float worldScale{ 1.0f };
+    std::string debugMsg;
 };
 
 class SDLInitializer
@@ -183,13 +187,17 @@ void RenderSystem( entt::registry& registry, SDL_Renderer* renderer )
     SDL_SetRenderDrawColor( renderer, 255, 255, 255, 255 );
     SDL_RenderClear( renderer );
 
+    auto& worldScale = registry.get<GameState>( registry.view<GameState>().front() );
+
     auto view = registry.view<Position>();
     for ( auto entity : view )
     {
         auto& position = view.get<Position>( entity );
 
+        glm::vec2 scaledPosition = position.value * worldScale.worldScale;
+
         SDL_Rect rect = {
-            static_cast<int>( position.value.x ) - 25, static_cast<int>( position.value.y ) - 25, 50, 50 };
+            static_cast<int>( scaledPosition.x ) - 25, static_cast<int>( scaledPosition.y ) - 25, 50, 50 };
         SDL_SetRenderDrawColor( renderer, 255, 0, 0, 255 );
         SDL_RenderFillRect( renderer, &rect );
     }
@@ -269,25 +277,34 @@ void PhysicsSystem( entt::registry& registry, float deltaTime )
     }
 }
 
-struct QuitEvent
-{};
-
-struct QuitEventHandler
-{
-    GameState& gameState;
-
-    void handle( const QuitEvent& ) const { gameState.quit = true; }
-};
-
 void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
 {
+    const float scaleSpeed = 0.1f;
+
+    auto& gameState = registry.get<GameState>( registry.view<GameState>().front() );
+
     SDL_Event event;
-    while ( SDL_PollEvent( &event ) != 0 )
+    while ( SDL_PollEvent( &event ) )
     {
         ImGui_ImplSDL2_ProcessEvent( &event );
         if ( event.type == SDL_QUIT )
         {
-            dispatcher.trigger<QuitEvent>();
+            gameState.quit = true;
+        }
+        else if ( event.type == SDL_MOUSEWHEEL )
+        {
+            gameState.debugMsg =
+                "Mouse Motion: " + std::to_string( event.motion.x ) + ", " + std::to_string( event.motion.y );
+
+            if ( event.wheel.y > 0 )
+            {
+                gameState.worldScale += scaleSpeed;
+            }
+            else if ( event.wheel.y < 0 )
+            {
+                gameState.worldScale -= scaleSpeed;
+            }
+            gameState.worldScale = glm::clamp( gameState.worldScale, 0.5f, 3.0f );
         }
     }
 }
@@ -302,6 +319,8 @@ void RenderHUDSystem( entt::registry& registry, SDL_Renderer* renderer )
         "Window Size: %dx%d", static_cast<int>( gameState.windowSize.x ), static_cast<int>( gameState.windowSize.y ) );
     ImGui::Text( "FPS: %u", gameState.fps );
     ImGui::Text( "Gravity: %.2f", gameState.gravity );
+    ImGui::Text( "World Scale: %.2f", gameState.worldScale );
+    ImGui::Text( "Debug Message: %s", gameState.debugMsg.c_str() );
 
     if ( ImGui::Button( "Add Random Entity" ) )
     {
@@ -345,10 +364,8 @@ int main( int argc, char* args[] )
         entt::registry registry;
         entt::dispatcher dispatcher;
 
-        // Create a game state entity and connect the quit event handler.
+        // Create a game state entity.
         auto& gameState = registry.emplace<GameState>( registry.create() );
-        QuitEventHandler quitEventHandler{ gameState };
-        dispatcher.sink<QuitEvent>().connect<&QuitEventHandler::handle>( quitEventHandler );
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
