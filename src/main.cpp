@@ -294,20 +294,36 @@ void EventSystem( entt::registry& registry, entt::dispatcher& dispatcher )
 
 void RenderHUDSystem( entt::registry& registry, SDL_Renderer* renderer )
 {
-    auto view = registry.view<GameState>();
-    for ( auto entity : view )
-    {
-        auto& gameState = view.get<GameState>( entity );
+    auto& gameState = registry.get<GameState>( registry.view<GameState>().front() );
 
-        ImGui::Begin( "HUD" );
-        ImGui::Text( "Quit: %s", gameState.quit ? "true" : "false" );
-        ImGui::Text(
-            "Window Size: %dx%d", static_cast<int>( gameState.windowSize.x ),
-            static_cast<int>( gameState.windowSize.y ) );
-        ImGui::Text( "FPS: %u", gameState.fps );
-        ImGui::Text( "Gravity: %.2f", gameState.gravity );
-        ImGui::End();
+    ImGui::Begin( "HUD" );
+    ImGui::Text( "Quit: %s", gameState.quit ? "true" : "false" );
+    ImGui::Text(
+        "Window Size: %dx%d", static_cast<int>( gameState.windowSize.x ), static_cast<int>( gameState.windowSize.y ) );
+    ImGui::Text( "FPS: %u", gameState.fps );
+    ImGui::Text( "Gravity: %.2f", gameState.gravity );
+
+    if ( ImGui::Button( "Add Random Entity" ) )
+    {
+        auto newEntity = registry.create();
+        glm::vec2 randomPosition = glm::linearRand( glm::vec2( 0.0f, 0.0f ), gameState.windowSize );
+        registry.emplace<Position>( newEntity, randomPosition );
     }
+
+    if ( ImGui::Button( "Remove All Entities With Only Position" ) )
+    {
+        auto positionEntities = registry.view<Position>();
+
+        for ( auto entity : positionEntities )
+        {
+            if ( !registry.any_of<Velocity>( entity ) )
+            {
+                registry.remove<Position>( entity );
+            }
+        }
+    }
+
+    ImGui::End();
 }
 
 void ScatterSystem( entt::registry& registry, const glm::vec2& windowSize )
