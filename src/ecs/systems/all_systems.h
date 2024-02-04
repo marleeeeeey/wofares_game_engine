@@ -185,7 +185,7 @@ void EventSystem(entt::registry& registry, entt::dispatcher& dispatcher)
                 gameState.cameraScale += scaleSpeed;
             else if (event.wheel.y < 0)
                 gameState.cameraScale -= scaleSpeed;
-            gameState.cameraScale = glm::clamp(gameState.cameraScale, 0.5f, 3.0f);
+            gameState.cameraScale = glm::clamp(gameState.cameraScale, 0.2f, 3.0f);
 
             // Get the cursor coordinates in world coordinates
             int mouseX, mouseY;
@@ -328,8 +328,4 @@ void DrawGridSystem(SDL_Renderer* renderer, const GameState& gameState)
 
     // Draw the center of screen point
     DrawCross(renderer, gameState.windowSize / 2.0f, 20, screenCenterColor);
-
-    // Draw the origin point
-    glm::vec2 originWorldPos = (-cameraCenter) * gameState.cameraScale;
-    DrawCross(renderer, originWorldPos, 20, originColor);
 }

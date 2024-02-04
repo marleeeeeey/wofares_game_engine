@@ -12,6 +12,7 @@ int main(int argc, char* args[])
 
         // Create a game state entity.
         auto& gameState = registry.emplace<GameState>(registry.create());
+        gameState.cameraCenter = gameState.windowSize / 2.0f;
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializer sdlInitializer(SDL_INIT_VIDEO);
