@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
 set(GLM_DISABLE_AUTO_DETECTION ON CACHE BOOL "" FORCE)
 
-# thirdparty
+# Generate compile_commands.json.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_subdirectory(thirdparty/SDL)
 add_subdirectory(thirdparty/glm)
 add_subdirectory(thirdparty/entt)
@@ -16,8 +18,6 @@ add_subdirectory(thirdparty/magic_enum)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/googletest)
 add_subdirectory(thirdparty/my_common_cpp_utils)
-
-# game sources
 add_subdirectory(src)
 
 # ###################################################################
