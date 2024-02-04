@@ -8,22 +8,23 @@
       "args": [
         "/c",
         "if not exist ${workspaceFolder}\\build mkdir ${workspaceFolder}\\build && cmake -G \"Ninja\" DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder}"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
+      ]
     },
     {
       "label": "Wofares (Windows) 2. Build",
       "type": "shell",
-      "command": "cmake --build ${workspaceFolder}/build"
+      "command": "cmake --build ${workspaceFolder}/build",
+      "dependsOn": [
+        "Wofares (Windows) 1. Configure"
+      ]
     },
     {
       "label": "Wofares (Windows) 3. Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/src/wofares.exe"
+      "command": "${workspaceFolder}/build/src/wofares.exe",
+      "dependsOn": [
+        "Wofares (Windows) 2. Build"
+      ]
     }
   ]
 }
