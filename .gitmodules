@@ -22,3 +22,6 @@
 [submodule "thirdparty/spdlog"]
 	path = thirdparty/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "thirdparty/my_common_cpp_utils"]
+	path = thirdparty/my_common_cpp_utils
+	url = git@github.com:marleeeeeey/my_common_cpp_utils.git

@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <entt/entt.hpp>
+#include <my_common_cpp_utils/Logger.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
 #include <iostream>
@@ -27,7 +28,7 @@ struct GameState
     float gravity = 1000.f;
     float worldScale{ 1.0f };
     std::string debugMsg;
-    glm::vec2 cameraCenter;
+    glm::vec2 cameraCenter{};
     bool isSceneCaptured{ false };
 };
 
@@ -123,13 +124,10 @@ public:
         ImGui::StyleColorsDark();
 
         if ( !ImGui_ImplSDL2_InitForSDLRenderer( window, renderer ) )
-        {
             throw std::runtime_error( "Failed to initialize ImGui SDL2 backend" );
-        }
+
         if ( !ImGui_ImplSDLRenderer2_Init( renderer ) )
-        {
             throw std::runtime_error( "Failed to initialize ImGui SDL Renderer backend" );
-        }
     }
 
     ~ImGuiSDL()
@@ -139,7 +137,7 @@ public:
         ImGui::DestroyContext();
     }
 
-    void startNewFrame() const
+    void startFrame() const
     {
         // Prepares a new frame for ImGui rendering with SDL_Renderer backend.
         // This function should be called before any ImGui drawing commands in the new frame.
@@ -326,15 +324,15 @@ void RenderHUDSystem( entt::registry& registry, SDL_Renderer* renderer )
     auto& gameState = registry.get<GameState>( registry.view<GameState>().front() );
 
     ImGui::Begin( "HUD" );
-    ImGui::Text( "Quit: %s", gameState.quit ? "true" : "false" );
-    ImGui::Text(
-        "Window Size: %dx%d", static_cast<int>( gameState.windowSize.x ), static_cast<int>( gameState.windowSize.y ) );
-    ImGui::Text( "FPS: %u", gameState.fps );
-    ImGui::Text( "Gravity: %.2f", gameState.gravity );
-    ImGui::Text( "World Scale: %.2f", gameState.worldScale );
-    ImGui::Text( "Debug Message: %s", gameState.debugMsg.c_str() );
-    ImGui::Text( "Camera Center: (%.2f, %.2f)", gameState.cameraCenter.x, gameState.cameraCenter.y );
-    ImGui::Text( "Scene Captured: %s", gameState.isSceneCaptured ? "true" : "false" );
+
+    ImGui::Text( MY_FMT( "Quit: {}", gameState.quit ).c_str() );
+    ImGui::Text( MY_FMT( "Window Size: {}", gameState.windowSize ).c_str() );
+    ImGui::Text( MY_FMT( "FPS: {}", gameState.fps ).c_str() );
+    ImGui::Text( MY_FMT( "Gravity: {:.2f}", gameState.gravity ).c_str() );
+    ImGui::Text( MY_FMT( "World Scale: {:.2f}", gameState.worldScale ).c_str() );
+    ImGui::Text( MY_FMT( "Debug Message: {}", gameState.debugMsg ).c_str() );
+    ImGui::Text( MY_FMT( "Camera Center: {}", gameState.cameraCenter ).c_str() );
+    ImGui::Text( MY_FMT( "Scene Captured: {}", gameState.isSceneCaptured ).c_str() );
 
     if ( ImGui::Button( "Add Random Entity" ) )
     {
@@ -383,6 +381,7 @@ int main( int argc, char* args[] )
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializer sdlInitializer( SDL_INIT_VIDEO );
+
         SDLWindow window( "Bouncing Ball with SDL, ImGui, EnTT & GLM", gameState.windowSize );
         SDLRenderer renderer( window.get() );
         ImGuiSDL imguiSDL( window.get(), renderer.get() );
@@ -417,7 +416,7 @@ int main( int argc, char* args[] )
             BoundarySystem( registry, gameState.windowSize );
 
             // Render the scene and the HUD.
-            imguiSDL.startNewFrame();
+            imguiSDL.startFrame();
             RenderSystem( registry, renderer.get() );
             RenderHUDSystem( registry, renderer.get() );
             imguiSDL.finishFrame();
