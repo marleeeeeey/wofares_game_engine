@@ -1,4 +1,13 @@
-# Wofaers (C++ Game Project)
+# Wofares (C++ Game Project)
+
+## How to build
+
+```
+mkdir build
+cd build
+cmake -G "Ninja"-DCMAKE_CXX_COMPILER=clang++ ..
+ninja
+```
 
 ## File Structure
 
