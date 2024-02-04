@@ -23,7 +23,7 @@ SortIncludes: true
 SortUsingDeclarations: false
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: true
-SpacesInParentheses: true
+SpacesInParentheses: false
 UseTab: Never
 
 BraceWrapping:

@@ -9,50 +9,50 @@
 class SDLInitializer
 {
 public:
-    explicit SDLInitializer( Uint32 flags )
+    explicit SDLInitializer(Uint32 flags)
     {
-        if ( SDL_Init( flags ) < 0 )
+        if (SDL_Init(flags) < 0)
         {
-            throw std::runtime_error( "SDL could not initialize! SDL_Error: " + std::string( SDL_GetError() ) );
+            throw std::runtime_error("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
         }
     }
 
     ~SDLInitializer() { SDL_Quit(); }
 
-    SDLInitializer( const SDLInitializer& ) = delete;
-    SDLInitializer& operator=( const SDLInitializer& ) = delete;
+    SDLInitializer(const SDLInitializer&) = delete;
+    SDLInitializer& operator=(const SDLInitializer&) = delete;
 };
 
 class SDLWindow
 {
 public:
-    SDLWindow( const std::string& title, int width, int height ) { init( title, width, height ); }
+    SDLWindow(const std::string& title, int width, int height) { init(title, width, height); }
 
-    SDLWindow( const std::string& title, glm::vec2 windowSize )
+    SDLWindow(const std::string& title, glm::vec2 windowSize)
     {
-        init( title, static_cast<int>( windowSize.x ), static_cast<int>( windowSize.y ) );
+        init(title, static_cast<int>(windowSize.x), static_cast<int>(windowSize.y));
     }
 
     ~SDLWindow()
     {
-        if ( window )
+        if (window)
         {
-            SDL_DestroyWindow( window );
+            SDL_DestroyWindow(window);
         }
     }
 
     [[nodiscard]] SDL_Window* get() const { return window; }
 
-    SDLWindow( const SDLWindow& ) = delete;
-    SDLWindow& operator=( const SDLWindow& ) = delete;
+    SDLWindow(const SDLWindow&) = delete;
+    SDLWindow& operator=(const SDLWindow&) = delete;
 private:
-    void init( const std::string& title, int width, int height )
+    void init(const std::string& title, int width, int height)
     {
         window = SDL_CreateWindow(
-            title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN );
-        if ( !window )
+            title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+        if (!window)
         {
-            throw std::runtime_error( "Failed to create SDL Window: " + std::string( SDL_GetError() ) );
+            throw std::runtime_error("Failed to create SDL Window: " + std::string(SDL_GetError()));
         }
     }
 
@@ -62,27 +62,27 @@ private:
 class SDLRenderer
 {
 public:
-    explicit SDLRenderer( SDL_Window* window )
+    explicit SDLRenderer(SDL_Window* window)
     {
-        renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED );
-        if ( !renderer )
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (!renderer)
         {
-            throw std::runtime_error( "Failed to create SDL Renderer: " + std::string( SDL_GetError() ) );
+            throw std::runtime_error("Failed to create SDL Renderer: " + std::string(SDL_GetError()));
         }
     }
 
     ~SDLRenderer()
     {
-        if ( renderer )
+        if (renderer)
         {
-            SDL_DestroyRenderer( renderer );
+            SDL_DestroyRenderer(renderer);
         }
     }
 
     [[nodiscard]] SDL_Renderer* get() const { return renderer; }
 
-    SDLRenderer( const SDLRenderer& ) = delete;
-    SDLRenderer& operator=( const SDLRenderer& ) = delete;
+    SDLRenderer(const SDLRenderer&) = delete;
+    SDLRenderer& operator=(const SDLRenderer&) = delete;
 private:
     SDL_Renderer* renderer = nullptr;
 };
@@ -91,17 +91,17 @@ class ImGuiSDL
 {
     SDL_Renderer* renderer = nullptr;
 public:
-    ImGuiSDL( SDL_Window* window, SDL_Renderer* renderer ) : renderer( renderer )
+    ImGuiSDL(SDL_Window* window, SDL_Renderer* renderer) : renderer(renderer)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
 
-        if ( !ImGui_ImplSDL2_InitForSDLRenderer( window, renderer ) )
-            throw std::runtime_error( "Failed to initialize ImGui SDL2 backend" );
+        if (!ImGui_ImplSDL2_InitForSDLRenderer(window, renderer))
+            throw std::runtime_error("Failed to initialize ImGui SDL2 backend");
 
-        if ( !ImGui_ImplSDLRenderer2_Init( renderer ) )
-            throw std::runtime_error( "Failed to initialize ImGui SDL Renderer backend" );
+        if (!ImGui_ImplSDLRenderer2_Init(renderer))
+            throw std::runtime_error("Failed to initialize ImGui SDL Renderer backend");
     }
 
     ~ImGuiSDL()
@@ -145,12 +145,12 @@ public:
         // This function draws all ImGui elements prepared in the current frame onto the screen.
         // It should be called after all ImGui rendering commands and before SDL_RenderPresent to display ImGui
         // elements.
-        ImGui_ImplSDLRenderer2_RenderDrawData( ImGui::GetDrawData() );
+        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
 
         // Updates the screen with rendering performed since the last call.
         // This function presents the final image to the screen, including both your application content and the
         // ImGui overlay. It should be the last call in your rendering loop to display everything rendered in the
         // current frame.
-        SDL_RenderPresent( renderer );
+        SDL_RenderPresent(renderer);
     }
 };
