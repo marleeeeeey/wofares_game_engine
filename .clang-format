@@ -19,7 +19,7 @@ IndentExternBlock: NoIndent
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 1
 PointerAlignment: Left
-SortIncludes: false
+SortIncludes: true
 SortUsingDeclarations: false
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: true
@@ -34,6 +34,3 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyNamespace: false
   SplitEmptyRecord: false
-
-WhitespaceSensitiveMacros:
-  - BOOST_PP_STRINGIZE

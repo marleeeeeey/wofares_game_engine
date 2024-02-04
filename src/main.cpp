@@ -23,10 +23,15 @@ int main( int argc, char* args[] )
         auto ball = registry.create();
         registry.emplace<Position>( ball, gameState.windowSize / 2.0f );
         registry.emplace<Velocity>( ball, glm::vec2( 0, 0 ) );
+        registry.emplace<SizeComponent>( ball, glm::vec2( 50, 50 ) );
 
         // Create 10 entities with position components and scatter them randomly.
         for ( int i = 0; i < 10; ++i )
-            registry.emplace<Position>( registry.create() );
+        {
+            auto entity = registry.create();
+            registry.emplace<Position>( entity );
+            registry.emplace<SizeComponent>( entity, glm::vec2( 50, 50 ) );
+        }
         ScatterSystem( registry, gameState.windowSize );
 
         Uint32 lastTick = SDL_GetTicks();
@@ -51,6 +56,7 @@ int main( int argc, char* args[] )
             // Render the scene and the HUD.
             imguiSDL.startFrame();
             RenderSystem( registry, renderer.get() );
+            DrawGridSystem( renderer.get(), gameState );
             RenderHUDSystem( registry, renderer.get() );
             imguiSDL.finishFrame();
 
