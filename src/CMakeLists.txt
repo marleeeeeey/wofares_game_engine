@@ -1,4 +1,4 @@
-add_executable(wofaers main.cpp)
+add_executable(wofaers main.cpp "ecs/systems/all_systems.h" "ecs/components/all_components.h")
 
 target_link_libraries(wofaers
     PRIVATE
