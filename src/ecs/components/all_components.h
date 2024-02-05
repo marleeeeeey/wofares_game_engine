@@ -17,6 +17,11 @@ struct SizeComponent
     glm::vec2 value;
 };
 
+struct PlayerNumber
+{
+    size_t value;
+};
+
 struct GameState
 {
     bool quit{false}; // Flag to control game loop exit

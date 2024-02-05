@@ -70,11 +70,11 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
 
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
 
-    auto view = registry.view<Position, SizeComponent>();
-    for (auto entity : view)
+    SetRenderDrawColor(renderer, ColorName::Red);
+    auto objects = registry.view<Position, SizeComponent>();
+    for (auto entity : objects)
     {
-        auto& position = view.get<Position>(entity);
-        auto& size = view.get<SizeComponent>(entity);
+        const auto& [position, size] = objects.get<Position, SizeComponent>(entity);
 
         glm::vec2 transformedPosition =
             (position.value - gameState.cameraCenter) * gameState.cameraScale + gameState.windowSize / 2.0f;
@@ -83,34 +83,54 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
             static_cast<int>(size.value.x * gameState.cameraScale),
             static_cast<int>(size.value.y * gameState.cameraScale)};
 
-        SetRenderDrawColor(renderer, ColorName::Red);
+        SDL_RenderFillRect(renderer, &rect);
+    }
+
+    // TODO: think how to make it more generic. Remove code duplication.
+    SetRenderDrawColor(renderer, ColorName::Blue);
+    auto players = registry.view<Position, SizeComponent, PlayerNumber>();
+    for (auto entity : players)
+    {
+        const auto& [position, size] = players.get<Position, SizeComponent>(entity);
+
+        glm::vec2 transformedPosition =
+            (position.value - gameState.cameraCenter) * gameState.cameraScale + gameState.windowSize / 2.0f;
+        SDL_Rect rect = {
+            static_cast<int>(transformedPosition.x), static_cast<int>(transformedPosition.y),
+            static_cast<int>(size.value.x * gameState.cameraScale),
+            static_cast<int>(size.value.y * gameState.cameraScale)};
+
         SDL_RenderFillRect(renderer, &rect);
     }
 }
 
 void BoundarySystem(entt::registry& registry, const glm::vec2& windowSize)
 {
-    auto view = registry.view<Position>();
+    auto view = registry.view<Position, Velocity>();
     for (auto entity : view)
     {
-        auto& position = view.get<Position>(entity);
+        const auto& [position, velocity] = view.get<Position, Velocity>(entity);
 
         if (position.value.x < 0)
         {
             position.value.x = 0;
+            velocity.value.x = 0;
         }
         else if (position.value.x > windowSize.x)
         {
             position.value.x = windowSize.x;
+            velocity.value.x = 0;
         }
 
         if (position.value.y < 0)
         {
             position.value.y = 0;
+            velocity.value.y = 0;
         }
         else if (position.value.y > windowSize.y)
         {
             position.value.y = windowSize.y;
+            velocity.value.y = 0;
         }
     }
 }
@@ -122,10 +142,10 @@ void InputSystem(entt::registry& registry)
 
     const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
 
-    auto view = registry.view<Velocity>();
-    for (auto entity : view)
+    auto playerWithVelocity = registry.view<PlayerNumber, Velocity>();
+    for (auto entity : playerWithVelocity)
     {
-        auto& vel = view.get<Velocity>(entity);
+        auto& vel = playerWithVelocity.get<Velocity>(entity);
 
         if (currentKeyStates[SDL_SCANCODE_UP])
         {
@@ -236,6 +256,14 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::Text(MY_FMT("Debug Message: {}", gameState.debugMsg).c_str());
     ImGui::Text(MY_FMT("Debug Message 2: {}", gameState.debugMsg2).c_str());
 
+    // print player velocity
+    auto playerWithVelocity = registry.view<PlayerNumber, Velocity>();
+    for (auto entity : playerWithVelocity)
+    {
+        const auto& [vel, player] = playerWithVelocity.get<Velocity, PlayerNumber>(entity);
+        ImGui::Text(MY_FMT("Player {} Velocity: {}", player.value, vel.value).c_str());
+    }
+
     // caclulare count of entities with Position:
     auto positionEntities = registry.view<Position>();
     ImGui::Text(MY_FMT("Position Entities: {}", positionEntities.size()).c_str());
@@ -328,4 +356,68 @@ void DrawGridSystem(SDL_Renderer* renderer, const GameState& gameState)
 
     // Draw the center of screen point
     DrawCross(renderer, gameState.windowSize / 2.0f, 20, screenCenterColor);
+}
+
+struct AABB
+{
+    glm::vec2 min; // Left top corner
+    glm::vec2 max; // Right upper corner
+};
+
+AABB СalculateAABB(const Position& position, const SizeComponent& size)
+{
+    AABB aabb;
+    aabb.min = position.value;
+    aabb.max = position.value + size.value;
+    return aabb;
+}
+
+bool CheckAABBCollision(const AABB& a, const AABB& b)
+{
+    if (a.max.x < b.min.x || a.min.x > b.max.x)
+        return false;
+    if (a.max.y < b.min.y || a.min.y > b.max.y)
+        return false;
+    return true;
+}
+
+void CollisionSystem(entt::registry& registry)
+{
+    auto players = registry.view<Position, SizeComponent, Velocity, PlayerNumber>();
+    auto objects = registry.view<Position, SizeComponent>();
+
+    for (auto player : players)
+    {
+        const auto& [playerPos, playerSize, playerVel] = players.get<Position, SizeComponent, Velocity>(player);
+        AABB playerAABB = СalculateAABB(playerPos, playerSize);
+
+        for (auto object : objects)
+        {
+            if (player == object)
+                continue;
+
+            const auto& [objectPos, objectSize] = players.get<Position, SizeComponent>(object);
+            AABB objectAABB = СalculateAABB(objectPos, objectSize);
+
+            if (CheckAABBCollision(playerAABB, objectAABB))
+            {
+                glm::vec2 direction = objectPos.value - playerPos.value;
+                float overlapX = 0.5f * (playerAABB.max.x - playerAABB.min.x + objectAABB.max.x - objectAABB.min.x) -
+                    std::abs(direction.x);
+                float overlapY = 0.5f * (playerAABB.max.y - playerAABB.min.y + objectAABB.max.y - objectAABB.min.y) -
+                    std::abs(direction.y);
+
+                if (overlapX < overlapY)
+                {
+                    playerPos.value.x -= overlapX * glm::sign(playerVel.value.x);
+                    playerVel.value.x = 0;
+                }
+                else
+                {
+                    playerPos.value.y -= overlapY * glm::sign(playerVel.value.y);
+                    playerVel.value.y = 0;
+                }
+            }
+        }
+    }
 }

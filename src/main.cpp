@@ -1,7 +1,9 @@
+#include <cstddef>
 #include <ecs/components/all_components.h>
 #include <ecs/systems/all_systems.h>
-#include <graphics/imgui_sdl_raii.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/imgui_sdl_RAII.h>
+#include <utils/sdl_RAII.h>
 
 int main(int argc, char* args[])
 {
@@ -25,6 +27,7 @@ int main(int argc, char* args[])
         registry.emplace<Position>(ball, gameState.windowSize / 2.0f);
         registry.emplace<Velocity>(ball, glm::vec2(0, 0));
         registry.emplace<SizeComponent>(ball, glm::vec2(50, 50));
+        registry.emplace<PlayerNumber>(ball, size_t{1});
 
         // Create 10 entities with position components and scatter them randomly.
         for (int i = 0; i < 10; ++i)
@@ -53,6 +56,7 @@ int main(int argc, char* args[])
             // Update the physics.
             PhysicsSystem(registry, deltaTime);
             BoundarySystem(registry, gameState.windowSize);
+            CollisionSystem(registry);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();
