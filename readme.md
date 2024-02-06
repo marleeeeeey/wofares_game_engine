@@ -25,10 +25,19 @@ ThisGameProject/
 │   ├── ecs/
 │   │   ├── systems/
 │   │   └── conponents/
-│   ├── graphics/
 │   └── utils/
 ├── tests/
 │   ├── CMakeLists.txt
-│   └── unit-tests/
+│   └── *.cpp
+├── assets
+│   ├── images
+│   │   └── *.png
+│   ├── maps
+│   │   └── *.json
+│   ├── sounds
+│   │   └── *.wav
+│   └── fonts
+│       └── *.ttf
 └── docs/
+    └── *.*
 ```
