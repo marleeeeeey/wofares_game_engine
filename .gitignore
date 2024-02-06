@@ -5,3 +5,4 @@ enc_temp_folder/
 .vs
 imgui.ini
 *.log
+.VSCodeCounter/*
