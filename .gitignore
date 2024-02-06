@@ -4,3 +4,4 @@ enc_temp_folder/
 .cache
 .vs
 imgui.ini
+*.log

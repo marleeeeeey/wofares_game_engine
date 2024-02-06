@@ -26,17 +26,10 @@ int main(int argc, char* args[])
         auto ball = registry.create();
         registry.emplace<Position>(ball, gameState.windowSize / 2.0f);
         registry.emplace<Velocity>(ball, glm::vec2(0, 0));
-        registry.emplace<SizeComponent>(ball, glm::vec2(50, 50));
+        registry.emplace<SizeComponent>(ball, glm::vec2(32, 32));
         registry.emplace<PlayerNumber>(ball, size_t{1});
 
-        // Create 10 entities with position components and scatter them randomly.
-        for (int i = 0; i < 10; ++i)
-        {
-            auto entity = registry.create();
-            registry.emplace<Position>(entity);
-            registry.emplace<SizeComponent>(entity, glm::vec2(50, 50));
-        }
-        ScatterSystem(registry, gameState.windowSize);
+        LoadMap(registry, "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json");
 
         Uint32 lastTick = SDL_GetTicks();
 
@@ -76,7 +69,7 @@ int main(int argc, char* args[])
     }
     catch (const std::runtime_error& e)
     {
-        MY_LOG_FMT(warn, "[main] Unhandled exception {}", e.what());
+        MY_LOG_FMT(warn, "[main] Unhandled exception: {}", e.what());
         return -1;
     }
 
