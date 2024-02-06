@@ -1,6 +1,10 @@
-#include <cstddef>
 #include <ecs/components/all_components.h>
-#include <ecs/systems/all_systems.h>
+#include <ecs/systems/collision_systems.h>
+#include <ecs/systems/input_systems.h>
+#include <ecs/systems/load_map_systems.h>
+#include <ecs/systems/phisics_systems.h>
+#include <ecs/systems/render_hud_systems.h>
+#include <ecs/systems/render_objects_systems.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/imgui_sdl_RAII.h>
 #include <utils/sdl_RAII.h>

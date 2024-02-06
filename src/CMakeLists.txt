@@ -1,6 +1,8 @@
-add_executable(wofares
-    main.cpp
-)
+# Recursively collect all .cpp files from the current source directory and subdirectories
+file(GLOB_RECURSE SOURCES "*.cpp")
+
+# Create an executable with the collected source files
+add_executable(wofares ${SOURCES})
 
 target_link_libraries(wofares
     PRIVATE
