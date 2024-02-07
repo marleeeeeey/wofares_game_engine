@@ -20,7 +20,7 @@ add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/my_common_cpp_utils)
 add_subdirectory(src)
 
-# TODO: this is workaround to make SDL_image linkable via cmake.
+# TODO: Disable adding the googletest library. This is workaround to make SDL_image linkable via cmake.
 # SDL_image\external\libjxl\third_party\googletest conflicts with thirdparty/googletest.
 # add_subdirectory(thirdparty/googletest)
 

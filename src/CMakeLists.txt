@@ -1,7 +1,7 @@
-# Recursively collect all .cpp files from the current source directory and subdirectories
+# Recursively collect all .cpp files from the current source directory and subdirectories.
 file(GLOB_RECURSE SOURCES "*.cpp")
 
-# Create an executable with the collected source files
+# Create an executable with the collected source files.
 add_executable(wofares ${SOURCES})
 
 target_link_libraries(wofares
@@ -23,21 +23,31 @@ target_include_directories(wofares
     ${PROJECT_SOURCE_DIR}/src
 )
 
-# Define the SDL2 DLL name cross-platform.
+# Helper to copy any required DLLs to the output directory.
+function(copy_dll target_name dll_name)
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/thirdparty/${dll_name}"
+        "$<TARGET_FILE_DIR:${target_name}>")
+endfunction()
+
+# Define dependent DLLs name based on the platform.
 if(WIN32)
     if(CMAKE_BUILD_TYPE MATCHES Debug)
         set(SDL_DLL_NAME SDL2d.dll)
+        set(SPD_LOG_DLL_NAME spdlogd.dll)
     else()
         set(SDL_DLL_NAME SDL2.dll)
+        set(SPD_LOG_DLL_NAME spdlog.dll)
     endif()
 elseif(APPLE)
     set(SDL_DLL_NAME libSDL2.dylib)
+    set(SPD_LOG_DLL_NAME libspdlog.dylib)
 else()
     set(SDL_DLL_NAME libSDL2.so)
+    set(SPD_LOG_DLL_NAME libspdlog.so)
 endif()
 
-# Copy the SDL2 DLL to the build directory after building.
-add_custom_command(TARGET wofares POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_BINARY_DIR}/thirdparty/SDL/${SDL_DLL_NAME}"
-    "$<TARGET_FILE_DIR:wofares>")
+# Copy the required DLLs to the output directory.
+copy_dll(wofares "SDL/${SDL_DLL_NAME}")
+copy_dll(wofares "spdlog/${SPD_LOG_DLL_NAME}")
