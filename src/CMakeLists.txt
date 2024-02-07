@@ -8,6 +8,7 @@ target_link_libraries(wofares
     PRIVATE
     glm
     SDL2::SDL2 SDL2::SDL2main
+    SDL2_image
     EnTT::EnTT
     imgui
     nlohmann_json::nlohmann_json

@@ -11,6 +11,7 @@ set(GLM_DISABLE_AUTO_DETECTION ON CACHE BOOL "" FORCE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(thirdparty/SDL)
+add_subdirectory(thirdparty/SDL_image)
 add_subdirectory(thirdparty/glm)
 add_subdirectory(thirdparty/entt)
 add_subdirectory(thirdparty/json)
