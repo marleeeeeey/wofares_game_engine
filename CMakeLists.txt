@@ -17,9 +17,12 @@ add_subdirectory(thirdparty/entt)
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/magic_enum)
 add_subdirectory(thirdparty/spdlog)
-add_subdirectory(thirdparty/googletest)
 add_subdirectory(thirdparty/my_common_cpp_utils)
 add_subdirectory(src)
+
+# TODO: this is workaround to make SDL_image linkable via cmake.
+# SDL_image\external\libjxl\third_party\googletest conflicts with thirdparty/googletest.
+# add_subdirectory(thirdparty/googletest)
 
 # ###################################################################
 # ############ hack to make imgui avalable via cmake ################
