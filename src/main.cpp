@@ -1,3 +1,4 @@
+#include <SDL_image.h>
 #include <ecs/components/all_components.h>
 #include <ecs/systems/collision_systems.h>
 #include <ecs/systems/input_systems.h>
