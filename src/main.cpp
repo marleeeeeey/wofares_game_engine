@@ -1,4 +1,3 @@
-#include <SDL_image.h>
 #include <ecs/components/all_components.h>
 #include <ecs/systems/collision_systems.h>
 #include <ecs/systems/input_systems.h>
@@ -34,7 +33,7 @@ int main(int argc, char* args[])
         registry.emplace<SizeComponent>(ball, glm::vec2(32, 32));
         registry.emplace<PlayerNumber>(ball, size_t{1});
 
-        LoadMap(registry, "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json");
+        LoadMap(registry, renderer.get(), "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json");
 
         Uint32 lastTick = SDL_GetTicks();
 

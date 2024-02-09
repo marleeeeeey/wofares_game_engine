@@ -1,4 +1,5 @@
 #pragma once
+#include "SDL_render.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -33,4 +34,16 @@ struct GameState
     std::string debugMsg2;
     glm::vec2 cameraCenter{};
     bool isSceneCaptured{false};
+};
+
+struct TileInfo
+{
+    int tileId;
+    // TODO: Additional tile properties can be added here.
+};
+
+struct Renderable
+{
+    SDL_Texture* texture; // Pointer to the texture.
+    SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
 };
