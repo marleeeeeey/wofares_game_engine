@@ -24,6 +24,7 @@ SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, SDL_Texture
     SDL_QueryTexture(texture, nullptr, nullptr, &textureWidth, &textureHeight);
 
     int tilesPerRow = textureWidth / tileWidth;
+    tileId -= 1; // Adjust tileId to match 0-based indexing.
 
     SDL_Rect srcRect;
     srcRect.x = (tileId % tilesPerRow) * tileWidth;
