@@ -81,7 +81,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     int tileHeight = json["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    const int colAndRowNumber = 1;
+    const int colAndRowNumber = 2;
     const int miniWidth = tileWidth / colAndRowNumber;
     const int miniHeight = tileHeight / colAndRowNumber;
 
@@ -125,6 +125,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                                 layerCol * tileWidth + miniCol * miniWidth,
                                 layerRow * tileHeight + miniRow * miniHeight);
                             auto entity = registry.create();
+                            registry.emplace<Angle>(entity, 0.0f);
                             registry.emplace<Position>(entity, miniTileWorldPosition);
                             registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
                             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
@@ -132,7 +133,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                             // *************************************** PHYSICS ***************************************
 
                             b2BodyDef bodyDef;
-                            bodyDef.type = utils::randomBool() ? b2_dynamicBody : b2_staticBody;
+                            bodyDef.type = utils::randomTrue(0.1f) ? b2_dynamicBody : b2_staticBody;
                             bodyDef.position.Set(miniTileWorldPosition.x, miniTileWorldPosition.y);
                             b2Body* body = physicsWorld->CreateBody(&bodyDef);
 
@@ -145,7 +146,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                             fixtureDef.friction = 0.3f; // Friction to apply to the body
                             body->CreateFixture(&fixtureDef);
 
-                            registry.emplace<Box2dObject>(
+                            registry.emplace<PhysicalBody>(
                                 entity, std::make_shared<Box2dObjectRAII>(body, physicsWorld));
 
                             // ***************************************************************************************
@@ -163,6 +164,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                 if (object["type"] == "PlayerPosition")
                 {
                     auto entity = registry.create();
+                    registry.emplace<Angle>(entity, 0.0f);
                     registry.emplace<Position>(entity, glm::u32vec2(object["x"], object["y"]));
                     registry.emplace<SizeComponent>(entity, glm::vec2(32, 32));
                     registry.emplace<Velocity>(entity, glm::vec2(0, 0));

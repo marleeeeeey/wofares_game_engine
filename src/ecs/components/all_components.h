@@ -11,6 +11,11 @@ struct Position
     glm::vec2 value;
 };
 
+struct Angle
+{
+    float value; // In radians.
+};
+
 struct Velocity
 {
     glm::vec2 value;
@@ -46,7 +51,7 @@ struct TileInfo
     SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
 };
 
-struct Box2dObject
+struct PhysicalBody
 {
     std::shared_ptr<Box2dObjectRAII> body;
 };

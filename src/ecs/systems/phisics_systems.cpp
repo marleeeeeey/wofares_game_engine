@@ -44,17 +44,21 @@ void PhysicsSystem(entt::registry& registry, float deltaTime)
     physicsWorld->Step(deltaTime, velocityIterations, positionIterations);
 
     // Update the position of the entities based on the Box2D bodies.
-    auto entities = registry.view<Position, SizeComponent, Box2dObject>();
+    auto entities = registry.view<Angle, Position, PhysicalBody>();
     for (auto& entity : entities)
     {
-        // Get the Box2D body and update the position of the entity.
-        b2Body* body = entities.get<Box2dObject>(entity).body->GetBody();
-        const b2Vec2& position = body->GetPosition();
-        // auto angle = body->GetAngle();
+        const auto& [targetAngle, targetPosition, physicalBody] = entities.get<Angle, Position, PhysicalBody>(entity);
+
+        // Get the Box2D body.
+        b2Body* body = physicalBody.body->GetBody();
 
         // Apply the new position to the entity.
-        auto& pos = registry.get<Position>(entity);
-        pos.value.x = position.x;
-        pos.value.y = position.y;
+        const b2Vec2& position = body->GetPosition();
+        targetPosition.value.x = position.x;
+        targetPosition.value.y = position.y;
+
+        // Apply the new angle to the entity.
+        auto angle = body->GetAngle();
+        targetAngle.value = angle;
     }
 }

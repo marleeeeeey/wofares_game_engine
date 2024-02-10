@@ -26,7 +26,7 @@ int main(int argc, char* args[])
         gameState.cameraCenter = gameState.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
-        b2Vec2 gravity(0.0f, +9.8f);
+        b2Vec2 gravity(0.0f, +9.8f * 1000);
         gameState.physicsWorld = std::make_shared<b2World>(gravity);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
