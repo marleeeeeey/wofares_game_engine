@@ -11,12 +11,12 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
 
     { // Render tiles.
-        auto tilesView = registry.view<Position, SizeComponent, TileInfo, Renderable>();
+        auto tilesView = registry.view<Position, SizeComponent, TileInfo>();
         for (auto entity : tilesView)
         {
             auto& position = tilesView.get<Position>(entity);
             auto& size = tilesView.get<SizeComponent>(entity);
-            auto& renderable = tilesView.get<Renderable>(entity);
+            auto& tileInfo = tilesView.get<TileInfo>(entity);
 
             // Compute the destination rectangle on the screen.
             glm::vec2 transformedPosition =
@@ -27,7 +27,7 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
                 static_cast<int>(size.value.y * gameState.cameraScale)};
 
             // Render the tile.
-            SDL_RenderCopy(renderer, renderable.texture->get(), &renderable.srcRect, &destRect);
+            SDL_RenderCopy(renderer, tileInfo.texture->get(), &tileInfo.srcRect, &destRect);
         }
     }
 

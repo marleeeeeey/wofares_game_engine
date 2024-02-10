@@ -121,8 +121,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                                     layerCol * tileWidth + miniCol * miniWidth,
                                     layerRow * tileHeight + miniRow * miniHeight));
                             registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
-                            registry.emplace<TileInfo>(entity, TileInfo{});
-                            registry.emplace<Renderable>(entity, Renderable{tilesetTexture, miniTextureSrcRect});
+                            registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
                             createdTiles++;
                         }
                     }

@@ -38,10 +38,6 @@ struct GameState
 };
 
 struct TileInfo
-{};
-
-// TODO replace it to TileInfo
-struct Renderable
 {
     std::shared_ptr<Texture> texture; // Pointer to the texture.
     SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
