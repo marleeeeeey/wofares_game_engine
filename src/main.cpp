@@ -1,4 +1,5 @@
 #include <ecs/components/all_components.h>
+#include <ecs/systems/camera_system.h>
 #include <ecs/systems/collision_systems.h>
 #include <ecs/systems/input_systems.h>
 #include <ecs/systems/load_map_systems.h>
@@ -17,9 +18,8 @@ int main(int argc, char* args[])
         // Initialize the logger with the trace level.
         utils::Logger::getInstance(spdlog::level::trace);
 
-        // Create an EnTT registry and dispatcher.
+        // Create an EnTT registry.
         entt::registry registry;
-        entt::dispatcher dispatcher;
 
         // Create a game state entity.
         auto& gameState = registry.emplace<GameState>(registry.create());
@@ -50,7 +50,7 @@ int main(int argc, char* args[])
 
             Uint32 frameStart = SDL_GetTicks();
 
-            EventSystem(registry, dispatcher);
+            CameraSystem(registry);
             InputSystem(registry);
 
             // Calculate delta time.

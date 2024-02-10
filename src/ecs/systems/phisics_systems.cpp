@@ -31,6 +31,7 @@ void BoundarySystem(entt::registry& registry, const glm::vec2& windowSize)
         }
     }
 }
+
 void PhysicsSystem(entt::registry& registry, float deltaTime)
 {
     // Get the physics world.
