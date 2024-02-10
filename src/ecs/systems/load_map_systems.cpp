@@ -1,27 +1,29 @@
 #include "load_map_systems.h"
 #include "SDL_image.h"
+#include "utils/sdl_RAII.h"
 #include <ecs/components/all_components.h>
 #include <fstream>
+#include <memory>
 #include <my_common_cpp_utils/Logger.h>
 #include <nlohmann/json.hpp>
 
 namespace
 {
 
-SDL_Texture* LoadTexture(SDL_Renderer* renderer, const std::string& filePath)
+std::shared_ptr<Texture> LoadTexture(SDL_Renderer* renderer, const std::string& filePath)
 {
     SDL_Texture* texture = IMG_LoadTexture(renderer, filePath.c_str());
 
     if (texture == nullptr)
         throw std::runtime_error("Failed to load texture");
 
-    return texture;
+    return std::make_shared<Texture>(texture);
 }
 
-SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, SDL_Texture* texture)
+SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<Texture> texture)
 {
     int textureWidth, textureHeight;
-    SDL_QueryTexture(texture, nullptr, nullptr, &textureWidth, &textureHeight);
+    SDL_QueryTexture(texture->get(), nullptr, nullptr, &textureWidth, &textureHeight);
 
     int tilesPerRow = textureWidth / tileWidth;
     tileId -= 1; // Adjust tileId to match 0-based indexing.
@@ -58,7 +60,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
         throw std::runtime_error(MY_FMT("Failed to open tileset file {}", tilesetPath));
 
     // Load the tileset texture.
-    SDL_Texture* tilesetTexture = LoadTexture(renderer, tilesetPath);
+    auto tilesetTexture = LoadTexture(renderer, tilesetPath);
     int firstGid = json["tilesets"][0]["firstgid"];
 
     // Assume all tiles are of the same size and the map is not infinite.

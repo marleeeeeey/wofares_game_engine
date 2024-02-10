@@ -1,7 +1,8 @@
 #pragma once
-#include "SDL_render.h"
 #include <glm/glm.hpp>
+#include <memory>
 #include <string>
+#include <utils/sdl_RAII.h>
 
 struct Position
 {
@@ -44,6 +45,6 @@ struct TileInfo
 
 struct Renderable
 {
-    SDL_Texture* texture; // Pointer to the texture.
+    std::shared_ptr<Texture> texture; // Pointer to the texture.
     SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
 };

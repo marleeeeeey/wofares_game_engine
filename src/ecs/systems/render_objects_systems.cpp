@@ -28,7 +28,7 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
                 static_cast<int>(size.value.y * gameState.cameraScale)};
 
             // Render the tile.
-            SDL_RenderCopy(renderer, renderable.texture, &renderable.srcRect, &destRect);
+            SDL_RenderCopy(renderer, renderable.texture->get(), &renderable.srcRect, &destRect);
         }
     }
 

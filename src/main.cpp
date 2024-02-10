@@ -13,6 +13,7 @@ int main(int argc, char* args[])
 {
     try
     {
+        utils::Logger::getInstance(spdlog::level::trace);
         entt::registry registry;
         entt::dispatcher dispatcher;
 

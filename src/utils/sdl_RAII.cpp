@@ -1,4 +1,5 @@
 #include "sdl_RAII.h"
+#include "my_common_cpp_utils/Logger.h"
 #include <stdexcept>
 
 SDLInitializer::SDLInitializer(Uint32 flags)
@@ -50,10 +51,50 @@ SDLRenderer::SDLRenderer(SDL_Window* window)
         throw std::runtime_error("Failed to create SDL Renderer: " + std::string(SDL_GetError()));
     }
 }
+
 SDLRenderer::~SDLRenderer()
 {
     if (renderer)
     {
         SDL_DestroyRenderer(renderer);
     }
+}
+
+Texture::Texture(SDL_Texture* texture) : texture(texture)
+{
+    if (!texture)
+        throw std::runtime_error("Texture is nullptr");
+
+    MY_LOG_FMT(trace, "Texture created: {}", static_cast<void*>(texture));
+}
+
+Texture::~Texture()
+{
+    if (texture)
+    {
+        SDL_DestroyTexture(texture);
+    }
+
+    MY_LOG_FMT(trace, "Texture destroyed: {}", static_cast<void*>(texture));
+}
+
+// NOTE: SDLTexture(SDLTexture&& other) noexcept : texture(other.texture) { other.texture = nullptr; }
+Texture::Texture(Texture&& other) noexcept : texture(std::exchange(other.texture, nullptr))
+{}
+
+// NOTE:
+// SDLTexture& operator=(SDLTexture&& other) noexcept
+// {
+//     if (this != &other)
+//     {
+//         SDL_DestroyTexture(texture);
+//         texture = other.texture;
+//         other.texture = nullptr;
+//     }
+//     return *this;
+// }
+Texture& Texture::operator=(Texture&& other) noexcept
+{
+    std::swap(texture, other.texture);
+    return *this;
 }

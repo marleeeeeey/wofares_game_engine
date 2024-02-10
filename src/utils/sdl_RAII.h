@@ -1,4 +1,5 @@
 #pragma once
+#include "SDL_render.h"
 #include <SDL.h>
 #include <glm/glm.hpp>
 #include <string>
@@ -39,4 +40,17 @@ public:
     [[nodiscard]] SDL_Renderer* get() const { return renderer; }
 private:
     SDL_Renderer* renderer = nullptr;
+};
+
+class Texture
+{
+public:
+    Texture(SDL_Texture* texture);
+    ~Texture();
+    Texture(Texture&& other) noexcept;
+    Texture& operator=(Texture&& other) noexcept;
+
+    [[nodiscard]] SDL_Texture* get() const { return texture; }
+private:
+    SDL_Texture* texture = nullptr;
 };
