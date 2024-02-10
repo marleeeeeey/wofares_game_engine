@@ -1,10 +1,13 @@
 #include "load_map_systems.h"
 #include "SDL_image.h"
+#include "box2d/b2_body.h"
+#include "glm/fwd.hpp"
 #include "utils/sdl_RAII.h"
 #include <ecs/components/all_components.h>
 #include <fstream>
 #include <memory>
 #include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/MathUtils.h>
 #include <nlohmann/json.hpp>
 
 namespace
@@ -78,9 +81,13 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     int tileHeight = json["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    const int colAndRowNumber = 4;
+    const int colAndRowNumber = 1;
     const int miniWidth = tileWidth / colAndRowNumber;
     const int miniHeight = tileHeight / colAndRowNumber;
+
+    // Get the physics world.
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto physicsWorld = gameState.physicsWorld;
 
     // Iterate over each tile layer.
     size_t createdTiles = 0;
@@ -114,14 +121,35 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                                 textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight,
                                 miniWidth, miniHeight};
 
+                            glm::u32vec2 miniTileWorldPosition(
+                                layerCol * tileWidth + miniCol * miniWidth,
+                                layerRow * tileHeight + miniRow * miniHeight);
                             auto entity = registry.create();
-                            registry.emplace<Position>(
-                                entity,
-                                glm::vec2(
-                                    layerCol * tileWidth + miniCol * miniWidth,
-                                    layerRow * tileHeight + miniRow * miniHeight));
+                            registry.emplace<Position>(entity, miniTileWorldPosition);
                             registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
                             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
+
+                            // *************************************** PHYSICS ***************************************
+
+                            b2BodyDef bodyDef;
+                            bodyDef.type = utils::randomBool() ? b2_dynamicBody : b2_staticBody;
+                            bodyDef.position.Set(miniTileWorldPosition.x, miniTileWorldPosition.y);
+                            b2Body* body = physicsWorld->CreateBody(&bodyDef);
+
+                            b2PolygonShape shape;
+                            shape.SetAsBox(miniWidth / 2.0, miniHeight / 2.0);
+
+                            b2FixtureDef fixtureDef;
+                            fixtureDef.shape = &shape;
+                            fixtureDef.density = 1.0f; // Density to calculate mass
+                            fixtureDef.friction = 0.3f; // Friction to apply to the body
+                            body->CreateFixture(&fixtureDef);
+
+                            registry.emplace<Box2dObject>(
+                                entity, std::make_shared<Box2dObjectRAII>(body, physicsWorld));
+
+                            // ***************************************************************************************
+
                             createdTiles++;
                         }
                     }

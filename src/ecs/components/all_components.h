@@ -1,7 +1,9 @@
 #pragma once
+#include <box2d/box2d.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
+#include <utils/box2d_RAII.h>
 #include <utils/sdl_RAII.h>
 
 struct Position
@@ -35,10 +37,16 @@ struct GameState
     std::string debugMsg2;
     glm::vec2 cameraCenter{};
     bool isSceneCaptured{false};
+    std::shared_ptr<b2World> physicsWorld;
 };
 
 struct TileInfo
 {
     std::shared_ptr<Texture> texture; // Pointer to the texture.
     SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
+};
+
+struct Box2dObject
+{
+    std::shared_ptr<Box2dObjectRAII> body;
 };

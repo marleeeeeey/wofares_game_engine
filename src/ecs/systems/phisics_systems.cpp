@@ -33,16 +33,28 @@ void BoundarySystem(entt::registry& registry, const glm::vec2& windowSize)
 }
 void PhysicsSystem(entt::registry& registry, float deltaTime)
 {
-    auto gameStateEntity = registry.view<GameState>().front();
-    const auto& gameState = registry.get<GameState>(gameStateEntity);
+    // Get the physics world.
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto physicsWorld = gameState.physicsWorld;
 
-    auto view = registry.view<Position, Velocity>();
-    for (auto entity : view)
+    int32 velocityIterations = 6;
+    int32 positionIterations = 2;
+
+    // Update the physics world.
+    physicsWorld->Step(deltaTime, velocityIterations, positionIterations);
+
+    // Update the position of the entities based on the Box2D bodies.
+    auto entities = registry.view<Position, SizeComponent, Box2dObject>();
+    for (auto& entity : entities)
     {
-        auto& pos = view.get<Position>(entity).value;
-        auto& vel = view.get<Velocity>(entity).value;
+        // Get the Box2D body and update the position of the entity.
+        b2Body* body = entities.get<Box2dObject>(entity).body->GetBody();
+        const b2Vec2& position = body->GetPosition();
+        // auto angle = body->GetAngle();
 
-        vel.y += gameState.gravity * deltaTime;
-        pos += vel * deltaTime;
+        // Apply the new position to the entity.
+        auto& pos = registry.get<Position>(entity);
+        pos.value.x = position.x;
+        pos.value.y = position.y;
     }
 }
