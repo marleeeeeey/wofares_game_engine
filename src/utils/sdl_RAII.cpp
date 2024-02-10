@@ -78,21 +78,9 @@ Texture::~Texture()
     MY_LOG_FMT(trace, "Texture destroyed: {}", static_cast<void*>(texture));
 }
 
-// NOTE: SDLTexture(SDLTexture&& other) noexcept : texture(other.texture) { other.texture = nullptr; }
 Texture::Texture(Texture&& other) noexcept : texture(std::exchange(other.texture, nullptr))
 {}
 
-// NOTE:
-// SDLTexture& operator=(SDLTexture&& other) noexcept
-// {
-//     if (this != &other)
-//     {
-//         SDL_DestroyTexture(texture);
-//         texture = other.texture;
-//         other.texture = nullptr;
-//     }
-//     return *this;
-// }
 Texture& Texture::operator=(Texture&& other) noexcept
 {
     std::swap(texture, other.texture);

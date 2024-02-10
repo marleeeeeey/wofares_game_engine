@@ -73,10 +73,9 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     auto tilesetTexture = LoadTexture(renderer, tilesetPath);
     int firstGid = json["tilesets"][0]["firstgid"];
 
-    // Assume all tiles are of the same size and the map is not infinite.
+    // Assume all tiles are of the same size.
     int tileWidth = json["tilewidth"];
     int tileHeight = json["tileheight"];
-    glm::vec2 tileSize{tileWidth, tileHeight};
 
     // Iterate over each tile layer.
     size_t createdTiles = 0;
@@ -84,30 +83,30 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     {
         if (layer["type"] == "tilelayer")
         {
-            int width = layer["width"];
-            int height = layer["height"];
+            int layerCols = layer["width"];
+            int layerRows = layer["height"];
             const auto& tiles = layer["data"];
 
             // Create entities for each tile.
-            for (int y = 0; y < height; ++y)
+            for (int layerRow = 0; layerRow < layerRows; ++layerRow)
             {
-                for (int x = 0; x < width; ++x)
+                for (int layerCol = 0; layerCol < layerCols; ++layerCol)
                 {
-                    int tileId = tiles[x + y * width];
-                    if (tileId > 0) // Skip empty tiles.
-                    {
-                        auto entity = registry.create();
-                        registry.emplace<Position>(entity, glm::vec2(x * tileWidth, y * tileHeight));
-                        registry.emplace<SizeComponent>(entity, tileSize);
-                        registry.emplace<TileInfo>(entity, TileInfo{tileId});
+                    int tileId = tiles[layerCol + layerRow * layerCols];
 
-                        // Calculate srcRect for Renderable component.
-                        SDL_Rect srcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
-                        registry.emplace<Renderable>(entity, Renderable{tilesetTexture, srcRect});
+                    // Skip empty tiles.
+                    if (tileId <= 0)
+                        continue;
 
-                        // TODO Additional components can be added here, such as tile type if needed.
-                        createdTiles++;
-                    }
+                    auto entity = registry.create();
+                    registry.emplace<Position>(entity, glm::vec2(layerCol * tileWidth, layerRow * tileHeight));
+                    registry.emplace<SizeComponent>(entity, glm::vec2(tileWidth, tileHeight));
+                    registry.emplace<TileInfo>(entity, TileInfo{});
+                    // Calculate srcRect for Renderable component.
+                    SDL_Rect srcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
+                    registry.emplace<Renderable>(entity, Renderable{tilesetTexture, srcRect});
+                    // TODO Additional components can be added here, such as tile type if needed.
+                    createdTiles++;
                 }
             }
         }

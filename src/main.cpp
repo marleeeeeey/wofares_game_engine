@@ -10,12 +10,14 @@
 #include <utils/imgui_sdl_RAII.h>
 #include <utils/sdl_RAII.h>
 
-
 int main(int argc, char* args[])
 {
     try
     {
+        // Initialize the logger with the trace level.
         utils::Logger::getInstance(spdlog::level::trace);
+
+        // Create an EnTT registry and dispatcher.
         entt::registry registry;
         entt::dispatcher dispatcher;
 

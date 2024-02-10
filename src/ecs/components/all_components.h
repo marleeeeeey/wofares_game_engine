@@ -38,11 +38,9 @@ struct GameState
 };
 
 struct TileInfo
-{
-    int tileId;
-    // TODO: Additional tile properties can be added here.
-};
+{};
 
+// TODO replace it to TileInfo
 struct Renderable
 {
     std::shared_ptr<Texture> texture; // Pointer to the texture.

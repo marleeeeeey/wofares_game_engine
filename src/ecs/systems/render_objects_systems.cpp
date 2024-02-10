@@ -16,7 +16,6 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
         {
             auto& position = tilesView.get<Position>(entity);
             auto& size = tilesView.get<SizeComponent>(entity);
-            auto& tileInfo = tilesView.get<TileInfo>(entity);
             auto& renderable = tilesView.get<Renderable>(entity);
 
             // Compute the destination rectangle on the screen.

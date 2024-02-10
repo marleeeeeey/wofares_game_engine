@@ -57,7 +57,7 @@ void EventSystem(entt::registry& registry, entt::dispatcher& dispatcher)
                 gameState.cameraScale += scaleSpeed;
             else if (event.wheel.y < 0)
                 gameState.cameraScale -= scaleSpeed;
-            gameState.cameraScale = glm::clamp(gameState.cameraScale, 0.2f, 3.0f);
+            gameState.cameraScale = glm::clamp(gameState.cameraScale, 0.2f, 6.0f);
 
             // Get the cursor coordinates in world coordinates
             int mouseX, mouseY;
