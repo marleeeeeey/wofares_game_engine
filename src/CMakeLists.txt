@@ -23,36 +23,38 @@ target_include_directories(wofares
     ${PROJECT_SOURCE_DIR}/src
 )
 
-# Helper to copy any required DLLs to the output directory.
-function(copy_dll target_name dll_name)
+# Helper to copy required DLLs and debug symbols to the output directory.
+function(copy_dynamic_lib target_name dll_dir dll_name)
+    # Determine the appropriate DLL and PDB names
+    if(WIN32)
+        if(CMAKE_BUILD_TYPE MATCHES Debug)
+            set(dll_file "${dll_name}d.dll")
+            set(pdb_file "${dll_name}d.pdb")
+        else()
+            set(dll_file "${dll_name}.dll")
+            set(pdb_file "${dll_name}.pdb")
+        endif()
+    elseif(APPLE)
+        set(dll_file "lib${dll_name}.dylib")
+    else()
+        set(dll_file "lib${dll_name}.so")
+    endif()
+
+    # Copy dynamic library.
     add_custom_command(TARGET ${target_name} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_BINARY_DIR}/${dll_name}"
+        "${dll_dir}/${dll_file}"
         "$<TARGET_FILE_DIR:${target_name}>")
+
+    if(WIN32)
+        # Copy debug symbols.
+        add_custom_command(TARGET ${target_name} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${dll_dir}/${pdb_file}"
+            "$<TARGET_FILE_DIR:${target_name}>")
+    endif()
 endfunction()
 
-# Define dependent DLLs name based on the platform.
-if(WIN32)
-    if(CMAKE_BUILD_TYPE MATCHES Debug)
-        set(SDL_DLL_NAME SDL2d.dll)
-        set(SPD_LOG_DLL_NAME spdlogd.dll)
-        set(SDL_IMAGE_DLL_NAME SDL2_imaged.dll)
-    else()
-        set(SDL_DLL_NAME SDL2.dll)
-        set(SPD_LOG_DLL_NAME spdlog.dll)
-        set(SDL_IMAGE_DLL_NAME SDL2_image.dll)
-    endif()
-elseif(APPLE)
-    set(SDL_DLL_NAME libSDL2.dylib)
-    set(SPD_LOG_DLL_NAME libspdlog.dylib)
-    set(SDL_IMAGE_DLL_NAME libSDL2_image.dylib)
-else()
-    set(SDL_DLL_NAME libSDL2.so)
-    set(SPD_LOG_DLL_NAME libspdlog.so)
-    set(SDL_IMAGE_DLL_NAME libSDL2_image.so)
-endif()
-
-# Copy the required DLLs to the output directory.
-copy_dll(wofares "thirdparty/SDL/${SDL_DLL_NAME}")
-copy_dll(wofares "thirdparty/spdlog/${SPD_LOG_DLL_NAME}")
-copy_dll(wofares "thirdparty/SDL_image/${SDL_IMAGE_DLL_NAME}")
+copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL" "SDL2")
+copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/spdlog" "spdlog")
+copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL_image" "SDL2_image")
