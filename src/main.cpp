@@ -60,7 +60,6 @@ int main(int argc, char* args[])
 
             // Update the physics.
             PhysicsSystem(registry, deltaTime);
-            BoundarySystem(registry, gameState.windowSize);
             CollisionSystem(registry);
 
             // Render the scene and the HUD.

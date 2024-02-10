@@ -167,7 +167,6 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                     registry.emplace<Angle>(entity, 0.0f);
                     registry.emplace<Position>(entity, glm::u32vec2(object["x"], object["y"]));
                     registry.emplace<SizeComponent>(entity, glm::vec2(32, 32));
-                    registry.emplace<Velocity>(entity, glm::vec2(0, 0));
                     registry.emplace<PlayerNumber>(entity, size_t{1});
                 }
             }

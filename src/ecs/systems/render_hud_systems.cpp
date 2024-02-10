@@ -20,30 +20,9 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::Text(MY_FMT("Debug Message: {}", gameState.debugMsg).c_str());
     ImGui::Text(MY_FMT("Debug Message 2: {}", gameState.debugMsg2).c_str());
 
-    // print player velocity
-    auto playerWithVelocity = registry.view<PlayerNumber, Velocity>();
-    for (auto entity : playerWithVelocity)
-    {
-        const auto& [vel, player] = playerWithVelocity.get<Velocity, PlayerNumber>(entity);
-        ImGui::Text(MY_FMT("Player {} Velocity: {}", player.value, vel.value).c_str());
-    }
-
     // caclulare count of entities with Position:
     auto positionEntities = registry.view<Position>();
     ImGui::Text(MY_FMT("Position Entities: {}", positionEntities.size()).c_str());
-
-    if (ImGui::Button("Remove All Entities With Only Position"))
-    {
-        auto positionEntities = registry.view<Position>();
-
-        for (auto entity : positionEntities)
-        {
-            if (!registry.any_of<Velocity>(entity))
-            {
-                registry.remove<Position>(entity);
-            }
-        }
-    }
 
     ImGui::End();
 }

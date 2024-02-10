@@ -11,26 +11,24 @@ void InputSystem(entt::registry& registry)
 
     const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
 
-    auto playerWithVelocity = registry.view<PlayerNumber, Velocity>();
+    auto playerWithVelocity = registry.view<PlayerNumber>();
     for (auto entity : playerWithVelocity)
     {
-        auto& vel = playerWithVelocity.get<Velocity>(entity);
-
         if (currentKeyStates[SDL_SCANCODE_UP])
         {
-            vel.value.y = jumpVelocity;
+            // vel.value.y = jumpVelocity;
         }
         if (currentKeyStates[SDL_SCANCODE_LEFT])
         {
-            vel.value.x = -moveSpeed;
+            // vel.value.x = -moveSpeed;
         }
         else if (currentKeyStates[SDL_SCANCODE_RIGHT])
         {
-            vel.value.x = moveSpeed;
+            // vel.value.x = moveSpeed;
         }
         else
         {
-            vel.value.x = 0;
+            // vel.value.x = 0;
         }
     }
 }

@@ -16,11 +16,6 @@ struct Angle
     float value; // In radians.
 };
 
-struct Velocity
-{
-    glm::vec2 value;
-};
-
 struct SizeComponent
 {
     glm::vec2 value;
