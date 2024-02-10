@@ -15,6 +15,7 @@ target_link_libraries(wofares
     magic_enum::magic_enum
     spdlog::spdlog
     glm
+    box2d
     my_common_cpp_utils
 )
 
