@@ -39,6 +39,35 @@ SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared
 
     return srcRect;
 }
+
+std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
+    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& position, const glm::u32vec2& size)
+{
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_staticBody;
+    bodyDef.position.Set(position.x, position.y);
+    b2Body* body = physicsWorld->CreateBody(&bodyDef);
+
+    b2PolygonShape shape;
+    shape.SetAsBox(size.x / 2.0, size.y / 2.0);
+
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &shape;
+    fixtureDef.density = 1.0f; // Density to calculate mass
+    fixtureDef.friction = 0.3f; // Friction to apply to the body
+    body->CreateFixture(&fixtureDef);
+
+    return std::make_shared<Box2dObjectRAII>(body, physicsWorld);
+}
+
+std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
+    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& position, const glm::u32vec2& size)
+{
+    auto staticBody = CreateStaticPhysicsBody(physicsWorld, position, size);
+    staticBody->GetBody()->SetType(b2_dynamicBody);
+    return staticBody;
+}
+
 } // namespace
 
 void UnloadMap(entt::registry& registry)
@@ -125,31 +154,19 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                                 layerCol * tileWidth + miniCol * miniWidth,
                                 layerRow * tileHeight + miniRow * miniHeight);
                             auto entity = registry.create();
-                            registry.emplace<Angle>(entity, 0.0f);
-                            registry.emplace<Position>(entity, miniTileWorldPosition);
+                            registry.emplace<Angle>(entity);
+                            registry.emplace<Position>(entity);
                             registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
                             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
 
-                            // *************************************** PHYSICS ***************************************
+                            auto tilePhysicsBody =
+                                CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, {miniWidth, miniHeight});
 
-                            b2BodyDef bodyDef;
-                            bodyDef.type = utils::randomTrue(0.1f) ? b2_dynamicBody : b2_staticBody;
-                            bodyDef.position.Set(miniTileWorldPosition.x, miniTileWorldPosition.y);
-                            b2Body* body = physicsWorld->CreateBody(&bodyDef);
+                            // Apply randomly: static/dynamic body.
+                            tilePhysicsBody->GetBody()->SetType(
+                                utils::randomTrue(0.1f) ? b2_dynamicBody : b2_staticBody);
 
-                            b2PolygonShape shape;
-                            shape.SetAsBox(miniWidth / 2.0, miniHeight / 2.0);
-
-                            b2FixtureDef fixtureDef;
-                            fixtureDef.shape = &shape;
-                            fixtureDef.density = 1.0f; // Density to calculate mass
-                            fixtureDef.friction = 0.3f; // Friction to apply to the body
-                            body->CreateFixture(&fixtureDef);
-
-                            registry.emplace<PhysicalBody>(
-                                entity, std::make_shared<Box2dObjectRAII>(body, physicsWorld));
-
-                            // ***************************************************************************************
+                            registry.emplace<PhysicalBody>(entity, tilePhysicsBody);
 
                             createdTiles++;
                         }
@@ -164,10 +181,15 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                 if (object["type"] == "PlayerPosition")
                 {
                     auto entity = registry.create();
-                    registry.emplace<Angle>(entity, 0.0f);
-                    registry.emplace<Position>(entity, glm::u32vec2(object["x"], object["y"]));
-                    registry.emplace<SizeComponent>(entity, glm::vec2(32, 32));
-                    registry.emplace<PlayerNumber>(entity, size_t{1});
+                    registry.emplace<Angle>(entity);
+                    registry.emplace<Position>(entity);
+                    auto playerSize = glm::u32vec2(32, 32);
+                    registry.emplace<SizeComponent>(entity, playerSize);
+                    registry.emplace<PlayerNumber>(entity);
+
+                    auto playerPhysicsBody =
+                        CreateDynamicPhysicsBody(physicsWorld, glm::u32vec2(object["x"], object["y"]), playerSize);
+                    registry.emplace<PhysicalBody>(entity, playerPhysicsBody);
                 }
             }
         }

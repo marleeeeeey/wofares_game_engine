@@ -26,6 +26,7 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
 
     ImGui::End();
 }
+
 void DrawGridSystem(SDL_Renderer* renderer, const GameState& gameState)
 {
     const int gridSize = 32;
@@ -45,9 +46,10 @@ void DrawGridSystem(SDL_Renderer* renderer, const GameState& gameState)
     int endX = startX + windowWidth / gameState.cameraScale;
     int endY = startY + windowHeight / gameState.cameraScale;
 
-    // Align the beginning of the grid with the cell boundaries
-    startX -= startX % gridSize;
-    startY -= startY % gridSize;
+    // Align the beginning of the grid with the cell boundaries and add 1.4 of the grid size to center the grid.
+    // This shift is necessary to align Box2D bodies with the grid.
+    startX -= startX % gridSize + gridSize / 4;
+    startY -= startY % gridSize + gridSize / 4;
 
     // Draw vertical grid lines
     SetRenderDrawColor(renderer, gridColor);

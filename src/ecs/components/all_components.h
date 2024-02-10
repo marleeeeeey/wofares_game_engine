@@ -8,22 +8,23 @@
 
 struct Position
 {
-    glm::vec2 value;
+    glm::vec2 value = {0, 0};
 };
 
 struct Angle
 {
-    float value; // In radians.
+    float value = 0; // In radians.
 };
 
 struct SizeComponent
 {
-    glm::vec2 value;
+    // Must be installed manually. Because this components is not calculated from Box2D body.
+    glm::vec2 value = {0, 0};
 };
 
 struct PlayerNumber
 {
-    size_t value;
+    size_t value = 0;
 };
 
 struct GameState

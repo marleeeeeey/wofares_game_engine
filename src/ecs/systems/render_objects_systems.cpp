@@ -25,8 +25,11 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
             // Compute the destination rectangle on the screen.
             glm::vec2 transformedPosition =
                 (position.value - gameState.cameraCenter) * gameState.cameraScale + gameState.windowSize / 2.0f;
+
+            // Have to render from the center of the object. Because the Box2D body is in the center of the object.
             SDL_Rect destRect = {
-                static_cast<int>(transformedPosition.x), static_cast<int>(transformedPosition.y),
+                static_cast<int>(transformedPosition.x - size.value.x * gameState.cameraScale / 2),
+                static_cast<int>(transformedPosition.y - size.value.y * gameState.cameraScale / 2),
                 static_cast<int>(size.value.x * gameState.cameraScale),
                 static_cast<int>(size.value.y * gameState.cameraScale)};
 
@@ -50,8 +53,11 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
 
             glm::vec2 transformedPosition =
                 (position.value - gameState.cameraCenter) * gameState.cameraScale + gameState.windowSize / 2.0f;
+
+            // Have to render from the center of the object. Because the Box2D body is in the center of the object.
             SDL_Rect rect = {
-                static_cast<int>(transformedPosition.x), static_cast<int>(transformedPosition.y),
+                static_cast<int>(transformedPosition.x - size.value.x * gameState.cameraScale / 2),
+                static_cast<int>(transformedPosition.y - size.value.y * gameState.cameraScale / 2),
                 static_cast<int>(size.value.x * gameState.cameraScale),
                 static_cast<int>(size.value.y * gameState.cameraScale)};
 
