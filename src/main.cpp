@@ -35,13 +35,6 @@ int main(int argc, char* args[])
         SDLRenderer renderer(window.get());
         ImGuiSDL imguiSDL(window.get(), renderer.get());
 
-        // Create a ball entity with position and velocity components.
-        auto ball = registry.create();
-        registry.emplace<Position>(ball, gameState.windowSize / 2.0f);
-        registry.emplace<Velocity>(ball, glm::vec2(0, 0));
-        registry.emplace<SizeComponent>(ball, glm::vec2(32, 32));
-        registry.emplace<PlayerNumber>(ball, size_t{1});
-
         std::string mapPath = "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json";
         LoadMap(registry, renderer.get(), mapPath);
         Uint32 lastTick = SDL_GetTicks();

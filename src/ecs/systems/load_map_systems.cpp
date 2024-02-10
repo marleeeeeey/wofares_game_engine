@@ -1,14 +1,14 @@
 #include "load_map_systems.h"
-#include "SDL_image.h"
-#include "box2d/b2_body.h"
-#include "glm/fwd.hpp"
-#include "utils/sdl_RAII.h"
+#include <SDL_image.h>
+#include <box2d/b2_body.h>
 #include <ecs/components/all_components.h>
 #include <fstream>
+#include <glm/fwd.hpp>
 #include <memory>
 #include <my_common_cpp_utils/Logger.h>
 #include <my_common_cpp_utils/MathUtils.h>
 #include <nlohmann/json.hpp>
+#include <utils/sdl_RAII.h>
 
 namespace
 {
@@ -153,6 +153,20 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                             createdTiles++;
                         }
                     }
+                }
+            }
+        }
+        else if (layer["type"] == "objectgroup")
+        {
+            for (const auto& object : layer["objects"])
+            {
+                if (object["type"] == "PlayerPosition")
+                {
+                    auto entity = registry.create();
+                    registry.emplace<Position>(entity, glm::u32vec2(object["x"], object["y"]));
+                    registry.emplace<SizeComponent>(entity, glm::vec2(32, 32));
+                    registry.emplace<Velocity>(entity, glm::vec2(0, 0));
+                    registry.emplace<PlayerNumber>(entity, size_t{1});
                 }
             }
         }
