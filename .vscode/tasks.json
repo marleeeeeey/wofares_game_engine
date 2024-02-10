@@ -1,13 +1,18 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // task to make build dirrectory
+    {
+      "label": "Wofares (Windows) 0. Make build directory",
+      "type": "shell",
+      "command": "mkdir ${workspaceFolder}\\build 2>nul || (exit 0)",
+    },
     {
       "label": "Wofares (Windows) 1. Configure",
       "type": "shell",
-      "command": "cmd",
-      "args": [
-        "/c",
-        "if not exist ${workspaceFolder}\\build mkdir ${workspaceFolder}\\build && cmake -G \"Ninja\" DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder}"
+      "command": "cmake -G \"Ninja\" DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder}",
+      "dependsOn": [
+        "Wofares (Windows) 0. Make build directory"
       ]
     },
     {
