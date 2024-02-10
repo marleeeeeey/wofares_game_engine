@@ -6,8 +6,10 @@
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/render_objects_systems.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
 #include <utils/sdl_RAII.h>
+
 
 int main(int argc, char* args[])
 {
@@ -34,13 +36,19 @@ int main(int argc, char* args[])
         registry.emplace<SizeComponent>(ball, glm::vec2(32, 32));
         registry.emplace<PlayerNumber>(ball, size_t{1});
 
-        LoadMap(registry, renderer.get(), "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json");
-
+        std::string mapPath = "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json";
+        LoadMap(registry, renderer.get(), mapPath);
         Uint32 lastTick = SDL_GetTicks();
 
         // Start the game loop.
         while (!gameState.quit)
         {
+            if (utils::FileHasChanged(mapPath))
+            {
+                UnloadMap(registry);
+                LoadMap(registry, renderer.get(), mapPath);
+            }
+
             Uint32 frameStart = SDL_GetTicks();
 
             EventSystem(registry, dispatcher);

@@ -38,6 +38,16 @@ SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared
 }
 } // namespace
 
+void UnloadMap(entt::registry& registry)
+{
+    // Remove all entities that have a TileInfo component.
+    auto view = registry.view<TileInfo>();
+    for (auto entity : view)
+    {
+        registry.destroy(entity);
+    }
+}
+
 void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string& filename)
 {
     std::ifstream file(filename);

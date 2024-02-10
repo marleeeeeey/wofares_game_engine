@@ -6,7 +6,7 @@ SDLInitializer::SDLInitializer(Uint32 flags)
 {
     if (SDL_Init(flags) < 0)
     {
-        throw std::runtime_error("SDL could not initialize! SDL_Error: " + std::string(SDL_GetError()));
+        throw std::runtime_error(MY_FMT("SDL could not initialize! SDL_Error: {}", SDL_GetError()));
     }
 }
 
@@ -39,7 +39,7 @@ void SDLWindow::init(const std::string& title, int width, int height)
         title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
     if (!window)
     {
-        throw std::runtime_error("Failed to create SDL Window: " + std::string(SDL_GetError()));
+        throw std::runtime_error(MY_FMT("Failed to create SDL Window: {}", SDL_GetError()));
     }
 }
 
@@ -48,7 +48,7 @@ SDLRenderer::SDLRenderer(SDL_Window* window)
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
     {
-        throw std::runtime_error("Failed to create SDL Renderer: " + std::string(SDL_GetError()));
+        throw std::runtime_error(MY_FMT("Failed to create SDL Renderer: {}", SDL_GetError()));
     }
 }
 
