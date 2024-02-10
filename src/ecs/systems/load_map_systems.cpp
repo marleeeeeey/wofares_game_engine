@@ -77,6 +77,11 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     int tileWidth = json["tilewidth"];
     int tileHeight = json["tileheight"];
 
+    // Calculate mini tile size: 4x4 mini tiles in one big tile.
+    const int colAndRowNumber = 4;
+    const int miniWidth = tileWidth / colAndRowNumber;
+    const int miniHeight = tileHeight / colAndRowNumber;
+
     // Iterate over each tile layer.
     size_t createdTiles = 0;
     for (const auto& layer : json["layers"])
@@ -98,15 +103,29 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                     if (tileId <= 0)
                         continue;
 
-                    auto entity = registry.create();
-                    registry.emplace<Position>(entity, glm::vec2(layerCol * tileWidth, layerRow * tileHeight));
-                    registry.emplace<SizeComponent>(entity, glm::vec2(tileWidth, tileHeight));
-                    registry.emplace<TileInfo>(entity, TileInfo{});
-                    // Calculate srcRect for Renderable component.
-                    SDL_Rect srcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
-                    registry.emplace<Renderable>(entity, Renderable{tilesetTexture, srcRect});
-                    // TODO Additional components can be added here, such as tile type if needed.
-                    createdTiles++;
+                    SDL_Rect textureSrcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
+
+                    // Create entities for each mini tile inside the tile.
+                    for (int miniRow = 0; miniRow < colAndRowNumber; ++miniRow)
+                    {
+                        for (int miniCol = 0; miniCol < colAndRowNumber; ++miniCol)
+                        {
+                            SDL_Rect miniTextureSrcRect{
+                                textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight,
+                                miniWidth, miniHeight};
+
+                            auto entity = registry.create();
+                            registry.emplace<Position>(
+                                entity,
+                                glm::vec2(
+                                    layerCol * tileWidth + miniCol * miniWidth,
+                                    layerRow * tileHeight + miniRow * miniHeight));
+                            registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
+                            registry.emplace<TileInfo>(entity, TileInfo{});
+                            registry.emplace<Renderable>(entity, Renderable{tilesetTexture, miniTextureSrcRect});
+                            createdTiles++;
+                        }
+                    }
                 }
             }
         }
