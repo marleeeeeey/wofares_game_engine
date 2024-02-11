@@ -116,7 +116,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     int tileHeight = json["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    const int colAndRowNumber = 2;
+    const int colAndRowNumber = 4;
     const int miniWidth = tileWidth / colAndRowNumber;
     const int miniHeight = tileHeight / colAndRowNumber;
 
@@ -160,8 +160,6 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                                 layerCol * tileWidth + miniCol * miniWidth,
                                 layerRow * tileHeight + miniRow * miniHeight);
                             auto entity = registry.create();
-                            registry.emplace<Angle>(entity);
-                            registry.emplace<Position>(entity);
                             registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
                             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
 
@@ -187,8 +185,6 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                 if (object["type"] == "PlayerPosition")
                 {
                     auto entity = registry.create();
-                    registry.emplace<Angle>(entity);
-                    registry.emplace<Position>(entity);
                     auto playerSize = glm::u32vec2(32, 32);
                     registry.emplace<SizeComponent>(entity, playerSize);
                     registry.emplace<PlayerNumber>(entity);

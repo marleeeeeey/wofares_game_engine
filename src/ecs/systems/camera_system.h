@@ -1,3 +1,3 @@
 #include <entt/entt.hpp>
 
-void CameraSystem(entt::registry& registry);
+void ProcessEventSystem(entt::registry& registry);

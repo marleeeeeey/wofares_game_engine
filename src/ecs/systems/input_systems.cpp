@@ -14,7 +14,7 @@ void InputSystem(entt::registry& registry)
     for (auto entity : players)
     {
         const auto& [playerNumber, physicalBody] = players.get<PlayerNumber, PhysicalBody>(entity);
-        auto body = physicalBody.body->GetBody();
+        auto body = physicalBody.value->GetBody();
         auto vel = body->GetLinearVelocity();
 
         if (currentKeyStates[SDL_SCANCODE_UP])

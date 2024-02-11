@@ -1,6 +1,5 @@
 #include <ecs/components/all_components.h>
 #include <ecs/systems/camera_system.h>
-#include <ecs/systems/collision_systems.h>
 #include <ecs/systems/input_systems.h>
 #include <ecs/systems/load_map_systems.h>
 #include <ecs/systems/phisics_systems.h>
@@ -42,15 +41,15 @@ int main(int argc, char* args[])
         // Start the game loop.
         while (!gameState.quit)
         {
+            Uint32 frameStart = SDL_GetTicks();
+
             if (utils::FileHasChanged(mapPath))
             {
                 UnloadMap(registry);
                 LoadMap(registry, renderer.get(), mapPath);
             }
 
-            Uint32 frameStart = SDL_GetTicks();
-
-            CameraSystem(registry);
+            ProcessEventSystem(registry);
             InputSystem(registry);
 
             // Calculate delta time.
@@ -60,7 +59,6 @@ int main(int argc, char* args[])
 
             // Update the physics.
             PhysicsSystem(registry, deltaTime);
-            CollisionSystem(registry);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

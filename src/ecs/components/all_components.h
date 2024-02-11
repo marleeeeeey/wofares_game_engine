@@ -2,19 +2,8 @@
 #include <box2d/box2d.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <string>
 #include <utils/box2d_RAII.h>
 #include <utils/sdl_RAII.h>
-
-struct Position
-{
-    glm::vec2 value = {0, 0};
-};
-
-struct Angle
-{
-    float value = 0; // In radians.
-};
 
 struct SizeComponent
 {
@@ -46,5 +35,5 @@ struct TileInfo
 
 struct PhysicalBody
 {
-    std::shared_ptr<Box2dObjectRAII> body;
+    std::shared_ptr<Box2dObjectRAII> value;
 };
