@@ -34,6 +34,7 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::SliderInt("Position Iterations", (int*)&gameState.positionIterations, 1, 10);
     ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.miniTileResolution, 1, 8);
     ImGui::SliderFloat("Dynamic Body Probability", &gameState.dynamicBodyProbability, 0.0f, 1.0f);
+    ImGui::SliderFloat("Gap Between Physical And Visual", &gameState.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
     ImGui::Checkbox("Prevent Creation Invisible Tiles", &gameState.preventCreationInvisibleTiles);
     ImGui::Checkbox("Reload Map", &gameState.reloadMap);
 

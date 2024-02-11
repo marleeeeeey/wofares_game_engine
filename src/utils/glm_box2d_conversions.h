@@ -28,3 +28,5 @@ Vec operator/(const Vec& vec, Scalar scalar)
         throw std::runtime_error("Division by zero");
     return Vec(vec.x / scalar, vec.y / scalar);
 }
+
+glm::vec2 toGmlVec2(const b2Vec2& vec);

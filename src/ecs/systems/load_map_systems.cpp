@@ -210,6 +210,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     // Get the physics world.
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
     auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.gapBetweenPhysicalAndVisual;
 
     // Load the tileset texture.
     std::shared_ptr<Texture> tilesetTexture;
@@ -277,8 +278,10 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                             registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
                             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
 
+                            glm::u32vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
+
                             auto tilePhysicsBody =
-                                CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, {miniWidth, miniHeight});
+                                CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, miniTileSize);
 
                             // Apply randomly: static/dynamic body.
                             tilePhysicsBody->GetBody()->SetType(
@@ -303,8 +306,8 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                     registry.emplace<SizeComponent>(entity, playerSize);
                     registry.emplace<PlayerNumber>(entity);
 
-                    auto playerPhysicsBody =
-                        CreateDynamicPhysicsBody(physicsWorld, glm::u32vec2(object["x"], object["y"]), playerSize);
+                    auto playerPhysicsBody = CreateDynamicPhysicsBody(
+                        physicsWorld, glm::u32vec2(object["x"], object["y"]), playerSize - glm::u32vec2{gap, gap});
                     registry.emplace<PhysicalBody>(entity, playerPhysicsBody);
                 }
             }

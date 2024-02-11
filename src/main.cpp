@@ -34,11 +34,12 @@ int main(int argc, char* args[])
         SDLRenderer renderer(window.get());
         ImGuiSDL imguiSDL(window.get(), renderer.get());
 
+        // Load the map.
         std::string mapPath = "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json";
         LoadMap(registry, renderer.get(), mapPath);
-        Uint32 lastTick = SDL_GetTicks();
 
         // Start the game loop.
+        Uint32 lastTick = SDL_GetTicks();
         while (!gameState.quit)
         {
             Uint32 frameStart = SDL_GetTicks();

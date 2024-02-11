@@ -31,6 +31,8 @@ struct GameState
     int32 velocityIterations{6};
     int32 positionIterations{2};
     bool preventCreationInvisibleTiles{false};
+    // Gap between physical and visual objects. Used to prevent dragging of physical objects.
+    float gapBetweenPhysicalAndVisual{0.2f};
 };
 
 struct TileInfo
