@@ -84,7 +84,7 @@ void UnloadMap(entt::registry& registry)
     if (Box2dObjectRAII::GetBodyCounter() != 0)
         MY_LOG_FMT(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
     else
-        MY_LOG(info, "All Box2D bodies were destroyed");
+        MY_LOG(debug, "All Box2D bodies were destroyed");
 }
 
 void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string& filename)
@@ -108,6 +108,10 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     if (!tilesetFile.is_open())
         throw std::runtime_error(MY_FMT("Failed to open tileset file {}", tilesetPath));
 
+    // Get the physics world.
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto physicsWorld = gameState.physicsWorld;
+
     // Load the tileset texture.
     auto tilesetTexture = LoadTexture(renderer, tilesetPath);
     int firstGid = json["tilesets"][0]["firstgid"];
@@ -117,13 +121,9 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     int tileHeight = json["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    const int colAndRowNumber = 4;
+    const int colAndRowNumber = gameState.miniTileResolution;
     const int miniWidth = tileWidth / colAndRowNumber;
     const int miniHeight = tileHeight / colAndRowNumber;
-
-    // Get the physics world.
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-    auto physicsWorld = gameState.physicsWorld;
 
     // Iterate over each tile layer.
     size_t createdTiles = 0;
@@ -169,7 +169,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
 
                             // Apply randomly: static/dynamic body.
                             tilePhysicsBody->GetBody()->SetType(
-                                utils::randomTrue(0.3f) ? b2_dynamicBody : b2_staticBody);
+                                utils::randomTrue(gameState.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
 
                             registry.emplace<PhysicalBody>(entity, tilePhysicsBody);
 

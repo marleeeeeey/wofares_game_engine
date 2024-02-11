@@ -11,24 +11,30 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
 
     ImGui::Begin("HUD");
 
-    ImGui::Text(MY_FMT("Quit: {}", gameState.quit).c_str());
-    ImGui::Text(MY_FMT("Window Size: {}", gameState.windowSize).c_str());
-    ImGui::Text(MY_FMT("FPS: {}", gameState.fps).c_str());
-    ImGui::Text(MY_FMT("Gravity: {:.2f}", gameState.physicsWorld->GetGravity().Length()).c_str());
-    ImGui::Text(MY_FMT("World Scale: {:.2f}", gameState.cameraScale).c_str());
-    ImGui::Text(MY_FMT("Camera Center: {}", gameState.cameraCenter).c_str());
-    ImGui::Text(MY_FMT("Scene Captured: {}", gameState.isSceneCaptured).c_str());
-
-    // Set reloadMap to true to reload the map.
-    ImGui::Checkbox("Reload Map", &gameState.reloadMap);
-
-    // Caclulare count of tiles:
+    // Caclulare count of tiles, players and dynamic bodies:
     auto tiles = registry.view<TileInfo>();
-    ImGui::Text(MY_FMT("Tiles number: {}", tiles.size()).c_str());
-
-    // Calculate count of players:
     auto players = registry.view<PlayerNumber>();
-    ImGui::Text(MY_FMT("Players number: {}", players.size()).c_str());
+    auto dynamicBodies = registry.view<PhysicalBody>();
+    size_t dynamicBodiesCount = 0;
+    for (auto entity : dynamicBodies)
+    {
+        auto body = dynamicBodies.get<PhysicalBody>(entity).value->GetBody();
+        if (body->GetType() == b2_dynamicBody)
+            dynamicBodiesCount++;
+    }
+
+    // Print the gravity and camera scale, count of tiles, players and dynamic bodies in one line.
+    auto gravity = gameState.physicsWorld->GetGravity().Length();
+    auto cameraScale = gameState.cameraScale;
+    ImGui::Text(MY_FMT("{:.2f}/{:.2f} (Gr/Sc)", gravity, cameraScale).c_str());
+    ImGui::Text(MY_FMT("{}/{}/{} (Ts/Ps/DB)", tiles.size(), players.size(), dynamicBodiesCount).c_str());
+
+    // Draw controls the physics world.
+    ImGui::SliderInt("Velocity Iterations", (int*)&gameState.velocityIterations, 1, 10);
+    ImGui::SliderInt("Position Iterations", (int*)&gameState.positionIterations, 1, 10);
+    ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.miniTileResolution, 1, 8);
+    ImGui::SliderFloat("Dynamic Body Probability", &gameState.dynamicBodyProbability, 0.0f, 1.0f);
+    ImGui::Checkbox("Reload Map", &gameState.reloadMap);
 
     ImGui::End();
 }

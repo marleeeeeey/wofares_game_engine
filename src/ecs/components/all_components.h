@@ -26,6 +26,10 @@ struct GameState
     bool isSceneCaptured{false};
     std::shared_ptr<b2World> physicsWorld;
     bool reloadMap{false};
+    float dynamicBodyProbability{0.3f};
+    size_t miniTileResolution{4};
+    int32 velocityIterations{6};
+    int32 positionIterations{2};
 };
 
 struct TileInfo
