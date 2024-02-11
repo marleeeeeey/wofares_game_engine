@@ -1,6 +1,6 @@
 #include <ecs/components/all_components.h>
-#include <ecs/systems/camera_system.h>
-#include <ecs/systems/input_systems.h>
+#include <ecs/systems/event_queue_system.h>
+#include <ecs/systems/keyboard_state_systems.h>
 #include <ecs/systems/load_map_systems.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/render_hud_systems.h>
@@ -49,8 +49,8 @@ int main(int argc, char* args[])
                 LoadMap(registry, renderer.get(), mapPath);
             }
 
-            ProcessEventSystem(registry);
-            InputSystem(registry);
+            EventQueueSystem(registry); // Impact on Camera.
+            KeyboardStateSystem(registry); // Impact on Player.
 
             // Calculate delta time.
             Uint32 currentTick = SDL_GetTicks();

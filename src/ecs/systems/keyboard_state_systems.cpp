@@ -1,10 +1,10 @@
-#include "input_systems.h"
+#include "keyboard_state_systems.h"
 #include <SDL.h>
 #include <ecs/components/all_components.h>
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/Logger.h>
 
-void InputSystem(entt::registry& registry)
+void KeyboardStateSystem(entt::registry& registry)
 {
     const float movingForce = 10.0f;
     const float jumpForce = 30.0f;

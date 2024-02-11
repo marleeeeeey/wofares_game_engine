@@ -1,5 +1,4 @@
-#include "camera_system.h"
-#include "SDL_keycode.h"
+#include "event_queue_system.h"
 #include <SDL.h>
 #include <ecs/components/all_components.h>
 #include <imgui_impl_sdl2.h>
@@ -49,7 +48,7 @@ void CameraEventSystem(entt::registry& registry, const SDL_Event& event)
     }
 }
 
-void ProcessEventSystem(entt::registry& registry)
+void PollingEventSystem(entt::registry& registry)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
 
