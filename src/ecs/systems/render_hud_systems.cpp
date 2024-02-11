@@ -19,6 +19,9 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::Text(MY_FMT("Camera Center: {}", gameState.cameraCenter).c_str());
     ImGui::Text(MY_FMT("Scene Captured: {}", gameState.isSceneCaptured).c_str());
 
+    // Set reloadMap to true to reload the map.
+    ImGui::Checkbox("Reload Map", &gameState.reloadMap);
+
     // Caclulare count of tiles:
     auto tiles = registry.view<TileInfo>();
     ImGui::Text(MY_FMT("Tiles number: {}", tiles.size()).c_str());

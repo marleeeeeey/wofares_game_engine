@@ -3,6 +3,7 @@
 #include <numbers>
 #include <utils/colors.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/globals.h>
 
 void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
 {
@@ -17,7 +18,7 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
         for (auto entity : tilesView)
         {
             const auto& [size, tileInfo, physicalBody] = tilesView.get<SizeComponent, TileInfo, PhysicalBody>(entity);
-            const b2Vec2& pos = physicalBody.value->GetBody()->GetPosition();
+            b2Vec2 pos = physicalBody.value->GetBody()->GetPosition() * box2DtoSDL;
             float angle = physicalBody.value->GetBody()->GetAngle();
 
             // Compute the destination rectangle on the screen.
@@ -47,7 +48,7 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
         for (auto entity : players)
         {
             const auto& [physicalBody, size] = players.get<PhysicalBody, SizeComponent>(entity);
-            const b2Vec2& pos = physicalBody.value->GetBody()->GetPosition();
+            const b2Vec2 pos = physicalBody.value->GetBody()->GetPosition() * box2DtoSDL;
 
             // TODO implement texture and angle for players.
             // float angle = physicalBody.value->GetBody()->GetAngle();

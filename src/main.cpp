@@ -25,7 +25,7 @@ int main(int argc, char* args[])
         gameState.cameraCenter = gameState.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
-        b2Vec2 gravity(0.0f, +9.8f * 1000);
+        b2Vec2 gravity(0.0f, +9.8f);
         gameState.physicsWorld = std::make_shared<b2World>(gravity);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
@@ -43,7 +43,7 @@ int main(int argc, char* args[])
         {
             Uint32 frameStart = SDL_GetTicks();
 
-            if (utils::FileHasChanged(mapPath))
+            if (utils::FileHasChanged(mapPath) || gameState.reloadMap)
             {
                 UnloadMap(registry);
                 LoadMap(registry, renderer.get(), mapPath);

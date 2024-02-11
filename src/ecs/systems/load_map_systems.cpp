@@ -8,6 +8,7 @@
 #include <my_common_cpp_utils/Logger.h>
 #include <my_common_cpp_utils/MathUtils.h>
 #include <nlohmann/json.hpp>
+#include <utils/globals.h>
 #include <utils/sdl_RAII.h>
 
 namespace
@@ -41,19 +42,19 @@ SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared
 }
 
 std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
-    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& position, const glm::u32vec2& size)
+    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& sdlPos, const glm::u32vec2& sdlSize)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_staticBody;
-    bodyDef.position.Set(position.x, position.y);
+    bodyDef.position.Set(sdlPos.x * sdlToBox2D, sdlPos.y * sdlToBox2D);
     b2Body* body = physicsWorld->CreateBody(&bodyDef);
 
     b2PolygonShape shape;
-    shape.SetAsBox(size.x / 2.0, size.y / 2.0);
+    shape.SetAsBox(sdlSize.x / 2.0 * sdlToBox2D, sdlSize.y / 2.0 * sdlToBox2D);
 
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;
-    fixtureDef.density = 1.0f; // Density to calculate mass
+    fixtureDef.density = 10.0f; // Density to calculate mass
     fixtureDef.friction = 0.3f; // Friction to apply to the body
     body->CreateFixture(&fixtureDef);
 
@@ -61,9 +62,9 @@ std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
 }
 
 std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
-    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& position, const glm::u32vec2& size)
+    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& sdlPos, const glm::u32vec2& sdlSize)
 {
-    auto staticBody = CreateStaticPhysicsBody(physicsWorld, position, size);
+    auto staticBody = CreateStaticPhysicsBody(physicsWorld, sdlPos, sdlSize);
     staticBody->GetBody()->SetType(b2_dynamicBody);
     return staticBody;
 }
@@ -168,7 +169,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
 
                             // Apply randomly: static/dynamic body.
                             tilePhysicsBody->GetBody()->SetType(
-                                utils::randomTrue(0.1f) ? b2_dynamicBody : b2_staticBody);
+                                utils::randomTrue(0.3f) ? b2_dynamicBody : b2_staticBody);
 
                             registry.emplace<PhysicalBody>(entity, tilePhysicsBody);
 
@@ -185,7 +186,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                 if (object["type"] == "PlayerPosition")
                 {
                     auto entity = registry.create();
-                    auto playerSize = glm::u32vec2(32, 32);
+                    auto playerSize = glm::u32vec2(10, 10);
                     registry.emplace<SizeComponent>(entity, playerSize);
                     registry.emplace<PlayerNumber>(entity);
 

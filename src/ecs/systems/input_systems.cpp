@@ -6,7 +6,8 @@
 
 void InputSystem(entt::registry& registry)
 {
-    const float desiredVelocity = 5000.0f;
+    const float movingForce = 10.0f;
+    const float jumpForce = 30.0f;
 
     const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
 
@@ -19,20 +20,17 @@ void InputSystem(entt::registry& registry)
 
         if (currentKeyStates[SDL_SCANCODE_UP])
         {
-            b2Vec2 impulse(0.0f, -body->GetMass() * desiredVelocity);
-            body->ApplyLinearImpulseToCenter(impulse, true);
+            body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
         }
 
         if (currentKeyStates[SDL_SCANCODE_LEFT])
         {
-            body->SetLinearVelocity(b2Vec2(-desiredVelocity, vel.y));
-            // body->ApplyForceToCenter(b2Vec2(-desiredVelocity, 0), true);
+            body->ApplyForceToCenter(b2Vec2(-movingForce, 0), true);
         }
 
         if (currentKeyStates[SDL_SCANCODE_RIGHT])
         {
-            body->SetLinearVelocity(b2Vec2(desiredVelocity, vel.y));
-            // body->ApplyForceToCenter(b2Vec2(desiredVelocity, 0), true);
+            body->ApplyForceToCenter(b2Vec2(movingForce, 0), true);
         }
     }
 }

@@ -25,6 +25,7 @@ struct GameState
     glm::vec2 cameraCenter{};
     bool isSceneCaptured{false};
     std::shared_ptr<b2World> physicsWorld;
+    bool reloadMap{false};
 };
 
 struct TileInfo
