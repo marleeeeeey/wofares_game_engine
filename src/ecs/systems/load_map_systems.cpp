@@ -1,6 +1,7 @@
 #include "load_map_systems.h"
 #include <SDL_image.h>
 #include <box2d/b2_body.h>
+#include <cstddef>
 #include <ecs/components/all_components.h>
 #include <fstream>
 #include <glm/fwd.hpp>
@@ -14,12 +15,110 @@
 namespace
 {
 
+/**
+ * Checks if the given tileset texture has an opaque pixel within the specified source rectangle.
+ * Note that in order to use SDL_LockTexture and SDL_UnlockTexture, the texture must be created with
+ * SDL_TEXTUREACCESS_STREAMING access.
+ *
+ * @param tilesetTexture The tileset texture to check.
+ * @param miniTextureSrcRect The source rectangle within the tileset texture.
+ * @return True if the tileset texture has an opaque pixel within the source rectangle, false otherwise.
+ */
+bool HasOpaquePixel(std::shared_ptr<Texture> tilesetTexture, const SDL_Rect& miniTextureSrcRect)
+{
+    Uint32* pixels;
+    int pitch; // The length of a row of pixels in bytes.
+
+    if (SDL_LockTexture(tilesetTexture->get(), &miniTextureSrcRect, (void**)&pixels, &pitch) != 0)
+    {
+        MY_LOG_FMT(
+            warn,
+            "SDL_LockTexture failed. Check that you use function LoadTextureWithStreamingAccess to load texture. Error: {}",
+            SDL_GetError());
+        return false;
+    }
+
+    bool hasOpaquePixel = false;
+    for (int row = 0; row < miniTextureSrcRect.h; ++row)
+    {
+        for (int col = 0; col < miniTextureSrcRect.w; ++col)
+        {
+            static const int pixelSize = 4; // 4 bytes per pixel (ABGR).
+            // TODO: here is a bug. pixel is always zero. Probably the issue in LoadTextureWithStreamingAccess.
+            Uint32 pixel = pixels[row * (pitch / pixelSize) + col];
+            Uint8 alpha = pixel & 0xFF; // Correct for SDL_PIXELFORMAT_ABGR8888
+            // MY_LOG_FMT(info, "Alpha: {}, Pixel: {}, Pitch: {}, col: {}, row: {}", alpha, pixel, pitch, col, row);
+            if (alpha > 0)
+            {
+                hasOpaquePixel = true;
+                break;
+            }
+        }
+        if (hasOpaquePixel)
+        {
+            break;
+        }
+    }
+
+    SDL_UnlockTexture(tilesetTexture->get());
+    return hasOpaquePixel;
+}
+
+/**
+ * Loads a texture from the specified file path.
+ *
+ * @param renderer The SDL renderer used to load the texture.
+ * @param filePath The file path of the texture to be loaded.
+ * @return A shared pointer to the loaded texture.
+ */
 std::shared_ptr<Texture> LoadTexture(SDL_Renderer* renderer, const std::string& filePath)
 {
     SDL_Texture* texture = IMG_LoadTexture(renderer, filePath.c_str());
 
     if (texture == nullptr)
         throw std::runtime_error("Failed to load texture");
+
+    return std::make_shared<Texture>(texture);
+}
+
+/**
+ * @brief Loads a texture with streaming access.
+ *
+ * This function loads a texture from the specified file path using SDL_Renderer with streaming access.
+ *
+ * @param renderer The SDL_Renderer pointer.
+ * @param filePath The file path of the texture to load.
+ * @return A shared pointer to the loaded texture.
+ */
+std::shared_ptr<Texture> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath)
+{
+    // Step 1. Load image into SDL_Surface.
+    SDL_Surface* surface = IMG_Load(filePath.c_str());
+    if (!surface)
+        throw std::runtime_error(MY_FMT("Failed to load image {}. Error: {}", filePath, IMG_GetError()));
+
+    MY_LOG_FMT(
+        info, "Surface format: {}, w: {}, h: {}", SDL_GetPixelFormatName(surface->format->format), surface->w,
+        surface->h);
+
+    // Step 2: Create a texture with the SDL_TEXTUREACCESS_STREAMING flag.
+    SDL_Texture* texture =
+        SDL_CreateTexture(renderer, surface->format->format, SDL_TEXTUREACCESS_STREAMING, surface->w, surface->h);
+    if (!texture)
+    {
+        SDL_FreeSurface(surface);
+        throw std::runtime_error(
+            MY_FMT("Failed to create streaming texture for image {}. Error: {}", filePath, SDL_GetError()));
+    }
+
+    // Step 3. Copy pixel data from the surface to the texture.
+    if (SDL_UpdateTexture(texture, nullptr, surface->pixels, surface->pitch) != 0)
+    {
+        MY_LOG_FMT(warn, "SDL_UpdateTexture failed. Error: {}", SDL_GetError());
+    }
+
+    // Step 4. Free the surface.
+    SDL_FreeSurface(surface);
 
     return std::make_shared<Texture>(texture);
 }
@@ -113,7 +212,12 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     auto physicsWorld = gameState.physicsWorld;
 
     // Load the tileset texture.
-    auto tilesetTexture = LoadTexture(renderer, tilesetPath);
+    std::shared_ptr<Texture> tilesetTexture;
+    if (gameState.preventCreationInvisibleTiles)
+        tilesetTexture = LoadTextureWithStreamingAccess(renderer, tilesetPath);
+    else
+        tilesetTexture = LoadTexture(renderer, tilesetPath);
+
     int firstGid = json["tilesets"][0]["firstgid"];
 
     // Assume all tiles are of the same size.
@@ -127,6 +231,8 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
 
     // Iterate over each tile layer.
     size_t createdTiles = 0;
+    size_t invisibleTilesNumber = 0;
+
     for (const auto& layer : json["layers"])
     {
         if (layer["type"] == "tilelayer")
@@ -156,6 +262,13 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                             SDL_Rect miniTextureSrcRect{
                                 textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight,
                                 miniWidth, miniHeight};
+
+                            if (gameState.preventCreationInvisibleTiles &&
+                                !HasOpaquePixel(tilesetTexture, miniTextureSrcRect))
+                            {
+                                invisibleTilesNumber++;
+                                continue;
+                            }
 
                             glm::u32vec2 miniTileWorldPosition(
                                 layerCol * tileWidth + miniCol * miniWidth,
@@ -198,6 +311,13 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
         }
     }
 
+    // Log warnings.
+    if (invisibleTilesNumber > 0)
+        MY_LOG_FMT(warn, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
     if (createdTiles == 0)
-        throw std::runtime_error(MY_FMT("No tiles were created during map loading {}", filename));
+    {
+        MY_LOG_FMT(warn, "No tiles were created during map loading {}", filename);
+        if (invisibleTilesNumber > 0)
+            MY_LOG(warn, "All tiles are invisible");
+    }
 }

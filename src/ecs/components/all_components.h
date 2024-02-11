@@ -30,6 +30,7 @@ struct GameState
     size_t miniTileResolution{4};
     int32 velocityIterations{6};
     int32 positionIterations{2};
+    bool preventCreationInvisibleTiles{false};
 };
 
 struct TileInfo

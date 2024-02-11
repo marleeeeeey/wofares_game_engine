@@ -4,7 +4,7 @@
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/Logger.h>
 
-void CameraEventSystem(entt::registry& registry, const SDL_Event& event)
+void CameraControlSystem(entt::registry& registry, const SDL_Event& event)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
 
@@ -48,7 +48,7 @@ void CameraEventSystem(entt::registry& registry, const SDL_Event& event)
     }
 }
 
-void PollingEventSystem(entt::registry& registry)
+void EventQueueSystem(entt::registry& registry)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
 
@@ -62,6 +62,6 @@ void PollingEventSystem(entt::registry& registry)
             return;
         }
 
-        CameraEventSystem(registry, event);
+        CameraControlSystem(registry, event);
     }
 }
