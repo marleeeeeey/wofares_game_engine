@@ -10,7 +10,9 @@ public:
     Box2dObjectRAII& operator=(Box2dObjectRAII&& other) noexcept;
 
     b2Body* GetBody() const { return body; }
+    static size_t GetBodyCounter() { return counter; }
 private:
     b2Body* body;
     std::shared_ptr<b2World> world;
+    static size_t counter;
 };

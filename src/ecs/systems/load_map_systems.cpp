@@ -73,11 +73,17 @@ std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
 void UnloadMap(entt::registry& registry)
 {
     // Remove all entities that have a TileInfo component.
-    auto view = registry.view<TileInfo>();
-    for (auto entity : view)
-    {
+    for (auto entity : registry.view<TileInfo>())
         registry.destroy(entity);
-    }
+
+    // Remove all entities that have a PhysicalBody component.
+    for (auto entity : registry.view<PhysicalBody>())
+        registry.destroy(entity);
+
+    if (Box2dObjectRAII::GetBodyCounter() != 0)
+        MY_LOG_FMT(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
+    else
+        MY_LOG(info, "All Box2D bodies were destroyed");
 }
 
 void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string& filename)

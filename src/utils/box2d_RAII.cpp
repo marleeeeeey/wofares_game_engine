@@ -3,18 +3,14 @@
 #include <stdexcept>
 #include <utility>
 
-namespace
-{
-static size_t bodyCounter = 0;
-}
+size_t Box2dObjectRAII::counter = 0;
 
 Box2dObjectRAII::Box2dObjectRAII(b2Body* body, std::shared_ptr<b2World> world) : body(body), world(world)
 {
     if (!body || !world)
         throw std::runtime_error("b2Body or b2World is nullptr");
 
-    bodyCounter++;
-    MY_LOG_FMT(trace, "b2Body created: {}. Total {} bodies.", static_cast<void*>(body), bodyCounter);
+    counter++;
 }
 
 Box2dObjectRAII::~Box2dObjectRAII()
@@ -22,8 +18,7 @@ Box2dObjectRAII::~Box2dObjectRAII()
     if (body && world)
     {
         world->DestroyBody(body);
-        bodyCounter--;
-        MY_LOG_FMT(trace, "b2Body destroyed: {}. Total {} bodies.", static_cast<void*>(body), bodyCounter);
+        counter--;
     }
 }
 

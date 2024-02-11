@@ -6,29 +6,33 @@
 
 void InputSystem(entt::registry& registry)
 {
-    const float jumpVelocity = -600.0f;
-    const float moveSpeed = 300.0f;
+    const float desiredVelocity = 5000.0f;
 
     const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
 
-    auto playerWithVelocity = registry.view<PlayerNumber>();
-    for (auto entity : playerWithVelocity)
+    const auto& players = registry.view<PlayerNumber, PhysicalBody>();
+    for (auto entity : players)
     {
+        const auto& [playerNumber, physicalBody] = players.get<PlayerNumber, PhysicalBody>(entity);
+        auto body = physicalBody.body->GetBody();
+        auto vel = body->GetLinearVelocity();
+
         if (currentKeyStates[SDL_SCANCODE_UP])
         {
-            // vel.value.y = jumpVelocity;
+            b2Vec2 impulse(0.0f, -body->GetMass() * desiredVelocity);
+            body->ApplyLinearImpulseToCenter(impulse, true);
         }
+
         if (currentKeyStates[SDL_SCANCODE_LEFT])
         {
-            // vel.value.x = -moveSpeed;
+            body->SetLinearVelocity(b2Vec2(-desiredVelocity, vel.y));
+            // body->ApplyForceToCenter(b2Vec2(-desiredVelocity, 0), true);
         }
-        else if (currentKeyStates[SDL_SCANCODE_RIGHT])
+
+        if (currentKeyStates[SDL_SCANCODE_RIGHT])
         {
-            // vel.value.x = moveSpeed;
-        }
-        else
-        {
-            // vel.value.x = 0;
+            body->SetLinearVelocity(b2Vec2(desiredVelocity, vel.y));
+            // body->ApplyForceToCenter(b2Vec2(desiredVelocity, 0), true);
         }
     }
 }

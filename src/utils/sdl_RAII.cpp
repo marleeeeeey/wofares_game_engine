@@ -65,7 +65,7 @@ Texture::Texture(SDL_Texture* texture) : texture(texture)
     if (!texture)
         throw std::runtime_error("Texture is nullptr");
 
-    MY_LOG_FMT(trace, "Texture created: {}", static_cast<void*>(texture));
+    MY_LOG_FMT(info, "Texture created: {}", static_cast<void*>(texture));
 }
 
 Texture::~Texture()
@@ -75,7 +75,7 @@ Texture::~Texture()
         SDL_DestroyTexture(texture);
     }
 
-    MY_LOG_FMT(trace, "Texture destroyed: {}", static_cast<void*>(texture));
+    MY_LOG_FMT(info, "Texture destroyed: {}", static_cast<void*>(texture));
 }
 
 Texture::Texture(Texture&& other) noexcept : texture(std::exchange(other.texture, nullptr))

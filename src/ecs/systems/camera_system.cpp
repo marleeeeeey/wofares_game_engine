@@ -36,8 +36,6 @@ void CameraSystem(entt::registry& registry)
             glm::vec2 mouseWorldBeforeZoom =
                 (glm::vec2(mouseX, mouseY) - gameState.windowSize * 0.5f) / prevScale + gameState.cameraCenter;
 
-            gameState.debugMsg2 = MY_FMT("mouseWorldBeforeZoom {}", mouseWorldBeforeZoom);
-
             // Calculate the new position of the camera so that the point under the cursor remains in the same place
             gameState.cameraCenter = mouseWorldBeforeZoom -
                 (glm::vec2(mouseX, mouseY) - gameState.windowSize * 0.5f) / gameState.cameraScale;
@@ -52,8 +50,6 @@ void CameraSystem(entt::registry& registry)
         }
         else if (event.type == SDL_MOUSEMOTION && gameState.isSceneCaptured)
         {
-            gameState.debugMsg = MY_FMT("Mouse moved to ({}, {})", event.motion.x, event.motion.y);
-
             float deltaX = event.motion.xrel / gameState.cameraScale;
             float deltaY = event.motion.yrel / gameState.cameraScale;
             gameState.cameraCenter.x -= deltaX;

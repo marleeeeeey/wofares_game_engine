@@ -16,7 +16,7 @@ int main(int argc, char* args[])
     try
     {
         // Initialize the logger with the trace level.
-        utils::Logger::getInstance(spdlog::level::trace);
+        utils::Logger::getInstance(spdlog::level::debug);
 
         // Create an EnTT registry.
         entt::registry registry;

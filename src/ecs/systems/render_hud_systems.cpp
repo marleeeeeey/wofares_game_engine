@@ -1,4 +1,5 @@
 #include "render_hud_systems.h"
+#include "ecs/components/all_components.h"
 #include <imgui.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/colors.h>
@@ -13,16 +14,18 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::Text(MY_FMT("Quit: {}", gameState.quit).c_str());
     ImGui::Text(MY_FMT("Window Size: {}", gameState.windowSize).c_str());
     ImGui::Text(MY_FMT("FPS: {}", gameState.fps).c_str());
-    ImGui::Text(MY_FMT("Gravity: {:.2f}", gameState.gravity).c_str());
+    ImGui::Text(MY_FMT("Gravity: {:.2f}", gameState.physicsWorld->GetGravity().Length()).c_str());
     ImGui::Text(MY_FMT("World Scale: {:.2f}", gameState.cameraScale).c_str());
     ImGui::Text(MY_FMT("Camera Center: {}", gameState.cameraCenter).c_str());
     ImGui::Text(MY_FMT("Scene Captured: {}", gameState.isSceneCaptured).c_str());
-    ImGui::Text(MY_FMT("Debug Message: {}", gameState.debugMsg).c_str());
-    ImGui::Text(MY_FMT("Debug Message 2: {}", gameState.debugMsg2).c_str());
 
-    // caclulare count of entities with Position:
-    auto positionEntities = registry.view<Position>();
-    ImGui::Text(MY_FMT("Position Entities: {}", positionEntities.size()).c_str());
+    // Caclulare count of tiles:
+    auto tiles = registry.view<TileInfo>();
+    ImGui::Text(MY_FMT("Tiles number: {}", tiles.size()).c_str());
+
+    // Calculate count of players:
+    auto players = registry.view<PlayerNumber>();
+    ImGui::Text(MY_FMT("Players number: {}", players.size()).c_str());
 
     ImGui::End();
 }
