@@ -10,41 +10,43 @@ void CameraControlSystem(entt::registry& registry, const SDL_Event& event)
 
     if (event.type == SDL_MOUSEWHEEL)
     {
-        float prevScale = gameState.cameraScale;
+        float prevScale = gameState.renderingOptions.cameraScale;
 
         // Calculate the new scale of the camera
         const float scaleSpeed = 1.3f;
         if (event.wheel.y > 0)
-            gameState.cameraScale *= scaleSpeed;
+            gameState.renderingOptions.cameraScale *= scaleSpeed;
         else if (event.wheel.y < 0)
-            gameState.cameraScale /= scaleSpeed;
-        gameState.cameraScale = glm::clamp(gameState.cameraScale, 0.2f, 6.0f);
+            gameState.renderingOptions.cameraScale /= scaleSpeed;
+        gameState.renderingOptions.cameraScale = glm::clamp(gameState.renderingOptions.cameraScale, 0.2f, 6.0f);
 
         // Get the cursor coordinates in world coordinates
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
 
         glm::vec2 mouseWorldBeforeZoom =
-            (glm::vec2(mouseX, mouseY) - gameState.windowSize * 0.5f) / prevScale + gameState.cameraCenter;
+            (glm::vec2(mouseX, mouseY) - gameState.renderingOptions.windowSize * 0.5f) / prevScale +
+            gameState.renderingOptions.cameraCenter;
 
         // Calculate the new position of the camera so that the point under the cursor remains in the same place
-        gameState.cameraCenter =
-            mouseWorldBeforeZoom - (glm::vec2(mouseX, mouseY) - gameState.windowSize * 0.5f) / gameState.cameraScale;
+        gameState.renderingOptions.cameraCenter = mouseWorldBeforeZoom -
+            (glm::vec2(mouseX, mouseY) - gameState.renderingOptions.windowSize * 0.5f) /
+                gameState.renderingOptions.cameraScale;
     }
     else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
-        gameState.isSceneCaptured = true;
+        gameState.controlOptions.isSceneCaptured = true;
     }
     else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_RIGHT)
     {
-        gameState.isSceneCaptured = false;
+        gameState.controlOptions.isSceneCaptured = false;
     }
-    else if (event.type == SDL_MOUSEMOTION && gameState.isSceneCaptured)
+    else if (event.type == SDL_MOUSEMOTION && gameState.controlOptions.isSceneCaptured)
     {
-        float deltaX = event.motion.xrel / gameState.cameraScale;
-        float deltaY = event.motion.yrel / gameState.cameraScale;
-        gameState.cameraCenter.x -= deltaX;
-        gameState.cameraCenter.y -= deltaY;
+        float deltaX = event.motion.xrel / gameState.renderingOptions.cameraScale;
+        float deltaY = event.motion.yrel / gameState.renderingOptions.cameraScale;
+        gameState.renderingOptions.cameraCenter.x -= deltaX;
+        gameState.renderingOptions.cameraCenter.y -= deltaY;
     }
 }
 
@@ -58,7 +60,7 @@ void EventQueueSystem(entt::registry& registry)
         ImGui_ImplSDL2_ProcessEvent(&event);
         if (event.type == SDL_QUIT)
         {
-            gameState.quit = true;
+            gameState.controlOptions.quit = true;
             return;
         }
 

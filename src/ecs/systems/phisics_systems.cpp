@@ -8,13 +8,14 @@ void PhysicsSystem(entt::registry& registry, float deltaTime)
     auto physicsWorld = gameState.physicsWorld;
 
     // Update the physics world.
-    physicsWorld->Step(deltaTime, gameState.velocityIterations, gameState.positionIterations);
+    physicsWorld->Step(
+        deltaTime, gameState.physicsOptions.velocityIterations, gameState.physicsOptions.positionIterations);
 }
 
 void RemoveDistantObjectsSystem(entt::registry& registry)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-    auto levelBounds = gameState.levelInfo.levelBounds;
+    auto levelBounds = gameState.levelOptions.levelBounds;
 
     auto physicalBodies = registry.view<PhysicalBody>();
     for (auto entity : physicalBodies)

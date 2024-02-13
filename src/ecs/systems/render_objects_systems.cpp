@@ -23,14 +23,15 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
 
             // Compute the destination rectangle on the screen.
             glm::vec2 transformedPosition =
-                (pos - gameState.cameraCenter) * gameState.cameraScale + gameState.windowSize / 2.0f;
+                (pos - gameState.renderingOptions.cameraCenter) * gameState.renderingOptions.cameraScale +
+                gameState.renderingOptions.windowSize / 2.0f;
 
             // Have to render from the center of the object. Because the Box2D body is in the center of the object.
             SDL_Rect destRect = {
-                static_cast<int>(transformedPosition.x - size.value.x * gameState.cameraScale / 2),
-                static_cast<int>(transformedPosition.y - size.value.y * gameState.cameraScale / 2),
-                static_cast<int>(size.value.x * gameState.cameraScale),
-                static_cast<int>(size.value.y * gameState.cameraScale)};
+                static_cast<int>(transformedPosition.x - size.value.x * gameState.renderingOptions.cameraScale / 2),
+                static_cast<int>(transformedPosition.y - size.value.y * gameState.renderingOptions.cameraScale / 2),
+                static_cast<int>(size.value.x * gameState.renderingOptions.cameraScale),
+                static_cast<int>(size.value.y * gameState.renderingOptions.cameraScale)};
 
             // Calculate the angle in degrees.
             SDL_Point center = {destRect.w / 2, destRect.h / 2};
@@ -54,14 +55,15 @@ void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
             // float angle = physicalBody.value->GetBody()->GetAngle();
 
             glm::vec2 transformedPosition =
-                (pos - gameState.cameraCenter) * gameState.cameraScale + gameState.windowSize / 2.0f;
+                (pos - gameState.renderingOptions.cameraCenter) * gameState.renderingOptions.cameraScale +
+                gameState.renderingOptions.windowSize / 2.0f;
 
             // Have to render from the center of the object. Because the Box2D body is in the center of the object.
             SDL_Rect rect = {
-                static_cast<int>(transformedPosition.x - size.value.x * gameState.cameraScale / 2),
-                static_cast<int>(transformedPosition.y - size.value.y * gameState.cameraScale / 2),
-                static_cast<int>(size.value.x * gameState.cameraScale),
-                static_cast<int>(size.value.y * gameState.cameraScale)};
+                static_cast<int>(transformedPosition.x - size.value.x * gameState.renderingOptions.cameraScale / 2),
+                static_cast<int>(transformedPosition.y - size.value.y * gameState.renderingOptions.cameraScale / 2),
+                static_cast<int>(size.value.x * gameState.renderingOptions.cameraScale),
+                static_cast<int>(size.value.y * gameState.renderingOptions.cameraScale)};
 
             SDL_RenderFillRect(renderer, &rect);
         }

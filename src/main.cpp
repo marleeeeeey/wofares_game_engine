@@ -28,7 +28,7 @@ int main(int argc, char* args[])
 
         // Create a game state entity.
         auto& gameState = registry.emplace<GameState>(registry.create());
-        gameState.cameraCenter = gameState.windowSize / 2.0f;
+        gameState.renderingOptions.cameraCenter = gameState.renderingOptions.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
         b2Vec2 gravity(0.0f, +9.8f);
@@ -36,7 +36,7 @@ int main(int argc, char* args[])
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializer sdlInitializer(SDL_INIT_VIDEO);
-        SDLWindow window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowSize);
+        SDLWindow window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.renderingOptions.windowSize);
         SDLRenderer renderer(window.get());
         ImGuiSDL imguiSDL(window.get(), renderer.get());
 
@@ -48,15 +48,15 @@ int main(int argc, char* args[])
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
-        while (!gameState.quit)
+        while (!gameState.controlOptions.quit)
         {
             Uint32 frameStart = SDL_GetTicks();
 
-            if (utils::FileHasChanged(mapPath) || gameState.reloadMap)
+            if (utils::FileHasChanged(mapPath) || gameState.controlOptions.reloadMap)
             {
                 UnloadMap(registry);
                 LoadMap(registry, renderer.get(), mapPath);
-                gameState.reloadMap = false;
+                gameState.controlOptions.reloadMap = false;
             }
 
             EventQueueSystem(registry); // Impact on Camera.
@@ -80,7 +80,7 @@ int main(int argc, char* args[])
 
             // Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
-            const Uint32 frameDelay = 1000 / gameState.fps;
+            const Uint32 frameDelay = 1000 / gameState.renderingOptions.fps;
             if (frameDelay > frameTime)
             {
                 SDL_Delay(frameDelay - frameTime);

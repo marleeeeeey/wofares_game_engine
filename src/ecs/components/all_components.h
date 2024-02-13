@@ -37,28 +37,43 @@ struct LevelPhysicsBounds
     b2Vec2 max = (b2Vec2(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()));
 };
 
-struct LevelInfo
+struct LevelOptions
 {
     LevelPhysicsBounds levelBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
+    float dynamicBodyProbability{0.3f};
+    size_t miniTileResolution{4};
+    bool preventCreationInvisibleTiles{false};
+};
+
+struct PhysicsOptions
+{
+    int32 velocityIterations{6};
+    int32 positionIterations{2};
+    // Gap between physical and visual objects. Used to prevent dragging of physical objects.
+    float gapBetweenPhysicalAndVisual{0.2f};
+};
+
+struct RenderingOptions
+{
+    unsigned fps{60};
+    glm::vec2 windowSize{800, 600};
+    float cameraScale{1.0f};
+    glm::vec2 cameraCenter{};
+};
+
+struct ControlOptions
+{
+    bool quit{false}; // Flag to control game loop exit
+    bool reloadMap{false};
+    bool isSceneCaptured{false};
 };
 
 struct GameState
 {
-    bool quit{false}; // Flag to control game loop exit
-    glm::vec2 windowSize{800, 600};
-    unsigned fps{60};
-    float cameraScale{1.0f};
-    glm::vec2 cameraCenter{};
-    bool isSceneCaptured{false};
     std::shared_ptr<b2World> physicsWorld;
-    bool reloadMap{false};
-    float dynamicBodyProbability{0.3f};
-    size_t miniTileResolution{4};
-    int32 velocityIterations{6};
-    int32 positionIterations{2};
-    bool preventCreationInvisibleTiles{false};
-    // Gap between physical and visual objects. Used to prevent dragging of physical objects.
-    float gapBetweenPhysicalAndVisual{0.2f};
-    LevelInfo levelInfo;
+    LevelOptions levelOptions; // TODO rename to levelOptions
+    PhysicsOptions physicsOptions;
+    RenderingOptions renderingOptions;
+    ControlOptions controlOptions;
 };

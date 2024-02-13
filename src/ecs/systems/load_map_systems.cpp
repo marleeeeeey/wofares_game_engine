@@ -174,7 +174,7 @@ std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
 void UnloadMap(entt::registry& registry)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-    gameState.levelInfo = {};
+    gameState.levelOptions = {};
 
     // Remove all entities that have a TileInfo component.
     for (auto entity : registry.view<TileInfo>())
@@ -214,11 +214,11 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     // Get the physics world.
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
     auto physicsWorld = gameState.physicsWorld;
-    auto gap = gameState.gapBetweenPhysicalAndVisual;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
 
     // Load the tileset texture.
     std::shared_ptr<Texture> tilesetTexture;
-    if (gameState.preventCreationInvisibleTiles)
+    if (gameState.levelOptions.preventCreationInvisibleTiles)
         tilesetTexture = LoadTextureWithStreamingAccess(renderer, tilesetPath);
     else
         tilesetTexture = LoadTexture(renderer, tilesetPath);
@@ -230,7 +230,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     int tileHeight = json["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    const int colAndRowNumber = gameState.miniTileResolution;
+    const int colAndRowNumber = gameState.levelOptions.miniTileResolution;
     const int miniWidth = tileWidth / colAndRowNumber;
     const int miniHeight = tileHeight / colAndRowNumber;
 
@@ -268,7 +268,7 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                                 textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight,
                                 miniWidth, miniHeight};
 
-                            if (gameState.preventCreationInvisibleTiles &&
+                            if (gameState.levelOptions.preventCreationInvisibleTiles &&
                                 !HasOpaquePixel(tilesetTexture, miniTextureSrcRect))
                             {
                                 invisibleTilesNumber++;
@@ -289,13 +289,14 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
 
                             // Update level bounds.
                             const auto& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();
-                            auto& levelBounds = gameState.levelInfo.levelBounds;
+                            auto& levelBounds = gameState.levelOptions.levelBounds;
                             levelBounds.min = Vec2Min(levelBounds.min, bodyPosition);
                             levelBounds.max = Vec2Max(levelBounds.max, bodyPosition);
 
                             // Apply randomly: static/dynamic body.
                             tilePhysicsBody->GetBody()->SetType(
-                                utils::randomTrue(gameState.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
+                                utils::randomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody
+                                                                                                 : b2_staticBody);
 
                             registry.emplace<PhysicalBody>(entity, tilePhysicsBody);
 
@@ -325,8 +326,8 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
     }
 
     // Add buffer zone to the level bounds.
-    auto& levelBounds = gameState.levelInfo.levelBounds;
-    auto& bufferZone = gameState.levelInfo.bufferZone;
+    auto& levelBounds = gameState.levelOptions.levelBounds;
+    auto& bufferZone = gameState.levelOptions.bufferZone;
     MY_LOG_FMT(
         info, "Level bounds: min: ({}, {}), max: ({}, {})", levelBounds.min.x, levelBounds.min.y, levelBounds.max.x,
         levelBounds.max.y);
