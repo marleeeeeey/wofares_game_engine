@@ -69,6 +69,12 @@ struct ControlOptions
     bool isSceneCaptured{false};
 };
 
+struct DebugInfo
+{
+    float spacePressedDuration{0.0f};
+    float spacePressedDurationOnUpEvent{0.0f};
+};
+
 struct GameState
 {
     std::shared_ptr<b2World> physicsWorld;
@@ -76,4 +82,5 @@ struct GameState
     PhysicsOptions physicsOptions;
     RenderingOptions renderingOptions;
     ControlOptions controlOptions;
+    DebugInfo debugInfo;
 };

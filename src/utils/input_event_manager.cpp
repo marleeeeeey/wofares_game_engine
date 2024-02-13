@@ -48,13 +48,18 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
     updateHoldDurations(deltaTime);
 
     // Notify rawListeners that are interested in hold duration.
-    for (auto& [eventType, rawListeners] : continuousListeners)
+    for (auto& [eventType, listeners] : continuousListeners)
     {
-        for (auto& listener : rawListeners)
+        for (auto& listener : listeners)
         {
+            // TODO: Think how to remove duplication.
             for (auto& [key, eventInfo] : keyboardButtonHoldInfo)
             {
-                if (eventInfo.isPressed)
+                if (eventInfo.isPressed && eventType == EventType::Down)
+                {
+                    listener(eventInfo);
+                }
+                else if (!eventInfo.isPressed && eventType == EventType::Up)
                 {
                     listener(eventInfo);
                 }
@@ -62,7 +67,11 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 
             for (auto& [key, eventInfo] : mouseButtonHoldInfo)
             {
-                if (eventInfo.isPressed)
+                if (eventInfo.isPressed && eventType == EventType::Down)
+                {
+                    listener(eventInfo);
+                }
+                else if (!eventInfo.isPressed && eventType == EventType::Up)
                 {
                     listener(eventInfo);
                 }

@@ -29,6 +29,11 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::Text(MY_FMT("{:.2f}/{:.2f} (Gr/Sc)", gravity, cameraScale).c_str());
     ImGui::Text(MY_FMT("{}/{}/{} (Ts/Ps/DB)", tiles.size(), players.size(), dynamicBodiesCount).c_str());
 
+    // Print debug info.
+    ImGui::Text(MY_FMT("Space pressed duration: {:.2f}", gameState.debugInfo.spacePressedDuration).c_str());
+    ImGui::Text(MY_FMT("Space pressed duration on up event: {:.2f}", gameState.debugInfo.spacePressedDurationOnUpEvent)
+                    .c_str());
+
     // Draw controls the physics world.
     ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
     ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);

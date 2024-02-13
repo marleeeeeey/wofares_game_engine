@@ -14,4 +14,31 @@ void SubscribeGameStateControlSystem(entt::registry& registry, InputEventManager
                 gameState.controlOptions.quit = true;
             }
         });
+
+    // subcrive on continuous events on space key and copy duration of pressing to the game state
+    inputEventManager.subscribeСontinuousListener(
+        InputEventManager::EventType::Down,
+        [&registry](const InputEventManager::EventInfo& eventInfo)
+        {
+            auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+            auto& originalEvent = eventInfo.originalEvent;
+
+            if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
+            {
+                gameState.debugInfo.spacePressedDuration = eventInfo.holdDuration;
+            }
+        });
+
+    inputEventManager.subscribeСontinuousListener(
+        InputEventManager::EventType::Up,
+        [&registry](const InputEventManager::EventInfo& eventInfo)
+        {
+            auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+            auto& originalEvent = eventInfo.originalEvent;
+
+            if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
+            {
+                gameState.debugInfo.spacePressedDurationOnUpEvent = eventInfo.holdDuration;
+            }
+        });
 }
