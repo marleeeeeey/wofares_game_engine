@@ -28,10 +28,16 @@ public:
     // It updates hold durations and notifies listeners with hold durations.
     void updateСontinuousEvents(float deltaTime);
 private:
+    struct PrivateEventInfo
+    {
+        bool firedToAll = false; // Used for UP events. This is because of assimetry of DOWN and UP events.
+        EventInfo info;
+    };
+
     void updateHoldDurations(float deltaTime);
 
     std::vector<RawListener> rawListeners;
     std::unordered_map<EventType, std::vector<СontinuousListener>> continuousListeners;
-    std::unordered_map<SDL_Scancode, EventInfo> keyboardButtonHoldInfo; // TODO: array.
-    std::unordered_map<Uint8, EventInfo> mouseButtonHoldInfo; // TODO: array
+    std::unordered_map<SDL_Scancode, PrivateEventInfo> keyboardButtonHoldInfo; // TODO: array.
+    std::unordered_map<Uint8, PrivateEventInfo> mouseButtonHoldInfo; // TODO: array
 };

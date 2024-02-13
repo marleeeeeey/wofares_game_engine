@@ -8,15 +8,16 @@ void InputEventManager::updateRawEvent(const SDL_Event& event)
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
     {
         auto scancode = static_cast<SDL_Scancode>(event.key.keysym.scancode);
+        keyboardButtonHoldInfo[scancode].firedToAll = false;
         if (event.type == SDL_KEYDOWN && !event.key.repeat)
         {
-            keyboardButtonHoldInfo[scancode].isPressed = true;
-            keyboardButtonHoldInfo[scancode].holdDuration = 0.0f;
-            keyboardButtonHoldInfo[scancode].originalEvent = event;
+            keyboardButtonHoldInfo[scancode].info.isPressed = true;
+            keyboardButtonHoldInfo[scancode].info.holdDuration = 0.0f;
+            keyboardButtonHoldInfo[scancode].info.originalEvent = event;
         }
         else if (event.type == SDL_KEYUP)
         {
-            keyboardButtonHoldInfo[scancode].isPressed = false;
+            keyboardButtonHoldInfo[scancode].info.isPressed = false;
         }
     }
 
@@ -24,15 +25,18 @@ void InputEventManager::updateRawEvent(const SDL_Event& event)
     if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
     {
         Uint8 button = event.button.button;
+        mouseButtonHoldInfo[button].firedToAll = false;
         if (event.type == SDL_MOUSEBUTTONDOWN)
         {
-            mouseButtonHoldInfo[button].isPressed = true;
-            mouseButtonHoldInfo[button].holdDuration = 0.0f;
-            mouseButtonHoldInfo[button].originalEvent = event;
+            mouseButtonHoldInfo[button].info.isPressed = true;
+            mouseButtonHoldInfo[button].info.holdDuration = 0.0f;
+            mouseButtonHoldInfo[button].info.originalEvent = event;
+            MY_LOG_FMT(info, "Mouse button {} is pressed. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
         else if (event.type == SDL_MOUSEBUTTONUP)
         {
-            mouseButtonHoldInfo[button].isPressed = false;
+            mouseButtonHoldInfo[button].info.isPressed = false;
+            MY_LOG_FMT(info, "Mouse button {} is released. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
     }
 
@@ -47,36 +51,52 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 {
     updateHoldDurations(deltaTime);
 
-    // Notify rawListeners that are interested in hold duration.
-    for (auto& [eventType, listeners] : continuousListeners)
+    for (auto& [scanCode, eventInfo] : keyboardButtonHoldInfo)
     {
-        for (auto& listener : listeners)
+        for (auto& listener : continuousListeners[EventType::Down])
         {
-            // TODO: Think how to remove duplication.
-            for (auto& [key, eventInfo] : keyboardButtonHoldInfo)
+            if (eventInfo.info.isPressed)
             {
-                if (eventInfo.isPressed && eventType == EventType::Down)
-                {
-                    listener(eventInfo);
-                }
-                else if (!eventInfo.isPressed && eventType == EventType::Up)
-                {
-                    listener(eventInfo);
-                }
-            }
-
-            for (auto& [key, eventInfo] : mouseButtonHoldInfo)
-            {
-                if (eventInfo.isPressed && eventType == EventType::Down)
-                {
-                    listener(eventInfo);
-                }
-                else if (!eventInfo.isPressed && eventType == EventType::Up)
-                {
-                    listener(eventInfo);
-                }
+                listener(eventInfo.info);
             }
         }
+    }
+
+    for (auto& [button, eventInfo] : mouseButtonHoldInfo)
+    {
+        for (auto& listener : continuousListeners[EventType::Down])
+        {
+            if (eventInfo.info.isPressed)
+            {
+                listener(eventInfo.info);
+            }
+        }
+    }
+
+    for (auto& [scanCode, eventInfo] : keyboardButtonHoldInfo)
+    {
+        for (auto& listener : continuousListeners[EventType::Up])
+        {
+            if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
+            {
+                listener(eventInfo.info);
+                MY_LOG_FMT(info, "Keyboard button {} is released. Event sent to listener.", scanCode);
+            }
+        }
+        eventInfo.firedToAll = true; // This flag should be set to true after all listeners are notified.
+    }
+
+    for (auto& [button, eventInfo] : mouseButtonHoldInfo)
+    {
+        for (auto& listener : continuousListeners[EventType::Up])
+        {
+            if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
+            {
+                listener(eventInfo.info);
+                MY_LOG_FMT(info, "Mouse button {} is released. Event sent to listener.", button);
+            }
+        }
+        eventInfo.firedToAll = true; // This flag should be set to true after all listeners are notified.
     }
 }
 
@@ -90,7 +110,7 @@ void InputEventManager::subscribeСontinuousListener(EventType eventType, Сonti
 {
     continuousListeners[eventType].push_back(listener);
     MY_LOG_FMT(
-        info, "InputEventManager: СontinuousListener added. Count of СontinuousListeners for {}: {}", eventType,
+        info, "InputEventManager: ContinuousListener added. Count of ContinuousListeners for {}: {}", eventType,
         continuousListeners[eventType].size());
 }
 
@@ -99,18 +119,18 @@ void InputEventManager::updateHoldDurations(float deltaTime)
     // Update the hold duration for keyboard buttons.
     for (auto& [key, eventInfo] : keyboardButtonHoldInfo)
     {
-        if (eventInfo.isPressed)
+        if (eventInfo.info.isPressed)
         {
-            eventInfo.holdDuration += deltaTime;
+            eventInfo.info.holdDuration += deltaTime;
         }
     }
 
     // Update the hold duration for mouse buttons.
     for (auto& [key, eventInfo] : mouseButtonHoldInfo)
     {
-        if (eventInfo.isPressed)
+        if (eventInfo.info.isPressed)
         {
-            eventInfo.holdDuration += deltaTime;
+            eventInfo.info.holdDuration += deltaTime;
         }
     }
 }

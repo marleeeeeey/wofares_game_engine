@@ -39,4 +39,24 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                 }
             }
         });
+
+    // Subscribe when user up mouse left button after holding to spawn the granade and set the direction and force
+    inputEventManager.subscribeСontinuousListener(
+        InputEventManager::EventType::Up,
+        [&registry](const InputEventManager::EventInfo& eventInfo)
+        {
+            const auto& players = registry.view<PlayerNumber, PhysicalBody>();
+            for (auto entity : players)
+            {
+                const auto& [playerNumber, physicalBody] = players.get<PlayerNumber, PhysicalBody>(entity);
+                auto body = physicalBody.value->GetBody();
+
+                float force = eventInfo.holdDuration;
+
+                if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
+                {
+                    MY_LOG_FMT(info, "Spawn the granade with force: {}", force);
+                }
+            }
+        });
 }
