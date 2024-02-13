@@ -10,3 +10,22 @@ void PhysicsSystem(entt::registry& registry, float deltaTime)
     // Update the physics world.
     physicsWorld->Step(deltaTime, gameState.velocityIterations, gameState.positionIterations);
 }
+
+void RemoveDistantObjectsSystem(entt::registry& registry)
+{
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto levelBounds = gameState.levelInfo.levelBounds;
+
+    auto physicalBodies = registry.view<PhysicalBody>();
+    for (auto entity : physicalBodies)
+    {
+        auto& physicalBody = physicalBodies.get<PhysicalBody>(entity);
+        b2Vec2 pos = physicalBody.value->GetBody()->GetPosition();
+
+        if (pos.x < levelBounds.min.x || pos.x > levelBounds.max.x || pos.y < levelBounds.min.y ||
+            pos.y > levelBounds.max.y)
+        {
+            registry.destroy(entity);
+        }
+    }
+}

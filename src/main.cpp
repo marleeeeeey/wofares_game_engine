@@ -56,6 +56,7 @@ int main(int argc, char* args[])
             {
                 UnloadMap(registry);
                 LoadMap(registry, renderer.get(), mapPath);
+                gameState.reloadMap = false;
             }
 
             EventQueueSystem(registry); // Impact on Camera.
@@ -68,6 +69,7 @@ int main(int argc, char* args[])
 
             // Update the physics.
             PhysicsSystem(registry, deltaTime);
+            RemoveDistantObjectsSystem(registry);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

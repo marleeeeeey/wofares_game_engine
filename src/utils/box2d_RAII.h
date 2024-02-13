@@ -1,3 +1,4 @@
+#pragma once
 #include <box2d/box2d.h>
 #include <my_common_cpp_utils/Logger.h>
 

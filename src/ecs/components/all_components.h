@@ -5,6 +5,8 @@
 #include <utils/box2d_RAII.h>
 #include <utils/sdl_RAII.h>
 
+// ************************************ COMPONENTS ************************************
+
 struct SizeComponent
 {
     // Must be installed manually. Because this components is not calculated from Box2D body.
@@ -14,6 +16,31 @@ struct SizeComponent
 struct PlayerNumber
 {
     size_t value = 0;
+};
+
+struct TileInfo
+{
+    std::shared_ptr<Texture> texture; // Pointer to the texture.
+    SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
+};
+
+struct PhysicalBody
+{
+    std::shared_ptr<Box2dObjectRAII> value;
+};
+
+// ********************************* SINGLETON COMPONENT *********************************
+
+struct LevelPhysicsBounds
+{
+    b2Vec2 min = (b2Vec2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max()));
+    b2Vec2 max = (b2Vec2(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()));
+};
+
+struct LevelInfo
+{
+    LevelPhysicsBounds levelBounds;
+    b2Vec2 bufferZone{10.0f, 10.0f};
 };
 
 struct GameState
@@ -33,15 +60,5 @@ struct GameState
     bool preventCreationInvisibleTiles{false};
     // Gap between physical and visual objects. Used to prevent dragging of physical objects.
     float gapBetweenPhysicalAndVisual{0.2f};
-};
-
-struct TileInfo
-{
-    std::shared_ptr<Texture> texture; // Pointer to the texture.
-    SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
-};
-
-struct PhysicalBody
-{
-    std::shared_ptr<Box2dObjectRAII> value;
+    LevelInfo levelInfo;
 };

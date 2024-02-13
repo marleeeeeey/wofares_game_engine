@@ -3,3 +3,5 @@
 #include <glm/glm.hpp>
 
 void PhysicsSystem(entt::registry& registry, float deltaTime);
+
+void RemoveDistantObjectsSystem(entt::registry& registry);

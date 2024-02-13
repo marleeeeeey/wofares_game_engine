@@ -9,6 +9,7 @@
 #include <my_common_cpp_utils/Logger.h>
 #include <my_common_cpp_utils/MathUtils.h>
 #include <nlohmann/json.hpp>
+#include <utils/glm_box2d_conversions.h>
 #include <utils/globals.h>
 #include <utils/sdl_RAII.h>
 
@@ -172,6 +173,9 @@ std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
 
 void UnloadMap(entt::registry& registry)
 {
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    gameState.levelInfo = {};
+
     // Remove all entities that have a TileInfo component.
     for (auto entity : registry.view<TileInfo>())
         registry.destroy(entity);
@@ -283,6 +287,12 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
                             auto tilePhysicsBody =
                                 CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, miniTileSize);
 
+                            // Update level bounds.
+                            const auto& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();
+                            auto& levelBounds = gameState.levelInfo.levelBounds;
+                            levelBounds.min = Vec2Min(levelBounds.min, bodyPosition);
+                            levelBounds.max = Vec2Max(levelBounds.max, bodyPosition);
+
                             // Apply randomly: static/dynamic body.
                             tilePhysicsBody->GetBody()->SetType(
                                 utils::randomTrue(gameState.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
@@ -313,6 +323,18 @@ void LoadMap(entt::registry& registry, SDL_Renderer* renderer, const std::string
             }
         }
     }
+
+    // Add buffer zone to the level bounds.
+    auto& levelBounds = gameState.levelInfo.levelBounds;
+    auto& bufferZone = gameState.levelInfo.bufferZone;
+    MY_LOG_FMT(
+        info, "Level bounds: min: ({}, {}), max: ({}, {})", levelBounds.min.x, levelBounds.min.y, levelBounds.max.x,
+        levelBounds.max.y);
+    levelBounds.min -= bufferZone;
+    levelBounds.max += bufferZone;
+    MY_LOG_FMT(
+        info, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", levelBounds.min.x, levelBounds.min.y,
+        levelBounds.max.x, levelBounds.max.y);
 
     // Log warnings.
     if (invisibleTilesNumber > 0)
