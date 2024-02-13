@@ -60,8 +60,8 @@ git submodule update --init --recursive
 ```
 mkdir build
 cd build
-cmake -G "Ninja"-DCMAKE_CXX_COMPILER=clang++ ..
-ninja
+cmake -G "Ninja" DCMAKE_CXX_COMPILER=clang++ -B . -S ..
+cmake --build .
 ```
 
 ### Running the Game

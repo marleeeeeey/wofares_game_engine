@@ -31,3 +31,6 @@
 [submodule "thirdparty/box2d"]
 	path = thirdparty/box2d
 	url = git@github.com:erincatto/box2d.git
+[submodule "thirdparty/my_tiled_maps"]
+	path = thirdparty/my_tiled_maps
+	url = git@github.com:marleeeeeey/my_tiled_maps.git

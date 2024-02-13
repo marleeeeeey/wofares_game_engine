@@ -14,6 +14,12 @@ int main(int argc, char* args[])
 {
     try
     {
+        // Set the current directory to the executable directory.
+        std::string execPath = args[0];
+        std::string execDir = execPath.substr(0, execPath.find_last_of("\\/"));
+        std::filesystem::current_path(execDir);
+        MY_LOG_FMT(info, "Set the current directory to: {}", execDir);
+
         // Initialize the logger with the trace level.
         utils::Logger::getInstance(spdlog::level::info);
 
@@ -30,12 +36,14 @@ int main(int argc, char* args[])
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializer sdlInitializer(SDL_INIT_VIDEO);
-        SDLWindow window("Bouncing Ball with SDL, ImGui, EnTT & GLM", gameState.windowSize);
+        SDLWindow window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowSize);
         SDLRenderer renderer(window.get());
         ImGuiSDL imguiSDL(window.get(), renderer.get());
 
         // Load the map.
-        std::string mapPath = "C:\\dev\\my_tiled_maps\\map002_wofares\\map.json";
+        std::string mapPath = "assets\\maps\\map.json";
+        if (!std::filesystem::exists(mapPath))
+            throw std::runtime_error(MY_FMT("Map file does not found: {}", mapPath));
         LoadMap(registry, renderer.get(), mapPath);
 
         // Start the game loop.
@@ -79,7 +87,7 @@ int main(int argc, char* args[])
     }
     catch (const std::runtime_error& e)
     {
-        MY_LOG_FMT(warn, "[main] Unhandled exception: {}", e.what());
+        MY_LOG_FMT(warn, "Unhandled exception catched in main: {}", e.what());
         return -1;
     }
 

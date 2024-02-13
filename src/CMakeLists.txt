@@ -59,3 +59,9 @@ endfunction()
 copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL" "SDL2")
 copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/spdlog" "spdlog")
 copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL_image" "SDL2_image")
+
+# copy from thirdparty\my_tiled_maps\map002_wofares\assets to bin\assets
+add_custom_command(TARGET wofares POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/thirdparty/my_tiled_maps/map002_wofares/assets"
+    "$<TARGET_FILE_DIR:wofares>/assets")
