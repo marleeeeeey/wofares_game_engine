@@ -1,4 +1,4 @@
 #pragma once
-#include <entt/entt.hpp>
+#include <utils/input_event_manager.h>
 
-void EventQueueSystem(entt::registry& registry);
+void EventQueueSystem(InputEventManager& inputEventManager, float deltaTime);

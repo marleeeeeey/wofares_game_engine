@@ -1,13 +1,16 @@
 #include <ecs/components/all_components.h>
+#include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
-#include <ecs/systems/keyboard_state_systems.h>
+#include <ecs/systems/game_state_control_system.h>
 #include <ecs/systems/load_map_systems.h>
 #include <ecs/systems/phisics_systems.h>
+#include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/render_objects_systems.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
+#include <utils/input_event_manager.h>
 #include <utils/sdl_RAII.h>
 
 int main(int argc, char* args[])
@@ -46,11 +49,20 @@ int main(int argc, char* args[])
             throw std::runtime_error(MY_FMT("Map file does not found: {}", mapPath));
         LoadMap(registry, renderer.get(), mapPath);
 
+        // Subscribe all systems that need to handle input events.
+        InputEventManager inputEventManager;
+        SubscribeCameraControlSystem(registry, inputEventManager);
+        SubscribeGameStateControlSystem(registry, inputEventManager);
+        SubscribePlayerControlSystem(registry, inputEventManager);
+
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
         while (!gameState.controlOptions.quit)
         {
+            // Calculate delta time.
             Uint32 frameStart = SDL_GetTicks();
+            float deltaTime = static_cast<float>(frameStart - lastTick) / 1000.0f;
+            lastTick = frameStart;
 
             if (utils::FileHasChanged(mapPath) || gameState.controlOptions.reloadMap)
             {
@@ -59,13 +71,8 @@ int main(int argc, char* args[])
                 gameState.controlOptions.reloadMap = false;
             }
 
-            EventQueueSystem(registry); // Impact on Camera.
-            KeyboardStateSystem(registry); // Impact on Player.
-
-            // Calculate delta time.
-            Uint32 currentTick = SDL_GetTicks();
-            float deltaTime = static_cast<float>(currentTick - lastTick) / 1000.0f;
-            lastTick = currentTick;
+            // Handle input events.
+            EventQueueSystem(inputEventManager, deltaTime);
 
             // Update the physics.
             PhysicsSystem(registry, deltaTime);

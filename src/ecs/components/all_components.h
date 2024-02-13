@@ -72,7 +72,7 @@ struct ControlOptions
 struct GameState
 {
     std::shared_ptr<b2World> physicsWorld;
-    LevelOptions levelOptions; // TODO rename to levelOptions
+    LevelOptions levelOptions;
     PhysicsOptions physicsOptions;
     RenderingOptions renderingOptions;
     ControlOptions controlOptions;
