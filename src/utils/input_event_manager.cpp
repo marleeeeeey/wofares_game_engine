@@ -31,12 +31,12 @@ void InputEventManager::updateRawEvent(const SDL_Event& event)
             mouseButtonHoldInfo[button].info.isPressed = true;
             mouseButtonHoldInfo[button].info.holdDuration = 0.0f;
             mouseButtonHoldInfo[button].info.originalEvent = event;
-            MY_LOG_FMT(info, "Mouse button {} is pressed. Size of cashe {}", button, mouseButtonHoldInfo.size());
+            MY_LOG_FMT(debug, "Mouse button {} is pressed. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
         else if (event.type == SDL_MOUSEBUTTONUP)
         {
             mouseButtonHoldInfo[button].info.isPressed = false;
-            MY_LOG_FMT(info, "Mouse button {} is released. Size of cashe {}", button, mouseButtonHoldInfo.size());
+            MY_LOG_FMT(debug, "Mouse button {} is released. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
     }
 
@@ -80,7 +80,7 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
             if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
             {
                 listener(eventInfo.info);
-                MY_LOG_FMT(info, "Keyboard button {} is released. Event sent to listener.", scanCode);
+                MY_LOG_FMT(debug, "Keyboard button {} is released. Event sent to listener.", scanCode);
             }
         }
         eventInfo.firedToAll = true; // This flag should be set to true after all listeners are notified.
@@ -93,7 +93,7 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
             if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
             {
                 listener(eventInfo.info);
-                MY_LOG_FMT(info, "Mouse button {} is released. Event sent to listener.", button);
+                MY_LOG_FMT(debug, "Mouse button {} is released. Event sent to listener.", button);
             }
         }
         eventInfo.firedToAll = true; // This flag should be set to true after all listeners are notified.
@@ -103,14 +103,14 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 void InputEventManager::subscribeRawListener(RawListener listener)
 {
     rawListeners.push_back(listener);
-    MY_LOG_FMT(info, "InputEventManager: RawListener added. Count of RawListeners: {}", rawListeners.size());
+    MY_LOG_FMT(debug, "InputEventManager: RawListener added. Count of RawListeners: {}", rawListeners.size());
 }
 
 void InputEventManager::subscribeСontinuousListener(EventType eventType, СontinuousListener listener)
 {
     continuousListeners[eventType].push_back(listener);
     MY_LOG_FMT(
-        info, "InputEventManager: ContinuousListener added. Count of ContinuousListeners for {}: {}", eventType,
+        debug, "InputEventManager: ContinuousListener added. Count of ContinuousListeners for {}: {}", eventType,
         continuousListeners[eventType].size());
 }
 

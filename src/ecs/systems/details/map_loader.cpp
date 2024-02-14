@@ -1,0 +1,211 @@
+#include "map_loader.h"
+#include <SDL_image.h>
+#include <fstream>
+#include <my_common_cpp_utils/MathUtils.h>
+#include <utils/glm_box2d_conversions.h>
+#include <utils/globals.h>
+#include <utils/texture_process.h>
+
+namespace
+{
+
+// Convert from SDL to Box2D system.
+std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
+    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& sdlPos, const glm::u32vec2& sdlSize)
+{
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_staticBody;
+    bodyDef.position.Set(sdlPos.x * sdlToBox2D, sdlPos.y * sdlToBox2D);
+    b2Body* body = physicsWorld->CreateBody(&bodyDef);
+
+    b2PolygonShape shape;
+    shape.SetAsBox(sdlSize.x / 2.0 * sdlToBox2D, sdlSize.y / 2.0 * sdlToBox2D);
+
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &shape;
+    fixtureDef.density = 10.0f; // Density to calculate mass
+    fixtureDef.friction = 0.3f; // Friction to apply to the body
+    body->CreateFixture(&fixtureDef);
+
+    return std::make_shared<Box2dObjectRAII>(body, physicsWorld);
+}
+
+// Convert from SDL to Box2D system.
+std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
+    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& sdlPos, const glm::u32vec2& sdlSize)
+{
+    auto staticBody = CreateStaticPhysicsBody(physicsWorld, sdlPos, sdlSize);
+    staticBody->GetBody()->SetType(b2_dynamicBody);
+    return staticBody;
+}
+
+} // namespace
+
+MapLoader::MapLoader(const std::string& filename, entt::registry& registry, SDL_Renderer* renderer)
+  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front()))
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+        throw std::runtime_error("Failed to open map file");
+
+    nlohmann::json json;
+    file >> json;
+
+    // Calc path to tileset image.
+    std::string tilesetPath = filename;
+    size_t found = tilesetPath.find_last_of("/\\");
+    if (found != std::string::npos)
+        tilesetPath = tilesetPath.substr(0, found + 1);
+    tilesetPath += json["tilesets"][0]["image"];
+
+    // Check if the tileset texture file exists.
+    std::ifstream tilesetFile(tilesetPath);
+    if (!tilesetFile.is_open())
+        throw std::runtime_error(MY_FMT("Failed to open tileset file {}", tilesetPath));
+
+    // Load the tileset texture.
+    if (gameState.levelOptions.preventCreationInvisibleTiles)
+        tilesetTexture = LoadTextureWithStreamingAccess(renderer, tilesetPath);
+    else
+        tilesetTexture = LoadTexture(renderer, tilesetPath);
+
+    // Assume all tiles are of the same size.
+    tileWidth = json["tilewidth"];
+    tileHeight = json["tileheight"];
+
+    // Calculate mini tile size: 4x4 mini tiles in one big tile.
+    colAndRowNumber = gameState.levelOptions.miniTileResolution;
+    miniWidth = tileWidth / colAndRowNumber;
+    miniHeight = tileHeight / colAndRowNumber;
+
+    // Iterate over each tile layer.
+    for (const auto& layer : json["layers"])
+    {
+        if (layer["type"] == "tilelayer")
+        {
+            ParseTileLayer(layer);
+        }
+        else if (layer["type"] == "objectgroup")
+        {
+            ParseObjectLayer(layer);
+        }
+    }
+
+    CalculateLevelBoundsWithBufferZone();
+
+    // Log warnings.
+    if (invisibleTilesNumber > 0)
+        MY_LOG_FMT(warn, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
+    if (createdTiles == 0)
+    {
+        MY_LOG_FMT(warn, "No tiles were created during map loading {}", filename);
+        if (invisibleTilesNumber > 0)
+            MY_LOG(warn, "All tiles are invisible");
+    }
+}
+
+void MapLoader::ParseTileLayer(const nlohmann::json& layer)
+{
+    auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+
+    int layerCols = layer["width"];
+    int layerRows = layer["height"];
+    const auto& tiles = layer["data"];
+
+    // Create entities for each tile.
+    for (int layerRow = 0; layerRow < layerRows; ++layerRow)
+    {
+        for (int layerCol = 0; layerCol < layerCols; ++layerCol)
+        {
+            int tileId = tiles[layerCol + layerRow * layerCols];
+
+            // Skip empty tiles.
+            if (tileId <= 0)
+                continue;
+
+            ParseTile(tileId, layerCol, layerRow);
+        }
+    }
+}
+
+void MapLoader::ParseObjectLayer(const nlohmann::json& layer)
+{
+    auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+
+    for (const auto& object : layer["objects"])
+    {
+        if (object["type"] == "PlayerPosition")
+        {
+            auto entity = registry.create();
+            auto playerSize = glm::u32vec2(10, 10);
+            registry.emplace<SizeComponent>(entity, playerSize);
+            registry.emplace<PlayerNumber>(entity);
+
+            auto playerPhysicsBody = CreateDynamicPhysicsBody(
+                physicsWorld, glm::u32vec2(object["x"], object["y"]), playerSize - glm::u32vec2{gap, gap});
+            registry.emplace<PhysicalBody>(entity, playerPhysicsBody);
+        }
+    }
+}
+
+void MapLoader::CalculateLevelBoundsWithBufferZone()
+{
+    auto& lb = gameState.levelOptions.levelBounds;
+    auto& bz = gameState.levelOptions.bufferZone;
+    MY_LOG_FMT(info, "Level bounds: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
+    lb.min -= bz;
+    lb.max += bz;
+    MY_LOG_FMT(
+        info, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
+}
+
+void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
+{
+    auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+
+    SDL_Rect textureSrcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
+
+    // Create entities for each mini tile inside the tile.
+    for (int miniRow = 0; miniRow < colAndRowNumber; ++miniRow)
+    {
+        for (int miniCol = 0; miniCol < colAndRowNumber; ++miniCol)
+        {
+            SDL_Rect miniTextureSrcRect{
+                textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight, miniWidth, miniHeight};
+
+            if (gameState.levelOptions.preventCreationInvisibleTiles &&
+                IsTileInvisible(tilesetTexture, miniTextureSrcRect))
+            {
+                invisibleTilesNumber++;
+                continue;
+            }
+
+            glm::u32vec2 miniTileWorldPosition(
+                layerCol * tileWidth + miniCol * miniWidth, layerRow * tileHeight + miniRow * miniHeight);
+            auto entity = registry.create();
+            registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
+            registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
+
+            glm::u32vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
+
+            auto tilePhysicsBody = CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, miniTileSize);
+
+            // Update level bounds.
+            const auto& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();
+            auto& levelBounds = gameState.levelOptions.levelBounds;
+            levelBounds.min = Vec2Min(levelBounds.min, bodyPosition);
+            levelBounds.max = Vec2Max(levelBounds.max, bodyPosition);
+
+            // Apply randomly: static/dynamic body.
+            tilePhysicsBody->GetBody()->SetType(
+                utils::randomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
+
+            registry.emplace<PhysicalBody>(entity, tilePhysicsBody);
+
+            createdTiles++;
+        }
+    }
+}
