@@ -38,10 +38,10 @@ int main(int argc, char* args[])
         gameState.physicsWorld = std::make_shared<b2World>(gravity);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
-        SDLInitializer sdlInitializer(SDL_INIT_VIDEO);
-        SDLWindow window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.renderingOptions.windowSize);
-        SDLRenderer renderer(window.get());
-        ImGuiSDL imguiSDL(window.get(), renderer.get());
+        SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO);
+        SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.renderingOptions.windowSize);
+        SDLRendererRAII renderer(window.get());
+        ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
         // Load the map.
         std::string mapPath = "assets\\maps\\map.json";
@@ -64,7 +64,7 @@ int main(int argc, char* args[])
             float deltaTime = static_cast<float>(frameStart - lastTick) / 1000.0f;
             lastTick = frameStart;
 
-            if (utils::FileHasChanged(mapPath) || gameState.controlOptions.reloadMap)
+            if (utils::FileChangedSinceLastCheck(mapPath) || gameState.controlOptions.reloadMap)
             {
                 UnloadMap(registry);
                 LoadMap(registry, renderer.get(), mapPath);

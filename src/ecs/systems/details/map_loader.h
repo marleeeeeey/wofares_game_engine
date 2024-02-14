@@ -22,5 +22,5 @@ private:
     int miniHeight;
     size_t createdTiles = 0;
     size_t invisibleTilesNumber = 0;
-    std::shared_ptr<Texture> tilesetTexture;
+    std::shared_ptr<SDLTextureRAII> tilesetTexture;
 };

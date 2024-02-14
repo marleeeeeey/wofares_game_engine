@@ -13,7 +13,7 @@
  * @param miniTextureSrcRect The source rectangle within the tileset texture.
  * @return True if the tileset texture has an opaque pixel within the source rectangle, false otherwise.
  */
-bool IsTileInvisible(std::shared_ptr<Texture> tilesetTexture, const SDL_Rect& miniTextureSrcRect);
+bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_Rect& miniTextureSrcRect);
 
 /**
  * Loads a texture from the specified file path.
@@ -22,7 +22,7 @@ bool IsTileInvisible(std::shared_ptr<Texture> tilesetTexture, const SDL_Rect& mi
  * @param filePath The file path of the texture to be loaded.
  * @return A shared pointer to the loaded texture.
  */
-std::shared_ptr<Texture> LoadTexture(SDL_Renderer* renderer, const std::string& filePath);
+std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::string& filePath);
 
 /**
  * @brief Loads a texture with streaming access.
@@ -33,6 +33,6 @@ std::shared_ptr<Texture> LoadTexture(SDL_Renderer* renderer, const std::string& 
  * @param filePath The file path of the texture to load.
  * @return A shared pointer to the loaded texture.
  */
-std::shared_ptr<Texture> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath);
+std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath);
 
-SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<Texture> texture);
+SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture);

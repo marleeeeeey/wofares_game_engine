@@ -1,4 +1,4 @@
-#include "draw.h"
+#include "sdl_draw.h"
 
 void DrawCross(SDL_Renderer* renderer, int centerX, int centerY, int size, const SDL_Color& color)
 {

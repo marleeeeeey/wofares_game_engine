@@ -1,4 +1,4 @@
-#include "colors.h"
+#include "sdl_colors.h"
 #include <map>
 
 SDL_Color GetSDLColor(ColorName colorName, Uint8 alpha)

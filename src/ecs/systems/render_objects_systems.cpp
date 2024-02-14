@@ -1,9 +1,10 @@
 #include "render_objects_systems.h"
 #include <ecs/components/all_components.h>
 #include <numbers>
-#include <utils/colors.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/globals.h>
+#include <utils/sdl_colors.h>
+
 
 void RenderSystem(entt::registry& registry, SDL_Renderer* renderer)
 {

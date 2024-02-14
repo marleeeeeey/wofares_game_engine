@@ -2,8 +2,8 @@
 #include "ecs/components/all_components.h"
 #include <imgui.h>
 #include <my_common_cpp_utils/Logger.h>
-#include <utils/colors.h>
-#include <utils/draw.h>
+#include <utils/sdl_colors.h>
+#include <utils/sdl_draw.h>
 
 void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
 {

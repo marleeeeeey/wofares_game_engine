@@ -1,22 +1,15 @@
 #include "texture_process.h"
+#include "utils/sdl_RAII.h"
 #include <SDL_image.h>
 #include <my_common_cpp_utils/Logger.h>
 
-bool IsTileInvisible(std::shared_ptr<Texture> tilesetTexture, const SDL_Rect& miniTextureSrcRect)
+bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_Rect& miniTextureSrcRect)
 {
-    Uint32* pixels;
-    int pitch; // The length of a row of pixels in bytes.
+    SDLTextureLockRAII lock(tilesetTexture->get());
 
-    if (SDL_LockTexture(tilesetTexture->get(), &miniTextureSrcRect, (void**)&pixels, &pitch) != 0)
-    {
-        MY_LOG_FMT(
-            warn,
-            "SDL_LockTexture failed. Check that you use function LoadTextureWithStreamingAccess to load texture. Error: {}",
-            SDL_GetError());
-        return true;
-    }
+    Uint32* pixels = static_cast<Uint32*>(lock.GetPixels());
+    int pitch = lock.GetPitch();
 
-    bool isTileInvicible = true;
     for (int row = 0; row < miniTextureSrcRect.h; ++row)
     {
         for (int col = 0; col < miniTextureSrcRect.w; ++col)
@@ -28,30 +21,25 @@ bool IsTileInvisible(std::shared_ptr<Texture> tilesetTexture, const SDL_Rect& mi
             // MY_LOG_FMT(info, "Alpha: {}, Pixel: {}, Pitch: {}, col: {}, row: {}", alpha, pixel, pitch, col, row);
             if (alpha > 0)
             {
-                isTileInvicible = false;
-                break;
+                return false;
             }
-        }
-        if (isTileInvicible)
-        {
-            break;
         }
     }
 
-    SDL_UnlockTexture(tilesetTexture->get());
-    return isTileInvicible;
+    return true;
 }
 
-std::shared_ptr<Texture> LoadTexture(SDL_Renderer* renderer, const std::string& filePath)
+std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::string& filePath)
 {
     SDL_Texture* texture = IMG_LoadTexture(renderer, filePath.c_str());
 
     if (texture == nullptr)
         throw std::runtime_error("Failed to load texture");
 
-    return std::make_shared<Texture>(texture);
+    return std::make_shared<SDLTextureRAII>(texture);
 }
-std::shared_ptr<Texture> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath)
+
+std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath)
 {
     // Step 1. Load image into SDL_Surface.
     SDL_Surface* surface = IMG_Load(filePath.c_str());
@@ -81,9 +69,10 @@ std::shared_ptr<Texture> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, 
     // Step 4. Free the surface.
     SDL_FreeSurface(surface);
 
-    return std::make_shared<Texture>(texture);
+    return std::make_shared<SDLTextureRAII>(texture);
 }
-SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<Texture> texture)
+
+SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture)
 {
     int textureWidth, textureHeight;
     SDL_QueryTexture(texture->get(), nullptr, nullptr, &textureWidth, &textureHeight);

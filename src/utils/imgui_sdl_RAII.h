@@ -5,12 +5,12 @@
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_sdlrenderer2.h>
 
-class ImGuiSDL
+class ImGuiSDLRAII
 {
     SDL_Renderer* renderer = nullptr;
 public:
-    ImGuiSDL(SDL_Window* window, SDL_Renderer* renderer);
-    ~ImGuiSDL();
+    ImGuiSDLRAII(SDL_Window* window, SDL_Renderer* renderer);
+    ~ImGuiSDLRAII();
 
     void startFrame() const;
     void finishFrame() const;

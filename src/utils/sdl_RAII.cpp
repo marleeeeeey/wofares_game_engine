@@ -2,7 +2,7 @@
 #include "my_common_cpp_utils/Logger.h"
 #include <stdexcept>
 
-SDLInitializer::SDLInitializer(Uint32 flags)
+SDLInitializerRAII::SDLInitializerRAII(Uint32 flags)
 {
     if (SDL_Init(flags) < 0)
     {
@@ -10,22 +10,22 @@ SDLInitializer::SDLInitializer(Uint32 flags)
     }
 }
 
-SDLInitializer::~SDLInitializer()
+SDLInitializerRAII::~SDLInitializerRAII()
 {
     SDL_Quit();
 }
 
-SDLWindow::SDLWindow(const std::string& title, int width, int height)
+SDLWindowRAII::SDLWindowRAII(const std::string& title, int width, int height)
 {
     init(title, width, height);
 }
 
-SDLWindow::SDLWindow(const std::string& title, glm::vec2 windowSize)
+SDLWindowRAII::SDLWindowRAII(const std::string& title, glm::vec2 windowSize)
 {
     init(title, static_cast<int>(windowSize.x), static_cast<int>(windowSize.y));
 }
 
-SDLWindow::~SDLWindow()
+SDLWindowRAII::~SDLWindowRAII()
 {
     if (window)
     {
@@ -33,7 +33,7 @@ SDLWindow::~SDLWindow()
     }
 }
 
-void SDLWindow::init(const std::string& title, int width, int height)
+void SDLWindowRAII::init(const std::string& title, int width, int height)
 {
     window = SDL_CreateWindow(
         title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
@@ -43,7 +43,7 @@ void SDLWindow::init(const std::string& title, int width, int height)
     }
 }
 
-SDLRenderer::SDLRenderer(SDL_Window* window)
+SDLRendererRAII::SDLRendererRAII(SDL_Window* window)
 {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
@@ -52,7 +52,7 @@ SDLRenderer::SDLRenderer(SDL_Window* window)
     }
 }
 
-SDLRenderer::~SDLRenderer()
+SDLRendererRAII::~SDLRendererRAII()
 {
     if (renderer)
     {
@@ -60,29 +60,46 @@ SDLRenderer::~SDLRenderer()
     }
 }
 
-Texture::Texture(SDL_Texture* texture) : texture(texture)
+SDLTextureRAII::SDLTextureRAII(SDL_Texture* texture) : texture(texture)
 {
     if (!texture)
-        throw std::runtime_error("Texture is nullptr");
+        throw std::runtime_error("SDLTextureRAII is nullptr");
 
-    MY_LOG_FMT(debug, "Texture created: {}", static_cast<void*>(texture));
+    MY_LOG_FMT(debug, "SDLTextureRAII created: {}", static_cast<void*>(texture));
 }
 
-Texture::~Texture()
+SDLTextureRAII::~SDLTextureRAII()
 {
     if (texture)
     {
         SDL_DestroyTexture(texture);
     }
 
-    MY_LOG_FMT(debug, "Texture destroyed: {}", static_cast<void*>(texture));
+    MY_LOG_FMT(debug, "SDLTextureRAII destroyed: {}", static_cast<void*>(texture));
 }
 
-Texture::Texture(Texture&& other) noexcept : texture(std::exchange(other.texture, nullptr))
+SDLTextureRAII::SDLTextureRAII(SDLTextureRAII&& other) noexcept : texture(std::exchange(other.texture, nullptr))
 {}
 
-Texture& Texture::operator=(Texture&& other) noexcept
+SDLTextureRAII& SDLTextureRAII::operator=(SDLTextureRAII&& other) noexcept
 {
     std::swap(texture, other.texture);
     return *this;
+}
+
+SDLTextureLockRAII::SDLTextureLockRAII(SDL_Texture* texture) : texture(texture), pixels(nullptr), pitch(0)
+{
+    if (SDL_LockTexture(texture, nullptr, &pixels, &pitch) != 0)
+    {
+        SDL_Log("Unable to lock texture: %s", SDL_GetError());
+        throw std::runtime_error("SDL_LockTexture failed");
+    }
+}
+
+SDLTextureLockRAII::~SDLTextureLockRAII()
+{
+    if (texture)
+    {
+        SDL_UnlockTexture(texture);
+    }
 }

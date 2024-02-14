@@ -1,7 +1,7 @@
 #include "imgui_sdl_RAII.h"
 #include <stdexcept>
 
-ImGuiSDL::ImGuiSDL(SDL_Window* window, SDL_Renderer* renderer) : renderer(renderer)
+ImGuiSDLRAII::ImGuiSDLRAII(SDL_Window* window, SDL_Renderer* renderer) : renderer(renderer)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -14,14 +14,14 @@ ImGuiSDL::ImGuiSDL(SDL_Window* window, SDL_Renderer* renderer) : renderer(render
         throw std::runtime_error("Failed to initialize ImGui SDL Renderer backend");
 }
 
-ImGuiSDL::~ImGuiSDL()
+ImGuiSDLRAII::~ImGuiSDLRAII()
 {
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
 
-void ImGuiSDL::startFrame() const
+void ImGuiSDLRAII::startFrame() const
 {
     // Prepares a new frame for ImGui rendering with SDL_Renderer backend.
     // This function should be called before any ImGui drawing commands in the new frame.
@@ -40,7 +40,7 @@ void ImGuiSDL::startFrame() const
     ImGui::NewFrame();
 }
 
-void ImGuiSDL::finishFrame() const
+void ImGuiSDLRAII::finishFrame() const
 {
     // Renders the ImGui draw commands submitted between ImGui::NewFrame() and ImGui::Render() calls and prepares
     // the draw data for display. This function does not perform the actual drawing on the screen but instead

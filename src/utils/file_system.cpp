@@ -5,7 +5,7 @@
 namespace utils
 {
 
-bool FileHasChanged(std::string filename)
+bool FileChangedSinceLastCheck(std::string filename)
 {
     filename = std::filesystem::absolute(filename).string();
 

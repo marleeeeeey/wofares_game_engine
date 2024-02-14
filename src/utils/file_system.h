@@ -10,6 +10,6 @@ namespace utils
  * @param filename The name of the file to check.
  * @return True if the file has changed, false otherwise.
  */
-bool FileHasChanged(std::string filename);
+bool FileChangedSinceLastCheck(std::string filename);
 
 } // namespace utils

@@ -20,7 +20,7 @@ struct PlayerNumber
 
 struct TileInfo
 {
-    std::shared_ptr<Texture> texture; // Pointer to the texture.
+    std::shared_ptr<SDLTextureRAII> texture; // Pointer to the texture.
     SDL_Rect srcRect; // Rectangle in the texture corresponding to the tile.
 };
 

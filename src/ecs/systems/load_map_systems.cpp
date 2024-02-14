@@ -3,7 +3,7 @@
 void UnloadMap(entt::registry& registry)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-    gameState.levelOptions = {};
+    gameState.levelOptions.levelBounds = {};
 
     // Remove all entities that have a TileInfo component.
     for (auto entity : registry.view<TileInfo>())
