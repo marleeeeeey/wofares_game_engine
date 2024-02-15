@@ -44,3 +44,9 @@ Vec2 Vec2Max(const Vec2& a, const Vec2& b)
 {
     return Vec2(std::max(a.x, b.x), std::max(a.y, b.y));
 }
+
+template <typename Point, typename Bounds>
+bool IsPointInsideBounds(const Point& point, const Bounds& bounds)
+{
+    return point.x >= bounds.min.x && point.x <= bounds.max.x && point.y >= bounds.min.y && point.y <= bounds.max.y;
+}

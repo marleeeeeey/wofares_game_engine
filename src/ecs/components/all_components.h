@@ -47,13 +47,13 @@ struct Granade
 
 struct LevelPhysicsBounds
 {
-    b2Vec2 min = (b2Vec2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max()));
-    b2Vec2 max = (b2Vec2(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()));
+    b2Vec2 min = b2Vec2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    b2Vec2 max = b2Vec2(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 };
 
 struct LevelOptions
 {
-    LevelPhysicsBounds levelBounds;
+    LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.3f};
     size_t miniTileResolution{4};

@@ -1,5 +1,6 @@
 #include "phisics_systems.h"
 #include <ecs/components/all_components.h>
+#include <utils/glm_box2d_conversions.h>
 
 void PhysicsSystem(entt::registry& registry, float deltaTime)
 {
@@ -15,7 +16,7 @@ void PhysicsSystem(entt::registry& registry, float deltaTime)
 void RemoveDistantObjectsSystem(entt::registry& registry)
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-    auto levelBounds = gameState.levelOptions.levelBounds;
+    auto levelBounds = gameState.levelOptions.levelBox2dBounds;
 
     auto physicalBodies = registry.view<PhysicalBody>();
     for (auto entity : physicalBodies)
@@ -23,8 +24,7 @@ void RemoveDistantObjectsSystem(entt::registry& registry)
         auto& physicalBody = physicalBodies.get<PhysicalBody>(entity);
         b2Vec2 pos = physicalBody.value->GetBody()->GetPosition();
 
-        if (pos.x < levelBounds.min.x || pos.x > levelBounds.max.x || pos.y < levelBounds.min.y ||
-            pos.y > levelBounds.max.y)
+        if (!IsPointInsideBounds(pos, levelBounds))
         {
             registry.destroy(entity);
         }

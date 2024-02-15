@@ -1,14 +1,17 @@
 #pragma once
 #include <SDL.h>
 #include <ecs/components/all_components.h>
+#include <ecs/systems/details/coordinates_transformer.h>
 #include <entt/entt.hpp>
 #include <utils/sdl_colors.h>
+
 
 class GameObjectsRenderer
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
     GameState& gameState;
+    CoordinatesTransformer coordinatesTransformer;
 public:
     GameObjectsRenderer(entt::registry& registry, SDL_Renderer* renderer);
 private: // Render game objects methods.

@@ -1,14 +1,16 @@
 #include "map_loader.h"
 #include <SDL_image.h>
+#include <box2d/b2_math.h>
 #include <ecs/systems/details/physics_body_creator.h>
 #include <fstream>
 #include <my_common_cpp_utils/MathUtils.h>
 #include <utils/glm_box2d_conversions.h>
-#include <utils/globals.h>
 #include <utils/texture_process.h>
 
+
 MapLoader::MapLoader(const std::string& filename, entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front()))
+  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+    objectsFactory(registry), coordinatesTransformer(registry)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -104,23 +106,15 @@ void MapLoader::ParseObjectLayer(const nlohmann::json& layer)
     {
         if (object["type"] == "PlayerPosition")
         {
-            auto playerSdlWorldSize = glm::vec2(10, 10);
             auto playerSdlWorldPos = glm::vec2(object["x"], object["y"]);
-            auto playerSdlBBox = playerSdlWorldSize - glm::vec2{gap, gap};
-
-            auto entity = registry.create();
-            registry.emplace<SdlSizeComponent>(entity, playerSdlWorldSize);
-            registry.emplace<PlayerNumber>(entity);
-            registry.emplace<PlayerDirection>(entity);
-            auto playerPhysicsBody = CreateDynamicPhysicsBody(physicsWorld, playerSdlWorldPos, playerSdlBBox);
-            registry.emplace<PhysicalBody>(entity, playerPhysicsBody);
+            objectsFactory.createPlayer(playerSdlWorldPos);
         }
     }
 }
 
 void MapLoader::CalculateLevelBoundsWithBufferZone()
 {
-    auto& lb = gameState.levelOptions.levelBounds;
+    auto& lb = gameState.levelOptions.levelBox2dBounds;
     auto& bz = gameState.levelOptions.bufferZone;
     MY_LOG_FMT(info, "Level bounds: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
     lb.min -= bz;
@@ -151,19 +145,20 @@ void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
                 continue;
             }
 
-            glm::vec2 miniTileWorldPosition(
-                layerCol * tileWidth + miniCol * miniWidth, layerRow * tileHeight + miniRow * miniHeight);
+            float miniTileWorldPositionX = layerCol * tileWidth + miniCol * miniWidth;
+            float miniTileWorldPositionY = layerRow * tileHeight + miniRow * miniHeight;
+            glm::vec2 miniTileWorldPosition{miniTileWorldPositionX, miniTileWorldPositionY};
+            glm::vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
+
             auto entity = registry.create();
             registry.emplace<SdlSizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
-
-            glm::vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
-
-            auto tilePhysicsBody = CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, miniTileSize);
+            auto tilePhysicsBody =
+                CreateStaticPhysicsBody(coordinatesTransformer, physicsWorld, miniTileWorldPosition, miniTileSize);
 
             // Update level bounds.
-            const auto& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();
-            auto& levelBounds = gameState.levelOptions.levelBounds;
+            const b2Vec2& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();
+            auto& levelBounds = gameState.levelOptions.levelBox2dBounds;
             levelBounds.min = Vec2Min(levelBounds.min, bodyPosition);
             levelBounds.max = Vec2Max(levelBounds.max, bodyPosition);
 

@@ -1,4 +1,5 @@
 #include "player_control_systems.h"
+#include "ecs/systems/details/coordinates_transformer.h"
 #include "ecs/systems/details/physics_body_creator.h"
 #include "utils/input_event_manager.h"
 #include <SDL.h>
@@ -6,7 +7,6 @@
 #include <ecs/components/all_components.h>
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/Logger.h>
-#include <utils/globals.h>
 
 void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {
@@ -53,6 +53,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                 auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
                 auto physicsWorld = gameState.physicsWorld;
                 const auto& players = registry.view<PlayerNumber, PhysicalBody>();
+                CoordinatesTransformer transformer(registry);
 
                 for (auto entity : players)
                 {
@@ -66,10 +67,10 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                     // Create a granade entity.
                     auto granadeEntity = registry.create();
                     glm::vec2 granadeSize(5.0f, 5.0f);
-                    glm::vec2 playerSdlPosition(
-                        playerBody->GetPosition().x * box2DtoSDL, playerBody->GetPosition().y * box2DtoSDL);
+                    glm::vec2 playerSdlPosition = transformer.PhysicsToWorld(playerBody->GetPosition());
 
-                    auto granadePhysicsBody = CreateDynamicPhysicsBody(physicsWorld, playerSdlPosition, granadeSize);
+                    auto granadePhysicsBody =
+                        CreateDynamicPhysicsBody(transformer, physicsWorld, playerSdlPosition, granadeSize);
                     registry.emplace<SdlSizeComponent>(granadeEntity, granadeSize);
                     registry.emplace<PhysicalBody>(granadeEntity, granadePhysicsBody);
                     registry.emplace<Granade>(granadeEntity);
@@ -88,6 +89,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
             {
                 auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
                 auto physicsWorld = gameState.physicsWorld;
+                CoordinatesTransformer transformer(registry);
 
                 auto mousePos = glm::vec2(event.button.x, event.button.y);
                 auto worldPos =
@@ -101,7 +103,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
 
                 auto entity = registry.create();
                 glm::vec2 size(10.0f, 10.0f);
-                auto physicsBody = CreateStaticPhysicsBody(physicsWorld, worldPos, size);
+                auto physicsBody = CreateStaticPhysicsBody(transformer, physicsWorld, worldPos, size);
                 registry.emplace<SdlSizeComponent>(entity, size);
                 registry.emplace<PhysicalBody>(entity, physicsBody);
                 registry.emplace<Granade>(entity);

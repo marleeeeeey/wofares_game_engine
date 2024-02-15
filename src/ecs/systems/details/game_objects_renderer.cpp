@@ -2,10 +2,10 @@
 #include "SDL_rect.h"
 #include <numbers>
 #include <utils/glm_box2d_conversions.h>
-#include <utils/globals.h>
 
 GameObjectsRenderer::GameObjectsRenderer(entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front()))
+  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+    coordinatesTransformer(registry)
 {
     // Clear the screen with white color.
     SetRenderDrawColor(renderer, ColorName::White);
@@ -34,7 +34,8 @@ void GameObjectsRenderer::RenderPlayers()
             players.get<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayerDirection>(entity);
 
         // Draw the player.
-        glm::vec2 playerSdlPosition = toGmlVec2(physicalBody.value->GetBody()->GetPosition() * box2DtoSDL);
+        glm::vec2 playerSdlPosition =
+            coordinatesTransformer.PhysicsToWorld(physicalBody.value->GetBody()->GetPosition());
         glm::vec2 playerSdlSize = playerSize.value;
         RenderSquare(playerSdlPosition, playerSdlSize, ColorName::Blue, 0);
 
@@ -80,7 +81,7 @@ void GameObjectsRenderer::RenderSquare(const glm::vec2& sdlPos, const glm::vec2&
 
 void GameObjectsRenderer::RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color)
 {
-    const glm::vec2 sdlPos = toGmlVec2(body->GetBody()->GetPosition() * box2DtoSDL);
+    const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     float angle = body->GetBody()->GetAngle();
     RenderSquare(sdlPos, sdlSize, color, angle);
 }
@@ -88,7 +89,7 @@ void GameObjectsRenderer::RenderSquare(std::shared_ptr<Box2dObjectRAII> body, co
 void GameObjectsRenderer::RenderTiledSquare(
     std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, const TileInfo& tileInfo)
 {
-    const glm::vec2 sdlPos = toGmlVec2(body->GetBody()->GetPosition() * box2DtoSDL);
+    const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     const float angle = body->GetBody()->GetAngle();
 
     SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
