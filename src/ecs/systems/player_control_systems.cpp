@@ -1,9 +1,12 @@
 #include "player_control_systems.h"
+#include "ecs/systems/details/physics_body_creator.h"
 #include "utils/input_event_manager.h"
 #include <SDL.h>
+#include <cassert>
 #include <ecs/components/all_components.h>
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/globals.h>
 
 void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {
@@ -45,17 +48,34 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
         InputEventManager::EventType::Up,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
-            const auto& players = registry.view<PlayerNumber, PhysicalBody>();
-            for (auto entity : players)
+            if (eventInfo.originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
             {
-                const auto& [playerNumber, physicalBody] = players.get<PlayerNumber, PhysicalBody>(entity);
-                auto body = physicalBody.value->GetBody();
+                auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+                auto physicsWorld = gameState.physicsWorld;
+                const auto& players = registry.view<PlayerNumber, PhysicalBody>();
 
-                float force = eventInfo.holdDuration;
-
-                if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
+                for (auto entity : players)
                 {
-                    MY_LOG_FMT(info, "Spawn the granade with force: {}", force);
+                    const auto& player = players.get<PhysicalBody>(entity).value;
+                    auto playerBody = player->GetBody();
+                    float force = eventInfo.holdDuration * 10.0f; // Force amplification coefficient.
+
+                    b2Vec2 forceVec = b2Vec2(force, 0); // Force vector.
+                    forceVec = b2Mul(playerBody->GetTransform().q, forceVec);
+
+                    // Create a granade entity.
+                    auto granadeEntity = registry.create();
+                    glm::vec2 granadeSize(5.0f, 5.0f);
+                    glm::vec2 playerSdlPosition(
+                        playerBody->GetPosition().x * box2DtoSDL, playerBody->GetPosition().y * box2DtoSDL);
+
+                    auto granadePhysicsBody = CreateDynamicPhysicsBody(physicsWorld, playerSdlPosition, granadeSize);
+                    registry.emplace<SizeComponent>(granadeEntity, granadeSize);
+                    registry.emplace<PhysicalBody>(granadeEntity, granadePhysicsBody);
+                    registry.emplace<Granade>(granadeEntity);
+
+                    // Apply the force to the granade.
+                    granadePhysicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
                 }
             }
         });
