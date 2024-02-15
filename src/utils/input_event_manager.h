@@ -20,13 +20,13 @@ public:
 
     using RawListener = std::function<void(const SDL_Event&)>;
     using СontinuousListener = std::function<void(const EventInfo&)>;
-    void subscribeRawListener(RawListener listener);
-    void subscribeСontinuousListener(EventType eventType, СontinuousListener listener);
+    void SubscribeRawListener(RawListener listener);
+    void SubscribeСontinuousListener(EventType eventType, СontinuousListener listener);
     // This method should be called on every SDL_Event in the event queue.
-    void updateRawEvent(const SDL_Event& event);
+    void UpdateRawEvent(const SDL_Event& event);
     // This method should be called every frame after updateRawEvent.
     // It updates hold durations and notifies listeners with hold durations.
-    void updateСontinuousEvents(float deltaTime);
+    void UpdateСontinuousEvents(float deltaTime);
 private:
     struct PrivateEventInfo
     {
@@ -34,7 +34,7 @@ private:
         EventInfo info;
     };
 
-    void updateHoldDurations(float deltaTime);
+    void UpdateHoldDurations(float deltaTime);
 
     std::vector<RawListener> rawListeners;
     std::unordered_map<EventType, std::vector<СontinuousListener>> continuousListeners;

@@ -11,7 +11,7 @@ class ImGuiSDLRAII
 public:
     ImGuiSDLRAII(SDL_Window* window, SDL_Renderer* renderer);
     ~ImGuiSDLRAII();
-
+public:
     void startFrame() const;
     void finishFrame() const;
 };

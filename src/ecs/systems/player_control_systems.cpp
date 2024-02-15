@@ -10,7 +10,7 @@
 
 void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {
-    inputEventManager.subscribeСontinuousListener(
+    inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
@@ -44,7 +44,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
         });
 
     // Subscribe when user up mouse left button after holding to spawn the granade and set the direction and force
-    inputEventManager.subscribeСontinuousListener(
+    inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonReleaseAfterHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
@@ -82,7 +82,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
         });
 
     // Subscribe when user press mouse right button to create a static body at the mouse position
-    inputEventManager.subscribeRawListener(
+    inputEventManager.SubscribeRawListener(
         [&registry](const SDL_Event& event)
         {
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)

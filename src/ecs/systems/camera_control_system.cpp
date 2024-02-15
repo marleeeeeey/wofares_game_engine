@@ -3,7 +3,7 @@
 
 void SubscribeCameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {
-    inputEventManager.subscribeRawListener(
+    inputEventManager.SubscribeRawListener(
         [&registry](const SDL_Event& event)
         {
             auto& gameState = registry.get<GameState>(registry.view<GameState>().front());

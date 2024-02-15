@@ -2,7 +2,7 @@
 #include "SDL_stdinc.h"
 #include "my_common_cpp_utils/Logger.h"
 
-void InputEventManager::updateRawEvent(const SDL_Event& event)
+void InputEventManager::UpdateRawEvent(const SDL_Event& event)
 {
     // Update the hold duration for keyboard buttons.
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
@@ -47,9 +47,9 @@ void InputEventManager::updateRawEvent(const SDL_Event& event)
     }
 }
 
-void InputEventManager::updateСontinuousEvents(float deltaTime)
+void InputEventManager::UpdateСontinuousEvents(float deltaTime)
 {
-    updateHoldDurations(deltaTime);
+    UpdateHoldDurations(deltaTime);
 
     for (auto& [scanCode, eventInfo] : keyboardButtonHoldInfo)
     {
@@ -100,13 +100,13 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
     }
 }
 
-void InputEventManager::subscribeRawListener(RawListener listener)
+void InputEventManager::SubscribeRawListener(RawListener listener)
 {
     rawListeners.push_back(listener);
     MY_LOG_FMT(debug, "InputEventManager: RawListener added. Count of RawListeners: {}", rawListeners.size());
 }
 
-void InputEventManager::subscribeСontinuousListener(EventType eventType, СontinuousListener listener)
+void InputEventManager::SubscribeСontinuousListener(EventType eventType, СontinuousListener listener)
 {
     continuousListeners[eventType].push_back(listener);
     MY_LOG_FMT(
@@ -114,7 +114,7 @@ void InputEventManager::subscribeСontinuousListener(EventType eventType, Сonti
         continuousListeners[eventType].size());
 }
 
-void InputEventManager::updateHoldDurations(float deltaTime)
+void InputEventManager::UpdateHoldDurations(float deltaTime)
 {
     // Update the hold duration for keyboard buttons.
     for (auto& [key, eventInfo] : keyboardButtonHoldInfo)

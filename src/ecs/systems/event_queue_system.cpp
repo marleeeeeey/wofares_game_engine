@@ -8,7 +8,7 @@ void EventQueueSystem(InputEventManager& inputEventManager, float deltaTime)
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
-        inputEventManager.updateRawEvent(event);
+        inputEventManager.UpdateRawEvent(event);
     }
-    inputEventManager.updateСontinuousEvents(deltaTime);
+    inputEventManager.UpdateСontinuousEvents(deltaTime);
 }

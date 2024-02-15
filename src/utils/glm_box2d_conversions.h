@@ -29,8 +29,6 @@ Vec operator/(const Vec& vec, Scalar scalar)
     return Vec(vec.x / scalar, vec.y / scalar);
 }
 
-glm::vec2 toGmlVec2(const b2Vec2& vec);
-
 // Returns a new Vec2 whose coordinates represent the minimum values of x and y from two provided vectors.
 template <typename Vec2>
 Vec2 Vec2Min(const Vec2& a, const Vec2& b)
