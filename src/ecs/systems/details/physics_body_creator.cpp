@@ -2,7 +2,7 @@
 #include <utils/globals.h>
 
 std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
-    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& sdlPos, const glm::u32vec2& sdlSize)
+    std::shared_ptr<b2World> physicsWorld, const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_staticBody;
@@ -22,7 +22,7 @@ std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
 }
 
 std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
-    std::shared_ptr<b2World> physicsWorld, const glm::u32vec2& sdlPos, const glm::u32vec2& sdlSize)
+    std::shared_ptr<b2World> physicsWorld, const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
     auto staticBody = CreateStaticPhysicsBody(physicsWorld, sdlPos, sdlSize);
     staticBody->GetBody()->SetType(b2_dynamicBody);

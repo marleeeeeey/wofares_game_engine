@@ -12,12 +12,13 @@ void SubscribeCameraControlSystem(entt::registry& registry, InputEventManager& i
                 float prevScale = gameState.renderingOptions.cameraScale;
 
                 // Calculate the new scale of the camera
-                const float scaleSpeed = 1.3f;
+                const float scaleSpeed = 2.0f;
                 if (event.wheel.y > 0)
                     gameState.renderingOptions.cameraScale *= scaleSpeed;
                 else if (event.wheel.y < 0)
                     gameState.renderingOptions.cameraScale /= scaleSpeed;
-                gameState.renderingOptions.cameraScale = glm::clamp(gameState.renderingOptions.cameraScale, 0.2f, 6.0f);
+                gameState.renderingOptions.cameraScale =
+                    glm::clamp(gameState.renderingOptions.cameraScale, 0.25f, 8.0f);
 
                 // Get the cursor coordinates in world coordinates
                 int mouseX, mouseY;

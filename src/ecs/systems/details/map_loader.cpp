@@ -104,14 +104,15 @@ void MapLoader::ParseObjectLayer(const nlohmann::json& layer)
     {
         if (object["type"] == "PlayerPosition")
         {
+            auto playerSdlWorldSize = glm::vec2(10, 10);
+            auto playerSdlWorldPos = glm::vec2(object["x"], object["y"]);
+            auto playerSdlBBox = playerSdlWorldSize - glm::vec2{gap, gap};
+
             auto entity = registry.create();
-            auto playerSize = glm::u32vec2(10, 10);
-            registry.emplace<SdlSizeComponent>(entity, playerSize);
+            registry.emplace<SdlSizeComponent>(entity, playerSdlWorldSize);
             registry.emplace<PlayerNumber>(entity);
             registry.emplace<PlayerDirection>(entity);
-
-            auto playerPhysicsBody = CreateDynamicPhysicsBody(
-                physicsWorld, glm::u32vec2(object["x"], object["y"]), playerSize - glm::u32vec2{gap, gap});
+            auto playerPhysicsBody = CreateDynamicPhysicsBody(physicsWorld, playerSdlWorldPos, playerSdlBBox);
             registry.emplace<PhysicalBody>(entity, playerPhysicsBody);
         }
     }
@@ -150,13 +151,13 @@ void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
                 continue;
             }
 
-            glm::u32vec2 miniTileWorldPosition(
+            glm::vec2 miniTileWorldPosition(
                 layerCol * tileWidth + miniCol * miniWidth, layerRow * tileHeight + miniRow * miniHeight);
             auto entity = registry.create();
             registry.emplace<SdlSizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
 
-            glm::u32vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
+            glm::vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
 
             auto tilePhysicsBody = CreateStaticPhysicsBody(physicsWorld, miniTileWorldPosition, miniTileSize);
 

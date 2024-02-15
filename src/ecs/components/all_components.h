@@ -65,7 +65,9 @@ struct PhysicsOptions
     int32 velocityIterations{6};
     int32 positionIterations{2};
     // Gap between physical and visual objects. Used to prevent dragging of physical objects.
-    float gapBetweenPhysicalAndVisual{0.2f};
+    // Also affects the destructibility of stacks of tiles. The smaller the gap, the easier it is to destroy the stack.
+    // The bigger the gap, the harder it is to destroy the stack => less random destruction.
+    float gapBetweenPhysicalAndVisual{0.5f};
 };
 
 struct RenderingOptions

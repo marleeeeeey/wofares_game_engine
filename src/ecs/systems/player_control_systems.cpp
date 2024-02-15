@@ -79,4 +79,32 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                 }
             }
         });
+
+    // Subscribe when user press mouse right button to create a static body at the mouse position
+    inputEventManager.subscribeRawListener(
+        [&registry](const SDL_Event& event)
+        {
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
+            {
+                auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+                auto physicsWorld = gameState.physicsWorld;
+
+                auto mousePos = glm::vec2(event.button.x, event.button.y);
+                auto worldPos =
+                    mousePos / gameState.renderingOptions.cameraScale + gameState.renderingOptions.cameraCenter;
+
+                // log mouse position
+                MY_LOG_FMT(info, "Window position: ({}, {})", event.button.x, event.button.y);
+
+                // log world position.
+                MY_LOG_FMT(info, "World position: ({}, {})", worldPos.x, worldPos.y);
+
+                auto entity = registry.create();
+                glm::vec2 size(10.0f, 10.0f);
+                auto physicsBody = CreateStaticPhysicsBody(physicsWorld, worldPos, size);
+                registry.emplace<SdlSizeComponent>(entity, size);
+                registry.emplace<PhysicalBody>(entity, physicsBody);
+                registry.emplace<Granade>(entity);
+            }
+        });
 }
