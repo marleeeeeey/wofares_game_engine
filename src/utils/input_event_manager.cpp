@@ -53,7 +53,7 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 
     for (auto& [scanCode, eventInfo] : keyboardButtonHoldInfo)
     {
-        for (auto& listener : continuousListeners[EventType::Down])
+        for (auto& listener : continuousListeners[EventType::ButtonHold])
         {
             if (eventInfo.info.isPressed)
             {
@@ -64,7 +64,7 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 
     for (auto& [button, eventInfo] : mouseButtonHoldInfo)
     {
-        for (auto& listener : continuousListeners[EventType::Down])
+        for (auto& listener : continuousListeners[EventType::ButtonHold])
         {
             if (eventInfo.info.isPressed)
             {
@@ -75,7 +75,7 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 
     for (auto& [scanCode, eventInfo] : keyboardButtonHoldInfo)
     {
-        for (auto& listener : continuousListeners[EventType::Up])
+        for (auto& listener : continuousListeners[EventType::ButtonReleaseAfterHold])
         {
             if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
             {
@@ -88,7 +88,7 @@ void InputEventManager::updateСontinuousEvents(float deltaTime)
 
     for (auto& [button, eventInfo] : mouseButtonHoldInfo)
     {
-        for (auto& listener : continuousListeners[EventType::Up])
+        for (auto& listener : continuousListeners[EventType::ButtonReleaseAfterHold])
         {
             if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
             {

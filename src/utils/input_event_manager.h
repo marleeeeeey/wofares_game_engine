@@ -14,8 +14,8 @@ public:
 
     enum EventType
     {
-        Down,
-        Up
+        ButtonHold,
+        ButtonReleaseAfterHold
     };
 
     using RawListener = std::function<void(const SDL_Event&)>;

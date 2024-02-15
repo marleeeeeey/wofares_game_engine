@@ -7,7 +7,7 @@
 
 // ************************************ COMPONENTS ************************************
 
-struct SizeComponent
+struct SdlSizeComponent
 {
     // Must be installed manually. Because this components is not calculated from Box2D body.
     glm::vec2 value = {0, 0};
@@ -16,6 +16,15 @@ struct SizeComponent
 struct PlayerNumber
 {
     size_t value = 0;
+};
+
+struct PlayerDirection
+{
+    // {1, 0} - look to the right,
+    // {-1, 0} - look to the left,
+    // {0, 1} - look down,
+    // {0, -1} - look up
+    glm::vec2 direction = {1, 0};
 };
 
 struct TileInfo

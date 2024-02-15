@@ -17,7 +17,7 @@ void SubscribeGameStateControlSystem(entt::registry& registry, InputEventManager
 
     // subcrive on continuous events on space key and copy duration of pressing to the game state
     inputEventManager.subscribeСontinuousListener(
-        InputEventManager::EventType::Down,
+        InputEventManager::EventType::ButtonHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
             auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
@@ -30,7 +30,7 @@ void SubscribeGameStateControlSystem(entt::registry& registry, InputEventManager
         });
 
     inputEventManager.subscribeСontinuousListener(
-        InputEventManager::EventType::Up,
+        InputEventManager::EventType::ButtonReleaseAfterHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
             auto& gameState = registry.get<GameState>(registry.view<GameState>().front());

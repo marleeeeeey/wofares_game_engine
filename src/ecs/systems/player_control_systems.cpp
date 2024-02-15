@@ -11,7 +11,7 @@
 void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {
     inputEventManager.subscribeСontinuousListener(
-        InputEventManager::EventType::Down,
+        InputEventManager::EventType::ButtonHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
             const float movingForce = 10.0f;
@@ -45,10 +45,10 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
 
     // Subscribe when user up mouse left button after holding to spawn the granade and set the direction and force
     inputEventManager.subscribeСontinuousListener(
-        InputEventManager::EventType::Up,
+        InputEventManager::EventType::ButtonReleaseAfterHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
-            if (eventInfo.originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
+            if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
             {
                 auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
                 auto physicsWorld = gameState.physicsWorld;
@@ -70,7 +70,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                         playerBody->GetPosition().x * box2DtoSDL, playerBody->GetPosition().y * box2DtoSDL);
 
                     auto granadePhysicsBody = CreateDynamicPhysicsBody(physicsWorld, playerSdlPosition, granadeSize);
-                    registry.emplace<SizeComponent>(granadeEntity, granadeSize);
+                    registry.emplace<SdlSizeComponent>(granadeEntity, granadeSize);
                     registry.emplace<PhysicalBody>(granadeEntity, granadePhysicsBody);
                     registry.emplace<Granade>(granadeEntity);
 

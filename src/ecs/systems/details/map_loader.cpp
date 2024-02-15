@@ -7,7 +7,6 @@
 #include <utils/globals.h>
 #include <utils/texture_process.h>
 
-
 MapLoader::MapLoader(const std::string& filename, entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front()))
 {
@@ -107,8 +106,9 @@ void MapLoader::ParseObjectLayer(const nlohmann::json& layer)
         {
             auto entity = registry.create();
             auto playerSize = glm::u32vec2(10, 10);
-            registry.emplace<SizeComponent>(entity, playerSize);
+            registry.emplace<SdlSizeComponent>(entity, playerSize);
             registry.emplace<PlayerNumber>(entity);
+            registry.emplace<PlayerDirection>(entity);
 
             auto playerPhysicsBody = CreateDynamicPhysicsBody(
                 physicsWorld, glm::u32vec2(object["x"], object["y"]), playerSize - glm::u32vec2{gap, gap});
@@ -153,7 +153,7 @@ void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
             glm::u32vec2 miniTileWorldPosition(
                 layerCol * tileWidth + miniCol * miniWidth, layerRow * tileHeight + miniRow * miniHeight);
             auto entity = registry.create();
-            registry.emplace<SizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
+            registry.emplace<SdlSizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
             registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
 
             glm::u32vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
