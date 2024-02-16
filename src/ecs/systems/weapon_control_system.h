@@ -11,5 +11,9 @@ public:
     WeaponControlSystem(entt::registry& registry, float deltaTime);
     // TODO: add here method to subscribe to input events.
 private:
-    void GrenadeExpiryControl();
+    void ImpactTargetsInGrenadesExplosionRadius();
+private: // Helper methods.
+    std::vector<entt::entity> GetPhysicalBodiesNearGrenade(
+        const b2Vec2& grenadePhysicsPos, float grenadeExplosionRadius);
+    void ApplyForceToPhysicalBodies(std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos);
 };

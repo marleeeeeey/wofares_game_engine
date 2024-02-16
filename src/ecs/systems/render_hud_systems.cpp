@@ -13,6 +13,9 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
 
     ImGui::Begin("HUD");
 
+    if (ImGui::Button("Reload Map"))
+        gameState.controlOptions.reloadMap = true;
+
     // Caclulare count of tiles, players and dynamic bodies:
     auto tiles = registry.view<TileInfo>();
     auto players = registry.view<PlayerNumber>();
@@ -60,8 +63,6 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
         ImGui::Text(MY_FMT("Box2D to SDL: {:.2f}", box2DtoSDL).c_str());
     }
 
-    if (ImGui::Button("Reload Map"))
-        gameState.controlOptions.reloadMap = true;
     ImGui::End();
 }
 
