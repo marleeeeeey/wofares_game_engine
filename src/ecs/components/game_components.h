@@ -32,7 +32,7 @@ struct PhysicalBody
     std::shared_ptr<Box2dObjectRAII> value;
 };
 
-struct Granade
+struct Grenade
 {
     float timeToExplode = 3.0f; // Time in seconds before the grenade explodes
 };

@@ -4,7 +4,6 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
-
 class PhysicsSystem
 {
     entt::registry& registry;

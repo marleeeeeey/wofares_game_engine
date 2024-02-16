@@ -42,7 +42,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
             }
         });
 
-    // Subscribe when user up mouse left button after holding to spawn the granade and set the direction and force
+    // Subscribe when user up mouse left button after holding to spawn the grenade and set the direction and force
     inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonReleaseAfterHold,
         [&registry](const InputEventManager::EventInfo& eventInfo)
@@ -69,20 +69,20 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                     b2Vec2 forceVec = b2Vec2(force, 0);
                     forceVec = b2Mul(b2Rot(atan2(weaponDirection.y, weaponDirection.x)), forceVec);
 
-                    // Calculate the position of the granade slightly in front of the player.
+                    // Calculate the position of the grenade slightly in front of the player.
                     glm::vec2 granadeWorldSize(5.0f, 5.0f);
                     glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
                     glm::vec2 granadeWorldPos = playerWorldPos + weaponDirection * playerSize.x / 1.5f;
 
-                    // Create the granade entity and set the physics body.
+                    // Create the grenade entity and set the physics body.
                     auto granadeEntity = registry.create();
                     auto granadePhysicsBody =
                         CreateDynamicPhysicsBody(transformer, physicsWorld, granadeWorldPos, granadeWorldSize);
                     registry.emplace<SdlSizeComponent>(granadeEntity, granadeWorldSize);
                     registry.emplace<PhysicalBody>(granadeEntity, granadePhysicsBody);
-                    registry.emplace<Granade>(granadeEntity);
+                    registry.emplace<Grenade>(granadeEntity);
 
-                    // Apply the force to the granade.
+                    // Apply the force to the grenade.
                     granadePhysicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
                 }
             }
@@ -99,7 +99,6 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                 CoordinatesTransformer transformer(registry);
 
                 auto windowPos = glm::vec2(event.button.x, event.button.y);
-
                 auto worldPos = transformer.CameraToWorld(windowPos);
 
                 auto entity = registry.create();

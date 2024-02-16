@@ -7,6 +7,7 @@
 #include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/render_objects_systems.h>
+#include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
@@ -78,6 +79,7 @@ int main(int argc, char* args[])
 
             // Update the physics.
             PhysicsSystem(registry, deltaTime);
+            WeaponControlSystem(registry, deltaTime);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

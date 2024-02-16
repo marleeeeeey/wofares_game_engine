@@ -47,7 +47,7 @@ void GameObjectsRenderer::RenderPlayers()
 
 void GameObjectsRenderer::RenderGranades()
 {
-    auto granades = registry.view<PhysicalBody, SdlSizeComponent, Granade>();
+    auto granades = registry.view<PhysicalBody, SdlSizeComponent, Grenade>();
     for (auto entity : granades)
     {
         const auto& [physicalBody, size] = granades.get<PhysicalBody, SdlSizeComponent>(entity);
