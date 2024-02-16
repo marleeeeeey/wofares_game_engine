@@ -31,7 +31,7 @@ int main(int argc, char* args[])
 
         // Create a game state entity.
         auto& gameState = registry.emplace<GameState>(registry.create());
-        gameState.renderingOptions.cameraCenter = gameState.renderingOptions.windowSize / 2.0f;
+        gameState.windowOptions.cameraCenter = gameState.windowOptions.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
         b2Vec2 gravity(0.0f, +9.8f);
@@ -39,7 +39,7 @@ int main(int argc, char* args[])
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO);
-        SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.renderingOptions.windowSize);
+        SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
@@ -76,7 +76,6 @@ int main(int argc, char* args[])
 
             // Update the physics.
             PhysicsSystem(registry, deltaTime);
-            RemoveDistantObjectsSystem(registry);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();
@@ -87,7 +86,7 @@ int main(int argc, char* args[])
 
             // Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
-            const Uint32 frameDelay = 1000 / gameState.renderingOptions.fps;
+            const Uint32 frameDelay = 1000 / gameState.windowOptions.fps;
             if (frameDelay > frameTime)
             {
                 SDL_Delay(frameDelay - frameTime);

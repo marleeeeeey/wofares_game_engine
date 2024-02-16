@@ -5,7 +5,6 @@
 #include <entt/entt.hpp>
 #include <utils/sdl_colors.h>
 
-
 class GameObjectsRenderer
 {
     entt::registry& registry;
@@ -18,6 +17,7 @@ private: // Render game objects methods.
     void RenderTiles();
     void RenderPlayers();
     void RenderGranades();
+    void RenderBridges();
 private: // Render helpers.
     void RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color);

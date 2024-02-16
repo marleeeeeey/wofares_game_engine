@@ -18,13 +18,9 @@ struct PlayerNumber
     size_t value = 0;
 };
 
-struct PlayerDirection
+struct PlayersWeaponDirection
 {
-    // {1, 0} - look to the right,
-    // {-1, 0} - look to the left,
-    // {0, 1} - look down,
-    // {0, -1} - look up
-    glm::vec2 direction = {1, 0};
+    glm::vec2 value = {1, 0}; // {1, 0} - look to the right, {0, 1} - look down,
 };
 
 struct TileInfo
@@ -42,6 +38,9 @@ struct Granade
 {
     float timeToExplode = 3.0f; // Time in seconds before the grenade explodes
 };
+
+struct Bridge
+{};
 
 // ********************************* SINGLETON COMPONENT *********************************
 
@@ -70,12 +69,13 @@ struct PhysicsOptions
     float gapBetweenPhysicalAndVisual{0.5f};
 };
 
-struct RenderingOptions
+struct WindowOptions
 {
     unsigned fps{60};
     glm::vec2 windowSize{800, 600};
     float cameraScale{1.0f};
     glm::vec2 cameraCenter{};
+    glm::vec2 lastMousePosInWindow{};
 };
 
 struct ControlOptions
@@ -96,7 +96,7 @@ struct GameState
     std::shared_ptr<b2World> physicsWorld;
     LevelOptions levelOptions;
     PhysicsOptions physicsOptions;
-    RenderingOptions renderingOptions;
+    WindowOptions windowOptions;
     ControlOptions controlOptions;
     DebugInfo debugInfo;
 };

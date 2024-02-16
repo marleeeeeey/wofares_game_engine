@@ -19,7 +19,7 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& playerSdlWorldPos)
     auto entity = registry.create();
     registry.emplace<SdlSizeComponent>(entity, playerSdlWorldSize);
     registry.emplace<PlayerNumber>(entity);
-    registry.emplace<PlayerDirection>(entity);
+    registry.emplace<PlayersWeaponDirection>(entity);
     auto playerPhysicsBody =
         CreateDynamicPhysicsBody(coordinatesTransformer, physicsWorld, playerSdlWorldPos, playerSdlBBox);
     registry.emplace<PhysicalBody>(entity, playerPhysicsBody);

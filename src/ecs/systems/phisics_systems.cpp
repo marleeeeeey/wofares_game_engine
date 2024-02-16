@@ -1,21 +1,22 @@
 #include "phisics_systems.h"
+#include "glm/geometric.hpp"
 #include <ecs/components/all_components.h>
 #include <utils/glm_box2d_conversions.h>
 
-void PhysicsSystem(entt::registry& registry, float deltaTime)
+PhysicsSystem::PhysicsSystem(entt::registry& registry, float deltaTime)
+  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+    physicsWorld(gameState.physicsWorld), coordinatesTransformer(registry), deltaTime(deltaTime)
 {
-    // Get the physics world.
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-    auto physicsWorld = gameState.physicsWorld;
-
-    // Update the physics world.
+    // Update the physics world with Box2D engine.
     physicsWorld->Step(
         deltaTime, gameState.physicsOptions.velocityIterations, gameState.physicsOptions.positionIterations);
+
+    UpdatePlayersWeaponDirection();
+    RemoveDistantObjectsSystem();
 }
 
-void RemoveDistantObjectsSystem(entt::registry& registry)
+void PhysicsSystem::RemoveDistantObjectsSystem()
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
     auto levelBounds = gameState.levelOptions.levelBox2dBounds;
 
     auto physicalBodies = registry.view<PhysicalBody>();
@@ -28,5 +29,21 @@ void RemoveDistantObjectsSystem(entt::registry& registry)
         {
             registry.destroy(entity);
         }
+    }
+}
+
+// Set the direction of the weapon of the player to the last mouse position.
+void PhysicsSystem::UpdatePlayersWeaponDirection()
+{
+    auto players = registry.view<PlayerNumber, PhysicalBody, PlayersWeaponDirection>();
+    for (auto entity : players)
+    {
+        const auto& [physicalBody, weaponDirection] = players.get<PhysicalBody, PlayersWeaponDirection>(entity);
+
+        auto& lastMousePosInWindow = gameState.windowOptions.lastMousePosInWindow;
+        glm::vec2 playerPosInWindow =
+            coordinatesTransformer.PhysicsToCamera(physicalBody.value->GetBody()->GetPosition());
+
+        weaponDirection.value = glm::normalize(lastMousePosInWindow - playerPosInWindow);
     }
 }

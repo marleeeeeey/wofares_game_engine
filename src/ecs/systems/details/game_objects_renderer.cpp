@@ -14,6 +14,7 @@ GameObjectsRenderer::GameObjectsRenderer(entt::registry& registry, SDL_Renderer*
     RenderTiles();
     RenderPlayers();
     RenderGranades();
+    RenderBridges();
 }
 
 void GameObjectsRenderer::RenderTiles()
@@ -27,22 +28,21 @@ void GameObjectsRenderer::RenderTiles()
 }
 void GameObjectsRenderer::RenderPlayers()
 {
-    auto players = registry.view<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayerDirection>();
+    auto players = registry.view<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayersWeaponDirection>();
     for (auto entity : players)
     {
-        auto [physicalBody, playerSize, playerNumber, direction] =
-            players.get<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayerDirection>(entity);
+        auto [physicalBody, playerSize, playerNumber, weaponDirection] =
+            players.get<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayersWeaponDirection>(entity);
 
         // Draw the player.
-        glm::vec2 playerSdlPosition =
-            coordinatesTransformer.PhysicsToWorld(physicalBody.value->GetBody()->GetPosition());
-        glm::vec2 playerSdlSize = playerSize.value;
-        RenderSquare(playerSdlPosition, playerSdlSize, ColorName::Blue, 0);
+        glm::vec2 playerWorldPos = coordinatesTransformer.PhysicsToWorld(physicalBody.value->GetBody()->GetPosition());
+        glm::vec2 playerWorldSize = playerSize.value;
+        RenderSquare(playerWorldPos, playerWorldSize, ColorName::Blue, 0);
 
         // Draw the weapon.
-        glm::vec2 weaponSdlSize = playerSize.value / 2.0f;
-        glm::vec2 weaponSdlPosition = playerSdlPosition + direction.direction * playerSdlSize / 2;
-        RenderSquare(weaponSdlPosition, weaponSdlSize, ColorName::Red, 0);
+        glm::vec2 weaponWorldSize = playerSize.value / 2.0f;
+        glm::vec2 weaponWorldPos = playerWorldPos + weaponDirection.value * playerWorldSize / 2;
+        RenderSquare(weaponWorldPos, weaponWorldSize, ColorName::Red, 0);
     }
 }
 
@@ -58,7 +58,7 @@ void GameObjectsRenderer::RenderGranades()
 
 SDL_Rect GameObjectsRenderer::GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
-    auto& rOpt = gameState.renderingOptions;
+    auto& rOpt = gameState.windowOptions;
 
     glm::vec2 transformedPosition = (sdlPos - rOpt.cameraCenter) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
 
@@ -101,4 +101,14 @@ void GameObjectsRenderer::RenderTiledSquare(
     // Render the tile with the calculated angle.
     SDL_RenderCopyEx(
         renderer, tileInfo.texture->get(), &tileInfo.srcRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
+}
+
+void GameObjectsRenderer::RenderBridges()
+{
+    auto bridges = registry.view<PhysicalBody, SdlSizeComponent, Bridge>();
+    for (auto entity : bridges)
+    {
+        const auto& [physicalBody, size] = bridges.get<PhysicalBody, SdlSizeComponent>(entity);
+        RenderSquare(physicalBody.value, size.value, ColorName::Purple);
+    }
 }
