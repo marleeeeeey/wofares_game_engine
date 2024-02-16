@@ -1,7 +1,8 @@
 #include "objects_factory.h"
-#include "ecs/systems/details/coordinates_transformer.h"
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
+#include <ecs/systems/details/coordinates_transformer.h>
 #include <ecs/systems/details/physics_body_creator.h>
+
 
 ObjectsFactory::ObjectsFactory(entt::registry& registry)
   : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),

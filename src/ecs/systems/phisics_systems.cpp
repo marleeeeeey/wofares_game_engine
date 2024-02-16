@@ -1,6 +1,6 @@
 #include "phisics_systems.h"
-#include "glm/geometric.hpp"
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
+#include <glm/glm.hpp>
 #include <utils/glm_box2d_conversions.h>
 
 PhysicsSystem::PhysicsSystem(entt::registry& registry, float deltaTime)

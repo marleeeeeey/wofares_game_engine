@@ -1,6 +1,7 @@
 #include "camera_control_system.h"
-#include "SDL_mouse.h"
-#include <ecs/components/all_components.h>
+#include <SDL_mouse.h>
+#include <ecs/components/game_components.h>
+#include <ecs/components/game_state_component.h>
 
 void SubscribeCameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {

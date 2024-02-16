@@ -1,9 +1,10 @@
 #pragma once
-#include "ecs/systems/details/coordinates_transformer.h"
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
+#include <ecs/systems/details/coordinates_transformer.h>
 #include <ecs/systems/details/objects_factory.h>
 #include <entt/entt.hpp>
 #include <nlohmann/json.hpp>
+
 
 class MapLoader
 {

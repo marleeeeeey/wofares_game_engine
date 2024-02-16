@@ -1,5 +1,6 @@
 #pragma once
-#include "ecs/systems/details/coordinates_transformer.h"
+#include <ecs/components/game_state_component.h>
+#include <ecs/systems/details/coordinates_transformer.h>
 #include <utils/box2d_RAII.h>
 
 // Convert from SDL to Box2D system.

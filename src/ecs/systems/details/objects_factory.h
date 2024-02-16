@@ -1,6 +1,5 @@
 #pragma once
-#include "ecs/components/all_components.h"
-#include "entt/entity/fwd.hpp"
+#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
 
 class ObjectsFactory

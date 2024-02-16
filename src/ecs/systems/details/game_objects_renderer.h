@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL.h>
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
 #include <ecs/systems/details/coordinates_transformer.h>
 #include <entt/entt.hpp>
 #include <utils/sdl_colors.h>

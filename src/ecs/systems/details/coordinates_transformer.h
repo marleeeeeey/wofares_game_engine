@@ -1,7 +1,7 @@
 #pragma once
-#include "box2d/b2_math.h"
 #include <box2d/box2d.h>
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
+#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
 
 // There are 3 coordinate systems in the game:

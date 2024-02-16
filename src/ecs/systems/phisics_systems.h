@@ -1,8 +1,9 @@
 #pragma once
-#include "ecs/systems/details/coordinates_transformer.h"
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_state_component.h>
+#include <ecs/systems/details/coordinates_transformer.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+
 
 class PhysicsSystem
 {

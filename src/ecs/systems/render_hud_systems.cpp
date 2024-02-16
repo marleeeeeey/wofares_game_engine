@@ -1,5 +1,6 @@
 #include "render_hud_systems.h"
-#include "ecs/components/all_components.h"
+#include <ecs/components/game_components.h>
+#include <ecs/components/game_state_component.h>
 #include <imgui.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/sdl_colors.h>
@@ -51,8 +52,10 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::End();
 }
 
-void DrawGridSystem(SDL_Renderer* renderer, const GameState& gameState)
+void DrawGridSystem(entt::registry& registry, SDL_Renderer* renderer)
 {
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+
     const int gridSize = 32;
     const SDL_Color gridColor = GetSDLColor(ColorName::Grey);
     const SDL_Color screenCenterColor = GetSDLColor(ColorName::Red);

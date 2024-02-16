@@ -1,6 +1,5 @@
 #include "input_event_manager.h"
-#include "SDL_stdinc.h"
-#include "my_common_cpp_utils/Logger.h"
+#include <my_common_cpp_utils/Logger.h>
 
 void InputEventManager::UpdateRawEvent(const SDL_Event& event)
 {

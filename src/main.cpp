@@ -1,4 +1,4 @@
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
 #include <ecs/systems/game_state_control_system.h>
@@ -82,7 +82,7 @@ int main(int argc, char* args[])
             // Render the scene and the HUD.
             imguiSDL.startFrame();
             RenderSystem(registry, renderer.get());
-            DrawGridSystem(renderer.get(), gameState);
+            DrawGridSystem(registry, renderer.get());
             RenderHUDSystem(registry, renderer.get());
             imguiSDL.finishFrame();
 

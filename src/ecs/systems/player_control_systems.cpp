@@ -1,11 +1,12 @@
 #include "player_control_systems.h"
-#include "ecs/systems/details/coordinates_transformer.h"
-#include "ecs/systems/details/physics_body_creator.h"
-#include "utils/input_event_manager.h"
 #include <SDL.h>
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
+#include <ecs/systems/details/coordinates_transformer.h>
+#include <ecs/systems/details/physics_body_creator.h>
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/input_event_manager.h>
+
 
 void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {

@@ -1,5 +1,6 @@
 #include "game_state_control_system.h"
-#include <ecs/components/all_components.h>
+#include <ecs/components/game_components.h>
+#include <ecs/components/game_state_component.h>
 
 void SubscribeGameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {

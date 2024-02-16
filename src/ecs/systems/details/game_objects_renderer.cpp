@@ -1,5 +1,4 @@
 #include "game_objects_renderer.h"
-#include "SDL_rect.h"
 #include <numbers>
 #include <utils/glm_box2d_conversions.h>
 
