@@ -26,6 +26,11 @@ int main(int argc, char* args[])
         // Initialize the logger with the trace level.
         utils::Logger::getInstance(spdlog::level::info);
 
+        // Check if the map file exists.
+        std::string mapPath = "assets\\maps\\map.json";
+        if (!std::filesystem::exists(mapPath))
+            throw std::runtime_error(MY_FMT("Map file does not found: {}", mapPath));
+
         // Create an EnTT registry.
         entt::registry registry;
 
@@ -44,9 +49,6 @@ int main(int argc, char* args[])
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
         // Load the map.
-        std::string mapPath = "assets\\maps\\map.json";
-        if (!std::filesystem::exists(mapPath))
-            throw std::runtime_error(MY_FMT("Map file does not found: {}", mapPath));
         LoadMap(registry, renderer.get(), mapPath);
 
         // Subscribe all systems that need to handle input events.

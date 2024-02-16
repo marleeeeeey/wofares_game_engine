@@ -63,7 +63,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
                     auto playerBody = player->GetBody();
 
                     // Clamp the force to the maximum value.
-                    float force = std::min(eventInfo.holdDuration * 10.0f, 50.0f);
+                    float force = std::min(eventInfo.holdDuration * 20.0f, 6.0f);
 
                     // Rotate the force vector to the direction of the weapon.
                     b2Vec2 forceVec = b2Vec2(force, 0);
