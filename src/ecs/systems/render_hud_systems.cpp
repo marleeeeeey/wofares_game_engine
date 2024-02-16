@@ -3,6 +3,7 @@
 #include <ecs/components/game_state_component.h>
 #include <imgui.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/imgui_RAII.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
 
@@ -39,14 +40,26 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     const auto& lastMousePosition = gameState.windowOptions.lastMousePosInWindow;
     ImGui::Text(MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
 
-    // Draw controls the physics world.
-    ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
-    ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);
-    ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.miniTileResolution, 1, 8);
-    ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
-    ImGui::SliderFloat(
-        "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
-    ImGui::Checkbox("Prevent Creation Invisible Tiles", &gameState.levelOptions.preventCreationInvisibleTiles);
+    if (ImGui::CollapsingHeader("Advanced Options"))
+    {
+        // Draw controls the physics world.
+        ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
+        ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);
+        ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.miniTileResolution, 1, 8);
+        ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
+        ImGui::SliderFloat(
+            "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
+        ImGui::Checkbox("Prevent Creation Invisible Tiles", &gameState.levelOptions.preventCreationInvisibleTiles);
+
+        // box2DtoSDL setting.
+        float box2DtoSdlStep = 4.0f;
+        float& box2DtoSDL = gameState.windowOptions.box2DtoSDL;
+        int intValue = static_cast<int>(box2DtoSDL / box2DtoSdlStep);
+        if (ImGui::SliderInt(MY_FMT("Box2D to SDL coef, x{:.2f}", box2DtoSdlStep).c_str(), &intValue, 8, 14))
+            box2DtoSDL = intValue * box2DtoSdlStep;
+        ImGui::Text(MY_FMT("Box2D to SDL: {:.2f}", box2DtoSDL).c_str());
+    }
+
     if (ImGui::Button("Reload Map"))
         gameState.controlOptions.reloadMap = true;
     ImGui::End();

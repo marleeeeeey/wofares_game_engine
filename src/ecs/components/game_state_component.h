@@ -35,6 +35,7 @@ struct WindowOptions
     float cameraScale{1.0f};
     glm::vec2 cameraCenter{};
     glm::vec2 lastMousePosInWindow{};
+    float box2DtoSDL = 48.0f; // 1 meter in Box2D is XX pixels in SDL.
 };
 
 struct ControlOptions

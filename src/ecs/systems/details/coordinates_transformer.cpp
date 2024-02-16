@@ -1,10 +1,8 @@
 #include "coordinates_transformer.h"
 
-constexpr float box2DtoSDL = 32.0f; // 1 meter in Box2D is 32 pixels in SDL.
-constexpr float sdlToBox2D = 1.0f / box2DtoSDL;
-
 CoordinatesTransformer::CoordinatesTransformer(entt::registry& registry)
-  : gameState(registry.get<GameState>(registry.view<GameState>().front()))
+  : gameState(registry.get<GameState>(registry.view<GameState>().front())),
+    box2DtoSDL(gameState.windowOptions.box2DtoSDL), sdlToBox2D(1.0f / box2DtoSDL)
 {}
 
 glm::vec2 CoordinatesTransformer::WorldToCamera(const glm::vec2& worldPos) const

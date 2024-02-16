@@ -11,6 +11,8 @@
 class CoordinatesTransformer
 {
     GameState& gameState;
+    const float box2DtoSDL;
+    const float sdlToBox2D;
 public:
     CoordinatesTransformer(entt::registry& registry);
     // World to Camera (World to Screen).

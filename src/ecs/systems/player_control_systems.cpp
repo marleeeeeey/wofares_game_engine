@@ -7,7 +7,6 @@
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/input_event_manager.h>
 
-
 void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
 {
     inputEventManager.SubscribeСontinuousListener(
@@ -15,7 +14,7 @@ void SubscribePlayerControlSystem(entt::registry& registry, InputEventManager& i
         [&registry](const InputEventManager::EventInfo& eventInfo)
         {
             const float movingForce = 10.0f;
-            const float jumpForce = 30.0f;
+            const float jumpForce = 25.0f;
 
             auto& originalEvent = eventInfo.originalEvent;
 

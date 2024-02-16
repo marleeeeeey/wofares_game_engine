@@ -11,9 +11,9 @@ GameObjectsRenderer::GameObjectsRenderer(entt::registry& registry, SDL_Renderer*
     SDL_RenderClear(renderer);
 
     RenderTiles();
-    RenderPlayers();
     RenderGranades();
     RenderBridges();
+    RenderPlayers();
 }
 
 void GameObjectsRenderer::RenderTiles()
