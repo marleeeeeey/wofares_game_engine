@@ -35,6 +35,7 @@ struct PhysicalBody
 struct Grenade
 {
     float timeToExplode = 3.0f; // Time in seconds before the grenade explodes
+    float explosionRadius = 0.5f;
 };
 
 struct Bridge

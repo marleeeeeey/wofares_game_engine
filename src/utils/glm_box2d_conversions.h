@@ -48,3 +48,8 @@ bool IsPointInsideBounds(const Point& point, const Bounds& bounds)
 {
     return point.x >= bounds.min.x && point.x <= bounds.max.x && point.y >= bounds.min.y && point.y <= bounds.max.y;
 }
+
+namespace utils
+{
+float distance(const b2Vec2& a, const b2Vec2& b);
+}
