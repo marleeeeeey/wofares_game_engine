@@ -1,5 +1,5 @@
 #include "box2d_entt_contact_listener.h"
-#include "my_common_cpp_utils/Logger.h"
+#include <my_common_cpp_utils/Logger.h>
 
 Box2dEnttContactListener::Box2dEnttContactListener(entt::registry& registry) : registry(registry)
 {}
@@ -49,7 +49,7 @@ std::optional<std::pair<entt::entity, entt::entity>> Box2dEnttContactListener::G
         return std::make_pair(entityA, entityB);
     }
 
-    MY_LOG_FMT(warn, "One of the entities is not valid. entityA: {}, entityB: {}", entityA, entityB);
+    MY_LOG_FMT(debug, "One of the entities is not valid. entityA: {}, entityB: {}", entityA, entityB);
     return std::nullopt;
 }
 

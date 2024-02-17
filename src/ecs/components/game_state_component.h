@@ -16,6 +16,7 @@ struct LevelOptions
     float dynamicBodyProbability{0.0f};
     size_t miniTileResolution{4};
     bool preventCreationInvisibleTiles{false};
+    float colisionDisableProbability{0.7f};
 };
 
 struct PhysicsOptions

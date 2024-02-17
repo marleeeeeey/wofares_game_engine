@@ -21,6 +21,7 @@ std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
     fixtureDef.shape = &shape;
     fixtureDef.density = 10.0f; // Density to calculate mass
     fixtureDef.friction = 0.3f; // Friction to apply to the body
+    fixtureDef.restitution = 0.2f; // Restitution to apply to the body
     body->CreateFixture(&fixtureDef);
 
     return std::make_shared<Box2dObjectRAII>(body, physicsWorld);

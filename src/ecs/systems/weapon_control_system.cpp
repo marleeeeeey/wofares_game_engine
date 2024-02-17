@@ -1,8 +1,9 @@
 #include "weapon_control_system.h"
-#include "box2d/b2_math.h"
-#include "utils/box2d_entt_contact_listener.h"
+#include <box2d/b2_math.h>
 #include <ecs/components/game_components.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/MathUtils.h>
+#include <utils/box2d_entt_contact_listener.h>
 #include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>
 
@@ -124,6 +125,7 @@ void WeaponControlSystem::StartCollisionDisableTimer(const std::vector<entt::ent
         if (registry.any_of<PlayerInfo>(entity))
             continue;
 
-        registry.emplace_or_replace<CollisionDisableTimerComponent>(entity);
+        if (utils::randomTrue(gameState.levelOptions.colisionDisableProbability))
+            registry.emplace_or_replace<CollisionDisableTimerComponent>(entity);
     }
 };
