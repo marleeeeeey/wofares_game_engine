@@ -1,8 +1,8 @@
 #pragma once
 #include "entt/entity/fwd.hpp"
 #include <ecs/components/game_state_component.h>
-#include <ecs/systems/details/coordinates_transformer.h>
 #include <utils/box2d_RAII.h>
+#include <utils/coordinates_transformer.h>
 
 // Convert from SDL to Box2D system.
 // entity is used to store entity in the physics body.

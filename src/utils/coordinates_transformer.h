@@ -7,7 +7,7 @@
 // There are 3 coordinate systems in the game:
 // 1. World (game) coordinates.
 // 2. Camera (screen) coordinates.
-// 3. Physics coordinates.
+// 3. Physics (box2d) coordinates.
 class CoordinatesTransformer
 {
     GameState& gameState;

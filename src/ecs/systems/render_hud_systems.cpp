@@ -7,10 +7,18 @@
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
 
-void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
-{
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
+  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front()))
+{}
 
+void HUDRenderSystem::Render()
+{
+    RenderGrid();
+    RenderDebugMenu();
+}
+
+void HUDRenderSystem::RenderDebugMenu()
+{
     ImGui::Begin("HUD");
 
     if (ImGui::Button("Reload Map"))
@@ -66,7 +74,7 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
     ImGui::End();
 }
 
-void DrawGridSystem(entt::registry& registry, SDL_Renderer* renderer)
+void HUDRenderSystem::RenderGrid()
 {
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
 

@@ -1,14 +1,14 @@
 #pragma once
 #include <ecs/components/game_components.h>
-#include <ecs/systems/details/coordinates_transformer.h>
-#include <ecs/systems/details/objects_factory.h>
 #include <entt/entt.hpp>
 #include <nlohmann/json.hpp>
+#include <utils/coordinates_transformer.h>
+#include <utils/objects_factory.h>
 
-
-class MapLoader
+class MapLoaderSystem
 {
     entt::registry& registry;
+    SDL_Renderer* renderer;
     GameState& gameState;
     ObjectsFactory objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
@@ -21,7 +21,9 @@ class MapLoader
     size_t invisibleTilesNumber = 0;
     std::shared_ptr<SDLTextureRAII> tilesetTexture;
 public:
-    MapLoader(const std::string& filename, entt::registry& registry, SDL_Renderer* renderer);
+    MapLoaderSystem(entt::registry& registry, SDL_Renderer* renderer);
+    void LoadMap(const std::string& filename);
+    void UnloadMap();
 private:
     void ParseTileLayer(const nlohmann::json& layer);
     void ParseObjectLayer(const nlohmann::json& layer);

@@ -1,12 +1,12 @@
 #include <ecs/components/game_components.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
+#include <ecs/systems/game_objects_render_system.h>
 #include <ecs/systems/game_state_control_system.h>
-#include <ecs/systems/load_map_systems.h>
+#include <ecs/systems/map_loader_system.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
-#include <ecs/systems/render_objects_systems.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/file_system.h>
@@ -56,9 +56,6 @@ int main(int argc, char* args[])
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
-        // Load the map.
-        LoadMap(registry, renderer.get(), mapPath);
-
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
         EventQueueSystem eventQueueSystem(inputEventManager);
@@ -70,6 +67,12 @@ int main(int argc, char* args[])
 
         // Create a systems with no input events.
         PhysicsSystem physicsSystem(registry);
+        GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get());
+        HUDRenderSystem hudRenderSystem(registry, renderer.get());
+        MapLoaderSystem mapLoaderSystem(registry, renderer.get());
+
+        // Load the map.
+        mapLoaderSystem.LoadMap(mapPath);
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
@@ -82,8 +85,8 @@ int main(int argc, char* args[])
 
             if (utils::FileChangedSinceLastCheck(mapPath) || gameState.controlOptions.reloadMap)
             {
-                UnloadMap(registry);
-                LoadMap(registry, renderer.get(), mapPath);
+                mapLoaderSystem.UnloadMap();
+                mapLoaderSystem.LoadMap(mapPath);
                 gameState.controlOptions.reloadMap = false;
             }
 
@@ -96,9 +99,8 @@ int main(int argc, char* args[])
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();
-            RenderSystem(registry, renderer.get());
-            DrawGridSystem(registry, renderer.get());
-            RenderHUDSystem(registry, renderer.get());
+            gameObjectsRenderSystem.Render();
+            hudRenderSystem.Render();
             imguiSDL.finishFrame();
 
             // Cap the frame rate.

@@ -1,18 +1,19 @@
 #pragma once
 #include <SDL.h>
 #include <ecs/components/game_components.h>
-#include <ecs/systems/details/coordinates_transformer.h>
 #include <entt/entt.hpp>
+#include <utils/coordinates_transformer.h>
 #include <utils/sdl_colors.h>
 
-class GameObjectsRenderer
+class GameObjectsRenderSystem
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
     GameState& gameState;
     CoordinatesTransformer coordinatesTransformer;
 public:
-    GameObjectsRenderer(entt::registry& registry, SDL_Renderer* renderer);
+    GameObjectsRenderSystem(entt::registry& registry, SDL_Renderer* renderer);
+    void Render();
 private: // Render game objects methods.
     void RenderTiles();
     void RenderPlayerWeaponDirection();

@@ -1,8 +1,8 @@
 #pragma once
 #include "entt/entity/fwd.hpp"
-#include <ecs/systems/details/coordinates_transformer.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include <utils/coordinates_transformer.h>
 #include <utils/input_event_manager.h>
 
 class PlayerControlSystem
@@ -13,7 +13,7 @@ class PlayerControlSystem
     CoordinatesTransformer transformer; // TODO: think to put it in the GameState class.
 public:
     PlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager);
-private:
+private: // Callbacks for the InputEventManager.
     void HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerAttack(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerBuildingAction(const SDL_Event& event); // TODO: remplace with eventInfo

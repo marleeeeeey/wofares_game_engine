@@ -3,7 +3,6 @@
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/sdl_RAII.h>
 
-
 bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_Rect& miniTextureSrcRect)
 {
     SDLTextureLockRAII lock(tilesetTexture->get());

@@ -3,10 +3,10 @@
 #include "glm/fwd.hpp"
 #include <SDL.h>
 #include <ecs/components/game_components.h>
-#include <ecs/systems/details/coordinates_transformer.h>
-#include <ecs/systems/details/physics_body_creator.h>
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/box2d_body_creator.h>
+#include <utils/coordinates_transformer.h>
 #include <utils/input_event_manager.h>
 
 PlayerControlSystem::PlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)

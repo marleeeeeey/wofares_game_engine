@@ -1,4 +1,4 @@
-#include "physics_body_creator.h"
+#include "box2d_body_creator.h"
 
 std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
     entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,

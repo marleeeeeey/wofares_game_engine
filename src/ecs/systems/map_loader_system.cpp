@@ -1,15 +1,18 @@
-#include "map_loader.h"
+#include "map_loader_system.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
-#include <ecs/systems/details/physics_body_creator.h>
 #include <fstream>
 #include <my_common_cpp_utils/MathUtils.h>
+#include <utils/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/texture_process.h>
 
-MapLoader::MapLoader(const std::string& filename, entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+MapLoaderSystem::MapLoaderSystem(entt::registry& registry, SDL_Renderer* renderer)
+  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front())),
     objectsFactory(registry), coordinatesTransformer(registry)
+{}
+
+void MapLoaderSystem::LoadMap(const std::string& filename)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -69,9 +72,28 @@ MapLoader::MapLoader(const std::string& filename, entt::registry& registry, SDL_
         if (invisibleTilesNumber > 0)
             MY_LOG(warn, "All tiles are invisible");
     }
-}
+};
 
-void MapLoader::ParseTileLayer(const nlohmann::json& layer)
+void MapLoaderSystem::UnloadMap()
+{
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    gameState.levelOptions.levelBox2dBounds = {};
+
+    // Remove all entities that have a RenderingInfo component.
+    for (auto entity : registry.view<RenderingInfo>())
+        registry.destroy(entity);
+
+    // Remove all entities that have a PhysicalBody component.
+    for (auto entity : registry.view<PhysicsInfo>())
+        registry.destroy(entity);
+
+    if (Box2dObjectRAII::GetBodyCounter() != 0)
+        MY_LOG_FMT(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
+    else
+        MY_LOG(debug, "All Box2D bodies were destroyed");
+};
+
+void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
 {
     auto physicsWorld = gameState.physicsWorld;
     auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
@@ -96,7 +118,7 @@ void MapLoader::ParseTileLayer(const nlohmann::json& layer)
     }
 }
 
-void MapLoader::ParseObjectLayer(const nlohmann::json& layer)
+void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
 {
     auto physicsWorld = gameState.physicsWorld;
     auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
@@ -111,7 +133,7 @@ void MapLoader::ParseObjectLayer(const nlohmann::json& layer)
     }
 }
 
-void MapLoader::CalculateLevelBoundsWithBufferZone()
+void MapLoaderSystem::CalculateLevelBoundsWithBufferZone()
 {
     auto& lb = gameState.levelOptions.levelBox2dBounds;
     auto& bz = gameState.levelOptions.bufferZone;
@@ -122,7 +144,7 @@ void MapLoader::CalculateLevelBoundsWithBufferZone()
         info, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
 }
 
-void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
+void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
 {
     auto physicsWorld = gameState.physicsWorld;
     auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;

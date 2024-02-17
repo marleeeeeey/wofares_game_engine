@@ -1,20 +1,13 @@
-#include "game_objects_renderer.h"
+#include "game_objects_render_system.h"
 #include <numbers>
 #include <utils/glm_box2d_conversions.h>
 
-GameObjectsRenderer::GameObjectsRenderer(entt::registry& registry, SDL_Renderer* renderer)
+GameObjectsRenderSystem::GameObjectsRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front())),
     coordinatesTransformer(registry)
-{
-    // Clear the screen with white color.
-    SetRenderDrawColor(renderer, ColorName::White);
-    SDL_RenderClear(renderer);
+{}
 
-    RenderTiles();
-    RenderPlayerWeaponDirection();
-}
-
-void GameObjectsRenderer::RenderTiles()
+void GameObjectsRenderSystem::RenderTiles()
 {
     auto tilesView = registry.view<RenderingInfo, PhysicsInfo>();
     for (auto entity : tilesView)
@@ -24,7 +17,7 @@ void GameObjectsRenderer::RenderTiles()
     }
 }
 
-void GameObjectsRenderer::RenderPlayerWeaponDirection()
+void GameObjectsRenderSystem::RenderPlayerWeaponDirection()
 {
     auto players = registry.view<PhysicsInfo, RenderingInfo, PlayerInfo>();
     for (auto entity : players)
@@ -40,7 +33,7 @@ void GameObjectsRenderer::RenderPlayerWeaponDirection()
     }
 }
 
-SDL_Rect GameObjectsRenderer::GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize)
+SDL_Rect GameObjectsRenderSystem::GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
     auto& rOpt = gameState.windowOptions;
 
@@ -55,7 +48,8 @@ SDL_Rect GameObjectsRenderer::GetRectWithCameraTransform(const glm::vec2& sdlPos
     return rect;
 }
 
-void GameObjectsRenderer::RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle)
+void GameObjectsRenderSystem::RenderSquare(
+    const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle)
 {
     SetRenderDrawColor(renderer, color);
     SDL_Rect rect = GetRectWithCameraTransform(sdlPos, sdlSize);
@@ -63,14 +57,15 @@ void GameObjectsRenderer::RenderSquare(const glm::vec2& sdlPos, const glm::vec2&
     SDL_RenderFillRect(renderer, &rect);
 }
 
-void GameObjectsRenderer::RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color)
+void GameObjectsRenderSystem::RenderSquare(
+    std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color)
 {
     const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     float angle = body->GetBody()->GetAngle();
     RenderSquare(sdlPos, sdlSize, color, angle);
 }
 
-void GameObjectsRenderer::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo)
+void GameObjectsRenderSystem::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo)
 {
     const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     const float angle = body->GetBody()->GetAngle();
@@ -94,3 +89,13 @@ void GameObjectsRenderer::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> bod
     SDL_RenderCopyEx(
         renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
 }
+
+void GameObjectsRenderSystem::Render()
+{
+    // Clear the screen with white color.
+    SetRenderDrawColor(renderer, ColorName::White);
+    SDL_RenderClear(renderer);
+
+    RenderTiles();
+    RenderPlayerWeaponDirection();
+};
