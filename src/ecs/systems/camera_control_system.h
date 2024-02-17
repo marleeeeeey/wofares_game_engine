@@ -2,4 +2,13 @@
 #include <entt/entt.hpp>
 #include <utils/input_event_manager.h>
 
-void SubscribeCameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager);
+class CameraControlSystem
+{
+    entt::registry& registry;
+    InputEventManager& inputEventManager;
+public:
+    CameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager);
+private:
+    void HandleCameraMovementAndScale(const SDL_Event& event);
+    void HandleMouseScreenPosition(const SDL_Event& event);
+};

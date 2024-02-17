@@ -2,44 +2,50 @@
 #include <ecs/components/game_components.h>
 #include <ecs/components/game_state_component.h>
 
-void SubscribeGameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
+GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
+  : registry(registry), inputEventManager(inputEventManager)
 {
-    inputEventManager.SubscribeRawListener(
-        [&registry](const SDL_Event& event)
-        {
-            auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-            bool isEscPressed = event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE;
+    inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandleGameStateChange(event); });
 
-            if (isEscPressed || event.type == SDL_QUIT)
-            {
-                gameState.controlOptions.quit = true;
-            }
-        });
-
-    // subcrive on continuous events on space key and copy duration of pressing to the game state
     inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonHold,
-        [&registry](const InputEventManager::EventInfo& eventInfo)
-        {
-            auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-            auto& originalEvent = eventInfo.originalEvent;
-
-            if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
-            {
-                gameState.debugInfo.spacePressedDuration = eventInfo.holdDuration;
-            }
-        });
+        [this](const InputEventManager::EventInfo& eventInfo) { HandleSpaceHoldButtonToDebugInfo(eventInfo); });
 
     inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonReleaseAfterHold,
-        [&registry](const InputEventManager::EventInfo& eventInfo)
-        {
-            auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-            auto& originalEvent = eventInfo.originalEvent;
-
-            if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
-            {
-                gameState.debugInfo.spacePressedDurationOnUpEvent = eventInfo.holdDuration;
-            }
-        });
+        [this](const InputEventManager::EventInfo& eventInfo)
+        { HandleSpaceReleaseAfterHoldButtonToDebugInfo(eventInfo); });
 }
+
+void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
+{
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    bool isEscPressed = event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE;
+
+    if (isEscPressed || event.type == SDL_QUIT)
+    {
+        gameState.controlOptions.quit = true;
+    }
+};
+
+void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
+{
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& originalEvent = eventInfo.originalEvent;
+
+    if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
+    {
+        gameState.debugInfo.spacePressedDuration = eventInfo.holdDuration;
+    }
+};
+
+void GameStateControlSystem::HandleSpaceReleaseAfterHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
+{
+    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& originalEvent = eventInfo.originalEvent;
+
+    if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
+    {
+        gameState.debugInfo.spacePressedDurationOnUpEvent = eventInfo.holdDuration;
+    }
+};

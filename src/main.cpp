@@ -43,6 +43,13 @@ int main(int argc, char* args[])
         b2Vec2 gravity(0.0f, +9.8f);
         gameState.physicsWorld = std::make_shared<b2World>(gravity);
 
+        // Create a contact listener and subscribe it to the physics world.
+        Box2dEnttContactListener contactListener(registry);
+        gameState.physicsWorld->SetContactListener(&contactListener);
+
+        // Create a weapon control system and subscribe it to the contact listener.
+        WeaponControlSystem weaponControlSystem(registry, contactListener);
+
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO);
         SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowOptions.windowSize);
@@ -52,11 +59,17 @@ int main(int argc, char* args[])
         // Load the map.
         LoadMap(registry, renderer.get(), mapPath);
 
-        // Subscribe all systems that need to handle input events.
+        // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
-        SubscribeCameraControlSystem(registry, inputEventManager);
-        SubscribeGameStateControlSystem(registry, inputEventManager);
-        SubscribePlayerControlSystem(registry, inputEventManager);
+        EventQueueSystem eventQueueSystem(inputEventManager);
+
+        // Subscribe all systems that need to handle input events.
+        PlayerControlSystem playerControlSystem(registry, inputEventManager);
+        CameraControlSystem cameraControlSystem(registry, inputEventManager);
+        GameStateControlSystem gameStateControlSystem(registry, inputEventManager);
+
+        // Create a systems with no input events.
+        PhysicsSystem physicsSystem(registry);
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
@@ -75,11 +88,11 @@ int main(int argc, char* args[])
             }
 
             // Handle input events.
-            EventQueueSystem(inputEventManager, deltaTime);
+            eventQueueSystem.Update(deltaTime);
 
-            // Update the physics.
-            PhysicsSystem(registry, deltaTime);
-            WeaponControlSystem(registry, deltaTime);
+            // Update the physics and post-physics systems to prepare the render.
+            physicsSystem.Update(deltaTime);
+            weaponControlSystem.Update(deltaTime);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

@@ -2,7 +2,10 @@
 #include <SDL.h>
 #include <imgui_impl_sdl2.h>
 
-void EventQueueSystem(InputEventManager& inputEventManager, float deltaTime)
+EventQueueSystem::EventQueueSystem(InputEventManager& inputEventManager) : inputEventManager(inputEventManager)
+{}
+
+void EventQueueSystem::Update(float deltaTime)
 {
     SDL_Event event;
     while (SDL_PollEvent(&event))
@@ -11,4 +14,4 @@ void EventQueueSystem(InputEventManager& inputEventManager, float deltaTime)
         inputEventManager.UpdateRawEvent(event);
     }
     inputEventManager.UpdateСontinuousEvents(deltaTime);
-}
+};

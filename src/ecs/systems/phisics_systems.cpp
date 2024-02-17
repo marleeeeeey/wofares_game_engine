@@ -3,9 +3,12 @@
 #include <glm/glm.hpp>
 #include <utils/glm_box2d_conversions.h>
 
-PhysicsSystem::PhysicsSystem(entt::registry& registry, float deltaTime)
+PhysicsSystem::PhysicsSystem(entt::registry& registry)
   : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
-    physicsWorld(gameState.physicsWorld), coordinatesTransformer(registry), deltaTime(deltaTime)
+    physicsWorld(gameState.physicsWorld), coordinatesTransformer(registry)
+{}
+
+void PhysicsSystem::Update(float deltaTime)
 {
     // Update the physics world with Box2D engine.
     physicsWorld->Step(
@@ -13,7 +16,7 @@ PhysicsSystem::PhysicsSystem(entt::registry& registry, float deltaTime)
 
     UpdatePlayersWeaponDirection();
     RemoveDistantObjectsSystem();
-}
+};
 
 void PhysicsSystem::RemoveDistantObjectsSystem()
 {

@@ -10,9 +10,9 @@ class PhysicsSystem
     GameState& gameState;
     std::shared_ptr<b2World> physicsWorld;
     CoordinatesTransformer coordinatesTransformer;
-    float deltaTime;
 public:
-    PhysicsSystem(entt::registry& registry, float deltaTime);
+    PhysicsSystem(entt::registry& registry);
+    void Update(float deltaTime);
 private:
     void RemoveDistantObjectsSystem();
     void UpdatePlayersWeaponDirection();

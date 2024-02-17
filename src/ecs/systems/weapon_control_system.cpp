@@ -1,14 +1,13 @@
 #include "weapon_control_system.h"
 #include "box2d/b2_math.h"
-#include "my_common_cpp_utils/Logger.h"
+#include "utils/box2d_entt_contact_listener.h"
 #include <ecs/components/game_components.h>
 #include <utils/glm_box2d_conversions.h>
 
-WeaponControlSystem::WeaponControlSystem(entt::registry& registry, float deltaTime)
-  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())), deltaTime(deltaTime)
-{
-    ImpactTargetsInGrenadesExplosionRadius();
-}
+WeaponControlSystem::WeaponControlSystem(entt::registry& registry, Box2dEnttContactListener& contactListener)
+  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+    contactListener(contactListener)
+{}
 
 void WeaponControlSystem::ImpactTargetsInGrenadesExplosionRadius()
 {
@@ -22,15 +21,8 @@ void WeaponControlSystem::ImpactTargetsInGrenadesExplosionRadius()
 
         if (grenade.timeToExplode <= 0.0f)
         {
-            // Log grenade position and explosion radius.
-            MY_LOG_FMT(
-                info, "Grenade exploded. Position: ({}, {}). Explosion radius: {}", grenadePhysicsPos.x,
-                grenadePhysicsPos.y, grenade.explosionRadius);
             auto physicalBodiesNearGrenade = GetPhysicalBodiesNearGrenade(grenadePhysicsPos, grenade.explosionRadius);
-            MY_LOG_FMT(
-                info, "Grenade exploded. Count of physical bodies near grenade: {}", physicalBodiesNearGrenade.size());
             ApplyForceToPhysicalBodies(physicalBodiesNearGrenade, grenadePhysicsPos);
-
             // Warning: double destroy of the grenade entity.
             registry.destroy(grenadeEntity);
         }
@@ -75,4 +67,10 @@ void WeaponControlSystem::ApplyForceToPhysicalBodies(
         auto force = -(targetPhysicsPos - grenadePhysicsPos) * 1000.0f;
         targetBody->ApplyForceToCenter(force, true);
     }
+}
+
+void WeaponControlSystem::Update(float deltaTime)
+{
+    this->deltaTime = deltaTime;
+    ImpactTargetsInGrenadesExplosionRadius();
 }
