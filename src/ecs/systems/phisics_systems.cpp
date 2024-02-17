@@ -15,18 +15,18 @@ void PhysicsSystem::Update(float deltaTime)
         deltaTime, gameState.physicsOptions.velocityIterations, gameState.physicsOptions.positionIterations);
 
     UpdatePlayersWeaponDirection();
-    RemoveDistantObjectsSystem();
+    RemoveDistantObjects();
 };
 
-void PhysicsSystem::RemoveDistantObjectsSystem()
+void PhysicsSystem::RemoveDistantObjects()
 {
     auto levelBounds = gameState.levelOptions.levelBox2dBounds;
 
-    auto physicalBodies = registry.view<PhysicalBody>();
+    auto physicalBodies = registry.view<PhysicsInfo>();
     for (auto entity : physicalBodies)
     {
-        auto& physicalBody = physicalBodies.get<PhysicalBody>(entity);
-        b2Vec2 pos = physicalBody.value->GetBody()->GetPosition();
+        auto& physicalBody = physicalBodies.get<PhysicsInfo>(entity);
+        b2Vec2 pos = physicalBody.bodyRAII->GetBody()->GetPosition();
 
         if (!IsPointInsideBounds(pos, levelBounds))
         {
@@ -38,15 +38,15 @@ void PhysicsSystem::RemoveDistantObjectsSystem()
 // Set the direction of the weapon of the player to the last mouse position.
 void PhysicsSystem::UpdatePlayersWeaponDirection()
 {
-    auto players = registry.view<PlayerNumber, PhysicalBody, PlayersWeaponDirection>();
+    auto players = registry.view<PhysicsInfo, PlayerInfo>();
     for (auto entity : players)
     {
-        const auto& [physicalBody, weaponDirection] = players.get<PhysicalBody, PlayersWeaponDirection>(entity);
+        const auto& [physicalBody, playerInfo] = players.get<PhysicsInfo, PlayerInfo>(entity);
 
         auto& lastMousePosInWindow = gameState.windowOptions.lastMousePosInWindow;
         glm::vec2 playerPosInWindow =
-            coordinatesTransformer.PhysicsToCamera(physicalBody.value->GetBody()->GetPosition());
+            coordinatesTransformer.PhysicsToCamera(physicalBody.bodyRAII->GetBody()->GetPosition());
 
-        weaponDirection.value = glm::normalize(lastMousePosInWindow - playerPosInWindow);
+        playerInfo.weaponDirection = glm::normalize(lastMousePosInWindow - playerPosInWindow);
     }
 }

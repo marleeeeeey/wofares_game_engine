@@ -3,7 +3,6 @@
 #include <ecs/systems/details/coordinates_transformer.h>
 #include <ecs/systems/details/physics_body_creator.h>
 
-
 ObjectsFactory::ObjectsFactory(entt::registry& registry)
   : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
     physicsWorld(gameState.physicsWorld)
@@ -18,11 +17,10 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& playerSdlWorldPos)
     glm::vec2 playerSdlBBox = playerSdlWorldSize - glm::vec2{gap, gap};
 
     auto entity = registry.create();
-    registry.emplace<SdlSizeComponent>(entity, playerSdlWorldSize);
-    registry.emplace<PlayerNumber>(entity);
-    registry.emplace<PlayersWeaponDirection>(entity);
+    registry.emplace<RenderingInfo>(entity, playerSdlWorldSize);
+    registry.emplace<PlayerInfo>(entity);
     auto playerPhysicsBody =
         CreateDynamicPhysicsBody(coordinatesTransformer, physicsWorld, playerSdlWorldPos, playerSdlBBox);
-    registry.emplace<PhysicalBody>(entity, playerPhysicsBody);
+    registry.emplace<PhysicsInfo>(entity, playerPhysicsBody);
     return entity;
 }

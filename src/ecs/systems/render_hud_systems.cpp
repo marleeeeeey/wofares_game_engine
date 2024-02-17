@@ -17,13 +17,13 @@ void RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
         gameState.controlOptions.reloadMap = true;
 
     // Caclulare count of tiles, players and dynamic bodies:
-    auto tiles = registry.view<TileInfo>();
-    auto players = registry.view<PlayerNumber>();
-    auto dynamicBodies = registry.view<PhysicalBody>();
+    auto tiles = registry.view<RenderingInfo>();
+    auto players = registry.view<PlayerInfo>();
+    auto dynamicBodies = registry.view<PhysicsInfo>();
     size_t dynamicBodiesCount = 0;
     for (auto entity : dynamicBodies)
     {
-        auto body = dynamicBodies.get<PhysicalBody>(entity).value->GetBody();
+        auto body = dynamicBodies.get<PhysicsInfo>(entity).bodyRAII->GetBody();
         if (body->GetType() == b2_dynamicBody)
             dynamicBodiesCount++;
     }

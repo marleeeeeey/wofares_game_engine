@@ -13,9 +13,11 @@ public:
     WeaponControlSystem(entt::registry& registry, Box2dEnttContactListener& contactListener);
     void Update(float deltaTime);
 private:
-    void ImpactTargetsInGrenadesExplosionRadius();
-private: // Helper methods.
+    void UpdateTimerExplosionComponents();
+    void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
+private: // Low level functions.
     std::vector<entt::entity> GetPhysicalBodiesNearGrenade(
         const b2Vec2& grenadePhysicsPos, float grenadeExplosionRadius);
-    void ApplyForceToPhysicalBodies(std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos);
+    void ApplyForceToPhysicalBodies(
+        std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force);
 };

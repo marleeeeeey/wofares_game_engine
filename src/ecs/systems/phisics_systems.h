@@ -14,6 +14,6 @@ public:
     PhysicsSystem(entt::registry& registry);
     void Update(float deltaTime);
 private:
-    void RemoveDistantObjectsSystem();
+    void RemoveDistantObjects();
     void UpdatePlayersWeaponDirection();
 };

@@ -1,4 +1,6 @@
 #include "player_control_systems.h"
+#include "entt/entity/fwd.hpp"
+#include "glm/fwd.hpp"
 #include <SDL.h>
 #include <ecs/components/game_components.h>
 #include <ecs/systems/details/coordinates_transformer.h>
@@ -8,7 +10,8 @@
 #include <utils/input_event_manager.h>
 
 PlayerControlSystem::PlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
-  : registry(registry), inputEventManager(inputEventManager)
+  : registry(registry), inputEventManager(inputEventManager), transformer(registry),
+    gameState(registry.get<GameState>(registry.view<GameState>().front()))
 {
     inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonHold,
@@ -30,11 +33,11 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
 
     auto& originalEvent = eventInfo.originalEvent;
 
-    const auto& players = registry.view<PlayerNumber, PhysicalBody>();
+    const auto& players = registry.view<PlayerInfo, PhysicsInfo>();
     for (auto entity : players)
     {
-        const auto& [playerNumber, physicalBody] = players.get<PlayerNumber, PhysicalBody>(entity);
-        auto body = physicalBody.value->GetBody();
+        const auto& [playerNumber, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
+        auto body = physicalBody.bodyRAII->GetBody();
         auto vel = body->GetLinearVelocity();
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W)
@@ -60,38 +63,35 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
     {
         auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
         auto physicsWorld = gameState.physicsWorld;
-        const auto& players = registry.view<PlayerNumber, PhysicalBody, PlayersWeaponDirection, SdlSizeComponent>();
+        const auto& players = registry.view<PlayerInfo, PhysicsInfo, RenderingInfo>();
         CoordinatesTransformer transformer(registry);
 
         for (auto entity : players)
         {
-            const auto& player = players.get<PhysicalBody>(entity).value;
-            const auto& weaponDirection = players.get<PlayersWeaponDirection>(entity).value;
-            const auto& playerSize = players.get<SdlSizeComponent>(entity).value;
-            auto playerBody = player->GetBody();
-
-            // Clamp the force to the maximum value.
-            float force = std::min(eventInfo.holdDuration * 10.0f, 3.0f);
-
-            // Rotate the force vector to the direction of the weapon.
-            b2Vec2 forceVec = b2Vec2(force, 0);
-            forceVec = b2Mul(b2Rot(atan2(weaponDirection.y, weaponDirection.x)), forceVec);
+            const auto& playerInfo = players.get<PlayerInfo>(entity);
+            const auto& playerBody = players.get<PhysicsInfo>(entity).bodyRAII->GetBody();
+            const auto& playerSize = players.get<RenderingInfo>(entity).sdlSize;
+            const auto& weaponDirection = playerInfo.weaponDirection;
 
             // Calculate the position of the grenade slightly in front of the player.
-            glm::vec2 granadeWorldSize(5.0f, 5.0f);
             glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
-            glm::vec2 granadeWorldPos = playerWorldPos + weaponDirection * playerSize.x / 1.5f;
+            glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x / 1.5f;
+            glm::vec2 projectileSize(5, 5);
 
-            // Create the grenade entity and set the physics body.
-            auto granadeEntity = registry.create();
-            auto granadePhysicsBody =
-                CreateDynamicPhysicsBody(transformer, physicsWorld, granadeWorldPos, granadeWorldSize);
-            registry.emplace<SdlSizeComponent>(granadeEntity, granadeWorldSize);
-            registry.emplace<PhysicalBody>(granadeEntity, granadePhysicsBody);
-            registry.emplace<Grenade>(granadeEntity);
+            // Spawn flying entity.
+            float force = std::min(eventInfo.holdDuration * 10.0f, 3.0f);
+            auto flyingEntity = SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
 
-            // Apply the force to the grenade.
-            granadePhysicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
+            // Apply the explosion component to the flying entity.
+            if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka)
+            {
+                registry.emplace<ContactExplosionComponent>(flyingEntity);
+            }
+            else if (playerInfo.currentWeapon == PlayerInfo::Weapon::Grenade)
+            {
+                registry.emplace<TimerExplosionComponent>(flyingEntity);
+                registry.emplace<ExplosionImpactComponent>(flyingEntity);
+            }
         }
     }
 }
@@ -100,19 +100,16 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
 {
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
-        auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
         auto physicsWorld = gameState.physicsWorld;
-        CoordinatesTransformer transformer(registry);
 
         auto windowPos = glm::vec2(event.button.x, event.button.y);
         auto worldPos = transformer.CameraToWorld(windowPos);
 
         auto entity = registry.create();
-        glm::vec2 size(10.0f, 10.0f);
-        auto physicsBody = CreateStaticPhysicsBody(transformer, physicsWorld, worldPos, size);
-        registry.emplace<SdlSizeComponent>(entity, size);
-        registry.emplace<PhysicalBody>(entity, physicsBody);
-        registry.emplace<Bridge>(entity);
+        glm::vec2 sdlSize(10.0f, 10.0f);
+        auto physicsBody = CreateStaticPhysicsBody(transformer, physicsWorld, worldPos, sdlSize);
+        registry.emplace<RenderingInfo>(entity, sdlSize, nullptr, SDL_Rect{}, ColorName::Green);
+        registry.emplace<PhysicsInfo>(entity, physicsBody);
     }
 };
 
@@ -120,20 +117,33 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const SDL_Event& event)
 {
     if (event.type == SDL_MOUSEMOTION)
     {
-        auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
-        const auto& players = registry.view<PlayerNumber, PlayersWeaponDirection, PhysicalBody>();
-        CoordinatesTransformer transformer(registry);
-
+        const auto& players = registry.view<PlayerInfo, PhysicsInfo>();
         for (auto entity : players)
         {
-            auto [playerNumber, direction, physicalBody] =
-                players.get<PlayerNumber, PlayersWeaponDirection, PhysicalBody>(entity);
-            auto playerBody = physicalBody.value->GetBody();
+            const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
+            auto playerBody = physicalBody.bodyRAII->GetBody();
 
             glm::vec2 mouseWindowPos{event.motion.x, event.motion.y};
             glm::vec2 playerWindowPos = transformer.PhysicsToCamera(playerBody->GetPosition());
             glm::vec2 directionVec = mouseWindowPos - playerWindowPos;
-            direction.value = glm::normalize(directionVec);
+            playerInfo.weaponDirection = glm::normalize(directionVec);
         }
     }
+};
+
+entt::entity PlayerControlSystem::SpawnFlyingEntity(
+    const glm::vec2& sdlPos, const glm::vec2& sdlSize, const glm::vec2& forceDirection, float force)
+{
+    // Create the flying entity.
+    auto flyingEntity = registry.create();
+    auto physicsBody = CreateDynamicPhysicsBody(transformer, gameState.physicsWorld, sdlPos, sdlSize);
+    registry.emplace<RenderingInfo>(flyingEntity, sdlSize);
+    registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
+
+    // Apply the force to the flying entity.
+    b2Vec2 forceVec = b2Vec2(force, 0);
+    forceVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), forceVec);
+    physicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
+
+    return flyingEntity;
 };

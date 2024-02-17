@@ -11,47 +11,32 @@ GameObjectsRenderer::GameObjectsRenderer(entt::registry& registry, SDL_Renderer*
     SDL_RenderClear(renderer);
 
     RenderTiles();
-    RenderGranades();
-    RenderBridges();
-    RenderPlayers();
+    RenderPlayerWeaponDirection();
 }
 
 void GameObjectsRenderer::RenderTiles()
 {
-    auto tilesView = registry.view<SdlSizeComponent, TileInfo, PhysicalBody>();
+    auto tilesView = registry.view<RenderingInfo, PhysicsInfo>();
     for (auto entity : tilesView)
     {
-        const auto& [size, tileInfo, physicalBody] = tilesView.get<SdlSizeComponent, TileInfo, PhysicalBody>(entity);
-        RenderTiledSquare(physicalBody.value, size.value, tileInfo);
+        const auto& [tileInfo, physicalBody] = tilesView.get<RenderingInfo, PhysicsInfo>(entity);
+        RenderTiledSquare(physicalBody.bodyRAII, tileInfo);
     }
 }
-void GameObjectsRenderer::RenderPlayers()
+
+void GameObjectsRenderer::RenderPlayerWeaponDirection()
 {
-    auto players = registry.view<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayersWeaponDirection>();
+    auto players = registry.view<PhysicsInfo, RenderingInfo, PlayerInfo>();
     for (auto entity : players)
     {
-        auto [physicalBody, playerSize, playerNumber, weaponDirection] =
-            players.get<PhysicalBody, SdlSizeComponent, PlayerNumber, PlayersWeaponDirection>(entity);
-
-        // Draw the player.
-        glm::vec2 playerWorldPos = coordinatesTransformer.PhysicsToWorld(physicalBody.value->GetBody()->GetPosition());
-        glm::vec2 playerWorldSize = playerSize.value;
-        RenderSquare(playerWorldPos, playerWorldSize, ColorName::Blue, 0);
+        auto [physicalBody, renderingInfo, playerInfo] = players.get<PhysicsInfo, RenderingInfo, PlayerInfo>(entity);
 
         // Draw the weapon.
-        glm::vec2 weaponWorldSize = playerSize.value / 2.0f;
-        glm::vec2 weaponWorldPos = playerWorldPos + weaponDirection.value * playerWorldSize / 2;
+        const glm::vec2 playerSdlPos =
+            coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
+        glm::vec2 weaponWorldSize = renderingInfo.sdlSize / 2.0f;
+        glm::vec2 weaponWorldPos = playerSdlPos + playerInfo.weaponDirection * renderingInfo.sdlSize / 2;
         RenderSquare(weaponWorldPos, weaponWorldSize, ColorName::Red, 0);
-    }
-}
-
-void GameObjectsRenderer::RenderGranades()
-{
-    auto granades = registry.view<PhysicalBody, SdlSizeComponent, Grenade>();
-    for (auto entity : granades)
-    {
-        const auto& [physicalBody, size] = granades.get<PhysicalBody, SdlSizeComponent>(entity);
-        RenderSquare(physicalBody.value, size.value, ColorName::Red);
     }
 }
 
@@ -85,13 +70,21 @@ void GameObjectsRenderer::RenderSquare(std::shared_ptr<Box2dObjectRAII> body, co
     RenderSquare(sdlPos, sdlSize, color, angle);
 }
 
-void GameObjectsRenderer::RenderTiledSquare(
-    std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, const TileInfo& tileInfo)
+void GameObjectsRenderer::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo)
 {
     const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     const float angle = body->GetBody()->GetAngle();
 
+    auto sdlSize = tileInfo.sdlSize;
     SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
+
+    if (!tileInfo.texturePtr)
+    {
+        SetRenderDrawColor(renderer, tileInfo.colorName);
+        // TODO implement texture and angle support for non tiled objects.
+        SDL_RenderFillRect(renderer, &destRect);
+        return;
+    }
 
     // Calculate the angle in degrees.
     SDL_Point center = {destRect.w / 2, destRect.h / 2};
@@ -99,15 +92,5 @@ void GameObjectsRenderer::RenderTiledSquare(
 
     // Render the tile with the calculated angle.
     SDL_RenderCopyEx(
-        renderer, tileInfo.texture->get(), &tileInfo.srcRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
-}
-
-void GameObjectsRenderer::RenderBridges()
-{
-    auto bridges = registry.view<PhysicalBody, SdlSizeComponent, Bridge>();
-    for (auto entity : bridges)
-    {
-        const auto& [physicalBody, size] = bridges.get<PhysicalBody, SdlSizeComponent>(entity);
-        RenderSquare(physicalBody.value, size.value, ColorName::Purple);
-    }
+        renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
 }

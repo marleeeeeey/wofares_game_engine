@@ -7,7 +7,6 @@
 #include <utils/glm_box2d_conversions.h>
 #include <utils/texture_process.h>
 
-
 MapLoader::MapLoader(const std::string& filename, entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
     objectsFactory(registry), coordinatesTransformer(registry)
@@ -151,8 +150,8 @@ void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
             glm::vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
 
             auto entity = registry.create();
-            registry.emplace<SdlSizeComponent>(entity, glm::vec2(miniWidth, miniHeight));
-            registry.emplace<TileInfo>(entity, tilesetTexture, miniTextureSrcRect);
+            registry.emplace<RenderingInfo>(
+                entity, glm::vec2(miniWidth, miniHeight), tilesetTexture, miniTextureSrcRect);
             auto tilePhysicsBody =
                 CreateStaticPhysicsBody(coordinatesTransformer, physicsWorld, miniTileWorldPosition, miniTileSize);
 
@@ -166,7 +165,7 @@ void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
             tilePhysicsBody->GetBody()->SetType(
                 utils::randomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
 
-            registry.emplace<PhysicalBody>(entity, tilePhysicsBody);
+            registry.emplace<PhysicsInfo>(entity, tilePhysicsBody);
 
             createdTiles++;
         }

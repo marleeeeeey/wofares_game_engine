@@ -5,12 +5,12 @@ void UnloadMap(entt::registry& registry)
     auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
     gameState.levelOptions.levelBox2dBounds = {};
 
-    // Remove all entities that have a TileInfo component.
-    for (auto entity : registry.view<TileInfo>())
+    // Remove all entities that have a RenderingInfo component.
+    for (auto entity : registry.view<RenderingInfo>())
         registry.destroy(entity);
 
     // Remove all entities that have a PhysicalBody component.
-    for (auto entity : registry.view<PhysicalBody>())
+    for (auto entity : registry.view<PhysicsInfo>())
         registry.destroy(entity);
 
     if (Box2dObjectRAII::GetBodyCounter() != 0)

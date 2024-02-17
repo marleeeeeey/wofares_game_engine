@@ -15,12 +15,10 @@ public:
     GameObjectsRenderer(entt::registry& registry, SDL_Renderer* renderer);
 private: // Render game objects methods.
     void RenderTiles();
-    void RenderPlayers();
-    void RenderGranades();
-    void RenderBridges();
-private: // Render helpers.
+    void RenderPlayerWeaponDirection();
+private: // Render helpers. TODO: check if items can be removed.
     void RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color);
-    void RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, const TileInfo& tileInfo);
+    void RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo);
     SDL_Rect GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize);
 };
