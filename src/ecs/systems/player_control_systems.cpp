@@ -11,7 +11,7 @@
 
 PlayerControlSystem::PlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
   : registry(registry), inputEventManager(inputEventManager), transformer(registry),
-    gameState(registry.get<GameState>(registry.view<GameState>().front()))
+    gameState(registry.get<GameState>(registry.view<GameState>().front())), box2dBodyCreator(registry)
 {
     inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonHold,
@@ -108,7 +108,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
 
         auto entity = registry.create();
         glm::vec2 sdlSize(10.0f, 10.0f);
-        auto physicsBody = CreateStaticPhysicsBody(entity, transformer, physicsWorld, worldPos, sdlSize);
+        auto physicsBody = box2dBodyCreator.CreateStaticPhysicsBody(entity, worldPos, sdlSize);
         registry.emplace<RenderingInfo>(entity, sdlSize, nullptr, SDL_Rect{}, ColorName::Green);
         registry.emplace<PhysicsInfo>(entity, physicsBody);
     }
@@ -137,7 +137,7 @@ entt::entity PlayerControlSystem::SpawnFlyingEntity(
 {
     // Create the flying entity.
     auto flyingEntity = registry.create();
-    auto physicsBody = CreateDynamicPhysicsBody(flyingEntity, transformer, gameState.physicsWorld, sdlPos, sdlSize);
+    auto physicsBody = box2dBodyCreator.CreateDynamicPhysicsBody(flyingEntity, sdlPos, sdlSize);
     registry.emplace<RenderingInfo>(flyingEntity, sdlSize);
     registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
 

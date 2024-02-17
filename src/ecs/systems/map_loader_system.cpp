@@ -151,6 +151,8 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
 
     SDL_Rect textureSrcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
 
+    Box2dBodyCreator box2dBodyCreator(registry);
+
     // Create entities for each mini tile inside the tile.
     for (int miniRow = 0; miniRow < colAndRowNumber; ++miniRow)
     {
@@ -174,8 +176,8 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             auto entity = registry.create();
             registry.emplace<RenderingInfo>(
                 entity, glm::vec2(miniWidth, miniHeight), tilesetTexture, miniTextureSrcRect);
-            auto tilePhysicsBody = CreateStaticPhysicsBody(
-                entity, coordinatesTransformer, physicsWorld, miniTileWorldPosition, miniTileSize);
+            auto tilePhysicsBody =
+                box2dBodyCreator.CreateStaticPhysicsBody(entity, miniTileWorldPosition, miniTileSize);
 
             // Update level bounds.
             const b2Vec2& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();

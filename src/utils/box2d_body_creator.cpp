@@ -1,8 +1,12 @@
 #include "box2d_body_creator.h"
 
-std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
-    entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
-    const glm::vec2& sdlPos, const glm::vec2& sdlSize)
+Box2dBodyCreator::Box2dBodyCreator(entt::registry& registry)
+  : physicsWorld(registry.get<GameState>(registry.view<GameState>().front()).physicsWorld),
+    coordinatesTransformer(registry)
+{}
+
+std::shared_ptr<Box2dObjectRAII> Box2dBodyCreator::CreateStaticPhysicsBody(
+    entt::entity entity, const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
     b2BodyDef bodyDef;
     bodyDef.type = b2_staticBody;
@@ -27,11 +31,10 @@ std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
     return std::make_shared<Box2dObjectRAII>(body, physicsWorld);
 }
 
-std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
-    entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
-    const glm::vec2& sdlPos, const glm::vec2& sdlSize)
+std::shared_ptr<Box2dObjectRAII> Box2dBodyCreator::CreateDynamicPhysicsBody(
+    entt::entity entity, const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
-    auto staticBody = CreateStaticPhysicsBody(entity, coordinatesTransformer, physicsWorld, sdlPos, sdlSize);
+    auto staticBody = CreateStaticPhysicsBody(entity, sdlPos, sdlSize);
     staticBody->GetBody()->SetType(b2_dynamicBody);
     return staticBody;
 }

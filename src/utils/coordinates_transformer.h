@@ -10,7 +10,7 @@
 // 3. Physics (box2d) coordinates.
 class CoordinatesTransformer
 {
-    GameState& gameState;
+    const GameState& gameState;
     const float box2DtoSDL;
     const float sdlToBox2D;
 public:

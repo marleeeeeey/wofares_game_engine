@@ -2,8 +2,10 @@
 #include "entt/entity/fwd.hpp"
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include <utils/box2d_body_creator.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/input_event_manager.h>
+
 
 class PlayerControlSystem
 {
@@ -11,6 +13,7 @@ class PlayerControlSystem
     InputEventManager& inputEventManager;
     GameState& gameState;
     CoordinatesTransformer transformer; // TODO: think to put it in the GameState class.
+    Box2dBodyCreator box2dBodyCreator;
 public:
     PlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager);
 private: // Callbacks for the InputEventManager.

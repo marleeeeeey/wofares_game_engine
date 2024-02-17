@@ -5,12 +5,11 @@
 
 ObjectsFactory::ObjectsFactory(entt::registry& registry)
   : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
-    physicsWorld(gameState.physicsWorld)
+    physicsWorld(gameState.physicsWorld), box2dBodyCreator(registry)
 {}
 
 entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
 {
-    CoordinatesTransformer coordinatesTransformer(registry);
     auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
 
     glm::vec2 playerSdlSize{10, 10};
@@ -19,8 +18,7 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
     auto entity = registry.create();
     registry.emplace<RenderingInfo>(entity, playerSdlSize);
     registry.emplace<PlayerInfo>(entity);
-    auto playerPhysicsBody =
-        CreateDynamicPhysicsBody(entity, coordinatesTransformer, physicsWorld, sdlPos, playerSdlBBox);
+    auto playerPhysicsBody = box2dBodyCreator.CreateDynamicPhysicsBody(entity, sdlPos, playerSdlBBox);
     registry.emplace<PhysicsInfo>(entity, playerPhysicsBody);
     return entity;
 }

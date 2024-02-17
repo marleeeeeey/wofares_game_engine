@@ -4,14 +4,18 @@
 #include <utils/box2d_RAII.h>
 #include <utils/coordinates_transformer.h>
 
-// Convert from SDL to Box2D system.
-// entity is used to store entity in the physics body.
-std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
-    entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
-    const glm::vec2& sdlPos, const glm::vec2& sdlSize);
+class Box2dBodyCreator
+{
+    const std::shared_ptr<b2World> physicsWorld;
+    CoordinatesTransformer coordinatesTransformer;
+public:
+    Box2dBodyCreator(entt::registry& registry);
 
-// Convert from SDL to Box2D system.
-// entity is used to store entity in the physics body.
-std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
-    entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
-    const glm::vec2& sdlPos, const glm::vec2& sdlSize);
+    // entity is used to store entity in the physics body.
+    std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
+        entt::entity entity, const glm::vec2& sdlPos, const glm::vec2& sdlSize);
+
+    // entity is used to store entity in the physics body.
+    std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
+        entt::entity entity, const glm::vec2& sdlPos, const glm::vec2& sdlSize);
+};
