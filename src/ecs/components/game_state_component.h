@@ -13,7 +13,7 @@ struct LevelOptions
 {
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
-    float dynamicBodyProbability{0.3f};
+    float dynamicBodyProbability{0.0f};
     size_t miniTileResolution{4};
     bool preventCreationInvisibleTiles{false};
 };

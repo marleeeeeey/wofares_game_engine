@@ -1,7 +1,7 @@
 #include "physics_body_creator.h"
 
 std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
-    const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
+    entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
     const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
     b2BodyDef bodyDef;
@@ -9,6 +9,9 @@ std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
     b2Vec2 physicalPos = coordinatesTransformer.WorldToPhysics(sdlPos);
     bodyDef.position.Set(physicalPos.x, physicalPos.y);
     b2Body* body = physicsWorld->CreateBody(&bodyDef);
+
+    // Set the entity to the Box2D body user data. It will be used to get the entity from the Box2D body.
+    body->GetUserData().pointer = static_cast<uintptr_t>(entity);
 
     b2PolygonShape shape;
     b2Vec2 physicalSize = coordinatesTransformer.WorldToPhysics(sdlSize);
@@ -24,10 +27,10 @@ std::shared_ptr<Box2dObjectRAII> CreateStaticPhysicsBody(
 }
 
 std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
-    const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
+    entt::entity entity, const CoordinatesTransformer& coordinatesTransformer, std::shared_ptr<b2World> physicsWorld,
     const glm::vec2& sdlPos, const glm::vec2& sdlSize)
 {
-    auto staticBody = CreateStaticPhysicsBody(coordinatesTransformer, physicsWorld, sdlPos, sdlSize);
+    auto staticBody = CreateStaticPhysicsBody(entity, coordinatesTransformer, physicsWorld, sdlPos, sdlSize);
     staticBody->GetBody()->SetType(b2_dynamicBody);
     return staticBody;
 }

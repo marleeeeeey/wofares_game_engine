@@ -75,7 +75,7 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
 
             // Calculate the position of the grenade slightly in front of the player.
             glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
-            glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x / 1.5f;
+            glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x;
             glm::vec2 projectileSize(5, 5);
 
             // Spawn flying entity.
@@ -86,6 +86,7 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
             if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka)
             {
                 registry.emplace<ContactExplosionComponent>(flyingEntity);
+                registry.emplace<ExplosionImpactComponent>(flyingEntity);
             }
             else if (playerInfo.currentWeapon == PlayerInfo::Weapon::Grenade)
             {
@@ -107,7 +108,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
 
         auto entity = registry.create();
         glm::vec2 sdlSize(10.0f, 10.0f);
-        auto physicsBody = CreateStaticPhysicsBody(transformer, physicsWorld, worldPos, sdlSize);
+        auto physicsBody = CreateStaticPhysicsBody(entity, transformer, physicsWorld, worldPos, sdlSize);
         registry.emplace<RenderingInfo>(entity, sdlSize, nullptr, SDL_Rect{}, ColorName::Green);
         registry.emplace<PhysicsInfo>(entity, physicsBody);
     }
@@ -136,7 +137,7 @@ entt::entity PlayerControlSystem::SpawnFlyingEntity(
 {
     // Create the flying entity.
     auto flyingEntity = registry.create();
-    auto physicsBody = CreateDynamicPhysicsBody(transformer, gameState.physicsWorld, sdlPos, sdlSize);
+    auto physicsBody = CreateDynamicPhysicsBody(flyingEntity, transformer, gameState.physicsWorld, sdlPos, sdlSize);
     registry.emplace<RenderingInfo>(flyingEntity, sdlSize);
     registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
 

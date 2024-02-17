@@ -1,4 +1,5 @@
 #include "box2d_entt_contact_listener.h"
+#include "my_common_cpp_utils/Logger.h"
 
 Box2dEnttContactListener::Box2dEnttContactListener(entt::registry& registry) : registry(registry)
 {}
@@ -36,6 +37,7 @@ std::optional<std::pair<entt::entity, entt::entity>> Box2dEnttContactListener::G
     auto pointerB = bodyB->GetUserData().pointer;
     if (pointerA == 0 || pointerB == 0)
     {
+        MY_LOG_FMT(warn, "One of the bodies has no user data. pointerA: {}, pointerB: {}", pointerA, pointerB);
         return std::nullopt;
     }
 
@@ -47,6 +49,7 @@ std::optional<std::pair<entt::entity, entt::entity>> Box2dEnttContactListener::G
         return std::make_pair(entityA, entityB);
     }
 
+    MY_LOG_FMT(warn, "One of the entities is not valid. entityA: {}, entityB: {}", entityA, entityB);
     return std::nullopt;
 }
 
@@ -55,9 +58,11 @@ void Box2dEnttContactListener::SubscribeContact(ContactType contactType, Contact
     if (contactType == ContactType::Begin)
     {
         beginContactListeners.push_back(listener);
+        MY_LOG_FMT(info, "Subscribed to begin contact listener. Count of listeners: {}", beginContactListeners.size());
     }
     else
     {
         endContactListeners.push_back(listener);
+        MY_LOG_FMT(info, "Subscribed to end contact listener. Count of listeners: {}", endContactListeners.size());
     }
 }

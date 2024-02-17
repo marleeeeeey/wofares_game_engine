@@ -152,8 +152,8 @@ void MapLoader::ParseTile(int tileId, int layerCol, int layerRow)
             auto entity = registry.create();
             registry.emplace<RenderingInfo>(
                 entity, glm::vec2(miniWidth, miniHeight), tilesetTexture, miniTextureSrcRect);
-            auto tilePhysicsBody =
-                CreateStaticPhysicsBody(coordinatesTransformer, physicsWorld, miniTileWorldPosition, miniTileSize);
+            auto tilePhysicsBody = CreateStaticPhysicsBody(
+                entity, coordinatesTransformer, physicsWorld, miniTileWorldPosition, miniTileSize);
 
             // Update level bounds.
             const b2Vec2& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();

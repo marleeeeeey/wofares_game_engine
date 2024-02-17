@@ -15,16 +15,13 @@ WeaponControlSystem::WeaponControlSystem(entt::registry& registry_, Box2dEnttCon
         {
             bool isEntityABazooka = registry.all_of<ContactExplosionComponent>(entityA);
             bool isEntityBBazooka = registry.all_of<ContactExplosionComponent>(entityB);
-            if (isEntityABazooka && isEntityBBazooka)
-                return;
 
-            auto entityBazooka = isEntityABazooka ? entityA : entityB;
-            auto entityTarget = isEntityABazooka ? entityB : entityA;
-
-            if (registry.all_of<RenderingInfo>(entityTarget))
-            {
-                OnBazookaContactWithTile(entityBazooka, entityTarget);
-            }
+            // Update Box2D object is not allowed in the contact listener. Because Box2D is in simulation step.
+            // So, we need to store entities in the queue and update them in the main loop.
+            if (registry.all_of<ContactExplosionComponent>(entityA))
+                explosionEntities.push(entityA);
+            if (registry.all_of<ContactExplosionComponent>(entityB))
+                explosionEntities.push(entityB);
         });
 }
 
@@ -38,18 +35,8 @@ void WeaponControlSystem::UpdateTimerExplosionComponents()
 
         if (timerExplosion.timeToExplode <= 0.0f)
         {
-            // try to get explosion impact component and physics info.
-            auto explosionImpact = registry.try_get<ExplosionImpactComponent>(timerEntity);
-            auto physicsInfo = registry.try_get<PhysicsInfo>(timerEntity);
-            if (explosionImpact && physicsInfo)
-            {
-                const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
-                auto physicalBodiesNearGrenade =
-                    GetPhysicalBodiesNearGrenade(grenadePhysicsPos, explosionImpact->radius);
-                ApplyForceToPhysicalBodies(physicalBodiesNearGrenade, grenadePhysicsPos, explosionImpact->force);
-            }
-
-            registry.destroy(timerEntity); // Удаление сущности
+            TryToRunExplosionImpactComponent(timerEntity);
+            registry.destroy(timerEntity);
         }
     }
 }
@@ -98,9 +85,31 @@ void WeaponControlSystem::Update(float deltaTime)
 {
     this->deltaTime = deltaTime;
     UpdateTimerExplosionComponents();
+    ProcessExplosionEntitiesQueue();
 }
 
 void WeaponControlSystem::OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity)
 {
     MY_LOG(info, "Bazooka contact with tile");
+};
+
+void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosionEntity)
+{
+    auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
+    auto physicsInfo = registry.try_get<PhysicsInfo>(explosionEntity);
+    if (explosionImpact && physicsInfo)
+    {
+        const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
+        auto physicalBodiesNearGrenade = GetPhysicalBodiesNearGrenade(grenadePhysicsPos, explosionImpact->radius);
+        ApplyForceToPhysicalBodies(physicalBodiesNearGrenade, grenadePhysicsPos, explosionImpact->force);
+    }
+};
+void WeaponControlSystem::ProcessExplosionEntitiesQueue()
+{
+    while (!explosionEntities.empty())
+    {
+        auto entity = explosionEntities.front();
+        TryToRunExplosionImpactComponent(entity);
+        explosionEntities.pop();
+    }
 };

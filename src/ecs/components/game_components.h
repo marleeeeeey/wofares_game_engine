@@ -28,7 +28,7 @@ struct PlayerInfo
     };
 
     size_t number = 0;
-    Weapon currentWeapon = Weapon::Grenade;
+    Weapon currentWeapon = Weapon::Bazooka;
     glm::vec2 weaponDirection = {1, 0};
     float timeToReload = 1.0f; // Time in seconds to reload the weapon. TODO: think how to use it.
 };
