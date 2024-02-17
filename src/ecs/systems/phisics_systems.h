@@ -16,4 +16,5 @@ public:
 private:
     void RemoveDistantObjects();
     void UpdatePlayersWeaponDirection();
+    void UpdateCollisionDisableTimerComponent(float deltaTime);
 };

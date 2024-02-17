@@ -24,4 +24,6 @@ private: // Low level functions.
         const b2Vec2& grenadePhysicsPos, float grenadeExplosionRadius);
     void ApplyForceToPhysicalBodies(
         std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force);
+    // Disable collisions after some time.
+    void StartCollisionDisableTimer(const std::vector<entt::entity>& physicalEntities);
 };

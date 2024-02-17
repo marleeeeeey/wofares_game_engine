@@ -3,6 +3,7 @@
 #include "utils/box2d_entt_contact_listener.h"
 #include <ecs/components/game_components.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>
 
 WeaponControlSystem::WeaponControlSystem(entt::registry& registry_, Box2dEnttContactListener& contactListener)
@@ -36,7 +37,6 @@ void WeaponControlSystem::UpdateTimerExplosionComponents()
         if (timerExplosion.timeToExplode <= 0.0f)
         {
             TryToRunExplosionImpactComponent(timerEntity);
-            registry.destroy(timerEntity);
         }
     }
 }
@@ -100,8 +100,10 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
     if (explosionImpact && physicsInfo)
     {
         const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
-        auto physicalBodiesNearGrenade = GetPhysicalBodiesNearGrenade(grenadePhysicsPos, explosionImpact->radius);
-        ApplyForceToPhysicalBodies(physicalBodiesNearGrenade, grenadePhysicsPos, explosionImpact->force);
+        auto entitiesUnderExploisonImpact = GetPhysicalBodiesNearGrenade(grenadePhysicsPos, explosionImpact->radius);
+        ApplyForceToPhysicalBodies(entitiesUnderExploisonImpact, grenadePhysicsPos, explosionImpact->force);
+        StartCollisionDisableTimer(entitiesUnderExploisonImpact);
+        registry.destroy(explosionEntity);
     }
 };
 void WeaponControlSystem::ProcessExplosionEntitiesQueue()
@@ -111,5 +113,17 @@ void WeaponControlSystem::ProcessExplosionEntitiesQueue()
         auto entity = explosionEntities.front();
         TryToRunExplosionImpactComponent(entity);
         explosionEntities.pop();
+    }
+};
+
+void WeaponControlSystem::StartCollisionDisableTimer(const std::vector<entt::entity>& physicalEntities)
+{
+    for (auto& entity : physicalEntities)
+    {
+        // Exclude players from the list.
+        if (registry.any_of<PlayerInfo>(entity))
+            continue;
+
+        registry.emplace_or_replace<CollisionDisableTimerComponent>(entity);
     }
 };

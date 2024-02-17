@@ -41,6 +41,11 @@ struct PhysicsInfo
     std::shared_ptr<Box2dObjectRAII> bodyRAII;
 };
 
+struct CollisionDisableTimerComponent
+{
+    float timeToDisableCollision = 2.5f; // Time in seconds to disable collision.
+};
+
 // ********************************* Weapon components *********************************
 
 // Like a grenade. Explodes after a certain time.
