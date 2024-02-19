@@ -8,10 +8,22 @@ void Box2dEnttContactListener::BeginContact(b2Contact* contact)
 {
     if (auto validEntities = GetValidEntities(contact))
     {
-        auto [entityA, entityB] = *validEntities;
-        for (auto& listener : beginContactListeners)
+        auto [entityWithPropsA, entityWithPropsB] = *validEntities;
+
+        for (auto& listener : contactListenersByType[ContactType::Begin])
         {
-            listener(entityA, entityB);
+            if (!entityWithPropsA.isSensor && !entityWithPropsB.isSensor)
+            {
+                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+            }
+        }
+
+        for (auto& listener : contactListenersByType[ContactType::BeginSensor])
+        {
+            if (entityWithPropsA.isSensor || entityWithPropsB.isSensor)
+            {
+                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+            }
         }
     }
 }
@@ -20,18 +32,34 @@ void Box2dEnttContactListener::EndContact(b2Contact* contact)
 {
     if (auto validEntities = GetValidEntities(contact))
     {
-        auto [entityA, entityB] = *validEntities;
-        for (auto& listener : endContactListeners)
+        auto [entityWithPropsA, entityWithPropsB] = *validEntities;
+
+        for (auto& listener : contactListenersByType[ContactType::End])
         {
-            listener(entityA, entityB);
+            if (!entityWithPropsA.isSensor && !entityWithPropsB.isSensor)
+            {
+                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+            }
+        }
+
+        for (auto& listener : contactListenersByType[ContactType::EndSensor])
+        {
+            if (entityWithPropsA.isSensor || entityWithPropsB.isSensor)
+            {
+                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+            }
         }
     }
 }
 
-std::optional<std::pair<entt::entity, entt::entity>> Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
+std::optional<std::pair<Box2dEnttContactListener::EntityWithProperties, Box2dEnttContactListener::EntityWithProperties>>
+Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
 {
-    auto* bodyA = contact->GetFixtureA()->GetBody();
-    auto* bodyB = contact->GetFixtureB()->GetBody();
+    b2Body* bodyA = contact->GetFixtureA()->GetBody();
+    b2Body* bodyB = contact->GetFixtureB()->GetBody();
+
+    b2Fixture* fixtureA = contact->GetFixtureA();
+    b2Fixture* fixtureB = contact->GetFixtureB();
 
     auto pointerA = bodyA->GetUserData().pointer;
     auto pointerB = bodyB->GetUserData().pointer;
@@ -46,7 +74,9 @@ std::optional<std::pair<entt::entity, entt::entity>> Box2dEnttContactListener::G
 
     if (registry.valid(entityA) && registry.valid(entityB))
     {
-        return std::make_pair(entityA, entityB);
+        EntityWithProperties entityWithPropertiesA{fixtureA->IsSensor(), entityA};
+        EntityWithProperties entityWithPropertiesB{fixtureB->IsSensor(), entityB};
+        return std::make_pair(entityWithPropertiesA, entityWithPropertiesB);
     }
 
     MY_LOG_FMT(debug, "One of the entities is not valid. entityA: {}, entityB: {}", entityA, entityB);
@@ -55,14 +85,5 @@ std::optional<std::pair<entt::entity, entt::entity>> Box2dEnttContactListener::G
 
 void Box2dEnttContactListener::SubscribeContact(ContactType contactType, ContactListener listener)
 {
-    if (contactType == ContactType::Begin)
-    {
-        beginContactListeners.push_back(listener);
-        MY_LOG_FMT(info, "Subscribed to begin contact listener. Count of listeners: {}", beginContactListeners.size());
-    }
-    else
-    {
-        endContactListeners.push_back(listener);
-        MY_LOG_FMT(info, "Subscribed to end contact listener. Count of listeners: {}", endContactListeners.size());
-    }
+    contactListenersByType[contactType].push_back(listener);
 }

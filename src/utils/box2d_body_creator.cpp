@@ -1,4 +1,5 @@
 #include "box2d_body_creator.h"
+#include "box2d/b2_polygon_shape.h"
 
 Box2dBodyCreator::Box2dBodyCreator(entt::registry& registry)
   : physicsWorld(registry.get<GameState>(registry.view<GameState>().front()).physicsWorld),
@@ -38,3 +39,23 @@ std::shared_ptr<Box2dObjectRAII> Box2dBodyCreator::CreateDynamicPhysicsBody(
     staticBody->GetBody()->SetType(b2_dynamicBody);
     return staticBody;
 }
+
+void Box2dBodyCreator::AddThinSensorBelowTheBody(
+    std::shared_ptr<Box2dObjectRAII> box2dObjectRAII, const glm::vec2& sdlSize)
+{
+    b2PolygonShape sensorShape;
+    b2Vec2 physicalSize = coordinatesTransformer.WorldToPhysics(sdlSize);
+    float hw = physicalSize.x / 2.0f;
+    float hh = 0.1f;
+    // Move center of polygon to the bottom of the body. Slighly above the ground.
+    b2Vec2 center(0, physicalSize.y / 2.0f);
+    float angle = 0;
+    sensorShape.SetAsBox(hw, hh, center, angle);
+
+    b2FixtureDef sensorDef;
+    sensorDef.shape = &sensorShape;
+    sensorDef.isSensor = true;
+
+    // Add a sensor to the body below the body.
+    box2dObjectRAII->GetBody()->CreateFixture(&sensorDef);
+};

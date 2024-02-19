@@ -31,7 +31,7 @@ struct PlayerInfo
     Weapon currentWeapon = Weapon::Bazooka;
     glm::vec2 weaponDirection = {1, 0};
     float timeToReload = 1.0f; // Time in seconds to reload the weapon. TODO: think how to use it.
-    bool canJump = false; // Flag indicating whether the player can jump.
+    size_t countOfGroundContacts = false; // Flag indicating whether the player can jump.
 };
 
 // ********************************* Physics components *********************************
@@ -44,7 +44,7 @@ struct PhysicsInfo
 
 struct CollisionDisableTimerComponent
 {
-    float timeToDisableCollision = 2.5f; // Time in seconds to disable collision.
+    float timeToDisableCollision = 1.1f; // Time in seconds to disable collision.
 };
 
 // ********************************* Weapon components *********************************

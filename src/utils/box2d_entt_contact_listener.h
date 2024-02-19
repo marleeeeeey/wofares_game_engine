@@ -23,7 +23,16 @@ public:
     enum class ContactType
     {
         Begin,
-        End
+        End,
+        BeginSensor,
+        EndSensor,
+    };
+private:
+    struct EntityWithProperties
+    {
+        // Sensors in my game is thin rects below the player. Uses to determine if the entity on the floor.
+        bool isSensor;
+        entt::entity entity;
     };
 public:
     Box2dEnttContactListener(entt::registry& registry);
@@ -36,9 +45,8 @@ private:
 private: // Interacting with Box2D. These methods are called by Box2D during the simulation.
     void BeginContact(b2Contact* contact) override;
     void EndContact(b2Contact* contact) override;
-    std::optional<std::pair<entt::entity, entt::entity>> GetValidEntities(b2Contact* contact);
+    std::optional<std::pair<EntityWithProperties, EntityWithProperties>> GetValidEntities(b2Contact* contact);
 private:
     entt::registry& registry;
-    std::vector<ContactListener> beginContactListeners;
-    std::vector<ContactListener> endContactListeners;
+    std::unordered_map<ContactType, std::vector<ContactListener>> contactListenersByType;
 };

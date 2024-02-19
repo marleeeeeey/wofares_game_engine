@@ -18,4 +18,6 @@ public:
     // entity is used to store entity in the physics body.
     std::shared_ptr<Box2dObjectRAII> CreateDynamicPhysicsBody(
         entt::entity entity, const glm::vec2& sdlPos, const glm::vec2& sdlSize);
+
+    void AddThinSensorBelowTheBody(std::shared_ptr<Box2dObjectRAII>, const glm::vec2& sdlSize);
 };

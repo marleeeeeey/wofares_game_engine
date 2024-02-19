@@ -61,7 +61,7 @@ int main(int argc, char* args[])
         EventQueueSystem eventQueueSystem(inputEventManager);
 
         // Subscribe all systems that need to handle input events.
-        PlayerControlSystem playerControlSystem(registry, inputEventManager);
+        PlayerControlSystem playerControlSystem(registry, inputEventManager, contactListener);
         CameraControlSystem cameraControlSystem(registry, inputEventManager);
         GameStateControlSystem gameStateControlSystem(registry, inputEventManager);
 

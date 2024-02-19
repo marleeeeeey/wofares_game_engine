@@ -9,9 +9,11 @@
 #include <utils/coordinates_transformer.h>
 #include <utils/input_event_manager.h>
 
-PlayerControlSystem::PlayerControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
+PlayerControlSystem::PlayerControlSystem(
+    entt::registry& registry, InputEventManager& inputEventManager, Box2dEnttContactListener& contactListener)
   : registry(registry), inputEventManager(inputEventManager), transformer(registry),
-    gameState(registry.get<GameState>(registry.view<GameState>().front())), box2dBodyCreator(registry)
+    gameState(registry.get<GameState>(registry.view<GameState>().front())), box2dBodyCreator(registry),
+    contactListener(contactListener)
 {
     inputEventManager.SubscribeСontinuousListener(
         InputEventManager::EventType::ButtonHold,
@@ -24,6 +26,14 @@ PlayerControlSystem::PlayerControlSystem(entt::registry& registry, InputEventMan
     inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandlePlayerBuildingAction(event); });
 
     inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandlePlayerWeaponDirection(event); });
+
+    // Subscribe to the contact listener to handle the ground contact flag.
+    contactListener.SubscribeContact(
+        Box2dEnttContactListener::ContactType::BeginSensor,
+        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerBeginSensorContact(entityA, entityB); });
+    contactListener.SubscribeContact(
+        Box2dEnttContactListener::ContactType::EndSensor,
+        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerEndSensorContact(entityA, entityB); });
 }
 
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
@@ -147,4 +157,26 @@ entt::entity PlayerControlSystem::SpawnFlyingEntity(
     physicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
 
     return flyingEntity;
+};
+
+void PlayerControlSystem::HandlePlayerEndSensorContact(entt::entity entityA, entt::entity entityB)
+{
+    SetGroundContactFlagIfPlayer(entityA, false);
+    SetGroundContactFlagIfPlayer(entityB, false);
+};
+
+void PlayerControlSystem::HandlePlayerBeginSensorContact(entt::entity entityA, entt::entity entityB)
+{
+    SetGroundContactFlagIfPlayer(entityA, true);
+    SetGroundContactFlagIfPlayer(entityB, true);
+};
+
+void PlayerControlSystem::SetGroundContactFlagIfPlayer(entt::entity entity, bool value)
+{
+    auto playerInfo = registry.try_get<PlayerInfo>(entity);
+    if (playerInfo)
+    {
+        playerInfo->countOfGroundContacts += value ? 1 : -1;
+        MY_LOG_FMT(info, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
+    }
 };
