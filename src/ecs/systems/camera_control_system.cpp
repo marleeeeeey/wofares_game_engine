@@ -4,7 +4,8 @@
 #include <ecs/components/game_state_component.h>
 
 CameraControlSystem::CameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
-  : registry(registry), inputEventManager(inputEventManager)
+  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+    inputEventManager(inputEventManager), transformer(registry)
 {
     inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandleCameraMovementAndScale(event); });
     inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandleMouseScreenPosition(event); });
@@ -31,10 +32,10 @@ void CameraControlSystem::HandleCameraMovementAndScale(const SDL_Event& event)
 
         glm::vec2 mouseWorldBeforeZoom =
             (glm::vec2(mouseX, mouseY) - gameState.windowOptions.windowSize * 0.5f) / prevScale +
-            gameState.windowOptions.cameraCenter;
+            gameState.windowOptions.cameraCenterSdl;
 
         // Calculate the new position of the camera so that the point under the cursor remains in the same place
-        gameState.windowOptions.cameraCenter = mouseWorldBeforeZoom -
+        gameState.windowOptions.cameraCenterSdl = mouseWorldBeforeZoom -
             (glm::vec2(mouseX, mouseY) - gameState.windowOptions.windowSize * 0.5f) /
                 gameState.windowOptions.cameraScale;
     }
@@ -50,8 +51,8 @@ void CameraControlSystem::HandleCameraMovementAndScale(const SDL_Event& event)
     {
         float deltaX = event.motion.xrel / gameState.windowOptions.cameraScale;
         float deltaY = event.motion.yrel / gameState.windowOptions.cameraScale;
-        gameState.windowOptions.cameraCenter.x -= deltaX;
-        gameState.windowOptions.cameraCenter.y -= deltaY;
+        gameState.windowOptions.cameraCenterSdl.x -= deltaX;
+        gameState.windowOptions.cameraCenterSdl.y -= deltaY;
     }
 };
 
@@ -61,5 +62,36 @@ void CameraControlSystem::HandleMouseScreenPosition(const SDL_Event& event)
     if (event.type == SDL_MOUSEMOTION)
     {
         gameState.windowOptions.lastMousePosInWindow = glm::vec2(event.motion.x, event.motion.y);
+    }
+};
+
+void CameraControlSystem::Update(float deltaTime)
+{
+    if (!gameState.controlOptions.isSceneCaptured)
+        PosiotioningCameraToPlayer(deltaTime);
+};
+
+void CameraControlSystem::PosiotioningCameraToPlayer(float deltaTime)
+{
+    auto players = registry.view<PlayerInfo, PhysicsInfo>();
+    for (auto entity : players)
+    {
+        const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
+        auto playerBody = physicalBody.bodyRAII->GetBody();
+        auto playerPosSdl = transformer.PhysicsToWorld(playerBody->GetPosition());
+        auto& cameraCenterSdl = gameState.windowOptions.cameraCenterSdl;
+
+        // Smoothing factor (value between 0 and 1, where closer to 0 - smoother following)
+        float smoothFactor = 0.1f;
+
+        glm::vec2 diffSdl = playerPosSdl - cameraCenterSdl;
+        float distanceSdl = glm::length(diffSdl);
+
+        if (distanceSdl > 0.001f)
+        {
+            // "Ease out" interpolation
+            float factor = 1.0f - pow(1.0f - smoothFactor, deltaTime * 60.0f);
+            cameraCenterSdl += diffSdl * factor;
+        }
     }
 };

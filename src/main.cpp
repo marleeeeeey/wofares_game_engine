@@ -37,7 +37,7 @@ int main(int argc, char* args[])
 
         // Create a game state entity.
         auto& gameState = registry.emplace<GameState>(registry.create());
-        gameState.windowOptions.cameraCenter = gameState.windowOptions.windowSize / 2.0f;
+        gameState.windowOptions.cameraCenterSdl = gameState.windowOptions.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
         b2Vec2 gravity(0.0f, +9.8f);
@@ -96,6 +96,7 @@ int main(int argc, char* args[])
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);
             weaponControlSystem.Update(deltaTime);
+            cameraControlSystem.Update(deltaTime);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

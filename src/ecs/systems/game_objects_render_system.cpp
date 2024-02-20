@@ -37,7 +37,7 @@ SDL_Rect GameObjectsRenderSystem::GetRectWithCameraTransform(const glm::vec2& sd
 {
     auto& rOpt = gameState.windowOptions;
 
-    glm::vec2 transformedPosition = (sdlPos - rOpt.cameraCenter) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
+    glm::vec2 transformedPosition = (sdlPos - rOpt.cameraCenterSdl) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
 
     // Have to render from the center of the object. Because the Box2D body is in the center of the object.
     SDL_Rect rect = {

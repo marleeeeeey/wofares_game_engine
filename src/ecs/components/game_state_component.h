@@ -34,9 +34,10 @@ struct WindowOptions
     unsigned fps{60};
     glm::vec2 windowSize{800, 600};
     float cameraScale{1.0f};
-    glm::vec2 cameraCenter{};
+    glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};
     float box2DtoSDL = 48.0f; // 1 meter in Box2D is XX pixels in SDL.
+    bool showGrid{false};
 };
 
 struct ControlOptions

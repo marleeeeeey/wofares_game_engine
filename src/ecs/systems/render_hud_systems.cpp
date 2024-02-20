@@ -13,7 +13,9 @@ HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* rendere
 
 void HUDRenderSystem::Render()
 {
-    RenderGrid();
+    if (gameState.windowOptions.showGrid)
+        RenderGrid();
+
     RenderDebugMenu();
 }
 
@@ -41,37 +43,36 @@ void HUDRenderSystem::RenderDebugMenu()
     auto cameraScale = gameState.windowOptions.cameraScale;
     ImGui::Text(MY_FMT("{:.2f}/{:.2f} (Gr/Sc)", gravity, cameraScale).c_str());
     ImGui::Text(MY_FMT("{}/{}/{} (Ts/Ps/DB)", tiles.size(), players.size(), dynamicBodiesCount).c_str());
+    ImGui::Text(MY_FMT("Camera center: {}", gameState.windowOptions.cameraCenterSdl).c_str());
 
     // Print debug info.
     ImGui::Text(MY_FMT("Space pressed duration: {:.2f}", gameState.debugInfo.spacePressedDuration).c_str());
     ImGui::Text(MY_FMT("Space pressed duration on up event: {:.2f}", gameState.debugInfo.spacePressedDurationOnUpEvent)
                     .c_str());
 
+    ImGui::Checkbox("Show Grid", &gameState.windowOptions.showGrid);
+
     // Print last mouse position.
     const auto& lastMousePosition = gameState.windowOptions.lastMousePosInWindow;
     ImGui::Text(MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
 
-    if (ImGui::CollapsingHeader("Advanced Options"))
-    {
-        // Draw controls the physics world.
-        ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
-        ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);
-        ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.miniTileResolution, 1, 8);
-        ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
-        ImGui::SliderFloat(
-            "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
-        ImGui::Checkbox("Prevent Creation Invisible Tiles", &gameState.levelOptions.preventCreationInvisibleTiles);
-        ImGui::SliderFloat(
-            "Colision Disable Probability", &gameState.levelOptions.colisionDisableProbability, 0.0f, 1.0f);
+    // Draw controls the physics world.
+    ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
+    ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);
+    ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.miniTileResolution, 1, 8);
+    ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
+    ImGui::SliderFloat(
+        "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
+    ImGui::Checkbox("Prevent Creation Invisible Tiles", &gameState.levelOptions.preventCreationInvisibleTiles);
+    ImGui::SliderFloat("Colision Disable Probability", &gameState.levelOptions.colisionDisableProbability, 0.0f, 1.0f);
 
-        // box2DtoSDL setting.
-        float box2DtoSdlStep = 4.0f;
-        float& box2DtoSDL = gameState.windowOptions.box2DtoSDL;
-        int intValue = static_cast<int>(box2DtoSDL / box2DtoSdlStep);
-        if (ImGui::SliderInt(MY_FMT("Box2D to SDL coef, x{:.2f}", box2DtoSdlStep).c_str(), &intValue, 8, 14))
-            box2DtoSDL = intValue * box2DtoSdlStep;
-        ImGui::Text(MY_FMT("Box2D to SDL: {:.2f}", box2DtoSDL).c_str());
-    }
+    // box2DtoSDL setting.
+    float box2DtoSdlStep = 4.0f;
+    float& box2DtoSDL = gameState.windowOptions.box2DtoSDL;
+    int intValue = static_cast<int>(box2DtoSDL / box2DtoSdlStep);
+    if (ImGui::SliderInt(MY_FMT("Box2D to SDL coef, x{:.2f}", box2DtoSdlStep).c_str(), &intValue, 8, 14))
+        box2DtoSDL = intValue * box2DtoSdlStep;
+    ImGui::Text(MY_FMT("Box2D to SDL: {:.2f}", box2DtoSDL).c_str());
 
     ImGui::End();
 }
@@ -89,11 +90,11 @@ void HUDRenderSystem::RenderGrid()
     int windowWidth = static_cast<int>(gameState.windowOptions.windowSize.x);
     int windowHeight = static_cast<int>(gameState.windowOptions.windowSize.y);
 
-    auto& cameraCenter = gameState.windowOptions.cameraCenter;
+    const auto& cameraCenterSdl = gameState.windowOptions.cameraCenterSdl;
 
     // Calculate the start and end points for drawing the grid
-    int startX = static_cast<int>(cameraCenter.x - windowWidth / 2 / gameState.windowOptions.cameraScale);
-    int startY = static_cast<int>(cameraCenter.y - windowHeight / 2 / gameState.windowOptions.cameraScale);
+    int startX = static_cast<int>(cameraCenterSdl.x - windowWidth / 2 / gameState.windowOptions.cameraScale);
+    int startY = static_cast<int>(cameraCenterSdl.y - windowHeight / 2 / gameState.windowOptions.cameraScale);
     int endX = startX + windowWidth / gameState.windowOptions.cameraScale;
     int endY = startY + windowHeight / gameState.windowOptions.cameraScale;
 
@@ -106,14 +107,15 @@ void HUDRenderSystem::RenderGrid()
     SetRenderDrawColor(renderer, gridColor);
     for (int x = startX; x <= endX; x += gridSize)
     {
-        int screenX = static_cast<int>((x - cameraCenter.x) * gameState.windowOptions.cameraScale + windowWidth / 2);
+        int screenX = static_cast<int>((x - cameraCenterSdl.x) * gameState.windowOptions.cameraScale + windowWidth / 2);
         SDL_RenderDrawLine(renderer, screenX, 0, screenX, windowHeight);
     }
 
     // Draw horizontal grid lines
     for (int y = startY; y <= endY; y += gridSize)
     {
-        int screenY = static_cast<int>((y - cameraCenter.y) * gameState.windowOptions.cameraScale + windowHeight / 2);
+        int screenY =
+            static_cast<int>((y - cameraCenterSdl.y) * gameState.windowOptions.cameraScale + windowHeight / 2);
         SDL_RenderDrawLine(renderer, 0, screenY, windowWidth, screenY);
     }
 
