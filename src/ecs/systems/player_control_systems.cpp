@@ -46,13 +46,14 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
     const auto& players = registry.view<PlayerInfo, PhysicsInfo>();
     for (auto entity : players)
     {
-        const auto& [playerNumber, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
+        const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
         auto vel = body->GetLinearVelocity();
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W)
         {
-            body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
+            if (playerInfo.countOfGroundContacts > 0)
+                body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
         }
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_A)

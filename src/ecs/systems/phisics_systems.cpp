@@ -15,6 +15,7 @@ void PhysicsSystem::Update(float deltaTime)
     physicsWorld->Step(
         deltaTime, gameState.physicsOptions.velocityIterations, gameState.physicsOptions.positionIterations);
 
+    SetPlayersRotationToZero(); // players should not rotate.
     UpdatePlayersWeaponDirection();
     RemoveDistantObjects();
     UpdateCollisionDisableTimerComponent(deltaTime);
@@ -71,5 +72,18 @@ void PhysicsSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
                 utils::DisableCollisionForTheBody(body);
             }
         }
+    }
+};
+
+void PhysicsSystem::SetPlayersRotationToZero()
+{
+    auto players = registry.view<PlayerInfo, PhysicsInfo>();
+    for (auto entity : players)
+    {
+        auto& playerInfo = players.get<PlayerInfo>(entity);
+        auto& physicalBody = players.get<PhysicsInfo>(entity);
+        auto body = physicalBody.bodyRAII->GetBody();
+        body->SetAngularVelocity(0);
+        body->SetTransform(body->GetPosition(), 0);
     }
 };
