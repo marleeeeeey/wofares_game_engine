@@ -15,6 +15,7 @@ public:
     GameObjectsRenderSystem(entt::registry& registry, SDL_Renderer* renderer);
     void Render();
 private: // Render game objects methods.
+    void RenderBackground();
     void RenderTiles();
     void RenderPlayerWeaponDirection();
 private: // Render helpers. TODO: check if items can be removed.

@@ -20,6 +20,7 @@ class MapLoaderSystem
     size_t createdTiles = 0;
     size_t invisibleTilesNumber = 0;
     std::shared_ptr<SDLTextureRAII> tilesetTexture;
+    std::filesystem::path mapFilepath;
 public:
     MapLoaderSystem(entt::registry& registry, SDL_Renderer* renderer);
     void LoadMap(const std::string& filename);

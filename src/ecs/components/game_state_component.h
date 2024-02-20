@@ -2,6 +2,7 @@
 #include <box2d/box2d.h>
 #include <glm/glm.hpp>
 #include <memory>
+#include <utils/sdl_RAII.h>
 
 struct LevelPhysicsBounds
 {
@@ -9,8 +10,16 @@ struct LevelPhysicsBounds
     b2Vec2 max = b2Vec2(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 };
 
+struct BackgroundInfo
+{
+    std::shared_ptr<SDLTextureRAII> texture{}; // Pointer to the texture.
+    float textureScale{1.0f}; // Scale of the texture. 1.0f means that the texture is not scaled.
+    float speedFactor{0.1f}; // Speed factor of the background. 1.0f means that the background moves with the camera.
+};
+
 struct LevelOptions
 {
+    BackgroundInfo backgroundInfo;
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.0f};

@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL.h>
+#include <filesystem>
 #include <memory>
-#include <string>
 #include <utils/sdl_RAII.h>
 
 /**
@@ -22,7 +22,7 @@ bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_R
  * @param filePath The file path of the texture to be loaded.
  * @return A shared pointer to the loaded texture.
  */
-std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::string& filePath);
+std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::filesystem::path& imagePath);
 
 /**
  * @brief Loads a texture with streaming access.
@@ -33,6 +33,7 @@ std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::s
  * @param filePath The file path of the texture to load.
  * @return A shared pointer to the loaded texture.
  */
-std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath);
+std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(
+    SDL_Renderer* renderer, const std::filesystem::path& imagePath);
 
 SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture);

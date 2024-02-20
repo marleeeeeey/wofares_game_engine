@@ -18,20 +18,18 @@ void MapLoaderSystem::LoadMap(const std::string& filename)
     if (!file.is_open())
         throw std::runtime_error("Failed to open map file");
 
+    mapFilepath = filename;
+
     nlohmann::json json;
     file >> json;
 
     // Calc path to tileset image.
-    std::string tilesetPath = filename;
-    size_t found = tilesetPath.find_last_of("/\\");
-    if (found != std::string::npos)
-        tilesetPath = tilesetPath.substr(0, found + 1);
-    tilesetPath += json["tilesets"][0]["image"];
+    std::filesystem::path tilesetPath = mapFilepath.parent_path() / json["tilesets"][0]["image"].get<std::string>();
 
     // Check if the tileset texture file exists.
     std::ifstream tilesetFile(tilesetPath);
     if (!tilesetFile.is_open())
-        throw std::runtime_error(MY_FMT("Failed to open tileset file {}", tilesetPath));
+        throw std::runtime_error(MY_FMT("Failed to open tileset file {}", tilesetPath.string()));
 
     // Load the tileset texture.
     if (gameState.levelOptions.preventCreationInvisibleTiles)
@@ -68,7 +66,7 @@ void MapLoaderSystem::LoadMap(const std::string& filename)
         MY_LOG_FMT(warn, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
     if (createdTiles == 0)
     {
-        MY_LOG_FMT(warn, "No tiles were created during map loading {}", filename);
+        MY_LOG_FMT(warn, "No tiles were created during map loading {}", mapFilepath.string());
         if (invisibleTilesNumber > 0)
             MY_LOG(warn, "All tiles are invisible");
     }
@@ -120,8 +118,14 @@ void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
 
 void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
 {
-    auto physicsWorld = gameState.physicsWorld;
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+    for (const auto& props : layer["properties"])
+    {
+        if (props["name"] == "background")
+        {
+            auto backgroundTexturePath = mapFilepath.parent_path() / props["value"];
+            gameState.levelOptions.backgroundInfo.texture = LoadTexture(renderer, backgroundTexturePath);
+        }
+    }
 
     for (const auto& object : layer["objects"])
     {

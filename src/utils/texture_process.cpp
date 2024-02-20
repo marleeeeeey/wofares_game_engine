@@ -29,22 +29,27 @@ bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_R
     return true;
 }
 
-std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::string& filePath)
+std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::filesystem::path& imagePath)
 {
-    SDL_Texture* texture = IMG_LoadTexture(renderer, filePath.c_str());
+    SDL_Texture* texture = IMG_LoadTexture(renderer, imagePath.string().c_str());
 
     if (texture == nullptr)
-        throw std::runtime_error("Failed to load texture");
+        throw std::runtime_error(MY_FMT("Failed to load texture: {}", imagePath.string()));
+
+    MY_LOG_FMT(info, "Loaded texture: {}", imagePath.string());
 
     return std::make_shared<SDLTextureRAII>(texture);
 }
 
-std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(SDL_Renderer* renderer, const std::string& filePath)
+std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(
+    SDL_Renderer* renderer, const std::filesystem::path& imagePath)
 {
+    std::string imagePathStr = imagePath.string();
+
     // Step 1. Load image into SDL_Surface.
-    SDL_Surface* surface = IMG_Load(filePath.c_str());
+    SDL_Surface* surface = IMG_Load(imagePathStr.c_str());
     if (!surface)
-        throw std::runtime_error(MY_FMT("Failed to load image {}. Error: {}", filePath, IMG_GetError()));
+        throw std::runtime_error(MY_FMT("Failed to load image {}. Error: {}", imagePathStr, IMG_GetError()));
 
     MY_LOG_FMT(
         info, "Surface format: {}, w: {}, h: {}", SDL_GetPixelFormatName(surface->format->format), surface->w,
@@ -57,7 +62,7 @@ std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(SDL_Renderer* ren
     {
         SDL_FreeSurface(surface);
         throw std::runtime_error(
-            MY_FMT("Failed to create streaming texture for image {}. Error: {}", filePath, SDL_GetError()));
+            MY_FMT("Failed to create streaming texture for image {}. Error: {}", imagePathStr, SDL_GetError()));
     }
 
     // Step 3. Copy pixel data from the surface to the texture.

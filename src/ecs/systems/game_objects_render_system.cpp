@@ -1,4 +1,5 @@
 #include "game_objects_render_system.h"
+#include "my_common_cpp_utils/Logger.h"
 #include <numbers>
 #include <utils/glm_box2d_conversions.h>
 
@@ -6,6 +7,54 @@ GameObjectsRenderSystem::GameObjectsRenderSystem(entt::registry& registry, SDL_R
   : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front())),
     coordinatesTransformer(registry)
 {}
+
+void GameObjectsRenderSystem::Render()
+{
+    // Clear the screen with white color.
+    SetRenderDrawColor(renderer, ColorName::Black);
+    SDL_RenderClear(renderer);
+
+    RenderBackground();
+
+    RenderTiles();
+    RenderPlayerWeaponDirection();
+};
+
+void GameObjectsRenderSystem::RenderBackground()
+{
+    auto backgroundInfo = gameState.levelOptions.backgroundInfo;
+    auto textureRAII = backgroundInfo.texture;
+    if (!textureRAII)
+    {
+        MY_LOG_FMT(warn, "No background texture to render");
+        return;
+    }
+    auto backgroundTexture = textureRAII->get();
+
+    auto textureScale = backgroundInfo.textureScale;
+    auto backgroundSpeed = backgroundInfo.speedFactor;
+
+    int textureWidth, textureHeight;
+    SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &textureWidth, &textureHeight);
+
+    // Calculate the size of the texture after scaling.
+    textureWidth *= textureScale;
+    textureHeight *= textureScale;
+
+    // Calculate the background offset depending on the camera position and the "depth" of the background.
+    auto backgroundCenter = gameState.windowOptions.cameraCenterSdl * backgroundInfo.speedFactor;
+    auto backgroundTopLeft = backgroundCenter - glm::vec2(textureWidth, textureHeight) / 2.0f;
+
+    // Set the destination rectangle for the texture.
+    SDL_Rect dstRect;
+    dstRect.x = backgroundTopLeft.x;
+    dstRect.y = backgroundTopLeft.y;
+    dstRect.w = textureWidth;
+    dstRect.h = textureHeight;
+
+    // Render the background texture.
+    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &dstRect);
+};
 
 void GameObjectsRenderSystem::RenderTiles()
 {
@@ -89,13 +138,3 @@ void GameObjectsRenderSystem::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII>
     SDL_RenderCopyEx(
         renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
 }
-
-void GameObjectsRenderSystem::Render()
-{
-    // Clear the screen with white color.
-    SetRenderDrawColor(renderer, ColorName::White);
-    SDL_RenderClear(renderer);
-
-    RenderTiles();
-    RenderPlayerWeaponDirection();
-};
