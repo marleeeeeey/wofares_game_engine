@@ -45,7 +45,7 @@ void Box2dBodyCreator::AddThinSensorBelowTheBody(
 {
     b2PolygonShape sensorShape;
     b2Vec2 physicalSize = coordinatesTransformer.WorldToPhysics(sdlSize);
-    float hw = physicalSize.x / 2.0f;
+    float hw = physicalSize.x / 2.0f / 2.0f;
     float hh = 0.1f;
     // Move center of polygon to the bottom of the body. Slighly above the ground.
     b2Vec2 center(0, physicalSize.y / 2.0f);

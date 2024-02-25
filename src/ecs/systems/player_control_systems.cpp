@@ -86,7 +86,7 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
 
             // Calculate the position of the grenade slightly in front of the player.
             glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
-            glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x;
+            glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x * 1.1f;
             glm::vec2 projectileSize(5, 5);
 
             // Spawn flying entity.
