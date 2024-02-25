@@ -8,7 +8,7 @@ AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry, ResourceM
 void AnimationUpdateSystem::Update(float deltaTime)
 {
     UpdateAnimationProgressForAllEntities(deltaTime);
-    UpdatePlayerAnimationDirection();
+    UpdatePlayerAnimationDirectionAndSpeed();
 }
 
 void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTime)
@@ -21,7 +21,7 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
 
         if (animation.isPlaying)
         {
-            animation.currentFrameTime += deltaTime;
+            animation.currentFrameTime += deltaTime * animation.speedFactor;
 
             if (animation.currentFrameTime >= animation.frames[animation.currentFrameIndex].duration)
             {
@@ -38,21 +38,24 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
     }
 };
 
-void AnimationUpdateSystem::UpdatePlayerAnimationDirection()
+void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
 {
-    auto view = registry.view<AnimationInfo, PlayerInfo>();
+    auto view = registry.view<AnimationInfo, PlayerInfo, PhysicsInfo>();
 
     for (auto entity : view)
     {
-        const auto& [animationInfo, playerInfo] = view.get<AnimationInfo, PlayerInfo>(entity);
+        const auto& [animationInfo, playerInfo, physicsInfo] = view.get<AnimationInfo, PlayerInfo, PhysicsInfo>(entity);
 
+        // Change the animation speed based on the player's speed.
+        auto body = physicsInfo.bodyRAII->GetBody();
+        auto vel = body->GetLinearVelocity();
+        float speed = glm::length(glm::vec2(vel.x, vel.y));
+        animationInfo.speedFactor = speed / 1.0f;
+
+        // Change the animation direction based on the player's direction.
         if (playerInfo.weaponDirection.x < 0)
-        {
             animationInfo.flip = SDL_FLIP_HORIZONTAL;
-        }
         else if (playerInfo.weaponDirection.x > 0)
-        {
             animationInfo.flip = SDL_FLIP_NONE;
-        }
     }
 };

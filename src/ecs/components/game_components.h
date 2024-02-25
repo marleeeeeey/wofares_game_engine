@@ -32,6 +32,7 @@ struct AnimationInfo
     bool isPlaying = false; // Is the animation playing.
     bool loop = true; // Should the animation loop.
     SDL_RendererFlip flip = SDL_FLIP_NONE; // Flip of the animation.
+    float speedFactor = 1.0f;
 };
 
 // ********************************* Player components *********************************

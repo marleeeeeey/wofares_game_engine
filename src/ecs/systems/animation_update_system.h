@@ -11,6 +11,6 @@ class AnimationUpdateSystem
 public:
     AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager);
     void UpdateAnimationProgressForAllEntities(float deltaTime);
-    void UpdatePlayerAnimationDirection();
+    void UpdatePlayerAnimationDirectionAndSpeed();
     void Update(float deltaTime);
 };
