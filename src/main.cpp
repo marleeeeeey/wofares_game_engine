@@ -1,6 +1,7 @@
-#include "utils/resource_cashe.h"
+#include "ecs/systems/animation_update_system.h"
 #include "utils/resource_manager.h"
 #include <ecs/components/game_components.h>
+#include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
 #include <ecs/systems/game_objects_render_system.h>
@@ -53,8 +54,7 @@ int main(int argc, char* args[])
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
-        ResourceCashe resourceCashe(renderer.get());
-        ResourceManager resourceManager(resourceCashe, "assets\\assets_map.json");
+        ResourceManager resourceManager("assets\\assets_map.json", renderer.get());
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
@@ -69,11 +69,13 @@ int main(int argc, char* args[])
         PhysicsSystem physicsSystem(registry);
         GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get());
         HUDRenderSystem hudRenderSystem(registry, renderer.get());
-        MapLoaderSystem mapLoaderSystem(registry, resourceCashe);
+        MapLoaderSystem mapLoaderSystem(registry, resourceManager);
 
         // Load the map.
         auto level1 = resourceManager.GetTiledLevel("level1");
         mapLoaderSystem.LoadMap(level1);
+
+        AnimationUpdateSystem animationUpdateSystem(registry, resourceManager);
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
@@ -98,6 +100,9 @@ int main(int argc, char* args[])
             physicsSystem.Update(deltaTime);
             weaponControlSystem.Update(deltaTime);
             cameraControlSystem.Update(deltaTime);
+
+            // Update animation.
+            animationUpdateSystem.Update(deltaTime);
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

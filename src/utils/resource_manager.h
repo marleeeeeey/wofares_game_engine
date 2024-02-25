@@ -1,4 +1,5 @@
 #pragma once
+#include "SDL_render.h"
 #include "ecs/components/game_components.h"
 #include "utils/resource_cashe.h"
 #include <filesystem>
@@ -26,7 +27,7 @@
 // }
 class ResourceManager
 {
-    ResourceCashe& resourceCashe;
+    details::ResourceCashe resourceCashe;
     std::filesystem::path resourceMapJson; // Absolute path to the resource map file.
     std::filesystem::path assetsDirectory; // Absolute path to the directory with assets.
 
@@ -34,11 +35,13 @@ class ResourceManager
     std::unordered_map<FriendlyName, AnimationInfo> animations;
     std::unordered_map<FriendlyName, std::filesystem::path> tiledLevels;
 public:
-    ResourceManager(ResourceCashe& resourceCashe, const std::filesystem::path& resourceMapFilePath);
+    ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer);
 public: // ************************* Animations *************************
     AnimationInfo GetAnimation(const std::string& name);
 private:
     AnimationInfo ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
 public: // ************************* Tiled levels *************************
     std::filesystem::path GetTiledLevel(const std::string& name);
+public: // ************************* Textures *************************
+    std::shared_ptr<SDLTextureRAII> GetTexture(const std::filesystem::path& path);
 };

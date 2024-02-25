@@ -17,6 +17,7 @@ void GameObjectsRenderSystem::Render()
     RenderBackground();
 
     RenderTiles();
+    RenderAnimations();
     RenderPlayerWeaponDirection();
 };
 
@@ -137,4 +138,21 @@ void GameObjectsRenderSystem::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII>
     // Render the tile with the calculated angle.
     SDL_RenderCopyEx(
         renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
+}
+
+void GameObjectsRenderSystem::RenderAnimations()
+{
+    auto view = registry.view<AnimationInfo, PhysicsInfo>();
+
+    for (auto entity : view)
+    {
+        const auto& [animation, body] = view.get<AnimationInfo, PhysicsInfo>(entity);
+
+        if (animation.isPlaying && !animation.frames.empty())
+        {
+            const auto& frame = animation.frames[animation.currentFrameIndex];
+            const auto& renderingInfo = frame.renderingInfo;
+            RenderTiledSquare(body.bodyRAII, renderingInfo);
+        }
+    }
 }

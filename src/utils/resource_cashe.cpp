@@ -4,10 +4,13 @@
 #include <tuple>
 #include <utils/texture_process.h>
 
+namespace details
+{
+
 ResourceCashe::ResourceCashe(SDL_Renderer* renderer) : renderer(renderer)
 {}
 
-std::shared_ptr<SDLTextureRAII> ResourceCashe::LoadTexture(std::filesystem::path& filePath, TextureAccess access)
+std::shared_ptr<SDLTextureRAII> ResourceCashe::LoadTexture(const std::filesystem::path& filePath, TextureAccess access)
 {
     // Get absolute path to the file.
     std::filesystem::path absolutePath = std::filesystem::absolute(filePath);
@@ -30,3 +33,5 @@ std::shared_ptr<SDLTextureRAII> ResourceCashe::LoadTexture(std::filesystem::path
     textures[key] = textureRAII;
     return textureRAII;
 }
+
+} // namespace details

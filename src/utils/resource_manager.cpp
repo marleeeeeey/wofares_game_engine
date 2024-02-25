@@ -1,10 +1,11 @@
 #include "resource_manager.h"
 #include "my_common_cpp_utils/Logger.h"
+#include "utils/resource_cashe.h"
 #include <filesystem>
 #include <fstream>
 
-ResourceManager::ResourceManager(ResourceCashe& resourceCashe, const std::filesystem::path& resourceMapFilePath)
-  : resourceCashe(resourceCashe), resourceMapJson()
+ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer)
+  : resourceCashe(renderer)
 {
     resourceMapJson = std::filesystem::absolute(resourceMapFilePath);
     if (!std::filesystem::exists(resourceMapJson))
@@ -35,12 +36,12 @@ ResourceManager::ResourceManager(ResourceCashe& resourceCashe, const std::filesy
         tiledLevels[tiledLevelName] = tiledLevelJsonPath;
     }
 
-    MY_LOG_FMT(info, "On game start were loaded {} animation(s), {} level(s).", animations.size(), tiledLevels.size());
+    MY_LOG_FMT(info, "Game found {} animation(s), {} level(s).", animations.size(), tiledLevels.size());
 }
 
 AnimationInfo ResourceManager::GetAnimation(const std::string& name)
 {
-    if (animations.contains(name) == false)
+    if (!animations.contains(name))
         throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", name));
     return animations[name];
 }
@@ -97,6 +98,7 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
         AnimationFrame animationFrame;
         animationFrame.renderingInfo.texturePtr = textureRAII;
         animationFrame.renderingInfo.textureRect = {x, y, w, h};
+        animationFrame.renderingInfo.sdlSize = {w, h}; // TODO: obsolete. Remove later.
         animationFrame.duration = static_cast<float>(duration) / 1000.0f; // Convert to seconds.
 
         // Add frame to the animation.
@@ -107,7 +109,12 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
 
 std::filesystem::path ResourceManager::GetTiledLevel(const std::string& name)
 {
-    if (tiledLevels.contains(name) == false)
+    if (!tiledLevels.contains(name))
         throw std::runtime_error(MY_FMT("Tiled level with name '{}' does not found", name));
     return tiledLevels[name];
 }
+
+std::shared_ptr<SDLTextureRAII> ResourceManager::GetTexture(const std::filesystem::path& path)
+{
+    return resourceCashe.LoadTexture(path, details::ResourceCashe::TextureAccess::Static);
+};

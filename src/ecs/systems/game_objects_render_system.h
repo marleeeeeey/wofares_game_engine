@@ -17,6 +17,7 @@ public:
 private: // Render game objects methods.
     void RenderBackground();
     void RenderTiles();
+    void RenderAnimations();
     void RenderPlayerWeaponDirection();
 private: // Render helpers. TODO: check if items can be removed.
     void RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle);

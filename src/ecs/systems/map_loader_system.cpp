@@ -8,9 +8,9 @@
 #include <utils/glm_box2d_conversions.h>
 #include <utils/texture_process.h>
 
-MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceCashe& resourceCashe)
-  : registry(registry), resourceCashe(resourceCashe),
-    gameState(registry.get<GameState>(registry.view<GameState>().front())), objectsFactory(registry),
+MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceManager& resourceManager)
+  : registry(registry), resourceManager(resourceManager),
+    gameState(registry.get<GameState>(registry.view<GameState>().front())), objectsFactory(registry, resourceManager),
     coordinatesTransformer(registry)
 {}
 
@@ -28,11 +28,7 @@ void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
     // Calc path to tileset image.
     std::filesystem::path tilesetPath = mapFilepath.parent_path() / json["tilesets"][0]["image"].get<std::string>();
 
-    // Load the tileset texture.
-    ResourceCashe::TextureAccess access = gameState.levelOptions.preventCreationInvisibleTiles
-        ? ResourceCashe::TextureAccess::Streaming
-        : ResourceCashe::TextureAccess::Static;
-    tilesetTexture = resourceCashe.LoadTexture(tilesetPath, access);
+    tilesetTexture = resourceManager.GetTexture(tilesetPath.string());
 
     // Assume all tiles are of the same size.
     tileWidth = json["tilewidth"];
@@ -120,7 +116,7 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
         if (props["name"] == "background")
         {
             auto backgroundTexturePath = mapFilepath.parent_path() / props["value"];
-            gameState.levelOptions.backgroundInfo.texture = resourceCashe.LoadTexture(backgroundTexturePath);
+            gameState.levelOptions.backgroundInfo.texture = resourceManager.GetTexture(backgroundTexturePath);
         }
     }
 

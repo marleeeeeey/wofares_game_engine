@@ -74,14 +74,16 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
     {
         auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
         auto physicsWorld = gameState.physicsWorld;
-        const auto& players = registry.view<PlayerInfo, PhysicsInfo, RenderingInfo>();
+        const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
         CoordinatesTransformer transformer(registry);
 
         for (auto entity : players)
         {
             const auto& playerInfo = players.get<PlayerInfo>(entity);
             const auto& playerBody = players.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-            const auto& playerSize = players.get<RenderingInfo>(entity).sdlSize;
+            const auto& animationInfo = players.get<AnimationInfo>(entity);
+            const auto& playerSize =
+                animationInfo.frames.front().renderingInfo.sdlSize; // TODO: use the size from specific bounding box.
             const auto& weaponDirection = playerInfo.weaponDirection;
 
             // Calculate the position of the grenade slightly in front of the player.
