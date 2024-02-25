@@ -7,6 +7,12 @@ AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry, ResourceM
 
 void AnimationUpdateSystem::Update(float deltaTime)
 {
+    UpdateAnimationProgressForAllEntities(deltaTime);
+    UpdatePlayerAnimationDirection();
+}
+
+void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTime)
+{
     auto view = registry.view<AnimationInfo>();
 
     for (auto entity : view)
@@ -30,4 +36,23 @@ void AnimationUpdateSystem::Update(float deltaTime)
             }
         }
     }
-}
+};
+
+void AnimationUpdateSystem::UpdatePlayerAnimationDirection()
+{
+    auto view = registry.view<AnimationInfo, PlayerInfo>();
+
+    for (auto entity : view)
+    {
+        const auto& [animationInfo, playerInfo] = view.get<AnimationInfo, PlayerInfo>(entity);
+
+        if (playerInfo.weaponDirection.x < 0)
+        {
+            animationInfo.flip = SDL_FLIP_HORIZONTAL;
+        }
+        else if (playerInfo.weaponDirection.x > 0)
+        {
+            animationInfo.flip = SDL_FLIP_NONE;
+        }
+    }
+};

@@ -22,6 +22,8 @@ private: // Render game objects methods.
 private: // Render helpers. TODO: check if items can be removed.
     void RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color);
-    void RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo);
+    void RenderTiledSquare(
+        std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo,
+        const SDL_RendererFlip& flip = SDL_FLIP_NONE);
     SDL_Rect GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize);
 };

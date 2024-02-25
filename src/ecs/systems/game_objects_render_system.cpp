@@ -115,7 +115,8 @@ void GameObjectsRenderSystem::RenderSquare(
     RenderSquare(sdlPos, sdlSize, color, angle);
 }
 
-void GameObjectsRenderSystem::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo)
+void GameObjectsRenderSystem::RenderTiledSquare(
+    std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo, const SDL_RendererFlip& flip)
 {
     const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     const float angle = body->GetBody()->GetAngle();
@@ -137,7 +138,7 @@ void GameObjectsRenderSystem::RenderTiledSquare(std::shared_ptr<Box2dObjectRAII>
 
     // Render the tile with the calculated angle.
     SDL_RenderCopyEx(
-        renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
+        renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, flip);
 }
 
 void GameObjectsRenderSystem::RenderAnimations()
@@ -152,7 +153,7 @@ void GameObjectsRenderSystem::RenderAnimations()
         {
             const auto& frame = animation.frames[animation.currentFrameIndex];
             const auto& renderingInfo = frame.renderingInfo;
-            RenderTiledSquare(body.bodyRAII, renderingInfo);
+            RenderTiledSquare(body.bodyRAII, renderingInfo, animation.flip);
         }
     }
 }

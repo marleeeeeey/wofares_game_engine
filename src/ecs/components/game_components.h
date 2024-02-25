@@ -31,6 +31,7 @@ struct AnimationInfo
     size_t currentFrameIndex = 0; // Index of the current frame.
     bool isPlaying = false; // Is the animation playing.
     bool loop = true; // Should the animation loop.
+    SDL_RendererFlip flip = SDL_FLIP_NONE; // Flip of the animation.
 };
 
 // ********************************* Player components *********************************

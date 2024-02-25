@@ -10,5 +10,7 @@ class AnimationUpdateSystem
     GameState& gameState;
 public:
     AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager);
+    void UpdateAnimationProgressForAllEntities(float deltaTime);
+    void UpdatePlayerAnimationDirection();
     void Update(float deltaTime);
 };
