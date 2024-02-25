@@ -16,6 +16,7 @@ public:
     void Update(float deltaTime);
 private:
     void UpdateTimerExplosionComponents();
+    void UpdateContactExplosionComponentTimer();
     void ProcessExplosionEntitiesQueue();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
     void TryToRunExplosionImpactComponent(entt::entity explosionEntity);

@@ -15,15 +15,19 @@ WeaponControlSystem::WeaponControlSystem(entt::registry& registry_, Box2dEnttCon
         Box2dEnttContactListener::ContactType::Begin,
         [this](entt::entity entityA, entt::entity entityB)
         {
-            bool isEntityABazooka = registry.all_of<ContactExplosionComponent>(entityA);
-            bool isEntityBBazooka = registry.all_of<ContactExplosionComponent>(entityB);
+            for (const auto& entity : {entityA, entityB})
+            {
+                if (!registry.all_of<ContactExplosionComponent>(entity))
+                    continue;
 
-            // Update Box2D object is not allowed in the contact listener. Because Box2D is in simulation step.
-            // So, we need to store entities in the queue and update them in the main loop.
-            if (registry.all_of<ContactExplosionComponent>(entityA))
-                explosionEntities.push(entityA);
-            if (registry.all_of<ContactExplosionComponent>(entityB))
-                explosionEntities.push(entityB);
+                auto& contactExplosion = registry.get<ContactExplosionComponent>(entity);
+                if (contactExplosion.spawnSafeTime <= 0.0f)
+                {
+                    // Update Box2D object is not allowed in the contact listener. Because Box2D is in simulation
+                    // step. So, we need to store entities in the queue and update them in the main loop.
+                    explosionEntities.push(entity);
+                }
+            }
         });
 }
 
@@ -86,6 +90,7 @@ void WeaponControlSystem::Update(float deltaTime)
 {
     this->deltaTime = deltaTime;
     UpdateTimerExplosionComponents();
+    UpdateContactExplosionComponentTimer();
     ProcessExplosionEntitiesQueue();
 }
 
@@ -127,5 +132,15 @@ void WeaponControlSystem::StartCollisionDisableTimer(const std::vector<entt::ent
 
         if (utils::randomTrue(gameState.levelOptions.colisionDisableProbability))
             registry.emplace_or_replace<CollisionDisableTimerComponent>(entity);
+    }
+};
+
+void WeaponControlSystem::UpdateContactExplosionComponentTimer()
+{
+    auto contactExplosionsView = registry.view<ContactExplosionComponent>();
+    for (auto& entity : contactExplosionsView)
+    {
+        auto& contactExplosion = contactExplosionsView.get<ContactExplosionComponent>(entity);
+        contactExplosion.spawnSafeTime -= deltaTime;
     }
 };

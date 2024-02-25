@@ -57,7 +57,9 @@ struct TimerExplosionComponent
 
 // Like a bazooka projectile. Explodes when it touches a tile.
 struct ContactExplosionComponent
-{};
+{
+    float spawnSafeTime = 0.01f; // Time in seconds before the explosion is activated.
+};
 
 // Like a bomb. Explodes when a remote trigger is activated.
 struct RemoteExplosionComponent
