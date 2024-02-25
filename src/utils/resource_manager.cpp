@@ -36,7 +36,27 @@ ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePat
         tiledLevels[tiledLevelName] = tiledLevelJsonPath;
     }
 
-    MY_LOG_FMT(info, "Game found {} animation(s), {} level(s).", animations.size(), tiledLevels.size());
+    // Load sound effects.
+    for (const auto& soundEffectPair : resourceMapJsonData["sound_effects"].items())
+    {
+        const std::string& soundEffectName = soundEffectPair.key();
+        const std::string& soundEffectPath = soundEffectPair.value().get<std::string>();
+        std::filesystem::path soundEffectAbsolutePath = assetsDirectory / soundEffectPath;
+        soundEffectPaths[soundEffectName] = soundEffectAbsolutePath;
+    }
+
+    // Load music.
+    for (const auto& musicPair : resourceMapJsonData["music"].items())
+    {
+        const std::string& musicName = musicPair.key();
+        const std::string& musicPath = musicPair.value().get<std::string>();
+        std::filesystem::path musicAbsolutePath = assetsDirectory / musicPath;
+        musicPaths[musicName] = musicAbsolutePath;
+    }
+
+    MY_LOG_FMT(
+        info, "Game found {} animation(s), {} level(s), {} music(s), {} sound(s).", animations.size(),
+        tiledLevels.size(), musicPaths.size(), soundEffectPaths.size());
 }
 
 AnimationInfo ResourceManager::GetAnimation(const std::string& name)
@@ -116,4 +136,18 @@ std::filesystem::path ResourceManager::GetTiledLevel(const std::string& name)
 std::shared_ptr<SDLTextureRAII> ResourceManager::GetTexture(const std::filesystem::path& path)
 {
     return resourceCashe.LoadTexture(path, details::ResourceCache::TextureAccess::Static);
+};
+
+std::shared_ptr<MusicRAII> ResourceManager::GetMusic(const std::string& name)
+{
+    if (!musicPaths.contains(name))
+        throw std::runtime_error(MY_FMT("Music with name '{}' does not found", name));
+    return resourceCashe.LoadMusic(musicPaths[name]);
+};
+
+std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::string& name)
+{
+    if (!soundEffectPaths.contains(name))
+        throw std::runtime_error(MY_FMT("Sound effect with name '{}' does not found", name));
+    return resourceCashe.LoadSoundEffect(soundEffectPaths[name]);
 };

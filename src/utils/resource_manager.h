@@ -34,6 +34,8 @@ class ResourceManager
     using FriendlyName = std::string;
     std::unordered_map<FriendlyName, AnimationInfo> animations;
     std::unordered_map<FriendlyName, std::filesystem::path> tiledLevels;
+    std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
+    std::unordered_map<FriendlyName, std::filesystem::path> soundEffectPaths;
 public:
     ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer);
 public: // ************************* Animations *************************
@@ -44,4 +46,7 @@ public: // ************************* Tiled levels *************************
     std::filesystem::path GetTiledLevel(const std::string& name);
 public: // ************************* Textures *************************
     std::shared_ptr<SDLTextureRAII> GetTexture(const std::filesystem::path& path);
+public: // ************************* Sounds *************************
+    std::shared_ptr<MusicRAII> GetMusic(const std::string& name);
+    std::shared_ptr<SoundEffectRAII> GetSoundEffect(const std::string& name);
 };

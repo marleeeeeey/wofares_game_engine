@@ -10,6 +10,10 @@ set(GLM_DISABLE_AUTO_DETECTION ON CACHE BOOL "" FORCE)
 # Generate compile_commands.json.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# TODO: here is a hack to make SDL_image linkable via cmake. Fix it and make cross-platform.
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};C:/dev/vcpkg/installed/x64-windows/share/SDL2_mixer")
+find_package(SDL2_mixer CONFIG REQUIRED)
+
 add_subdirectory(thirdparty/SDL)
 add_subdirectory(thirdparty/SDL_image)
 add_subdirectory(thirdparty/glm)

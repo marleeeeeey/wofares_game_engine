@@ -34,4 +34,34 @@ std::shared_ptr<SDLTextureRAII> ResourceCache::LoadTexture(const std::filesystem
     return textureRAII;
 }
 
+std::shared_ptr<MusicRAII> ResourceCache::LoadMusic(const std::filesystem::path& filePath)
+{
+    // Get absolute path to the file.
+    std::filesystem::path absolutePath = std::filesystem::absolute(filePath);
+
+    // Return cached music if it was already loaded.
+    if (musics.contains(absolutePath))
+        return musics[absolutePath];
+
+    // Load the music and cache it.
+    std::shared_ptr<MusicRAII> musicRAII = std::make_shared<MusicRAII>(absolutePath.string());
+    musics[absolutePath] = musicRAII;
+    return musicRAII;
+};
+
+std::shared_ptr<SoundEffectRAII> ResourceCache::LoadSoundEffect(const std::filesystem::path& filePath)
+{
+    // Get absolute path to the file.
+    std::filesystem::path absolutePath = std::filesystem::absolute(filePath);
+
+    // Return cached sound effect if it was already loaded.
+    if (soundEffects.contains(absolutePath))
+        return soundEffects[absolutePath];
+
+    // Load the sound effect and cache it.
+    std::shared_ptr<SoundEffectRAII> soundEffectRAII = std::make_shared<SoundEffectRAII>(absolutePath.string());
+    soundEffects[absolutePath] = soundEffectRAII;
+    return soundEffectRAII;
+};
+
 } // namespace details

@@ -1,7 +1,6 @@
-#include "ecs/systems/animation_update_system.h"
-#include "utils/resource_manager.h"
 #include <ecs/components/game_components.h>
 #include <ecs/systems/animation_update_system.h>
+#include <ecs/systems/audio_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
 #include <ecs/systems/game_objects_render_system.h>
@@ -15,6 +14,7 @@
 #include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
 #include <utils/input_event_manager.h>
+#include <utils/resource_manager.h>
 #include <utils/sdl_RAII.h>
 
 int main(int argc, char* args[])
@@ -49,12 +49,15 @@ int main(int argc, char* args[])
         WeaponControlSystem weaponControlSystem(registry, contactListener);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
-        SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO);
+        SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+        SDLAudioInitializerRAII sdlAudioInitializer;
         SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
         ResourceManager resourceManager("assets\\assets_map.json", renderer.get());
+        AudioSystem audioSystem(resourceManager);
+        audioSystem.PlayMusic("background_music");
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
