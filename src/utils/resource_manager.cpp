@@ -23,11 +23,26 @@ ResourceManager::ResourceManager(ResourceCashe& resourceCashe, const std::filesy
         std::filesystem::path asepriteAnimationJsonPath = assetsDirectory / animationPath;
         animations[animationName] = ReadAsepriteAnimation(asepriteAnimationJsonPath);
     }
+
+    // Load tiled level names.
+    for (const auto& tiledLevelPair : resourceMapJsonData["maps"].items())
+    {
+        const std::string& tiledLevelName = tiledLevelPair.key();
+        const std::string& tiledLevelPath = tiledLevelPair.value().get<std::string>();
+        std::filesystem::path tiledLevelJsonPath = assetsDirectory / tiledLevelPath;
+        if (!std::filesystem::exists(tiledLevelJsonPath))
+            throw std::runtime_error(MY_FMT("Tiled level file does not found: {}", tiledLevelJsonPath.string()));
+        tiledLevels[tiledLevelName] = tiledLevelJsonPath;
+    }
+
+    MY_LOG_FMT(info, "On game start were loaded {} animation(s), {} level(s).", animations.size(), tiledLevels.size());
 }
 
 AnimationInfo ResourceManager::GetAnimation(const std::string& name)
 {
-    return animations.at(name);
+    if (animations.contains(name) == false)
+        throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", name));
+    return animations[name];
 }
 
 /**
@@ -64,7 +79,7 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
     // Load texture.
     const std::string imagePath = asepriteJsonData["meta"]["image"].get<std::string>();
     auto imageAbsolutePath = assetsDirectory / "images" / imagePath;
-    auto textureRAII = resourceCashe.LoadTexture(imageAbsolutePath.string());
+    auto textureRAII = resourceCashe.LoadTexture(imageAbsolutePath);
 
     // Create animation.
     AnimationInfo animation;
@@ -89,3 +104,10 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
     }
     return animation;
 };
+
+std::filesystem::path ResourceManager::GetTiledLevel(const std::string& name)
+{
+    if (tiledLevels.contains(name) == false)
+        throw std::runtime_error(MY_FMT("Tiled level with name '{}' does not found", name));
+    return tiledLevels[name];
+}

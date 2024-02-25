@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/resource_cashe.h"
 #include <ecs/components/game_components.h>
 #include <entt/entt.hpp>
 #include <nlohmann/json.hpp>
@@ -8,7 +9,7 @@
 class MapLoaderSystem
 {
     entt::registry& registry;
-    SDL_Renderer* renderer;
+    ResourceCashe& resourceCashe;
     GameState& gameState;
     ObjectsFactory objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
@@ -22,8 +23,8 @@ class MapLoaderSystem
     std::shared_ptr<SDLTextureRAII> tilesetTexture;
     std::filesystem::path mapFilepath;
 public:
-    MapLoaderSystem(entt::registry& registry, SDL_Renderer* renderer);
-    void LoadMap(const std::string& filename);
+    MapLoaderSystem(entt::registry& registry, ResourceCashe& resourceCashe);
+    void LoadMap(const std::filesystem::path& filename);
     void UnloadMap();
 private:
     void ParseTileLayer(const nlohmann::json& layer);

@@ -5,22 +5,22 @@
 namespace utils
 {
 
-bool FileChangedSinceLastCheck(std::string filename)
+bool FileChangedSinceLastCheck(const std::filesystem::path& filename)
 {
-    filename = std::filesystem::absolute(filename).string();
+    auto absPath = std::filesystem::absolute(filename).string();
 
-    static std::unordered_map<std::string, std::filesystem::file_time_type> fileTimes;
+    static std::unordered_map<std::filesystem::path, std::filesystem::file_time_type> fileTimes;
 
-    std::filesystem::file_time_type writeTime = std::filesystem::last_write_time(filename);
+    std::filesystem::file_time_type writeTime = std::filesystem::last_write_time(absPath);
 
-    if (fileTimes.find(filename) == fileTimes.end())
+    if (fileTimes.find(absPath) == fileTimes.end())
     {
-        fileTimes[filename] = writeTime;
+        fileTimes[absPath] = writeTime;
         return false;
     }
-    else if (fileTimes[filename] != writeTime)
+    else if (fileTimes[absPath] != writeTime)
     {
-        fileTimes[filename] = writeTime;
+        fileTimes[absPath] = writeTime;
         return true;
     }
 

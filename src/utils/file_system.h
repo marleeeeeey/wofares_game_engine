@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <filesystem>
 
 namespace utils
 {
@@ -10,6 +10,6 @@ namespace utils
  * @param filename The name of the file to check.
  * @return True if the file has changed, false otherwise.
  */
-bool FileChangedSinceLastCheck(std::string filename);
+bool FileChangedSinceLastCheck(const std::filesystem::path& filename);
 
 } // namespace utils

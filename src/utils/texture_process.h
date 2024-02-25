@@ -15,6 +15,11 @@
  */
 bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_Rect& miniTextureSrcRect);
 
+SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture);
+
+namespace details
+{
+
 /**
  * Loads a texture from the specified file path.
  *
@@ -36,4 +41,4 @@ std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::f
 std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(
     SDL_Renderer* renderer, const std::filesystem::path& imagePath);
 
-SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture);
+} // namespace details

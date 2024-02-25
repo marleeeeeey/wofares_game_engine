@@ -29,11 +29,6 @@ int main(int argc, char* args[])
         // Initialize the logger with the trace level.
         utils::Logger::getInstance(spdlog::level::info);
 
-        // Check if the map file exists.
-        std::string mapPath = "assets\\maps\\map.json";
-        if (!std::filesystem::exists(mapPath))
-            throw std::runtime_error(MY_FMT("Map file does not found: {}", mapPath));
-
         // Create an EnTT registry.
         entt::registry registry;
 
@@ -74,10 +69,11 @@ int main(int argc, char* args[])
         PhysicsSystem physicsSystem(registry);
         GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get());
         HUDRenderSystem hudRenderSystem(registry, renderer.get());
-        MapLoaderSystem mapLoaderSystem(registry, renderer.get());
+        MapLoaderSystem mapLoaderSystem(registry, resourceCashe);
 
         // Load the map.
-        mapLoaderSystem.LoadMap(mapPath);
+        auto level1 = resourceManager.GetTiledLevel("level1");
+        mapLoaderSystem.LoadMap(level1);
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
@@ -88,10 +84,10 @@ int main(int argc, char* args[])
             float deltaTime = static_cast<float>(frameStart - lastTick) / 1000.0f;
             lastTick = frameStart;
 
-            if (utils::FileChangedSinceLastCheck(mapPath) || gameState.controlOptions.reloadMap)
+            if (utils::FileChangedSinceLastCheck(level1) || gameState.controlOptions.reloadMap)
             {
                 mapLoaderSystem.UnloadMap();
-                mapLoaderSystem.LoadMap(mapPath);
+                mapLoaderSystem.LoadMap(level1);
                 gameState.controlOptions.reloadMap = false;
             }
 

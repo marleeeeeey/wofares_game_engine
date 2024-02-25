@@ -29,14 +29,32 @@ bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_R
     return true;
 }
 
+SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture)
+{
+    int textureWidth, textureHeight;
+    SDL_QueryTexture(texture->get(), nullptr, nullptr, &textureWidth, &textureHeight);
+
+    int tilesPerRow = textureWidth / tileWidth;
+    tileId -= 1; // Adjust tileId to match 0-based indexing.
+
+    SDL_Rect srcRect;
+    srcRect.x = (tileId % tilesPerRow) * tileWidth;
+    srcRect.y = (tileId / tilesPerRow) * tileHeight;
+    srcRect.w = tileWidth;
+    srcRect.h = tileHeight;
+
+    return srcRect;
+}
+
+namespace details
+{
+
 std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::filesystem::path& imagePath)
 {
     SDL_Texture* texture = IMG_LoadTexture(renderer, imagePath.string().c_str());
 
     if (texture == nullptr)
         throw std::runtime_error(MY_FMT("Failed to load texture: {}", imagePath.string()));
-
-    MY_LOG_FMT(info, "Loaded texture: {}", imagePath.string());
 
     return std::make_shared<SDLTextureRAII>(texture);
 }
@@ -77,19 +95,4 @@ std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(
     return std::make_shared<SDLTextureRAII>(texture);
 }
 
-SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared_ptr<SDLTextureRAII> texture)
-{
-    int textureWidth, textureHeight;
-    SDL_QueryTexture(texture->get(), nullptr, nullptr, &textureWidth, &textureHeight);
-
-    int tilesPerRow = textureWidth / tileWidth;
-    tileId -= 1; // Adjust tileId to match 0-based indexing.
-
-    SDL_Rect srcRect;
-    srcRect.x = (tileId % tilesPerRow) * tileWidth;
-    srcRect.y = (tileId / tilesPerRow) * tileHeight;
-    srcRect.w = tileWidth;
-    srcRect.h = tileHeight;
-
-    return srcRect;
-}
+} // namespace details

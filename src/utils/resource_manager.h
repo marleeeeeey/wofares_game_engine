@@ -32,10 +32,13 @@ class ResourceManager
 
     using FriendlyName = std::string;
     std::unordered_map<FriendlyName, AnimationInfo> animations;
+    std::unordered_map<FriendlyName, std::filesystem::path> tiledLevels;
 public:
     ResourceManager(ResourceCashe& resourceCashe, const std::filesystem::path& resourceMapFilePath);
-public: // Get Animation by name.
+public: // ************************* Animations *************************
     AnimationInfo GetAnimation(const std::string& name);
 private:
     AnimationInfo ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
+public: // ************************* Tiled levels *************************
+    std::filesystem::path GetTiledLevel(const std::string& name);
 };

@@ -1,4 +1,5 @@
 #include "map_loader_system.h"
+#include "utils/resource_cashe.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
 #include <fstream>
@@ -7,12 +8,13 @@
 #include <utils/glm_box2d_conversions.h>
 #include <utils/texture_process.h>
 
-MapLoaderSystem::MapLoaderSystem(entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front())),
-    objectsFactory(registry), coordinatesTransformer(registry)
+MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceCashe& resourceCashe)
+  : registry(registry), resourceCashe(resourceCashe),
+    gameState(registry.get<GameState>(registry.view<GameState>().front())), objectsFactory(registry),
+    coordinatesTransformer(registry)
 {}
 
-void MapLoaderSystem::LoadMap(const std::string& filename)
+void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
 {
     std::ifstream file(filename);
     if (!file.is_open())
@@ -26,16 +28,11 @@ void MapLoaderSystem::LoadMap(const std::string& filename)
     // Calc path to tileset image.
     std::filesystem::path tilesetPath = mapFilepath.parent_path() / json["tilesets"][0]["image"].get<std::string>();
 
-    // Check if the tileset texture file exists.
-    std::ifstream tilesetFile(tilesetPath);
-    if (!tilesetFile.is_open())
-        throw std::runtime_error(MY_FMT("Failed to open tileset file {}", tilesetPath.string()));
-
     // Load the tileset texture.
-    if (gameState.levelOptions.preventCreationInvisibleTiles)
-        tilesetTexture = LoadTextureWithStreamingAccess(renderer, tilesetPath);
-    else
-        tilesetTexture = LoadTexture(renderer, tilesetPath);
+    ResourceCashe::TextureAccess access = gameState.levelOptions.preventCreationInvisibleTiles
+        ? ResourceCashe::TextureAccess::Streaming
+        : ResourceCashe::TextureAccess::Static;
+    tilesetTexture = resourceCashe.LoadTexture(tilesetPath, access);
 
     // Assume all tiles are of the same size.
     tileWidth = json["tilewidth"];
@@ -123,7 +120,7 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
         if (props["name"] == "background")
         {
             auto backgroundTexturePath = mapFilepath.parent_path() / props["value"];
-            gameState.levelOptions.backgroundInfo.texture = LoadTexture(renderer, backgroundTexturePath);
+            gameState.levelOptions.backgroundInfo.texture = resourceCashe.LoadTexture(backgroundTexturePath);
         }
     }
 
