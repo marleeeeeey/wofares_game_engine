@@ -1,3 +1,5 @@
+#include "utils/resource_cashe.h"
+#include "utils/resource_manager.h"
 #include <ecs/components/game_components.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
@@ -55,6 +57,9 @@ int main(int argc, char* args[])
         SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
+
+        ResourceCashe resourceCashe(renderer.get());
+        ResourceManager resourceManager(resourceCashe, "assets\\assets_map.json");
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;

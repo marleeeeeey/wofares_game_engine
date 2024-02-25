@@ -16,6 +16,23 @@ struct RenderingInfo
     ColorName colorName = ColorName::Blue; // Color if the texture is not available.
 };
 
+// ********************************* Animation components *********************************
+
+struct AnimationFrame
+{
+    RenderingInfo renderingInfo; // Rendering information for the frame.
+    float duration; // Duration of the frame in seconds.
+};
+
+struct AnimationInfo
+{
+    std::vector<AnimationFrame> frames; // Frames of the animation.
+    float currentFrameTime = 0; // Time in seconds from the start of the current frame.
+    size_t currentFrameIndex = 0; // Index of the current frame.
+    bool isPlaying = false; // Is the animation playing.
+    bool loop = true; // Should the animation loop.
+};
+
 // ********************************* Player components *********************************
 
 struct PlayerInfo
