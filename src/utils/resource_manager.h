@@ -1,7 +1,7 @@
 #pragma once
 #include "SDL_render.h"
 #include "ecs/components/game_components.h"
-#include "utils/resource_cashe.h"
+#include "utils/resource_cache.h"
 #include <filesystem>
 #include <unordered_map>
 
@@ -27,7 +27,7 @@
 // }
 class ResourceManager
 {
-    details::ResourceCashe resourceCashe;
+    details::ResourceCache resourceCashe;
     std::filesystem::path resourceMapJson; // Absolute path to the resource map file.
     std::filesystem::path assetsDirectory; // Absolute path to the directory with assets.
 

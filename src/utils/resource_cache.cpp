@@ -1,4 +1,4 @@
-#include "resource_cashe.h"
+#include "resource_cache.h"
 #include <filesystem>
 #include <my_common_cpp_utils/Logger.h>
 #include <tuple>
@@ -7,10 +7,10 @@
 namespace details
 {
 
-ResourceCashe::ResourceCashe(SDL_Renderer* renderer) : renderer(renderer)
+ResourceCache::ResourceCache(SDL_Renderer* renderer) : renderer(renderer)
 {}
 
-std::shared_ptr<SDLTextureRAII> ResourceCashe::LoadTexture(const std::filesystem::path& filePath, TextureAccess access)
+std::shared_ptr<SDLTextureRAII> ResourceCache::LoadTexture(const std::filesystem::path& filePath, TextureAccess access)
 {
     // Get absolute path to the file.
     std::filesystem::path absolutePath = std::filesystem::absolute(filePath);

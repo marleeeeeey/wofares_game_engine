@@ -1,5 +1,4 @@
 #include "map_loader_system.h"
-#include "utils/resource_cashe.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
 #include <fstream>

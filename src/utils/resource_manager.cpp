@@ -1,6 +1,6 @@
 #include "resource_manager.h"
 #include "my_common_cpp_utils/Logger.h"
-#include "utils/resource_cashe.h"
+#include "utils/resource_cache.h"
 #include <filesystem>
 #include <fstream>
 
@@ -59,8 +59,7 @@ AnimationInfo ResourceManager::GetAnimation(const std::string& name)
  *   },
  *   "meta": {
  *     ...
- *     IMPORTANT: Path to the sprite sheet should be full! Need to be changed. By default it is relative.
- *     "image": "FULL\PATH\TO\SPRITE-SHEET.png",
+ *     "image": "SPRITE-SHEET.png",
  *     ...
  *   }
  * }
@@ -116,5 +115,5 @@ std::filesystem::path ResourceManager::GetTiledLevel(const std::string& name)
 
 std::shared_ptr<SDLTextureRAII> ResourceManager::GetTexture(const std::filesystem::path& path)
 {
-    return resourceCashe.LoadTexture(path, details::ResourceCashe::TextureAccess::Static);
+    return resourceCashe.LoadTexture(path, details::ResourceCache::TextureAccess::Static);
 };

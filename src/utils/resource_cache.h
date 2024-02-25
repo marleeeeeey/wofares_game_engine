@@ -8,10 +8,10 @@
 namespace details
 {
 // Reponsible for low-level resource management like loading textures and sounds.
-class ResourceCashe
+class ResourceCache
 {
 public:
-    explicit ResourceCashe(SDL_Renderer* renderer);
+    explicit ResourceCache(SDL_Renderer* renderer);
 
     enum class TextureAccess
     {
