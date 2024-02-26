@@ -56,6 +56,12 @@ struct ControlOptions
     bool isSceneCaptured{false};
 };
 
+struct SoundOptions
+{
+    float randomSoundEventInterval{10}; // Interval between random sound events in seconds.
+    float nextSoundEventTime{0.0f}; // Time of the next random sound event.
+};
+
 struct DebugInfo
 {
     float spacePressedDuration{0.0f};
@@ -69,5 +75,6 @@ struct GameState
     PhysicsOptions physicsOptions;
     WindowOptions windowOptions;
     ControlOptions controlOptions;
+    SoundOptions soundOptions;
     DebugInfo debugInfo;
 };

@@ -38,8 +38,8 @@ PlayerControlSystem::PlayerControlSystem(
 
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
 {
-    const float movingForce = 10.0f;
-    const float jumpForce = 25.0f;
+    float movingForce = 10.0f;
+    float jumpForce = 50.0f;
 
     auto& originalEvent = eventInfo.originalEvent;
 
@@ -48,7 +48,10 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
     {
         const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
-        auto vel = body->GetLinearVelocity();
+
+        auto mass = body->GetMass();
+        movingForce *= mass;
+        jumpForce *= mass;
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W)
         {

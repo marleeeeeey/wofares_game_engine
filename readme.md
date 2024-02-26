@@ -100,3 +100,7 @@ wofares/
 └── docs/
     └── *.*
 ```
+
+## Video log
+
+2024-02-26 https://youtu.be/8OZJOwcWsZs

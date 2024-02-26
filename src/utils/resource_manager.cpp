@@ -1,6 +1,8 @@
 #include "resource_manager.h"
 #include "my_common_cpp_utils/Logger.h"
+#include "my_common_cpp_utils/MathUtils.h"
 #include "utils/resource_cache.h"
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 
@@ -40,9 +42,22 @@ ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePat
     for (const auto& soundEffectPair : resourceMapJsonData["sound_effects"].items())
     {
         const std::string& soundEffectName = soundEffectPair.key();
-        const std::string& soundEffectPath = soundEffectPair.value().get<std::string>();
-        std::filesystem::path soundEffectAbsolutePath = assetsDirectory / soundEffectPath;
-        soundEffectPaths[soundEffectName] = soundEffectAbsolutePath;
+        const auto& soundEffectPathsJson = soundEffectPair.value();
+
+        if (!soundEffectPathsJson.is_array())
+            throw std::runtime_error(MY_FMT("Sound effect paths for '{}' should be an array", soundEffectName));
+
+        std::vector<std::filesystem::path> paths;
+
+        // Load sound effect paths.
+        for (const auto& pathJson : soundEffectPathsJson)
+        {
+            const std::string& soundEffectPath = pathJson.get<std::string>();
+            std::filesystem::path soundEffectAbsolutePath = assetsDirectory / soundEffectPath;
+            paths.push_back(soundEffectAbsolutePath);
+        }
+
+        soundEffectPaths[soundEffectName] = paths;
     }
 
     // Load music.
@@ -149,5 +164,9 @@ std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::stri
 {
     if (!soundEffectPaths.contains(name))
         throw std::runtime_error(MY_FMT("Sound effect with name '{}' does not found", name));
-    return resourceCashe.LoadSoundEffect(soundEffectPaths[name]);
+
+    // Get random sound effect from the list.
+    const auto& sounds = soundEffectPaths[name];
+    auto number = utils::random<size_t>(0, soundEffectPaths[name].size() - 1);
+    return resourceCashe.LoadSoundEffect(sounds[number]);
 };

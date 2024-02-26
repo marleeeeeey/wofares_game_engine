@@ -21,7 +21,7 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
 
         if (animation.isPlaying)
         {
-            animation.currentFrameTime += deltaTime * animation.speedFactor;
+            animation.currentFrameTime += deltaTime * animation.speedFactor * 0.5;
 
             if (animation.currentFrameTime >= animation.frames[animation.currentFrameIndex].duration)
             {
@@ -50,7 +50,7 @@ void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
         auto body = physicsInfo.bodyRAII->GetBody();
         auto vel = body->GetLinearVelocity();
         float speed = glm::length(glm::vec2(vel.x, vel.y));
-        animationInfo.speedFactor = speed / 1.0f;
+        animationInfo.speedFactor = std::min(speed, 2.5f);
 
         // Change the animation direction based on the player's direction.
         if (playerInfo.weaponDirection.x < 0)

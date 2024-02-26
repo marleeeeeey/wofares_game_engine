@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/audio_system.h"
 #include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
 #include <queue>
@@ -9,10 +10,11 @@ class WeaponControlSystem
     entt::registry& registry;
     GameState& gameState;
     Box2dEnttContactListener& contactListener;
+    AudioSystem& audioSystem;
     float deltaTime;
     std::queue<entt::entity> explosionEntities;
 public:
-    WeaponControlSystem(entt::registry& registry, Box2dEnttContactListener& contactListener);
+    WeaponControlSystem(entt::registry& registry, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem);
     void Update(float deltaTime);
 private:
     void UpdateTimerExplosionComponents();

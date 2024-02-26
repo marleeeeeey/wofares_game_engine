@@ -35,7 +35,7 @@ class ResourceManager
     std::unordered_map<FriendlyName, AnimationInfo> animations;
     std::unordered_map<FriendlyName, std::filesystem::path> tiledLevels;
     std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
-    std::unordered_map<FriendlyName, std::filesystem::path> soundEffectPaths;
+    std::unordered_map<std::string, std::vector<std::filesystem::path>> soundEffectPaths;
 public:
     ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer);
 public: // ************************* Animations *************************

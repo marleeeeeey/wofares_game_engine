@@ -1,6 +1,6 @@
+#include "ecs/systems/random_event_system.h"
 #include <ecs/components/game_components.h>
 #include <ecs/systems/animation_update_system.h>
-#include <ecs/systems/audio_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/event_queue_system.h>
 #include <ecs/systems/game_objects_render_system.h>
@@ -11,6 +11,7 @@
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/Logger.h>
+#include <utils/audio_system.h>
 #include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
 #include <utils/input_event_manager.h>
@@ -45,9 +46,6 @@ int main(int argc, char* args[])
         Box2dEnttContactListener contactListener(registry);
         gameState.physicsWorld->SetContactListener(&contactListener);
 
-        // Create a weapon control system and subscribe it to the contact listener.
-        WeaponControlSystem weaponControlSystem(registry, contactListener);
-
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         SDLAudioInitializerRAII sdlAudioInitializer;
@@ -58,6 +56,9 @@ int main(int argc, char* args[])
         ResourceManager resourceManager("assets\\assets_map.json", renderer.get());
         AudioSystem audioSystem(resourceManager);
         audioSystem.PlayMusic("background_music");
+
+        // Create a weapon control system and subscribe it to the contact listener.
+        WeaponControlSystem weaponControlSystem(registry, contactListener, audioSystem);
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
@@ -70,6 +71,7 @@ int main(int argc, char* args[])
 
         // Create a systems with no input events.
         PhysicsSystem physicsSystem(registry);
+        RandomEventSystem randomEventSystem(registry, audioSystem);
         GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get());
         HUDRenderSystem hudRenderSystem(registry, renderer.get());
         MapLoaderSystem mapLoaderSystem(registry, resourceManager);
@@ -98,6 +100,8 @@ int main(int argc, char* args[])
 
             // Handle input events.
             eventQueueSystem.Update(deltaTime);
+
+            randomEventSystem.Update(deltaTime);
 
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);

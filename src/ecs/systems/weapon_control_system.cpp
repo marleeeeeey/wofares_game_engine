@@ -7,9 +7,10 @@
 #include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>
 
-WeaponControlSystem::WeaponControlSystem(entt::registry& registry_, Box2dEnttContactListener& contactListener)
+WeaponControlSystem::WeaponControlSystem(
+    entt::registry& registry_, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem)
   : registry(registry_), gameState(registry.get<GameState>(registry.view<GameState>().front())),
-    contactListener(contactListener)
+    contactListener(contactListener), audioSystem(audioSystem)
 {
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::Begin,
@@ -110,6 +111,7 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
         ApplyForceToPhysicalBodies(entitiesUnderExploisonImpact, grenadePhysicsPos, explosionImpact->force);
         StartCollisionDisableTimer(entitiesUnderExploisonImpact);
         registry.destroy(explosionEntity);
+        audioSystem.PlaySoundEffect("explosion");
     }
 };
 void WeaponControlSystem::ProcessExplosionEntitiesQueue()
