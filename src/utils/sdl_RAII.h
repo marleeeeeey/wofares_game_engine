@@ -1,4 +1,5 @@
 #pragma once
+#include "SDL_pixels.h"
 #include "SDL_render.h"
 #include <SDL.h>
 #include <glm/glm.hpp>
@@ -66,4 +67,41 @@ public:
 public:
     void* GetPixels() const { return pixels; }
     int GetPitch() const { return pitch; }
+};
+
+class SDLSurfaceLockRAII
+{
+public:
+    explicit SDLSurfaceLockRAII(SDL_Surface* surface);
+    ~SDLSurfaceLockRAII();
+    SDLSurfaceLockRAII(const SDLSurfaceLockRAII&) = delete;
+    SDLSurfaceLockRAII& operator=(const SDLSurfaceLockRAII&) = delete;
+private:
+    SDL_Surface* surface;
+};
+
+class SDLSurfaceRAII
+{
+public:
+    SDLSurfaceRAII(SDL_Surface* surface);
+    ~SDLSurfaceRAII();
+    SDLSurfaceRAII(SDLSurfaceRAII&& other) noexcept;
+    SDLSurfaceRAII& operator=(SDLSurfaceRAII&& other) noexcept;
+
+    SDL_Surface* get() const { return surface; }
+private:
+    SDL_Surface* surface = nullptr;
+};
+
+class SDLPixelFormatRAII
+{
+public:
+    SDLPixelFormatRAII(SDL_PixelFormat* format);
+    ~SDLPixelFormatRAII();
+    SDLPixelFormatRAII(SDLPixelFormatRAII&& other) noexcept;
+    SDLPixelFormatRAII& operator=(SDLPixelFormatRAII&& other) noexcept;
+
+    SDL_PixelFormat* get() const { return pixelFormat; }
+private:
+    SDL_PixelFormat* pixelFormat = nullptr;
 };

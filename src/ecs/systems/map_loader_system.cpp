@@ -1,4 +1,5 @@
 #include "map_loader_system.h"
+#include "my_common_cpp_utils/Logger.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
 #include <fstream>
@@ -27,7 +28,11 @@ void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
     // Calc path to tileset image.
     std::filesystem::path tilesetPath = mapFilepath.parent_path() / json["tilesets"][0]["image"].get<std::string>();
 
-    tilesetTexture = resourceManager.GetTexture(tilesetPath.string());
+    tilesetTexture = resourceManager.GetTexture(tilesetPath);
+    if (gameState.levelOptions.preventCreationInvisibleTiles)
+        tilesetSurface = resourceManager.GetSurface(tilesetPath);
+    else
+        tilesetSurface = nullptr;
 
     // Assume all tiles are of the same size.
     tileWidth = json["tilewidth"];
@@ -157,11 +162,17 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             SDL_Rect miniTextureSrcRect{
                 textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight, miniWidth, miniHeight};
 
-            if (gameState.levelOptions.preventCreationInvisibleTiles &&
-                IsTileInvisible(tilesetTexture, miniTextureSrcRect))
+            // Skip invisible tiles.
+            if (gameState.levelOptions.preventCreationInvisibleTiles)
             {
-                invisibleTilesNumber++;
-                continue;
+                if (!tilesetSurface)
+                    throw std::runtime_error("tilesetSurface is nullptr");
+
+                if (IsTileInvisible(tilesetSurface->get(), miniTextureSrcRect))
+                {
+                    invisibleTilesNumber++;
+                    continue;
+                }
             }
 
             float miniTileWorldPositionX = layerCol * tileWidth + miniCol * miniWidth;

@@ -150,7 +150,7 @@ std::filesystem::path ResourceManager::GetTiledLevel(const std::string& name)
 
 std::shared_ptr<SDLTextureRAII> ResourceManager::GetTexture(const std::filesystem::path& path)
 {
-    return resourceCashe.LoadTexture(path, details::ResourceCache::TextureAccess::Static);
+    return resourceCashe.LoadTexture(path);
 };
 
 std::shared_ptr<MusicRAII> ResourceManager::GetMusic(const std::string& name)
@@ -169,4 +169,9 @@ std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::stri
     const auto& sounds = soundEffectPaths[name];
     auto number = utils::random<size_t>(0, soundEffectPaths[name].size() - 1);
     return resourceCashe.LoadSoundEffect(sounds[number]);
+};
+
+std::shared_ptr<SDLSurfaceRAII> ResourceManager::GetSurface(const std::filesystem::path& path)
+{
+    return resourceCashe.LoadSurface(path);
 };

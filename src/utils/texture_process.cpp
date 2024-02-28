@@ -1,24 +1,26 @@
 #include "texture_process.h"
+#include "SDL_pixels.h"
+#include "SDL_surface.h"
 #include <SDL_image.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/sdl_RAII.h>
 
-bool IsTileInvisible(std::shared_ptr<SDLTextureRAII> tilesetTexture, const SDL_Rect& miniTextureSrcRect)
+bool IsTileInvisible(SDL_Surface* surface, const SDL_Rect& miniTextureSrcRect)
 {
-    SDLTextureLockRAII lock(tilesetTexture->get());
+    if (!surface)
+        throw std::runtime_error("[IsTileInvisible] Surface is NULL");
 
-    Uint32* pixels = static_cast<Uint32*>(lock.GetPixels());
-    int pitch = lock.GetPitch();
+    SDLSurfaceLockRAII lock(surface);
+
+    Uint32* pixels = static_cast<Uint32*>(surface->pixels);
+    int pitch = surface->pitch;
 
     for (int row = 0; row < miniTextureSrcRect.h; ++row)
     {
         for (int col = 0; col < miniTextureSrcRect.w; ++col)
         {
-            static const int pixelSize = 4; // 4 bytes per pixel (ABGR).
-            // TODO: here is a bug. pixel is always zero. Probably the issue in LoadTextureWithStreamingAccess.
-            Uint32 pixel = pixels[row * (pitch / pixelSize) + col];
-            Uint8 alpha = pixel & 0xFF; // Correct for SDL_PIXELFORMAT_ABGR8888
-            // MY_LOG_FMT(info, "Alpha: {}, Pixel: {}, Pitch: {}, col: {}, row: {}", alpha, pixel, pitch, col, row);
+            Uint32 pixel = pixels[(miniTextureSrcRect.y + row) * (pitch / 4) + (miniTextureSrcRect.x + col)];
+            Uint8 alpha = (pixel >> surface->format->Ashift) & 0xFF;
             if (alpha > 0)
             {
                 return false;
@@ -35,7 +37,7 @@ SDL_Rect CalculateSrcRect(int tileId, int tileWidth, int tileHeight, std::shared
     SDL_QueryTexture(texture->get(), nullptr, nullptr, &textureWidth, &textureHeight);
 
     int tilesPerRow = textureWidth / tileWidth;
-    tileId -= 1; // Adjust tileId to match 0-based indexing.
+    tileId -= 1; // Adjust tileId to match 0-based indexing. Tiled uses 1-based indexing.
 
     SDL_Rect srcRect;
     srcRect.x = (tileId % tilesPerRow) * tileWidth;
@@ -59,40 +61,43 @@ std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::f
     return std::make_shared<SDLTextureRAII>(texture);
 }
 
-std::shared_ptr<SDLTextureRAII> LoadTextureWithStreamingAccess(
+SDL_Surface* ConvertSurfaceFormat(SDL_Surface* srcSurface, Uint32 toFormatEnum)
+{
+    if (!srcSurface)
+        throw std::runtime_error("[ConvertSurfaceFormat] Source surface is NULL");
+
+    SDLPixelFormatRAII toFormat = SDL_AllocFormat(toFormatEnum);
+
+    // Create a new surface with the desired format.
+    SDL_Surface* convertedSurface = SDL_ConvertSurface(srcSurface, toFormat.get(), 0);
+    if (!convertedSurface)
+        throw std::runtime_error(MY_FMT("[ConvertSurfaceFormat] Failed to convert surface: {}", SDL_GetError()));
+
+    return convertedSurface;
+}
+
+std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(
     SDL_Renderer* renderer, const std::filesystem::path& imagePath)
 {
     std::string imagePathStr = imagePath.string();
 
     // Step 1. Load image into SDL_Surface.
-    SDL_Surface* surface = IMG_Load(imagePathStr.c_str());
-    if (!surface)
-        throw std::runtime_error(MY_FMT("Failed to load image {}. Error: {}", imagePathStr, IMG_GetError()));
+    SDLSurfaceRAII surface = IMG_Load(imagePathStr.c_str());
 
-    MY_LOG_FMT(
-        info, "Surface format: {}, w: {}, h: {}", SDL_GetPixelFormatName(surface->format->format), surface->w,
-        surface->h);
-
-    // Step 2: Create a texture with the SDL_TEXTUREACCESS_STREAMING flag.
-    SDL_Texture* texture =
-        SDL_CreateTexture(renderer, surface->format->format, SDL_TEXTUREACCESS_STREAMING, surface->w, surface->h);
-    if (!texture)
+    // Convert surface to target format if necessary.
+    auto targetFormat = SDL_PIXELFORMAT_ABGR8888;
+    if (surface.get()->format->format != targetFormat)
     {
-        SDL_FreeSurface(surface);
-        throw std::runtime_error(
-            MY_FMT("Failed to create streaming texture for image {}. Error: {}", imagePathStr, SDL_GetError()));
+        MY_LOG_FMT(warn, "Original surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        surface = ConvertSurfaceFormat(surface.get(), targetFormat);
+        MY_LOG_FMT(warn, "Converted surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+    }
+    else
+    {
+        MY_LOG_FMT(info, "Surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
     }
 
-    // Step 3. Copy pixel data from the surface to the texture.
-    if (SDL_UpdateTexture(texture, nullptr, surface->pixels, surface->pitch) != 0)
-    {
-        MY_LOG_FMT(warn, "SDL_UpdateTexture failed. Error: {}", SDL_GetError());
-    }
-
-    // Step 4. Free the surface.
-    SDL_FreeSurface(surface);
-
-    return std::make_shared<SDLTextureRAII>(texture);
+    return std::make_shared<SDLSurfaceRAII>(std::move(surface));
 }
 
 } // namespace details

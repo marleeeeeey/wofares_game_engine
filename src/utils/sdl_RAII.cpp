@@ -103,3 +103,64 @@ SDLTextureLockRAII::~SDLTextureLockRAII()
         SDL_UnlockTexture(texture);
     }
 }
+
+SDLSurfaceLockRAII::SDLSurfaceLockRAII(SDL_Surface* surface) : surface(surface)
+{
+    if (surface && SDL_MUSTLOCK(surface))
+    {
+        SDL_LockSurface(surface);
+    }
+}
+
+SDLSurfaceLockRAII::~SDLSurfaceLockRAII()
+{
+    if (surface && SDL_MUSTLOCK(surface))
+    {
+        SDL_UnlockSurface(surface);
+    }
+}
+
+SDLSurfaceRAII::SDLSurfaceRAII(SDL_Surface* surface) : surface(surface)
+{
+    if (!this->surface)
+    {
+        throw std::runtime_error("Null surface provided to SDLSurfaceRAII");
+    }
+}
+
+SDLSurfaceRAII::~SDLSurfaceRAII()
+{
+    SDL_FreeSurface(surface);
+}
+
+SDLSurfaceRAII::SDLSurfaceRAII(SDLSurfaceRAII&& other) noexcept : surface(std::exchange(other.surface, nullptr))
+{}
+
+SDLSurfaceRAII& SDLSurfaceRAII::operator=(SDLSurfaceRAII&& other) noexcept
+{
+    std::swap(surface, other.surface);
+    return *this;
+}
+SDLPixelFormatRAII::SDLPixelFormatRAII(SDL_PixelFormat* format)
+{
+    if (!pixelFormat)
+        throw std::runtime_error("[SDLPixelFormatRAII] format is nullptr");
+}
+
+SDLPixelFormatRAII::~SDLPixelFormatRAII()
+{
+    if (pixelFormat)
+    {
+        SDL_FreeFormat(pixelFormat);
+    }
+}
+
+SDLPixelFormatRAII::SDLPixelFormatRAII(SDLPixelFormatRAII&& other) noexcept
+  : pixelFormat(std::exchange(other.pixelFormat, nullptr))
+{}
+
+SDLPixelFormatRAII& SDLPixelFormatRAII::operator=(SDLPixelFormatRAII&& other) noexcept
+{
+    std::swap(pixelFormat, other.pixelFormat);
+    return *this;
+}

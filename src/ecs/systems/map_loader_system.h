@@ -1,7 +1,9 @@
 #pragma once
 #include "utils/resource_manager.h"
+#include "utils/sdl_RAII.h"
 #include <ecs/components/game_components.h>
 #include <entt/entt.hpp>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <utils/coordinates_transformer.h>
 #include <utils/objects_factory.h>
@@ -21,6 +23,7 @@ class MapLoaderSystem
     size_t createdTiles = 0;
     size_t invisibleTilesNumber = 0;
     std::shared_ptr<SDLTextureRAII> tilesetTexture;
+    std::shared_ptr<SDLSurfaceRAII> tilesetSurface; // Optional. Used when Streaming access is needed.
     std::filesystem::path mapFilepath;
 public:
     MapLoaderSystem(entt::registry& registry, ResourceManager& resourceManager);

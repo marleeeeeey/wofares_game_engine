@@ -2,7 +2,9 @@
 #include "SDL_render.h"
 #include "ecs/components/game_components.h"
 #include "utils/resource_cache.h"
+#include "utils/sdl_RAII.h"
 #include <filesystem>
+#include <memory>
 #include <unordered_map>
 
 // High-level resource management. Get resources by friendly names in game like terminolgy.
@@ -46,6 +48,7 @@ public: // ************************* Tiled levels *************************
     std::filesystem::path GetTiledLevel(const std::string& name);
 public: // ************************* Textures *************************
     std::shared_ptr<SDLTextureRAII> GetTexture(const std::filesystem::path& path);
+    std::shared_ptr<SDLSurfaceRAII> GetSurface(const std::filesystem::path& path);
 public: // ************************* Sounds *************************
     std::shared_ptr<MusicRAII> GetMusic(const std::string& name);
     std::shared_ptr<SoundEffectRAII> GetSoundEffect(const std::string& name);
