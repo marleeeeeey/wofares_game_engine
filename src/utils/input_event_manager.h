@@ -14,14 +14,19 @@ public:
 
     enum EventType
     {
+        RawSdlEvent,
+        ButtonPress,
+        ButtonRelease,
         ButtonHold,
         ButtonReleaseAfterHold
     };
-
-    using RawListener = std::function<void(const SDL_Event&)>;
-    using СontinuousListener = std::function<void(const EventInfo&)>;
-    void SubscribeRawListener(RawListener listener);
-    void SubscribeСontinuousListener(EventType eventType, СontinuousListener listener);
+public: // Methods to subscribe to the events.
+    using EventListener = std::function<void(const EventInfo&)>;
+    // Subscribe to raw SDL events.
+    void Subscribe(EventListener listener);
+    // Subscribe to specific event type.
+    void Subscribe(EventType eventType, EventListener listener);
+public: // Methods to translate SDL events to the EventInfo and notify listeners.
     // This method should be called on every SDL_Event in the event queue.
     void UpdateRawEvent(const SDL_Event& event);
     // This method should be called every frame after updateRawEvent.
@@ -30,14 +35,18 @@ public:
 private:
     struct PrivateEventInfo
     {
-        bool firedToAll = false; // Used for UP events. This is because of assimetry of DOWN and UP events.
+        // Used for Release events. This is because of assimetry of press and release events.
+        // Hold time is not needed for release events.
+        bool firedToAll = false;
         EventInfo info;
     };
 
     void UpdateHoldDurations(float deltaTime);
+    void UpdateButtonHoldStaticInfo(const SDL_Event& event);
 
-    std::vector<RawListener> rawListeners;
-    std::unordered_map<EventType, std::vector<СontinuousListener>> continuousListeners;
+    // Listeners for the events.
+    std::unordered_map<EventType, std::vector<EventListener>> continuousListeners;
+    // Status of the buttons.
     std::unordered_map<SDL_Scancode, PrivateEventInfo> keyboardButtonHoldInfo; // TODO: array.
     std::unordered_map<Uint8, PrivateEventInfo> mouseButtonHoldInfo; // TODO: array
 };

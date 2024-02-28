@@ -5,13 +5,14 @@
 GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
   : registry(registry), inputEventManager(inputEventManager)
 {
-    inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandleGameStateChange(event); });
+    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
+                                { HandleGameStateChange(eventInfo.originalEvent); });
 
-    inputEventManager.SubscribeСontinuousListener(
+    inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonHold,
         [this](const InputEventManager::EventInfo& eventInfo) { HandleSpaceHoldButtonToDebugInfo(eventInfo); });
 
-    inputEventManager.SubscribeСontinuousListener(
+    inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonReleaseAfterHold,
         [this](const InputEventManager::EventInfo& eventInfo)
         { HandleSpaceReleaseAfterHoldButtonToDebugInfo(eventInfo); });

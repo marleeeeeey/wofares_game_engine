@@ -15,17 +15,19 @@ PlayerControlSystem::PlayerControlSystem(
     gameState(registry.get<GameState>(registry.view<GameState>().front())), box2dBodyCreator(registry),
     contactListener(contactListener)
 {
-    inputEventManager.SubscribeСontinuousListener(
+    inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonHold,
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerMovement(eventInfo); });
 
-    inputEventManager.SubscribeСontinuousListener(
+    inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonReleaseAfterHold,
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttack(eventInfo); });
 
-    inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandlePlayerBuildingAction(event); });
+    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
+                                { HandlePlayerBuildingAction(eventInfo.originalEvent); });
 
-    inputEventManager.SubscribeRawListener([this](const SDL_Event& event) { HandlePlayerWeaponDirection(event); });
+    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
+                                { HandlePlayerWeaponDirection(eventInfo.originalEvent); });
 
     // Subscribe to the contact listener to handle the ground contact flag.
     contactListener.SubscribeContact(
