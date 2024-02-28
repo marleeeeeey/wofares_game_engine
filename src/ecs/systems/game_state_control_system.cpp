@@ -5,17 +5,7 @@
 GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
   : registry(registry), inputEventManager(inputEventManager)
 {
-    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
-                                { HandleGameStateChange(eventInfo.originalEvent); });
-
-    inputEventManager.Subscribe(
-        InputEventManager::EventType::ButtonHold,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandleSpaceHoldButtonToDebugInfo(eventInfo); });
-
-    inputEventManager.Subscribe(
-        InputEventManager::EventType::ButtonReleaseAfterHold,
-        [this](const InputEventManager::EventInfo& eventInfo)
-        { HandleSpaceReleaseAfterHoldButtonToDebugInfo(eventInfo); });
+    SubscribeToInputEvents();
 }
 
 void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
@@ -49,4 +39,19 @@ void GameStateControlSystem::HandleSpaceReleaseAfterHoldButtonToDebugInfo(const 
     {
         gameState.debugInfo.spacePressedDurationOnUpEvent = eventInfo.holdDuration;
     }
+};
+
+void GameStateControlSystem::SubscribeToInputEvents()
+{
+    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
+                                { HandleGameStateChange(eventInfo.originalEvent); });
+
+    inputEventManager.Subscribe(
+        InputEventManager::EventType::ButtonHold,
+        [this](const InputEventManager::EventInfo& eventInfo) { HandleSpaceHoldButtonToDebugInfo(eventInfo); });
+
+    inputEventManager.Subscribe(
+        InputEventManager::EventType::ButtonReleaseAfterHold,
+        [this](const InputEventManager::EventInfo& eventInfo)
+        { HandleSpaceReleaseAfterHoldButtonToDebugInfo(eventInfo); });
 };

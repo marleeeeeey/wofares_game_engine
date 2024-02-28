@@ -24,6 +24,7 @@ public:
     SDLWindowRAII& operator=(const SDLWindowRAII&) = delete;
 public:
     [[nodiscard]] SDL_Window* get() const { return window; }
+    operator SDL_Window*() const { return window; } // TODO: decide if the same way can be used for other RAII classes.
 private:
     void init(const std::string& title, int width, int height);
 };

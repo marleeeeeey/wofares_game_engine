@@ -10,6 +10,8 @@ public:
     GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager);
 private:
     void HandleGameStateChange(const SDL_Event& event);
+private:
+    void SubscribeToInputEvents();
 private: // Debug purposes. Maybe removed safely.
     void HandleSpaceHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo);
     void HandleSpaceReleaseAfterHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo);

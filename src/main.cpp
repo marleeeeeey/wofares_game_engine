@@ -9,6 +9,7 @@
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
+#include <ecs/systems/screen_mode_control_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/Logger.h>
 #include <utils/audio_system.h>
@@ -17,6 +18,7 @@
 #include <utils/input_event_manager.h>
 #include <utils/resource_manager.h>
 #include <utils/sdl_RAII.h>
+
 
 int main(int argc, char* args[])
 {
@@ -75,6 +77,9 @@ int main(int argc, char* args[])
         GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get());
         HUDRenderSystem hudRenderSystem(registry, renderer.get());
         MapLoaderSystem mapLoaderSystem(registry, resourceManager);
+
+        // Auxiliary systems.
+        ScreenModeControlSystem screenModeControlSystem(inputEventManager, window);
 
         // Load the map.
         auto level1 = resourceManager.GetTiledLevel("level1");
