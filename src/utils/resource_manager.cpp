@@ -175,3 +175,8 @@ std::shared_ptr<SDLSurfaceRAII> ResourceManager::GetSurface(const std::filesyste
 {
     return resourceCashe.LoadSurface(path);
 };
+
+std::shared_ptr<SDLTextureRAII> ResourceManager::GetColoredPixelTexture(ColorName color)
+{
+    return resourceCashe.GetColoredPixelTexture(color);
+};

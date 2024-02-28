@@ -3,6 +3,7 @@
 #include "ecs/components/game_components.h"
 #include "utils/resource_cache.h"
 #include "utils/sdl_RAII.h"
+#include "utils/sdl_colors.h"
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
@@ -47,6 +48,7 @@ private:
 public: // ************************* Tiled levels *************************
     std::filesystem::path GetTiledLevel(const std::string& name);
 public: // ************************* Textures *************************
+    std::shared_ptr<SDLTextureRAII> GetColoredPixelTexture(ColorName color);
     std::shared_ptr<SDLTextureRAII> GetTexture(const std::filesystem::path& path);
     std::shared_ptr<SDLSurfaceRAII> GetSurface(const std::filesystem::path& path);
 public: // ************************* Sounds *************************

@@ -3,9 +3,10 @@
 #include <numbers>
 #include <utils/glm_box2d_conversions.h>
 
-GameObjectsRenderSystem::GameObjectsRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front())),
-    coordinatesTransformer(registry)
+GameObjectsRenderSystem::GameObjectsRenderSystem(
+    entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
+  : registry(registry), renderer(renderer), resourceManager(resourceManager),
+    gameState(registry.get<GameState>(registry.view<GameState>().front())), coordinatesTransformer(registry)
 {}
 
 void GameObjectsRenderSystem::Render()
@@ -101,10 +102,11 @@ SDL_Rect GameObjectsRenderSystem::GetRectWithCameraTransform(const glm::vec2& sd
 void GameObjectsRenderSystem::RenderSquare(
     const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle)
 {
-    SetRenderDrawColor(renderer, color);
-    SDL_Rect rect = GetRectWithCameraTransform(sdlPos, sdlSize);
-    // TODO implement texture and angle support for non tiled objects.
-    SDL_RenderFillRect(renderer, &rect);
+    std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
+    double angleDegrees = angle * (180.0 / M_PI);
+    SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
+    SDL_Point center = {destRect.w / 2, destRect.h / 2};
+    SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
 }
 
 void GameObjectsRenderSystem::RenderSquare(
@@ -126,9 +128,7 @@ void GameObjectsRenderSystem::RenderTiledSquare(
 
     if (!tileInfo.texturePtr)
     {
-        SetRenderDrawColor(renderer, tileInfo.colorName);
-        // TODO implement texture and angle support for non tiled objects.
-        SDL_RenderFillRect(renderer, &destRect);
+        RenderSquare(sdlPos, sdlSize, tileInfo.colorName, angle);
         return;
     }
 

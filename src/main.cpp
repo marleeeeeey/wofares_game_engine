@@ -19,7 +19,6 @@
 #include <utils/resource_manager.h>
 #include <utils/sdl_RAII.h>
 
-
 int main(int argc, char* args[])
 {
     try
@@ -74,7 +73,7 @@ int main(int argc, char* args[])
         // Create a systems with no input events.
         PhysicsSystem physicsSystem(registry);
         RandomEventSystem randomEventSystem(registry, audioSystem);
-        GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get());
+        GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get(), resourceManager);
         HUDRenderSystem hudRenderSystem(registry, renderer.get());
         MapLoaderSystem mapLoaderSystem(registry, resourceManager);
 

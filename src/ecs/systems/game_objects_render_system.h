@@ -3,6 +3,7 @@
 #include <ecs/components/game_components.h>
 #include <entt/entt.hpp>
 #include <utils/coordinates_transformer.h>
+#include <utils/resource_manager.h>
 #include <utils/sdl_colors.h>
 
 class GameObjectsRenderSystem
@@ -11,8 +12,9 @@ class GameObjectsRenderSystem
     SDL_Renderer* renderer;
     GameState& gameState;
     CoordinatesTransformer coordinatesTransformer;
+    ResourceManager& resourceManager;
 public:
-    GameObjectsRenderSystem(entt::registry& registry, SDL_Renderer* renderer);
+    GameObjectsRenderSystem(entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager);
     void Render();
 private: // Render game objects methods.
     void RenderBackground();

@@ -48,6 +48,8 @@ class SDLTextureRAII
 public:
     SDLTextureRAII(SDL_Texture* texture);
     ~SDLTextureRAII();
+    SDLTextureRAII(const SDLTextureRAII&) = delete;
+    SDLTextureRAII& operator=(const SDLTextureRAII&) = delete;
     SDLTextureRAII(SDLTextureRAII&& other) noexcept;
     SDLTextureRAII& operator=(SDLTextureRAII&& other) noexcept;
 public:
