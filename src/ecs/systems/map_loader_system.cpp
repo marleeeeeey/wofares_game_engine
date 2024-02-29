@@ -138,11 +138,11 @@ void MapLoaderSystem::CalculateLevelBoundsWithBufferZone()
 {
     auto& lb = gameState.levelOptions.levelBox2dBounds;
     auto& bz = gameState.levelOptions.bufferZone;
-    MY_LOG_FMT(info, "Level bounds: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
+    MY_LOG_FMT(debug, "Level bounds: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
     lb.min -= bz;
     lb.max += bz;
     MY_LOG_FMT(
-        info, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
+        debug, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
 }
 
 void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)

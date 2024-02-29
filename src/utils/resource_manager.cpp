@@ -113,8 +113,8 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
 
     // Load texture.
     const std::string imagePath = asepriteJsonData["meta"]["image"].get<std::string>();
-    auto imageAbsolutePath = assetsDirectory / "images" / imagePath;
-    auto textureRAII = resourceCashe.LoadTexture(imageAbsolutePath);
+    auto animationTexturePath = asepriteAnimationJsonPath.parent_path() / imagePath;
+    auto textureRAII = resourceCashe.LoadTexture(animationTexturePath);
 
     // Create animation.
     AnimationInfo animation;

@@ -44,10 +44,11 @@ std::shared_ptr<SDLTextureRAII> ResourceCache::LoadTexture(const std::filesystem
     if (textures.contains(absolutePath))
         return textures[absolutePath];
 
+    MY_LOG_FMT(info, "Loading texture: {}", filePath.string());
+
     // Load the texture and cache it.
     std::shared_ptr<SDLTextureRAII> textureRAII;
     textureRAII = details::LoadTexture(renderer, absolutePath);
-    MY_LOG_FMT(info, "Loaded texture: {}", filePath.string());
     textures[absolutePath] = textureRAII;
     return textureRAII;
 }
