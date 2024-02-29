@@ -10,8 +10,13 @@ set(GLM_DISABLE_AUTO_DETECTION ON CACHE BOOL "" FORCE)
 # Generate compile_commands.json.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Getting vcpkg root dir.
+message(STATUS "CMAKE_TOOLCHAIN_FILE is set to ${CMAKE_TOOLCHAIN_FILE}")
+string(REGEX REPLACE "/scripts/buildsystems/vcpkg.cmake$" "" VCPKG_ROOT_DIR "${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "VCPKG root dir: ${VCPKG_ROOT_DIR}")
+
 # TODO: here is a hack to make SDL_image linkable via cmake. Fix it and make cross-platform.
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};C:/dev/vcpkg/installed/x64-windows/share/SDL2_mixer")
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${VCPKG_ROOT_DIR}/installed/x64-windows/share/SDL2_mixer")
 find_package(SDL2_mixer CONFIG REQUIRED)
 
 add_subdirectory(thirdparty/SDL)

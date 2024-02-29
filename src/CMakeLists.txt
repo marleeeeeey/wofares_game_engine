@@ -57,11 +57,55 @@ function(copy_dynamic_lib target_name dll_dir dll_name)
     endif()
 endfunction()
 
+# C:\dev\vcpkg\installed\x64-windows\debug\bin\SDL2_mixerd.dll
+# C:\dev\vcpkg\installed\x64-windows\debug\bin\SDL2_mixerd.pdb
+function(copy_lib_from_vcpkg target_name dll_name)
+    # Set the path to the appropriate DLL directory based on the build type.
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+        set(dll_dir "${VCPKG_ROOT_DIR}/installed/x64-windows/debug/bin")
+    else()
+        set(dll_dir "${VCPKG_ROOT_DIR}/installed/x64-windows/bin")
+    endif()
+
+    # Determine the appropriate DLL and PDB names
+    if(WIN32)
+        if(CMAKE_BUILD_TYPE MATCHES Debug)
+            set(dll_file "${dll_name}d.dll")
+            set(pdb_file "${dll_name}d.pdb")
+        else()
+            set(dll_file "${dll_name}.dll")
+            set(pdb_file "${dll_name}.pdb")
+        endif()
+    elseif(APPLE)
+        set(dll_file "lib${dll_name}.dylib")
+    else()
+        set(dll_file "lib${dll_name}.so")
+    endif()
+
+    # Copy the SDL2_mixer dynamic library.
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${dll_dir}/${dll_file}"
+        "$<TARGET_FILE_DIR:${target_name}>")
+
+    if(WIN32)
+        # Copy the SDL2_mixer debug symbols.
+        if(CMAKE_BUILD_TYPE MATCHES Debug)
+            add_custom_command(TARGET ${target_name} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${dll_dir}/${pdb_file}"
+                "$<TARGET_FILE_DIR:${target_name}>")
+        endif()
+    endif()
+endfunction()
+
 copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL" "SDL2")
 copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/spdlog" "spdlog")
 copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL_image" "SDL2_image")
 
-# copy from `thirdparty\game_assets\wofares\assets` to build directory
+copy_lib_from_vcpkg(wofares "SDL2_mixer")
+
+# copy from thirdparty\my_tiled_maps\map002_wofares\assets to bin\assets
 add_custom_command(TARGET wofares POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/thirdparty/game_assets/wofares/assets"
