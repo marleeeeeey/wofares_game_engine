@@ -11,6 +11,14 @@ void EventQueueSystem::Update(float deltaTime)
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL2_ProcessEvent(&event);
+
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+        {
+            // The mouse or keyboard event was processed by ImGui, do not process in the application.
+            continue;
+        }
+
         inputEventManager.UpdateRawEvent(event);
     }
     inputEventManager.UpdateСontinuousEvents(deltaTime);
