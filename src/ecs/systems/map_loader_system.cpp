@@ -183,8 +183,7 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             auto entity = registry.create();
             registry.emplace<RenderingInfo>(
                 entity, glm::vec2(miniWidth, miniHeight), tilesetTexture, miniTextureSrcRect);
-            auto tilePhysicsBody =
-                box2dBodyCreator.CreateStaticPhysicsBody(entity, miniTileWorldPosition, miniTileSize);
+            auto tilePhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, miniTileWorldPosition, miniTileSize);
 
             // Update level bounds.
             const b2Vec2& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();

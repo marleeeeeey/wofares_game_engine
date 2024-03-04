@@ -1,5 +1,4 @@
 #include "objects_factory.h"
-#include "box2d/b2_polygon_shape.h"
 #include <ecs/components/game_components.h>
 #include <utils/box2d_body_creator.h>
 #include <utils/coordinates_transformer.h>
@@ -23,10 +22,13 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
     auto entity = registry.create();
     registry.emplace<AnimationInfo>(entity, playerAnimation);
     registry.emplace<PlayerInfo>(entity);
-    auto playerPhysicsBody = box2dBodyCreator.CreateDynamicPhysicsBody(entity, sdlPos, playerSdlBBox);
 
-    // Add sensor to detect the ground below the player.
-    box2dBodyCreator.AddThinSensorBelowTheBody(playerPhysicsBody, playerSdlBBox);
+    // Create a Box2D body for the player.
+    Box2dBodyCreator::Options options;
+    options.shape = Box2dBodyCreator::Options::Shape::Capsule;
+    options.hasSensorBelowTheBody = true;
+    options.isDynamic = true;
+    auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, sdlPos, playerSdlBBox, options);
 
     registry.emplace<PhysicsInfo>(entity, playerPhysicsBody);
     return entity;

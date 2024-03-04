@@ -126,7 +126,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
 
         auto entity = registry.create();
         glm::vec2 sdlSize(10.0f, 10.0f);
-        auto physicsBody = box2dBodyCreator.CreateStaticPhysicsBody(entity, worldPos, sdlSize);
+        auto physicsBody = box2dBodyCreator.CreatePhysicsBody(entity, worldPos, sdlSize);
         registry.emplace<RenderingInfo>(entity, sdlSize, nullptr, SDL_Rect{}, ColorName::Green);
         registry.emplace<PhysicsInfo>(entity, physicsBody);
     }
@@ -155,7 +155,12 @@ entt::entity PlayerControlSystem::SpawnFlyingEntity(
 {
     // Create the flying entity.
     auto flyingEntity = registry.create();
-    auto physicsBody = box2dBodyCreator.CreateDynamicPhysicsBody(flyingEntity, sdlPos, sdlSize);
+
+    // Create a Box2D body for the flying entity.
+    Box2dBodyCreator::Options options;
+    options.isDynamic = true;
+    auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, sdlPos, sdlSize, options);
+
     registry.emplace<RenderingInfo>(flyingEntity, sdlSize);
     registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
 
