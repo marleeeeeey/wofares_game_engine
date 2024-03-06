@@ -23,7 +23,7 @@ struct LevelOptions
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.0f};
-    size_t miniTileResolution{4};
+    size_t miniTileResolution{2};
     bool preventCreationInvisibleTiles{true}; // TODO: implement this feature.
     float colisionDisableProbability{0.7f};
 };

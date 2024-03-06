@@ -34,4 +34,6 @@ private:
     void ParseObjectLayer(const nlohmann::json& layer);
     void CalculateLevelBoundsWithBufferZone();
     void ParseTile(int tileId, int layerCol, int layerRow);
+private: // Low level functions.
+    std::filesystem::path ReadPathToTileset(const nlohmann::json& mapJson);
 };

@@ -16,18 +16,16 @@ MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceManager& reso
 
 void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
 {
+    // Save map file path and load it as json.
     std::ifstream file(filename);
     if (!file.is_open())
         throw std::runtime_error("Failed to open map file");
-
     mapFilepath = filename;
+    nlohmann::json mapJson;
+    file >> mapJson;
 
-    nlohmann::json json;
-    file >> json;
-
-    // Calc path to tileset image.
-    std::filesystem::path tilesetPath = mapFilepath.parent_path() / json["tilesets"][0]["image"].get<std::string>();
-
+    // Load tileset texture and surface. Surface is used to search for invisible tiles.
+    std::filesystem::path tilesetPath = ReadPathToTileset(mapJson);
     tilesetTexture = resourceManager.GetTexture(tilesetPath);
     if (gameState.levelOptions.preventCreationInvisibleTiles)
         tilesetSurface = resourceManager.GetSurface(tilesetPath);
@@ -35,8 +33,8 @@ void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
         tilesetSurface = nullptr;
 
     // Assume all tiles are of the same size.
-    tileWidth = json["tilewidth"];
-    tileHeight = json["tileheight"];
+    tileWidth = mapJson["tilewidth"];
+    tileHeight = mapJson["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
     colAndRowNumber = gameState.levelOptions.miniTileResolution;
@@ -44,9 +42,9 @@ void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
     miniHeight = tileHeight / colAndRowNumber;
 
     // Iterate over each tile layer.
-    for (const auto& layer : json["layers"])
+    for (const auto& layer : mapJson["layers"])
     {
-        if (layer["type"] == "tilelayer")
+        if (layer["type"] == "tilelayer" && layer["name"] == "terrain")
         {
             ParseTileLayer(layer);
         }
@@ -115,14 +113,15 @@ void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
 
 void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
 {
-    for (const auto& props : layer["properties"])
-    {
-        if (props["name"] == "background")
-        {
-            auto backgroundTexturePath = mapFilepath.parent_path() / props["value"];
-            gameState.levelOptions.backgroundInfo.texture = resourceManager.GetTexture(backgroundTexturePath);
-        }
-    }
+    // TODO: implement loading the background texture from main json file.
+    // for (const auto& props : layer["properties"])
+    // {
+    //     if (props["name"] == "background")
+    //     {
+    //         auto backgroundTexturePath = mapFilepath.parent_path() / props["value"];
+    //         gameState.levelOptions.backgroundInfo.texture = resourceManager.GetTexture(backgroundTexturePath);
+    //     }
+    // }
 
     for (const auto& object : layer["objects"])
     {
@@ -201,3 +200,45 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
         }
     }
 }
+
+std::filesystem::path MapLoaderSystem::ReadPathToTileset(const nlohmann::json& mapJson)
+{
+    std::filesystem::path tilesetPath;
+
+    if (mapJson.contains("tilesets") && mapJson["tilesets"][0].contains("source"))
+    {
+        // if map contains path to tileset.json
+        //  "tilesets":[
+        //         {
+        //          "firstgid":1,
+        //          "source":"tileset.json"
+        //         }]
+        std::filesystem::path tilesetJsonPath =
+            mapFilepath.parent_path() / mapJson["tilesets"][0]["source"].get<std::string>();
+        std::ifstream tilesetFile(tilesetJsonPath);
+        if (!tilesetFile.is_open())
+            throw std::runtime_error("Failed to open tileset file");
+
+        nlohmann::json tilesetJson;
+        tilesetFile >> tilesetJson;
+        tilesetPath = mapFilepath.parent_path() / tilesetJson["image"].get<std::string>();
+    }
+    else if (mapJson.contains("tilesets") && mapJson["tilesets"][0].contains("image"))
+    {
+        // if map contains
+        //  "tilesets":[
+        //         {
+        //          ...
+        //          "firstgid":1,
+        //          "image":"tileset.png",
+        //          ...
+        //         }]
+        tilesetPath = mapFilepath.parent_path() / mapJson["tilesets"][0]["image"].get<std::string>();
+    }
+    else
+    {
+        throw std::runtime_error("[ReadPathToTileset] Failed to read path to tileset");
+    }
+
+    return tilesetPath;
+};
