@@ -3,24 +3,18 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
 #include <nlohmann/json.hpp>
 
-ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer)
-  : resourceCashe(renderer)
+ResourceManager::ResourceManager(const std::filesystem::path& assetsDirectory, SDL_Renderer* renderer)
+  : resourceCashe(renderer), assetsDirectory(assetsDirectory)
 {
-    resourceMapJson = std::filesystem::absolute(resourceMapFilePath);
-    if (!std::filesystem::exists(resourceMapJson))
-        throw std::runtime_error(MY_FMT("Resource map file does not found: {}", resourceMapJson.string()));
-    assetsDirectory = resourceMapJson.parent_path();
-
-    std::ifstream resourceMapJsonFile(resourceMapJson);
-    nlohmann::json resourceMapJsonData;
-    resourceMapJsonFile >> resourceMapJsonData;
+    auto& assetsJson = utils::GetConfig<nlohmann::json, "assets">();
 
     // Load animations.
-    for (const auto& animationPair : resourceMapJsonData["animations"].items())
+    for (const auto& animationPair : assetsJson["animations"].items())
     {
         const std::string& animationName = animationPair.key();
         const std::string& animationPath = animationPair.value().get<std::string>();
@@ -29,7 +23,7 @@ ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePat
     }
 
     // Load tiled level names.
-    for (const auto& tiledLevelPair : resourceMapJsonData["maps"].items())
+    for (const auto& tiledLevelPair : assetsJson["maps"].items())
     {
         const std::string& tiledLevelName = tiledLevelPair.key();
         const std::string& tiledLevelPath = tiledLevelPair.value().get<std::string>();
@@ -40,7 +34,7 @@ ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePat
     }
 
     // Load sound effects.
-    for (const auto& soundEffectPair : resourceMapJsonData["sound_effects"].items())
+    for (const auto& soundEffectPair : assetsJson["sound_effects"].items())
     {
         const std::string& soundEffectName = soundEffectPair.key();
         const auto& soundEffectPathsJson = soundEffectPair.value();
@@ -62,7 +56,7 @@ ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePat
     }
 
     // Load music.
-    for (const auto& musicPair : resourceMapJsonData["music"].items())
+    for (const auto& musicPair : assetsJson["music"].items())
     {
         const std::string& musicName = musicPair.key();
         const std::string& musicPath = musicPair.value().get<std::string>();

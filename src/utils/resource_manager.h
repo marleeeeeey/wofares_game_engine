@@ -31,7 +31,6 @@
 class ResourceManager
 {
     details::ResourceCache resourceCashe;
-    std::filesystem::path resourceMapJson; // Absolute path to the resource map file.
     std::filesystem::path assetsDirectory; // Absolute path to the directory with assets.
 
     using FriendlyName = std::string;
@@ -40,7 +39,7 @@ class ResourceManager
     std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
     std::unordered_map<std::string, std::vector<std::filesystem::path>> soundEffectPaths;
 public:
-    ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer);
+    ResourceManager(const std::filesystem::path& assetsDirectory, SDL_Renderer* renderer);
 public: // ************************* Animations *************************
     AnimationInfo GetAnimation(const std::string& name);
 private:
