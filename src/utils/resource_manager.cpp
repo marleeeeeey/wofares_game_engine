@@ -168,7 +168,7 @@ std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::stri
 
     // Get random sound effect from the list.
     const auto& sounds = soundEffectPaths[name];
-    auto number = utils::random<size_t>(0, soundEffectPaths[name].size() - 1);
+    auto number = utils::Random<size_t>(0, soundEffectPaths[name].size() - 1);
     return resourceCashe.LoadSoundEffect(sounds[number]);
 };
 

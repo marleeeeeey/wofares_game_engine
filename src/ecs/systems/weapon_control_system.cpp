@@ -132,7 +132,7 @@ void WeaponControlSystem::StartCollisionDisableTimer(const std::vector<entt::ent
         if (registry.any_of<PlayerInfo>(entity))
             continue;
 
-        if (utils::randomTrue(gameState.levelOptions.colisionDisableProbability))
+        if (utils::RandomTrue(gameState.levelOptions.colisionDisableProbability))
             registry.emplace_or_replace<CollisionDisableTimerComponent>(entity);
     }
 };

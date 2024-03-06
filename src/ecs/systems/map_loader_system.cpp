@@ -192,7 +192,7 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
 
             // Apply randomly: static/dynamic body.
             tilePhysicsBody->GetBody()->SetType(
-                utils::randomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
+                utils::RandomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
 
             registry.emplace<PhysicsInfo>(entity, tilePhysicsBody);
 

@@ -29,7 +29,7 @@ int main(int argc, char* args[])
         std::filesystem::current_path(execDir);
 
         // Initialize the logger with the trace level.
-        utils::Logger::init("wofares.log", spdlog::level::info);
+        utils::Logger::Init("wofares.log", spdlog::level::info);
         MY_LOG_FMT(info, "Current directory set to: {}", execDir);
 
         // Create an EnTT registry.
