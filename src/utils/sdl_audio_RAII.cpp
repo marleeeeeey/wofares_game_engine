@@ -1,5 +1,5 @@
 #include "sdl_audio_RAII.h"
-#include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/logger.h>
 #include <stdexcept>
 
 SDLAudioInitializerRAII::SDLAudioInitializerRAII()

@@ -2,7 +2,7 @@
 #include <ecs/components/game_components.h>
 #include <ecs/components/game_state_component.h>
 #include <imgui.h>
-#include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/logger.h>
 #include <utils/imgui_RAII.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>

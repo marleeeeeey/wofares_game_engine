@@ -2,7 +2,7 @@
 #include "SDL_pixels.h"
 #include "SDL_surface.h"
 #include <SDL_image.h>
-#include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/logger.h>
 #include <utils/sdl_RAII.h>
 
 bool IsTileInvisible(SDL_Surface* surface, const SDL_Rect& miniTextureSrcRect)

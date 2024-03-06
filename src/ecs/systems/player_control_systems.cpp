@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <ecs/components/game_components.h>
 #include <imgui_impl_sdl2.h>
-#include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/logger.h>
 #include <utils/box2d_body_creator.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/input_event_manager.h>

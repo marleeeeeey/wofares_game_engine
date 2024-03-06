@@ -11,7 +11,7 @@
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/screen_mode_control_system.h>
 #include <ecs/systems/weapon_control_system.h>
-#include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/logger.h>
 #include <utils/audio_system.h>
 #include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
@@ -27,10 +27,10 @@ int main(int argc, char* args[])
         std::string execPath = args[0];
         std::string execDir = execPath.substr(0, execPath.find_last_of("\\/"));
         std::filesystem::current_path(execDir);
-        MY_LOG_FMT(info, "Set the current directory to: {}", execDir);
 
         // Initialize the logger with the trace level.
-        utils::Logger::getInstance(spdlog::level::info);
+        utils::Logger::init("wofares.log", spdlog::level::info);
+        MY_LOG_FMT(info, "Current directory set to: {}", execDir);
 
         // Create an EnTT registry.
         entt::registry registry;
@@ -54,7 +54,7 @@ int main(int argc, char* args[])
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
-        ResourceManager resourceManager("assets\\assets_map.json", renderer.get());
+        ResourceManager resourceManager("assets\\assets_dict.json", renderer.get());
         AudioSystem audioSystem(resourceManager);
         audioSystem.PlayMusic("background_music");
 

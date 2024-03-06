@@ -1,10 +1,11 @@
 #include "resource_manager.h"
-#include "my_common_cpp_utils/Logger.h"
-#include "my_common_cpp_utils/MathUtils.h"
 #include "utils/resource_cache.h"
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <my_common_cpp_utils/logger.h>
+#include <my_common_cpp_utils/math_utils.h>
+#include <nlohmann/json.hpp>
 
 ResourceManager::ResourceManager(const std::filesystem::path& resourceMapFilePath, SDL_Renderer* renderer)
   : resourceCashe(renderer)

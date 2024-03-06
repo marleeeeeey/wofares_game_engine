@@ -1,8 +1,8 @@
 #include "weapon_control_system.h"
 #include <box2d/b2_math.h>
 #include <ecs/components/game_components.h>
-#include <my_common_cpp_utils/Logger.h>
-#include <my_common_cpp_utils/MathUtils.h>
+#include <my_common_cpp_utils/logger.h>
+#include <my_common_cpp_utils/math_utils.h>
 #include <utils/box2d_entt_contact_listener.h>
 #include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>

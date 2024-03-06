@@ -2,7 +2,7 @@
 #include "utils/sdl_RAII.h"
 #include "utils/sdl_colors.h"
 #include <filesystem>
-#include <my_common_cpp_utils/Logger.h>
+#include <my_common_cpp_utils/logger.h>
 #include <utils/texture_process.h>
 
 namespace details
