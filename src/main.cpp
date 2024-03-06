@@ -62,7 +62,7 @@ int main(int argc, char* args[])
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
-        ResourceManager resourceManager(assetsDirectory, renderer.get());
+        ResourceManager resourceManager(renderer.get());
         AudioSystem audioSystem(resourceManager);
         audioSystem.PlayMusic("background_music");
 
@@ -103,7 +103,7 @@ int main(int argc, char* args[])
             float deltaTime = static_cast<float>(frameStart - lastTick) / 1000.0f;
             lastTick = frameStart;
 
-            if (utils::FileChangedSinceLastCheck(level1) || gameState.controlOptions.reloadMap)
+            if (utils::FileChangedSinceLastCheck(level1.tiledMapPath) || gameState.controlOptions.reloadMap)
             {
                 mapLoaderSystem.UnloadMap();
                 mapLoaderSystem.LoadMap(level1);

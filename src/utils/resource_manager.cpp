@@ -8,8 +8,7 @@
 #include <my_common_cpp_utils/math_utils.h>
 #include <nlohmann/json.hpp>
 
-ResourceManager::ResourceManager(const std::filesystem::path& assetsDirectory, SDL_Renderer* renderer)
-  : resourceCashe(renderer), assetsDirectory(assetsDirectory)
+ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(renderer)
 {
     auto& assetsJson = utils::GetConfig<nlohmann::json, "assets">();
 
@@ -17,20 +16,18 @@ ResourceManager::ResourceManager(const std::filesystem::path& assetsDirectory, S
     for (const auto& animationPair : assetsJson["animations"].items())
     {
         const std::string& animationName = animationPair.key();
-        const std::string& animationPath = animationPair.value().get<std::string>();
-        std::filesystem::path asepriteAnimationJsonPath = assetsDirectory / animationPath;
-        animations[animationName] = ReadAsepriteAnimation(asepriteAnimationJsonPath);
+        auto animationPath = animationPair.value().get<std::filesystem::path>();
+        animations[animationName] = ReadAsepriteAnimation(animationPath);
     }
 
     // Load tiled level names.
     for (const auto& tiledLevelPair : assetsJson["maps"].items())
     {
         const std::string& tiledLevelName = tiledLevelPair.key();
-        const std::string& tiledLevelPath = tiledLevelPair.value().get<std::string>();
-        std::filesystem::path tiledLevelJsonPath = assetsDirectory / tiledLevelPath;
-        if (!std::filesystem::exists(tiledLevelJsonPath))
-            throw std::runtime_error(MY_FMT("Tiled level file does not found: {}", tiledLevelJsonPath.string()));
-        tiledLevels[tiledLevelName] = tiledLevelJsonPath;
+        LevelInfo levelInfo = tiledLevelPair.value().get<LevelInfo>();
+        if (!std::filesystem::exists(levelInfo.tiledMapPath))
+            throw std::runtime_error(MY_FMT("Tiled level file does not found: {}", levelInfo.tiledMapPath.string()));
+        tiledLevels[levelInfo.name] = levelInfo;
     }
 
     // Load sound effects.
@@ -47,9 +44,8 @@ ResourceManager::ResourceManager(const std::filesystem::path& assetsDirectory, S
         // Load sound effect paths.
         for (const auto& pathJson : soundEffectPathsJson)
         {
-            const std::string& soundEffectPath = pathJson.get<std::string>();
-            std::filesystem::path soundEffectAbsolutePath = assetsDirectory / soundEffectPath;
-            paths.push_back(soundEffectAbsolutePath);
+            auto soundEffectPath = pathJson.get<std::filesystem::path>();
+            paths.push_back(soundEffectPath);
         }
 
         soundEffectPaths[soundEffectName] = paths;
@@ -59,9 +55,8 @@ ResourceManager::ResourceManager(const std::filesystem::path& assetsDirectory, S
     for (const auto& musicPair : assetsJson["music"].items())
     {
         const std::string& musicName = musicPair.key();
-        const std::string& musicPath = musicPair.value().get<std::string>();
-        std::filesystem::path musicAbsolutePath = assetsDirectory / musicPath;
-        musicPaths[musicName] = musicAbsolutePath;
+        const auto musicPath = musicPair.value().get<std::filesystem::path>();
+        musicPaths[musicName] = musicPath;
     }
 
     MY_LOG_FMT(
@@ -136,7 +131,7 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
     return animation;
 };
 
-std::filesystem::path ResourceManager::GetTiledLevel(const std::string& name)
+LevelInfo ResourceManager::GetTiledLevel(const std::string& name)
 {
     if (!tiledLevels.contains(name))
         throw std::runtime_error(MY_FMT("Tiled level with name '{}' does not found", name));

@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
+#include <utils/level_info.h>
 
 // High-level resource management. Get resources by friendly names in game like terminolgy.
 // Every Get* method define specific resource type and return it by friendly name.
@@ -31,21 +32,20 @@
 class ResourceManager
 {
     details::ResourceCache resourceCashe;
-    std::filesystem::path assetsDirectory; // Absolute path to the directory with assets.
 
     using FriendlyName = std::string;
     std::unordered_map<FriendlyName, AnimationInfo> animations;
-    std::unordered_map<FriendlyName, std::filesystem::path> tiledLevels;
+    std::unordered_map<FriendlyName, LevelInfo> tiledLevels;
     std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
     std::unordered_map<std::string, std::vector<std::filesystem::path>> soundEffectPaths;
 public:
-    ResourceManager(const std::filesystem::path& assetsDirectory, SDL_Renderer* renderer);
+    ResourceManager(SDL_Renderer* renderer);
 public: // ************************* Animations *************************
     AnimationInfo GetAnimation(const std::string& name);
 private:
     AnimationInfo ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
 public: // ************************* Tiled levels *************************
-    std::filesystem::path GetTiledLevel(const std::string& name);
+    LevelInfo GetTiledLevel(const std::string& name);
 public: // ************************* Textures *************************
     std::shared_ptr<SDLTextureRAII> GetColoredPixelTexture(ColorName color);
     std::shared_ptr<SDLTextureRAII> GetTexture(const std::filesystem::path& path);

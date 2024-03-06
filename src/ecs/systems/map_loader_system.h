@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/level_info.h"
 #include "utils/resource_manager.h"
 #include "utils/sdl_RAII.h"
 #include <ecs/components/game_components.h>
@@ -24,10 +25,10 @@ class MapLoaderSystem
     size_t invisibleTilesNumber = 0;
     std::shared_ptr<SDLTextureRAII> tilesetTexture;
     std::shared_ptr<SDLSurfaceRAII> tilesetSurface; // Optional. Used when Streaming access is needed.
-    std::filesystem::path mapFilepath;
+    LevelInfo currentLevelInfo;
 public:
     MapLoaderSystem(entt::registry& registry, ResourceManager& resourceManager);
-    void LoadMap(const std::filesystem::path& filename);
+    void LoadMap(const LevelInfo& levelInfo);
     void UnloadMap();
 private:
     void ParseTileLayer(const nlohmann::json& layer);

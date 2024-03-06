@@ -14,13 +14,15 @@ MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceManager& reso
     coordinatesTransformer(registry)
 {}
 
-void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
+void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
 {
+    currentLevelInfo = levelInfo;
+
     // Save map file path and load it as json.
-    std::ifstream file(filename);
+    std::ifstream file(levelInfo.tiledMapPath);
     if (!file.is_open())
         throw std::runtime_error("Failed to open map file");
-    mapFilepath = filename;
+
     nlohmann::json mapJson;
     file >> mapJson;
 
@@ -31,6 +33,9 @@ void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
         tilesetSurface = resourceManager.GetSurface(tilesetPath);
     else
         tilesetSurface = nullptr;
+
+    // Load background texture.
+    gameState.levelOptions.backgroundInfo.texture = resourceManager.GetTexture(levelInfo.backgroundPath);
 
     // Assume all tiles are of the same size.
     tileWidth = mapJson["tilewidth"];
@@ -61,7 +66,7 @@ void MapLoaderSystem::LoadMap(const std::filesystem::path& filename)
         MY_LOG_FMT(warn, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
     if (createdTiles == 0)
     {
-        MY_LOG_FMT(warn, "No tiles were created during map loading {}", mapFilepath.string());
+        MY_LOG_FMT(warn, "No tiles were created during map loading {}", levelInfo.tiledMapPath.string());
         if (invisibleTilesNumber > 0)
             MY_LOG(warn, "All tiles are invisible");
     }
@@ -113,16 +118,6 @@ void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
 
 void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
 {
-    // TODO: implement loading the background texture from main json file.
-    // for (const auto& props : layer["properties"])
-    // {
-    //     if (props["name"] == "background")
-    //     {
-    //         auto backgroundTexturePath = mapFilepath.parent_path() / props["value"];
-    //         gameState.levelOptions.backgroundInfo.texture = resourceManager.GetTexture(backgroundTexturePath);
-    //     }
-    // }
-
     for (const auto& object : layer["objects"])
     {
         if (object["type"] == "PlayerPosition")
@@ -214,14 +209,14 @@ std::filesystem::path MapLoaderSystem::ReadPathToTileset(const nlohmann::json& m
         //          "source":"tileset.json"
         //         }]
         std::filesystem::path tilesetJsonPath =
-            mapFilepath.parent_path() / mapJson["tilesets"][0]["source"].get<std::string>();
+            currentLevelInfo.tiledMapPath.parent_path() / mapJson["tilesets"][0]["source"].get<std::string>();
         std::ifstream tilesetFile(tilesetJsonPath);
         if (!tilesetFile.is_open())
             throw std::runtime_error("Failed to open tileset file");
 
         nlohmann::json tilesetJson;
         tilesetFile >> tilesetJson;
-        tilesetPath = mapFilepath.parent_path() / tilesetJson["image"].get<std::string>();
+        tilesetPath = currentLevelInfo.tiledMapPath.parent_path() / tilesetJson["image"].get<std::string>();
     }
     else if (mapJson.contains("tilesets") && mapJson["tilesets"][0].contains("image"))
     {
@@ -233,7 +228,7 @@ std::filesystem::path MapLoaderSystem::ReadPathToTileset(const nlohmann::json& m
         //          "image":"tileset.png",
         //          ...
         //         }]
-        tilesetPath = mapFilepath.parent_path() / mapJson["tilesets"][0]["image"].get<std::string>();
+        tilesetPath = currentLevelInfo.tiledMapPath.parent_path() / mapJson["tilesets"][0]["image"].get<std::string>();
     }
     else
     {
