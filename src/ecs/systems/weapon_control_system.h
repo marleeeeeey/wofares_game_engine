@@ -1,14 +1,15 @@
 #pragma once
 #include "utils/audio_system.h"
-#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
 #include <queue>
 #include <utils/box2d_entt_contact_listener.h>
+#include <utils/game_options.h>
+
 
 class WeaponControlSystem
 {
     entt::registry& registry;
-    GameState& gameState;
+    GameOptions& gameState;
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
     float deltaTime;

@@ -10,8 +10,8 @@ class PlayerControlSystem
 {
     entt::registry& registry;
     InputEventManager& inputEventManager;
-    GameState& gameState;
-    CoordinatesTransformer transformer; // TODO: think to put it in the GameState class.
+    GameOptions& gameState;
+    CoordinatesTransformer transformer; // TODO: think to put it in the GameOptions class.
     Box2dBodyCreator box2dBodyCreator;
     Box2dEnttContactListener& contactListener;
 public:

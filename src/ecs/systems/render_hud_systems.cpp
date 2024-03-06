@@ -1,14 +1,15 @@
 #include "render_hud_systems.h"
 #include <ecs/components/game_components.h>
-#include <ecs/components/game_state_component.h>
 #include <imgui.h>
 #include <my_common_cpp_utils/logger.h>
+#include <utils/game_options.h>
 #include <utils/imgui_RAII.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
 
+
 HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), renderer(renderer), gameState(registry.get<GameState>(registry.view<GameState>().front()))
+  : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
 void HUDRenderSystem::Render()
@@ -79,7 +80,7 @@ void HUDRenderSystem::RenderDebugMenu()
 
 void HUDRenderSystem::RenderGrid()
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
 
     const int gridSize = 32;
     const SDL_Color gridColor = GetSDLColor(ColorName::Grey);

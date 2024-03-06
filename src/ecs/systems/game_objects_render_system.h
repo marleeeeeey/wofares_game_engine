@@ -10,7 +10,7 @@ class GameObjectsRenderSystem
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
-    GameState& gameState;
+    GameOptions& gameState;
     CoordinatesTransformer coordinatesTransformer;
     ResourceManager& resourceManager;
 public:

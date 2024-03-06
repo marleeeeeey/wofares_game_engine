@@ -13,7 +13,7 @@ class MapLoaderSystem
 {
     entt::registry& registry;
     ResourceManager& resourceManager;
-    GameState& gameState;
+    GameOptions& gameState;
     ObjectsFactory objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
     int tileWidth;

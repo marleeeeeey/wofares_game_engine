@@ -1,8 +1,9 @@
 #pragma once
 #include "entt/entity/fwd.hpp"
-#include <ecs/components/game_state_component.h>
 #include <utils/box2d_RAII.h>
 #include <utils/coordinates_transformer.h>
+#include <utils/game_options.h>
+
 
 class Box2dBodyCreator
 {

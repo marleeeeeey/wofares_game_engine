@@ -1,5 +1,5 @@
 #pragma once
-#include "ecs/components/game_state_component.h"
+#include "utils/game_options.h"
 #include <entt/entt.hpp>
 #include <random>
 #include <utils/audio_system.h>
@@ -8,7 +8,7 @@ class RandomEventSystem
 {
     AudioSystem& audioSystem;
     entt::registry& registry;
-    GameState& gameState;
+    GameOptions& gameState;
     std::default_random_engine rng;
     float elapsedTime;
 public:

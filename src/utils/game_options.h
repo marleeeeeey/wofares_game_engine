@@ -2,6 +2,7 @@
 #include <box2d/box2d.h>
 #include <glm/glm.hpp>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <utils/sdl_RAII.h>
 
 struct LevelPhysicsBounds
@@ -26,6 +27,8 @@ struct LevelOptions
     size_t miniTileResolution{2};
     bool preventCreationInvisibleTiles{true}; // TODO: implement this feature.
     float colisionDisableProbability{0.7f};
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        LevelOptions, miniTileResolution, preventCreationInvisibleTiles, colisionDisableProbability)
 };
 
 struct PhysicsOptions
@@ -36,17 +39,19 @@ struct PhysicsOptions
     // Also affects the destructibility of stacks of tiles. The smaller the gap, the easier it is to destroy the stack.
     // The bigger the gap, the harder it is to destroy the stack => less random destruction.
     float gapBetweenPhysicalAndVisual{0.5f};
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(PhysicsOptions, velocityIterations, positionIterations, gapBetweenPhysicalAndVisual)
 };
 
 struct WindowOptions
 {
     unsigned fps{60};
-    glm::vec2 windowSize{800, 600};
+    glm::vec2 windowSize{800, 600}; // TODO: support for json serialization.
     float cameraScale{1.0f};
     glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};
     float box2DtoSDL = 48.0f; // 1 meter in Box2D is XX pixels in SDL.
     bool showGrid{false};
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(WindowOptions, fps, cameraScale, box2DtoSDL, showGrid)
 };
 
 struct ControlOptions
@@ -58,8 +63,10 @@ struct ControlOptions
 
 struct SoundOptions
 {
+    bool playBackgroundMusicOnStart{false};
     float randomSoundEventInterval{10}; // Interval between random sound events in seconds.
     float nextSoundEventTime{0.0f}; // Time of the next random sound event.
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SoundOptions, playBackgroundMusicOnStart, randomSoundEventInterval)
 };
 
 struct DebugInfo
@@ -68,7 +75,7 @@ struct DebugInfo
     float spacePressedDurationOnUpEvent{0.0f};
 };
 
-struct GameState
+struct GameOptions
 {
     std::shared_ptr<b2World> physicsWorld;
     LevelOptions levelOptions;
@@ -77,4 +84,5 @@ struct GameState
     ControlOptions controlOptions;
     SoundOptions soundOptions;
     DebugInfo debugInfo;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameOptions, levelOptions, physicsOptions, windowOptions, soundOptions)
 };

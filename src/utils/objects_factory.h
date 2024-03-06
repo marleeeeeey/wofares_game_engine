@@ -1,14 +1,15 @@
 #pragma once
 #include "utils/resource_manager.h"
-#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
 #include <utils/box2d_body_creator.h>
+#include <utils/game_options.h>
+
 
 class ObjectsFactory
 {
     entt::registry& registry;
     ResourceManager& resourceManager;
-    GameState& gameState;
+    GameOptions& gameState;
     std::shared_ptr<b2World> physicsWorld;
     Box2dBodyCreator box2dBodyCreator;
 public:

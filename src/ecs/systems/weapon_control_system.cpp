@@ -9,7 +9,7 @@
 
 WeaponControlSystem::WeaponControlSystem(
     entt::registry& registry_, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem)
-  : registry(registry_), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+  : registry(registry_), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     contactListener(contactListener), audioSystem(audioSystem)
 {
     contactListener.SubscribeContact(

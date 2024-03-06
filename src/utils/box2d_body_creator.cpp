@@ -6,7 +6,7 @@ Box2dBodyCreator::Options::Options()
 {}
 
 Box2dBodyCreator::Box2dBodyCreator(entt::registry& registry)
-  : physicsWorld(registry.get<GameState>(registry.view<GameState>().front()).physicsWorld),
+  : physicsWorld(registry.get<GameOptions>(registry.view<GameOptions>().front()).physicsWorld),
     coordinatesTransformer(registry)
 {}
 

@@ -1,13 +1,14 @@
 #pragma once
-#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <utils/coordinates_transformer.h>
+#include <utils/game_options.h>
+
 
 class PhysicsSystem
 {
     entt::registry& registry;
-    GameState& gameState;
+    GameOptions& gameState;
     std::shared_ptr<b2World> physicsWorld;
     CoordinatesTransformer coordinatesTransformer;
 public:

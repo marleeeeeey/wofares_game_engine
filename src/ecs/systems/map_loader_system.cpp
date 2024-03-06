@@ -10,8 +10,8 @@
 
 MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceManager& resourceManager)
   : registry(registry), resourceManager(resourceManager),
-    gameState(registry.get<GameState>(registry.view<GameState>().front())), objectsFactory(registry, resourceManager),
-    coordinatesTransformer(registry)
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    objectsFactory(registry, resourceManager), coordinatesTransformer(registry)
 {}
 
 void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
@@ -74,7 +74,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
 
 void MapLoaderSystem::UnloadMap()
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     gameState.levelOptions.levelBox2dBounds = {};
 
     // Remove all entities that have a RenderingInfo component.

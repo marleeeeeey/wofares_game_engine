@@ -1,7 +1,8 @@
 #include "random_event_system.h"
 
 RandomEventSystem::RandomEventSystem(entt::registry& registry, AudioSystem& audioSystem)
-  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())), audioSystem(audioSystem)
+  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    audioSystem(audioSystem)
 {
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 }

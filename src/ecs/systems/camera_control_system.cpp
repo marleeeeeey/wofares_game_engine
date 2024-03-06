@@ -1,10 +1,10 @@
 #include "camera_control_system.h"
 #include <SDL_mouse.h>
 #include <ecs/components/game_components.h>
-#include <ecs/components/game_state_component.h>
+#include <utils/game_options.h>
 
 CameraControlSystem::CameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
-  : registry(registry), gameState(registry.get<GameState>(registry.view<GameState>().front())),
+  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     inputEventManager(inputEventManager), transformer(registry)
 {
     inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
@@ -15,7 +15,7 @@ CameraControlSystem::CameraControlSystem(entt::registry& registry, InputEventMan
 
 void CameraControlSystem::HandleCameraMovementAndScale(const SDL_Event& event)
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     if (event.type == SDL_MOUSEWHEEL)
     {
         float prevScale = gameState.windowOptions.cameraScale;
@@ -60,7 +60,7 @@ void CameraControlSystem::HandleCameraMovementAndScale(const SDL_Event& event)
 
 void CameraControlSystem::HandleMouseScreenPosition(const SDL_Event& event)
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     if (event.type == SDL_MOUSEMOTION)
     {
         gameState.windowOptions.lastMousePosInWindow = glm::vec2(event.motion.x, event.motion.y);

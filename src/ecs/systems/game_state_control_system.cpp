@@ -1,6 +1,6 @@
 #include "game_state_control_system.h"
 #include <ecs/components/game_components.h>
-#include <ecs/components/game_state_component.h>
+#include <utils/game_options.h>
 
 GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
   : registry(registry), inputEventManager(inputEventManager)
@@ -10,7 +10,7 @@ GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEv
 
 void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     bool isEscPressed = event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE;
 
     if (isEscPressed || event.type == SDL_QUIT)
@@ -21,7 +21,7 @@ void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
 
 void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     auto& originalEvent = eventInfo.originalEvent;
 
     if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
@@ -32,7 +32,7 @@ void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventMa
 
 void GameStateControlSystem::HandleSpaceReleaseAfterHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
 {
-    auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     auto& originalEvent = eventInfo.originalEvent;
 
     if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)

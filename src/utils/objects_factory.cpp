@@ -5,7 +5,7 @@
 
 ObjectsFactory::ObjectsFactory(entt::registry& registry, ResourceManager& resourceManager)
   : registry(registry), resourceManager(resourceManager),
-    gameState(registry.get<GameState>(registry.view<GameState>().front())), physicsWorld(gameState.physicsWorld),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
     box2dBodyCreator(registry)
 {}
 

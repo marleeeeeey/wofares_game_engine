@@ -1,7 +1,7 @@
 #include "coordinates_transformer.h"
 
 CoordinatesTransformer::CoordinatesTransformer(entt::registry& registry)
-  : gameState(registry.get<GameState>(registry.view<GameState>().front())),
+  : gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     box2DtoSDL(gameState.windowOptions.box2DtoSDL), sdlToBox2D(1.0f / box2DtoSDL)
 {}
 

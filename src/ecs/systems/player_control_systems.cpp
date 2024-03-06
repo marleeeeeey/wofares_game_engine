@@ -12,7 +12,7 @@
 PlayerControlSystem::PlayerControlSystem(
     entt::registry& registry, InputEventManager& inputEventManager, Box2dEnttContactListener& contactListener)
   : registry(registry), inputEventManager(inputEventManager), transformer(registry),
-    gameState(registry.get<GameState>(registry.view<GameState>().front())), box2dBodyCreator(registry),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), box2dBodyCreator(registry),
     contactListener(contactListener)
 {
     inputEventManager.Subscribe(
@@ -77,7 +77,7 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
 {
     if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
     {
-        auto& gameState = registry.get<GameState>(registry.view<GameState>().front());
+        auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
         auto physicsWorld = gameState.physicsWorld;
         const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
         CoordinatesTransformer transformer(registry);

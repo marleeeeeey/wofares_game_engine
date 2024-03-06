@@ -1,8 +1,9 @@
 #pragma once
 #include <box2d/box2d.h>
 #include <ecs/components/game_components.h>
-#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
+#include <utils/game_options.h>
+
 
 // There are 3 coordinate systems in the game:
 // 1. World (game) coordinates.
@@ -10,7 +11,7 @@
 // 3. Physics (box2d) coordinates.
 class CoordinatesTransformer
 {
-    const GameState& gameState;
+    const GameOptions& gameState;
     const float box2DtoSDL;
     const float sdlToBox2D;
 public:

@@ -6,7 +6,7 @@
 GameObjectsRenderSystem::GameObjectsRenderSystem(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
   : registry(registry), renderer(renderer), resourceManager(resourceManager),
-    gameState(registry.get<GameState>(registry.view<GameState>().front())), coordinatesTransformer(registry)
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
 {}
 
 void GameObjectsRenderSystem::Render()

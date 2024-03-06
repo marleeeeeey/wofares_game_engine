@@ -1,13 +1,14 @@
 #pragma once
 #include "utils/coordinates_transformer.h"
-#include <ecs/components/game_state_component.h>
 #include <entt/entt.hpp>
+#include <utils/game_options.h>
 #include <utils/input_event_manager.h>
+
 
 class CameraControlSystem
 {
     entt::registry& registry;
-    GameState& gameState;
+    GameOptions& gameState;
     InputEventManager& inputEventManager;
     CoordinatesTransformer transformer;
 public:

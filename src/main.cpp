@@ -29,8 +29,8 @@ int main(int argc, char* args[])
         std::string execDir = execPath.substr(0, execPath.find_last_of("\\/"));
         std::filesystem::current_path(execDir);
 
-        std::filesystem::path assetsDirectory = std::filesystem::absolute("assets");
-        std::filesystem::path configFilePath = assetsDirectory / "assets_dict.json";
+        std::filesystem::path assetsDirectory = "assets";
+        std::filesystem::path configFilePath = assetsDirectory / "config.json";
 
         // Initialize the logger with the trace level.
         std::filesystem::path logFilePath = std::filesystem::absolute("logs") / "wofares.log";
@@ -39,32 +39,35 @@ int main(int argc, char* args[])
 
         // Load the global configuration from a file.
         utils::Config::InitInstanceFromFile(configFilePath);
+        MY_LOG_FMT(info, "Config file loaded: {}", configFilePath.string());
 
         // Create an EnTT registry.
         entt::registry registry;
 
         // Create a game state entity.
-        auto& gameState = registry.emplace<GameState>(registry.create());
-        gameState.windowOptions.cameraCenterSdl = gameState.windowOptions.windowSize / 2.0f;
+        auto& gameOptions =
+            registry.emplace<GameOptions>(registry.create(), utils::GetConfig<GameOptions, "gameOptions">());
+        gameOptions.windowOptions.cameraCenterSdl = gameOptions.windowOptions.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
         b2Vec2 gravity(0.0f, +9.8f);
-        gameState.physicsWorld = std::make_shared<b2World>(gravity);
+        gameOptions.physicsWorld = std::make_shared<b2World>(gravity);
 
         // Create a contact listener and subscribe it to the physics world.
         Box2dEnttContactListener contactListener(registry);
-        gameState.physicsWorld->SetContactListener(&contactListener);
+        gameOptions.physicsWorld->SetContactListener(&contactListener);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         SDLAudioInitializerRAII sdlAudioInitializer;
-        SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameState.windowOptions.windowSize);
+        SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameOptions.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
         ResourceManager resourceManager(renderer.get());
         AudioSystem audioSystem(resourceManager);
-        audioSystem.PlayMusic("background_music");
+        if (gameOptions.soundOptions.playBackgroundMusicOnStart)
+            audioSystem.PlayMusic("background_music");
 
         // Create a weapon control system and subscribe it to the contact listener.
         WeaponControlSystem weaponControlSystem(registry, contactListener, audioSystem);
@@ -96,18 +99,18 @@ int main(int argc, char* args[])
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
-        while (!gameState.controlOptions.quit)
+        while (!gameOptions.controlOptions.quit)
         {
             // Calculate delta time.
             Uint32 frameStart = SDL_GetTicks();
             float deltaTime = static_cast<float>(frameStart - lastTick) / 1000.0f;
             lastTick = frameStart;
 
-            if (utils::FileChangedSinceLastCheck(level1.tiledMapPath) || gameState.controlOptions.reloadMap)
+            if (utils::FileChangedSinceLastCheck(level1.tiledMapPath) || gameOptions.controlOptions.reloadMap)
             {
                 mapLoaderSystem.UnloadMap();
                 mapLoaderSystem.LoadMap(level1);
-                gameState.controlOptions.reloadMap = false;
+                gameOptions.controlOptions.reloadMap = false;
             }
 
             // Handle input events.
@@ -131,7 +134,7 @@ int main(int argc, char* args[])
 
             // Cap the frame rate.
             Uint32 frameTime = SDL_GetTicks() - frameStart;
-            const Uint32 frameDelay = 1000 / gameState.windowOptions.fps;
+            const Uint32 frameDelay = 1000 / gameOptions.windowOptions.fps;
             if (frameDelay > frameTime)
             {
                 SDL_Delay(frameDelay - frameTime);
