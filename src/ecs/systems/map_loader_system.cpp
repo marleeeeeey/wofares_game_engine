@@ -30,10 +30,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
     // Load tileset texture and surface. Surface is used to search for invisible tiles.
     std::filesystem::path tilesetPath = ReadPathToTileset(mapJson);
     tilesetTexture = resourceManager.GetTexture(tilesetPath);
-    if (gameState.levelOptions.preventCreationInvisibleTiles)
-        tilesetSurface = resourceManager.GetSurface(tilesetPath);
-    else
-        tilesetSurface = nullptr;
+    tilesetSurface = resourceManager.GetSurface(tilesetPath);
 
     // Load background texture.
     gameState.levelOptions.backgroundInfo.texture = resourceManager.GetTexture(levelInfo.backgroundPath);
@@ -158,7 +155,6 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
                 textureSrcRect.x + miniCol * miniWidth, textureSrcRect.y + miniRow * miniHeight, miniWidth, miniHeight};
 
             // Skip invisible tiles.
-            if (gameState.levelOptions.preventCreationInvisibleTiles)
             {
                 if (!tilesetSurface)
                     throw std::runtime_error("tilesetSurface is nullptr");

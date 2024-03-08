@@ -31,7 +31,7 @@ private: // Low level functions.
         std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force);
     // Disable collisions after some time.
     void StartCollisionDisableTimer(const std::vector<entt::entity>& physicalEntities);
-private: // TODO: functions to move to shared code like utils.
+private: // TODO3: functions to move to shared code like utils.
     std::vector<entt::entity> GetPhysicalBodiesInRaduis(
         const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType);
     std::vector<entt::entity> GetPhysicalBodiesInRaduis(

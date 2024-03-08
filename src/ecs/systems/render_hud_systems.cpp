@@ -63,7 +63,6 @@ void HUDRenderSystem::RenderDebugMenu()
     ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
     ImGui::SliderFloat(
         "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
-    ImGui::Checkbox("Prevent Creation Invisible Tiles", &gameState.levelOptions.preventCreationInvisibleTiles);
     ImGui::SliderFloat("Colision Disable Probability", &gameState.levelOptions.colisionDisableProbability, 0.0f, 1.0f);
 
     // box2DtoSDL setting.

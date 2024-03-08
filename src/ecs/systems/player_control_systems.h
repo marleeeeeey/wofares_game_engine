@@ -13,7 +13,7 @@ class PlayerControlSystem
     entt::registry& registry;
     InputEventManager& inputEventManager;
     GameOptions& gameState;
-    CoordinatesTransformer transformer; // TODO: think to put it in the GameOptions class.
+    CoordinatesTransformer transformer;
     Box2dBodyCreator box2dBodyCreator;
     Box2dEnttContactListener& contactListener;
 public:
@@ -23,8 +23,8 @@ public:
 private: // Callbacks for the InputEventManager.
     void HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerAttack(const InputEventManager::EventInfo& eventInfo);
-    void HandlePlayerBuildingAction(const SDL_Event& event); // TODO: remplace with eventInfo
-    void HandlePlayerWeaponDirection(const SDL_Event& event); // TODO: remplace with eventInfo
+    void HandlePlayerBuildingAction(const InputEventManager::EventInfo& eventInfo);
+    void HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo);
 private: // Methods to set the ground contact flag.
     void HandlePlayerBeginSensorContact(entt::entity entityA, entt::entity entityB);
     void HandlePlayerEndSensorContact(entt::entity entityA, entt::entity entityB);

@@ -1,4 +1,5 @@
 #include "weapon_control_system.h"
+#include "my_common_cpp_utils/config.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
@@ -79,8 +80,6 @@ void WeaponControlSystem::ApplyForceToPhysicalBodies(
         auto& originalObjRenderingInfo = registry.get<RenderingInfo>(entity);
         const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
 
-        // TODO replace original texture in rederingInfo to the random explosion fragment. Prepare png's for it.
-
         // Make target body as dynamic.
         originalObjPhysicsInfo->SetType(b2_dynamicBody);
 
@@ -116,43 +115,38 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
         return;
 
     const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
-    float radiusCoef = 1.2f; // TODO: hack. Need to calculate it based on the texture size. Because position is
+    float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
     auto staticOriginalBodies =
         GetPhysicalBodiesInRaduis(grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
 
-    // TODO: maybe better split entities to static and dynamic. And apply force only to dynamic.
-    SDL_Point cellSize = {2, 2}; // TODO: move to the game options.
+    auto& cellSizeForMicroDistruction = utils::GetConfig<int, "weaponControlSystem.cellSizeForMicroDistruction">();
+    SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
     auto splittedEntities = AddAndReturnSplittedPhysicalEntetiesToWorld(staticOriginalBodies, cellSize);
 
-    // TODO: add to debug options.
-    bool debugMiniDistructionEnabled = true; // true by default.
-    bool debugForceEnabled = false; // true by default.
-    bool debugDestroyOriginalObjectEmidiatly = true; // false by default.
+    // Destroy micro objects in the explosion radius.
+    auto staticMicroBodiesToDestroy =
+        GetPhysicalBodiesInRaduis(splittedEntities, grenadePhysicsPos, explosionImpact->radius, b2_staticBody);
+    for (auto& entity : staticMicroBodiesToDestroy)
+        registryWrapper.Destroy(entity);
 
-    if (debugMiniDistructionEnabled)
+    // Destroy original objects.
+    for (auto& entity : staticOriginalBodies)
     {
-        auto staticMicroBodiesToDestroy =
-            GetPhysicalBodiesInRaduis(splittedEntities, grenadePhysicsPos, explosionImpact->radius, b2_staticBody);
-        for (auto& entity : staticMicroBodiesToDestroy)
-            registryWrapper.Destroy(entity);
+        registryWrapper.Destroy(entity);
     }
 
-    if (debugForceEnabled)
-    {
-        ApplyForceToPhysicalBodies(staticOriginalBodies, grenadePhysicsPos, explosionImpact->force);
-        StartCollisionDisableTimer(staticOriginalBodies);
-    }
+    // TODO0 psedocode:
+    // 1. Create particles in the explosion radius.
+    // 2. Apply force to the particles.
+    // 3. Destroy the particles after some number of collisions.
+    // ApplyForceToPhysicalBodies(staticOriginalBodies, grenadePhysicsPos, explosionImpact->force);
+    // StartCollisionDisableTimer(staticOriginalBodies);
 
-    if (debugDestroyOriginalObjectEmidiatly)
-    {
-        for (auto& entity : staticOriginalBodies)
-        {
-            registryWrapper.Destroy(entity);
-        }
-    }
-
+    // Destroy the explosion entity.
     registryWrapper.Destroy(explosionEntity);
+
+    // Play explosion sound.
     audioSystem.PlaySoundEffect("explosion");
 };
 
@@ -224,8 +218,8 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
             // Fill rendering info for the pixel.
             RenderingInfo pixelRenderingInfo;
 
-            // TODO: add to debug options.
-            bool debugColoredPixelsRandomly = false; // true by default.
+            auto& debugColoredPixelsRandomly =
+                utils::GetConfig<bool, "weaponControlSystem.debug.useColoredMicroTiles">();
 
             if (debugColoredPixelsRandomly)
             {
@@ -242,7 +236,7 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
             // Create physics body for the pixel.
             auto pixelRectPosInTexture = glm::vec2(rect.x, rect.y);
             glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
-                cellSizeGlm - glm::vec2{1, 1}; // TODO: here is a hack with {1, 1}.
+                cellSizeGlm - glm::vec2{1, 1}; // TODO1: here is a hack with {1, 1}.
             glm::vec2 pixelTileSize(rect.w - gap, rect.h - gap);
             auto pixelPhysicsBody = box2dBodyCreator.CreatePhysicsBody(pixelEntity, pixelWorldPosition, pixelTileSize);
 

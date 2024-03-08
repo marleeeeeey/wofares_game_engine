@@ -11,7 +11,7 @@
       "program": "${workspaceFolder}/build/src/wofares.exe",
       "args": [],
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "Wofares (Windows) 2. Build"
+      "preLaunchTask": "Wofares (Windows) 3. Copy assets"
     }
   ]
 }

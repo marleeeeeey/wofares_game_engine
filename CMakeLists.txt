@@ -15,7 +15,7 @@ message(STATUS "CMAKE_TOOLCHAIN_FILE is set to ${CMAKE_TOOLCHAIN_FILE}")
 string(REGEX REPLACE "/scripts/buildsystems/vcpkg.cmake$" "" VCPKG_ROOT_DIR "${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "VCPKG root dir: ${VCPKG_ROOT_DIR}")
 
-# TODO: here is a hack to make SDL_image linkable via cmake. Fix it and make cross-platform.
+# TODO5: here is a hack to make SDL_image linkable via cmake. Fix it and make cross-platform.
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${VCPKG_ROOT_DIR}/installed/x64-windows/share/SDL2_mixer")
 find_package(SDL2_mixer CONFIG REQUIRED)
 
@@ -29,7 +29,7 @@ add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/my_common_cpp_utils)
 add_subdirectory(src)
 
-# TODO: Disable adding the googletest library. This is workaround to make SDL_image linkable via cmake.
+# TODO5: Disable adding the googletest library. This is workaround to make SDL_image linkable via cmake.
 # SDL_image\external\libjxl\third_party\googletest conflicts with thirdparty/googletest.
 # add_subdirectory(thirdparty/googletest)
 

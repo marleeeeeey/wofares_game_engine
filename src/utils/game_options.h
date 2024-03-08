@@ -25,10 +25,8 @@ struct LevelOptions
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.0f};
     size_t tileSplitFactor{2};
-    bool preventCreationInvisibleTiles{true}; // TODO: implement this feature.
     float colisionDisableProbability{0.7f};
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        LevelOptions, tileSplitFactor, preventCreationInvisibleTiles, colisionDisableProbability)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LevelOptions, tileSplitFactor, colisionDisableProbability)
 };
 
 struct PhysicsOptions
@@ -45,7 +43,7 @@ struct PhysicsOptions
 struct WindowOptions
 {
     unsigned fps{60};
-    glm::vec2 windowSize{800, 600}; // TODO: support for json serialization.
+    glm::vec2 windowSize{800, 600}; // TODO4: support for json serialization.
     float cameraScale{1.0f};
     glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};

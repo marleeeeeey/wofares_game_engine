@@ -3,14 +3,12 @@
 #include <utils/game_options.h>
 #include <utils/resource_manager.h>
 
-
 class AnimationUpdateSystem
 {
     entt::registry& registry;
-    ResourceManager& resourceManager; // TODO: unused. Remove later if not needed.
     GameOptions& gameState;
 public:
-    AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager);
+    AnimationUpdateSystem(entt::registry& registry);
     void UpdateAnimationProgressForAllEntities(float deltaTime);
     void UpdatePlayerAnimationDirectionAndSpeed();
     void Update(float deltaTime);

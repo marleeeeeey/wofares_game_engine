@@ -7,7 +7,7 @@ add_executable(wofares ${SOURCES})
 target_compile_definitions(wofares
     PRIVATE
 
-    # MY_DEBUG # TODO: Uncomment this to enable extra debug mode.
+    # MY_DEBUG # TODO5: Uncomment this to enable extra debug mode.
 )
 
 target_link_libraries(wofares
@@ -112,7 +112,7 @@ copy_dynamic_lib(wofares "${CMAKE_BINARY_DIR}/thirdparty/SDL_image" "SDL2_image"
 
 copy_lib_from_vcpkg(wofares "SDL2_mixer")
 
-# copy from thirdparty\my_tiled_maps\map002_wofares\assets to bin\assets
+# copy assets
 add_custom_command(TARGET wofares POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/thirdparty/game_assets/wofares/assets"

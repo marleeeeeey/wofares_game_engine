@@ -25,11 +25,13 @@ PlayerControlSystem::PlayerControlSystem(
         InputEventManager::EventType::ButtonReleaseAfterHold,
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttack(eventInfo); });
 
-    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
-                                { HandlePlayerBuildingAction(eventInfo.originalEvent); });
+    inputEventManager.Subscribe(
+        InputEventManager::EventType::RawSdlEvent,
+        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerBuildingAction(eventInfo); });
 
-    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
-                                { HandlePlayerWeaponDirection(eventInfo.originalEvent); });
+    inputEventManager.Subscribe(
+        InputEventManager::EventType::RawSdlEvent,
+        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerWeaponDirection(eventInfo); });
 
     // Subscribe to the contact listener to handle the ground contact flag.
     contactListener.SubscribeContact(
@@ -89,8 +91,8 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
             const auto& playerInfo = players.get<PlayerInfo>(entity);
             const auto& playerBody = players.get<PhysicsInfo>(entity).bodyRAII->GetBody();
             const auto& animationInfo = players.get<AnimationInfo>(entity);
-            const auto& playerSize =
-                animationInfo.frames.front().renderingInfo.sdlSize; // TODO: use the size from specific bounding box.
+            // TODO2: use the size from specific bounding box.
+            const auto& playerSize = animationInfo.frames.front().renderingInfo.sdlSize;
             const auto& weaponDirection = playerInfo.weaponDirection;
 
             // Calculate the position of the grenade slightly in front of the player.
@@ -117,8 +119,10 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
     }
 }
 
-void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
+void PlayerControlSystem::HandlePlayerBuildingAction(const InputEventManager::EventInfo& eventInfo)
 {
+    auto event = eventInfo.originalEvent;
+
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
         auto physicsWorld = gameState.physicsWorld;
@@ -134,8 +138,10 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
     }
 };
 
-void PlayerControlSystem::HandlePlayerWeaponDirection(const SDL_Event& event)
+void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo)
 {
+    auto event = eventInfo.originalEvent;
+
     if (event.type == SDL_MOUSEMOTION)
     {
         const auto& players = registry.view<PlayerInfo, PhysicsInfo>();
