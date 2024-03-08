@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <glob/glob.hpp>
 #include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
@@ -34,18 +35,20 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(rendere
     for (const auto& soundEffectPair : assetsJson["sound_effects"].items())
     {
         const std::string& soundEffectName = soundEffectPair.key();
-        const auto& soundEffectPathsJson = soundEffectPair.value();
+        const auto& soundEffectGlobsJson = soundEffectPair.value();
 
-        if (!soundEffectPathsJson.is_array())
+        if (!soundEffectGlobsJson.is_array())
             throw std::runtime_error(MY_FMT("Sound effect paths for '{}' should be an array", soundEffectName));
 
         std::vector<std::filesystem::path> paths;
 
         // Load sound effect paths.
-        for (const auto& pathJson : soundEffectPathsJson)
+        for (const auto& soundEffectGlobPath : soundEffectGlobsJson)
         {
-            auto soundEffectPath = pathJson.get<std::filesystem::path>();
-            paths.push_back(soundEffectPath);
+            for (auto& soundEffectPath : glob::glob(soundEffectGlobPath.get<std::string>()))
+            {
+                paths.push_back(soundEffectPath);
+            }
         }
 
         soundEffectPaths[soundEffectName] = paths;
@@ -60,7 +63,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(rendere
     }
 
     MY_LOG_FMT(
-        info, "Game found {} animation(s), {} level(s), {} music(s), {} sound(s).", animations.size(),
+        info, "Game found {} animation(s), {} level(s), {} music(s), {} sound effect(s).", animations.size(),
         tiledLevels.size(), musicPaths.size(), soundEffectPaths.size());
 }
 

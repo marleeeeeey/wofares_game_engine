@@ -23,6 +23,7 @@ target_link_libraries(wofares
 target_include_directories(wofares
     PRIVATE
     ${PROJECT_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/thirdparty/glob/single_include
 )
 
 # Helper to copy required DLLs and debug symbols to the output directory.
