@@ -125,7 +125,7 @@ AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path
         AnimationFrame animationFrame;
         animationFrame.renderingInfo.texturePtr = textureRAII;
         animationFrame.renderingInfo.textureRect = {x, y, w, h};
-        animationFrame.renderingInfo.sdlSize = {w, h}; // TODO: obsolete. Remove later.
+        animationFrame.renderingInfo.sdlSize = {w, h}; // TODO2: obsolete. Remove later.
         animationFrame.duration = static_cast<float>(duration) / 1000.0f; // Convert to seconds.
 
         // Add frame to the animation.

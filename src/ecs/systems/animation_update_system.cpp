@@ -1,8 +1,7 @@
 #include "animation_update_system.h"
 
-AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager)
-  : registry(registry), resourceManager(resourceManager),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
+AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry)
+  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
 void AnimationUpdateSystem::Update(float deltaTime)

@@ -4,24 +4,27 @@
 #include <utils/box2d_body_creator.h>
 #include <utils/box2d_entt_contact_listener.h>
 #include <utils/coordinates_transformer.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/input_event_manager.h>
 
 class PlayerControlSystem
 {
+    EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     InputEventManager& inputEventManager;
     GameOptions& gameState;
-    CoordinatesTransformer transformer; // TODO: think to put it in the GameOptions class.
+    CoordinatesTransformer transformer;
     Box2dBodyCreator box2dBodyCreator;
     Box2dEnttContactListener& contactListener;
 public:
     PlayerControlSystem(
-        entt::registry& registry, InputEventManager& inputEventManager, Box2dEnttContactListener& contactListener);
+        EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
+        Box2dEnttContactListener& contactListener);
 private: // Callbacks for the InputEventManager.
     void HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerAttack(const InputEventManager::EventInfo& eventInfo);
-    void HandlePlayerBuildingAction(const SDL_Event& event); // TODO: remplace with eventInfo
-    void HandlePlayerWeaponDirection(const SDL_Event& event); // TODO: remplace with eventInfo
+    void HandlePlayerBuildingAction(const InputEventManager::EventInfo& eventInfo);
+    void HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo);
 private: // Methods to set the ground contact flag.
     void HandlePlayerBeginSensorContact(entt::entity entityA, entt::entity entityB);
     void HandlePlayerEndSensorContact(entt::entity entityA, entt::entity entityB);

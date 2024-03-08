@@ -21,7 +21,7 @@ private: // Render game objects methods.
     void RenderTiles();
     void RenderAnimations();
     void RenderPlayerWeaponDirection();
-private: // Render helpers. TODO: check if items can be removed.
+private: // Render helpers. TODO4: check if items can be removed.
     void RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color);
     void RenderTiledSquare(

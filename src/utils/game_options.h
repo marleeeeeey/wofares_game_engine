@@ -24,11 +24,9 @@ struct LevelOptions
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.0f};
-    size_t miniTileResolution{2};
-    bool preventCreationInvisibleTiles{true}; // TODO: implement this feature.
+    size_t tileSplitFactor{2};
     float colisionDisableProbability{0.7f};
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        LevelOptions, miniTileResolution, preventCreationInvisibleTiles, colisionDisableProbability)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LevelOptions, tileSplitFactor, colisionDisableProbability)
 };
 
 struct PhysicsOptions
@@ -45,7 +43,7 @@ struct PhysicsOptions
 struct WindowOptions
 {
     unsigned fps{60};
-    glm::vec2 windowSize{800, 600}; // TODO: support for json serialization.
+    glm::vec2 windowSize{800, 600}; // TODO4: support for json serialization.
     float cameraScale{1.0f};
     glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};
@@ -63,10 +61,11 @@ struct ControlOptions
 
 struct SoundOptions
 {
+    float masterVolume{0.0f};
     bool playBackgroundMusicOnStart{false};
     float randomSoundEventInterval{10}; // Interval between random sound events in seconds.
     float nextSoundEventTime{0.0f}; // Time of the next random sound event.
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SoundOptions, playBackgroundMusicOnStart, randomSoundEventInterval)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SoundOptions, masterVolume, playBackgroundMusicOnStart, randomSoundEventInterval)
 };
 
 struct DebugInfo

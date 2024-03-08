@@ -1,5 +1,7 @@
 #include "sdl_colors.h"
+#include <magic_enum.hpp>
 #include <map>
+#include <my_common_cpp_utils/math_utils.h>
 
 SDL_Color GetSDLColor(ColorName colorName, Uint8 alpha)
 {
@@ -31,3 +33,8 @@ void SetRenderDrawColor(SDL_Renderer* renderer, ColorName colorName)
 {
     SetRenderDrawColor(renderer, GetSDLColor(colorName));
 }
+
+ColorName GetRandomColorName()
+{
+    return static_cast<ColorName>(utils::Random<size_t>(0, magic_enum::enum_count<ColorName>() - 1));
+};

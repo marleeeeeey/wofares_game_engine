@@ -47,6 +47,6 @@ private:
     // Listeners for the events.
     std::unordered_map<EventType, std::vector<EventListener>> continuousListeners;
     // Status of the buttons.
-    std::unordered_map<SDL_Scancode, PrivateEventInfo> keyboardButtonHoldInfo; // TODO: array.
-    std::unordered_map<Uint8, PrivateEventInfo> mouseButtonHoldInfo; // TODO: array
+    std::unordered_map<SDL_Scancode, PrivateEventInfo> keyboardButtonHoldInfo;
+    std::unordered_map<Uint8, PrivateEventInfo> mouseButtonHoldInfo;
 };

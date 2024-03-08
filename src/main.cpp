@@ -1,4 +1,3 @@
-#include "ecs/systems/random_event_system.h"
 #include <ecs/components/game_components.h>
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
@@ -8,12 +7,14 @@
 #include <ecs/systems/map_loader_system.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
+#include <ecs/systems/random_event_system.h>
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/screen_mode_control_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <utils/audio_system.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/file_system.h>
 #include <utils/imgui_sdl_RAII.h>
 #include <utils/input_event_manager.h>
@@ -34,7 +35,7 @@ int main(int argc, char* args[])
 
         // Initialize the logger with the trace level.
         std::filesystem::path logFilePath = std::filesystem::absolute("logs") / "wofares.log";
-        utils::Logger::Init(logFilePath, spdlog::level::info);
+        utils::Logger::Init(logFilePath, spdlog::level::debug);
         MY_LOG_FMT(info, "Current directory set to: {}", execDir);
 
         // Load the global configuration from a file.
@@ -43,10 +44,12 @@ int main(int argc, char* args[])
 
         // Create an EnTT registry.
         entt::registry registry;
+        EnttRegistryWrapper registryWrapper(registry);
 
         // Create a game state entity.
-        auto& gameOptions =
-            registry.emplace<GameOptions>(registry.create(), utils::GetConfig<GameOptions, "gameOptions">());
+        auto& gameOptions = registry.emplace<GameOptions>(
+            registryWrapper.Create("gameOptions"), utils::GetConfig<GameOptions, "gameOptions">());
+
         gameOptions.windowOptions.cameraCenterSdl = gameOptions.windowOptions.windowSize / 2.0f;
 
         // Create a physics world with gravity and store it in the registry.
@@ -54,7 +57,7 @@ int main(int argc, char* args[])
         gameOptions.physicsWorld = std::make_shared<b2World>(gravity);
 
         // Create a contact listener and subscribe it to the physics world.
-        Box2dEnttContactListener contactListener(registry);
+        Box2dEnttContactListener contactListener(registryWrapper);
         gameOptions.physicsWorld->SetContactListener(&contactListener);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
@@ -70,23 +73,23 @@ int main(int argc, char* args[])
             audioSystem.PlayMusic("background_music");
 
         // Create a weapon control system and subscribe it to the contact listener.
-        WeaponControlSystem weaponControlSystem(registry, contactListener, audioSystem);
+        WeaponControlSystem weaponControlSystem(registryWrapper, contactListener, audioSystem);
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
         EventQueueSystem eventQueueSystem(inputEventManager);
 
         // Subscribe all systems that need to handle input events.
-        PlayerControlSystem playerControlSystem(registry, inputEventManager, contactListener);
-        CameraControlSystem cameraControlSystem(registry, inputEventManager);
-        GameStateControlSystem gameStateControlSystem(registry, inputEventManager);
+        PlayerControlSystem playerControlSystem(registryWrapper, inputEventManager, contactListener);
+        CameraControlSystem cameraControlSystem(registryWrapper.GetRegistry(), inputEventManager);
+        GameStateControlSystem gameStateControlSystem(registryWrapper.GetRegistry(), inputEventManager);
 
         // Create a systems with no input events.
-        PhysicsSystem physicsSystem(registry);
-        RandomEventSystem randomEventSystem(registry, audioSystem);
-        GameObjectsRenderSystem gameObjectsRenderSystem(registry, renderer.get(), resourceManager);
-        HUDRenderSystem hudRenderSystem(registry, renderer.get());
-        MapLoaderSystem mapLoaderSystem(registry, resourceManager);
+        PhysicsSystem physicsSystem(registryWrapper);
+        RandomEventSystem randomEventSystem(registryWrapper.GetRegistry(), audioSystem);
+        GameObjectsRenderSystem gameObjectsRenderSystem(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
+        HUDRenderSystem hudRenderSystem(registryWrapper.GetRegistry(), renderer.get());
+        MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager);
 
         // Auxiliary systems.
         ScreenModeControlSystem screenModeControlSystem(inputEventManager, window);
@@ -95,7 +98,7 @@ int main(int argc, char* args[])
         auto level1 = resourceManager.GetTiledLevel("level1");
         mapLoaderSystem.LoadMap(level1);
 
-        AnimationUpdateSystem animationUpdateSystem(registry, resourceManager);
+        AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry());
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
@@ -140,6 +143,8 @@ int main(int argc, char* args[])
                 SDL_Delay(frameDelay - frameTime);
             }
         }
+
+        registryWrapper.LogAllEntitiesByTheirNames();
     }
     catch (const std::runtime_error& e)
     {
