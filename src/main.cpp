@@ -12,6 +12,7 @@
 #include <ecs/systems/screen_mode_control_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/config.h>
+#include <my_common_cpp_utils/json_utils.h>
 #include <my_common_cpp_utils/logger.h>
 #include <utils/audio_system.h>
 #include <utils/entt_registry_wrapper.h>
@@ -30,16 +31,17 @@ int main(int argc, char* args[])
         std::string execDir = execPath.substr(0, execPath.find_last_of("\\/"));
         std::filesystem::current_path(execDir);
 
-        std::filesystem::path assetsDirectory = "assets";
-        std::filesystem::path configFilePath = assetsDirectory / "config.json";
+        // Set the paths to the configuration and log files.
+        std::filesystem::path configFilePath = "config.json";
+        std::filesystem::path logFilePath = "logs/wofares.log";
 
-        // Initialize the logger with the trace level.
-        std::filesystem::path logFilePath = std::filesystem::absolute("logs") / "wofares.log";
-        utils::Logger::Init(logFilePath, spdlog::level::debug);
-        MY_LOG_FMT(info, "Current directory set to: {}", execDir);
-
-        // Load the global configuration from a file.
+        // Initialize the logger and the configuration.
         utils::Config::InitInstanceFromFile(configFilePath);
+        utils::Logger::Init(logFilePath, spdlog::level::info);
+
+        // Log initial information.
+        MY_LOG(info, "Wofares game started");
+        MY_LOG_FMT(info, "Current directory set to: {}", execDir);
         MY_LOG_FMT(info, "Config file loaded: {}", configFilePath.string());
 
         // Create an EnTT registry.
@@ -67,7 +69,10 @@ int main(int argc, char* args[])
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
-        ResourceManager resourceManager(renderer.get());
+        std::filesystem::path assetsSettingsFilePath = "assets/assets_settings.json";
+        auto assetsSettingsJson = utils::LoadJsonFromFile(assetsSettingsFilePath);
+        MY_LOG_FMT(info, "Assets settings loaded: {}", assetsSettingsFilePath.string());
+        ResourceManager resourceManager(renderer.get(), assetsSettingsJson);
         AudioSystem audioSystem(resourceManager);
         if (gameOptions.soundOptions.playBackgroundMusicOnStart)
             audioSystem.PlayMusic("background_music");

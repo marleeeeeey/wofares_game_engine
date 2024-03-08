@@ -25,19 +25,28 @@
       ]
     },
     {
-      "label": "Wofares (Windows) 3. Copy assets",
+      "label": "Wofares (Windows) 3. Copy config.json",
       "type": "shell",
-      "command": "cmake -E copy_directory ${workspaceFolder}/thirdparty/game_assets/wofares/assets ${workspaceFolder}/build/src/assets",
+      "command": "cmake -E copy ${workspaceFolder}/config.json ${workspaceFolder}/build/src/config.json",
       "dependsOn": [
         "Wofares (Windows) 2. Build"
       ]
     },
+
     {
-      "label": "Wofares (Windows) 4. Run",
+      "label": "Wofares (Windows) 4. Copy assets",
+      "type": "shell",
+      "command": "cmake -E copy_directory ${workspaceFolder}/thirdparty/game_assets/wofares/assets ${workspaceFolder}/build/src/assets",
+      "dependsOn": [
+        "Wofares (Windows) 3. Copy config.json"
+      ]
+    },
+    {
+      "label": "Wofares (Windows) 5. Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/src/wofares.exe",
       "dependsOn": [
-        "Wofares (Windows) 3. Copy assets"
+        "Wofares (Windows) 4. Copy assets"
       ]
     }
   ]

@@ -133,7 +133,7 @@ std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(
     }
     else
     {
-        MY_LOG_FMT(info, "Surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        MY_LOG_FMT(debug, "Surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
     }
 
     return std::make_shared<SDLSurfaceRAII>(std::move(surface));

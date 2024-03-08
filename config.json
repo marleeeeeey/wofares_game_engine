@@ -1,0 +1,30 @@
+{
+  "gameOptions": {
+    "levelOptions": {
+      "tileSplitFactor": 2,
+      "colisionDisableProbability": 1
+    },
+    "physicsOptions": {
+      "velocityIterations": 6,
+      "positionIterations": 2,
+      "gapBetweenPhysicalAndVisual": 0
+    },
+    "windowOptions": {
+      "fps": 60,
+      "cameraScale": 4,
+      "box2DtoSDL": 48,
+      "showGrid": false
+    },
+    "soundOptions": {
+      "masterVolume": 0,
+      "playBackgroundMusicOnStart": false,
+      "randomSoundEventInterval": 10
+    }
+  },
+  "weaponControlSystem": {
+    "cellSizeForMicroDistruction": 2,
+    "debug": {
+      "useColoredMicroTiles": false
+    }
+  }
+}

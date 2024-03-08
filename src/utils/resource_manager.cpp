@@ -9,12 +9,11 @@
 #include <my_common_cpp_utils/math_utils.h>
 #include <nlohmann/json.hpp>
 
-ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(renderer)
+ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson)
+  : resourceCashe(renderer)
 {
-    auto& assetsJson = utils::GetConfig<nlohmann::json, "assets">();
-
     // Load animations.
-    for (const auto& animationPair : assetsJson["animations"].items())
+    for (const auto& animationPair : assetsSettingsJson["animations"].items())
     {
         const std::string& animationName = animationPair.key();
         auto animationPath = animationPair.value().get<std::filesystem::path>();
@@ -22,7 +21,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(rendere
     }
 
     // Load tiled level names.
-    for (const auto& tiledLevelPair : assetsJson["maps"].items())
+    for (const auto& tiledLevelPair : assetsSettingsJson["maps"].items())
     {
         const std::string& tiledLevelName = tiledLevelPair.key();
         LevelInfo levelInfo = tiledLevelPair.value().get<LevelInfo>();
@@ -32,7 +31,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(rendere
     }
 
     // Load sound effects.
-    for (const auto& soundEffectPair : assetsJson["sound_effects"].items())
+    for (const auto& soundEffectPair : assetsSettingsJson["sound_effects"].items())
     {
         const std::string& soundEffectName = soundEffectPair.key();
         const auto& soundEffectGlobsJson = soundEffectPair.value();
@@ -55,7 +54,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer) : resourceCashe(rendere
     }
 
     // Load music.
-    for (const auto& musicPair : assetsJson["music"].items())
+    for (const auto& musicPair : assetsSettingsJson["music"].items())
     {
         const std::string& musicName = musicPair.key();
         const auto musicPath = musicPair.value().get<std::filesystem::path>();

@@ -117,3 +117,9 @@ add_custom_command(TARGET wofares POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/thirdparty/game_assets/wofares/assets"
     "$<TARGET_FILE_DIR:wofares>/assets")
+
+# copy config.json
+add_custom_command(TARGET wofares POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_SOURCE_DIR}/config.json"
+    "$<TARGET_FILE_DIR:wofares>/config.json")

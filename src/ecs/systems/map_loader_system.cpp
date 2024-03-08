@@ -61,7 +61,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
 
     // Log warnings.
     if (invisibleTilesNumber > 0)
-        MY_LOG_FMT(warn, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
+        MY_LOG_FMT(info, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
     if (createdTiles == 0)
     {
         MY_LOG_FMT(warn, "No tiles were created during map loading {}", levelInfo.tiledMapPath.string());

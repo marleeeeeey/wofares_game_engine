@@ -39,7 +39,7 @@ class ResourceManager
     std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
     std::unordered_map<std::string, std::vector<std::filesystem::path>> soundEffectPaths;
 public:
-    ResourceManager(SDL_Renderer* renderer);
+    ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson);
 public: // ************************* Animations *************************
     AnimationInfo GetAnimation(const std::string& name);
 private:
