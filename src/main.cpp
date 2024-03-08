@@ -57,7 +57,7 @@ int main(int argc, char* args[])
         gameOptions.physicsWorld = std::make_shared<b2World>(gravity);
 
         // Create a contact listener and subscribe it to the physics world.
-        Box2dEnttContactListener contactListener(registryWrapper.GetRegistry());
+        Box2dEnttContactListener contactListener(registryWrapper);
         gameOptions.physicsWorld->SetContactListener(&contactListener);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.

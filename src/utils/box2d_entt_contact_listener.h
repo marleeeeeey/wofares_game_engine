@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/entt_registry_wrapper.h"
 #include <box2d/box2d.h>
 #include <entt/entt.hpp>
 #include <optional>
@@ -35,7 +36,7 @@ private:
         entt::entity entity;
     };
 public:
-    Box2dEnttContactListener(entt::registry& registry);
+    Box2dEnttContactListener(EnttRegistryWrapper& registryWrapper);
     void SubscribeContact(ContactType contactType, ContactListener listener);
 private:
     Box2dEnttContactListener(const Box2dEnttContactListener&) = delete;
@@ -47,6 +48,7 @@ private: // Interacting with Box2D. These methods are called by Box2D during the
     void EndContact(b2Contact* contact) override;
     std::optional<std::pair<EntityWithProperties, EntityWithProperties>> GetValidEntities(b2Contact* contact);
 private:
+    EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     std::unordered_map<ContactType, std::vector<ContactListener>> contactListenersByType;
 };

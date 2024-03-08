@@ -63,10 +63,11 @@ struct ControlOptions
 
 struct SoundOptions
 {
+    float masterVolume{0.0f};
     bool playBackgroundMusicOnStart{false};
     float randomSoundEventInterval{10}; // Interval between random sound events in seconds.
     float nextSoundEventTime{0.0f}; // Time of the next random sound event.
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SoundOptions, playBackgroundMusicOnStart, randomSoundEventInterval)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SoundOptions, masterVolume, playBackgroundMusicOnStart, randomSoundEventInterval)
 };
 
 struct DebugInfo

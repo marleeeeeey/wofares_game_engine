@@ -1,7 +1,8 @@
 #include "box2d_entt_contact_listener.h"
 #include <my_common_cpp_utils/logger.h>
 
-Box2dEnttContactListener::Box2dEnttContactListener(entt::registry& registry) : registry(registry)
+Box2dEnttContactListener::Box2dEnttContactListener(EnttRegistryWrapper& registryWrapper)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry())
 {}
 
 void Box2dEnttContactListener::BeginContact(b2Contact* contact)
@@ -72,6 +73,20 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
     auto entityA = static_cast<entt::entity>(pointerA);
     auto entityB = static_cast<entt::entity>(pointerB);
 
+    if (!registry.valid(entityA))
+    {
+        MY_LOG_FMT(
+            warn, "EntityA is not valid. entityA: {}, name: {}", static_cast<uint32_t>(entityA),
+            registryWrapper.TryGetName(entityA));
+    }
+
+    if (!registry.valid(entityB))
+    {
+        MY_LOG_FMT(
+            warn, "EntityB is not valid. entityB: {}, name: {}", static_cast<uint32_t>(entityB),
+            registryWrapper.TryGetName(entityB));
+    }
+
     if (registry.valid(entityA) && registry.valid(entityB))
     {
         EntityWithProperties entityWithPropertiesA{fixtureA->IsSensor(), entityA};
@@ -79,9 +94,6 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
         return std::make_pair(entityWithPropertiesA, entityWithPropertiesB);
     }
 
-    MY_LOG_FMT(
-        debug, "One of the entities is not valid. entityA: {}, entityB: {}", static_cast<uint32_t>(entityA),
-        static_cast<uint32_t>(entityB));
     return std::nullopt;
 }
 

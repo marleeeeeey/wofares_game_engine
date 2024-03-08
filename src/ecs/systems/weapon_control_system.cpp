@@ -1,17 +1,17 @@
 #include "weapon_control_system.h"
-#include "box2d/b2_body.h"
-#include "entt/entity/fwd.hpp"
-#include "utils/entt_registry_wrapper.h"
-#include "utils/sdl_colors.h"
 #include <SDL_rect.h>
+#include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
 #include <ecs/components/game_components.h>
+#include <entt/entity/fwd.hpp>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
 #include <utils/box2d_body_creator.h>
 #include <utils/box2d_entt_contact_listener.h>
 #include <utils/box2d_helpers.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/sdl_colors.h>
 #include <utils/texture_process.h>
 #include <vector>
 
@@ -25,6 +25,8 @@ WeaponControlSystem::WeaponControlSystem(
         Box2dEnttContactListener::ContactType::Begin,
         [this](entt::entity entityA, entt::entity entityB)
         {
+            MY_LOG_FMT(debug, "explosionEntities size before: {}", contactedEntities.size());
+
             for (const auto& entity : {entityA, entityB})
             {
                 // If the entity contains the ContactExplosionComponent.
@@ -36,9 +38,11 @@ WeaponControlSystem::WeaponControlSystem(
                 {
                     // Update Box2D object is not allowed in the contact listener. Because Box2D is in simulation
                     // step. So, we need to store entities in the queue and update them in the main loop.
-                    explosionEntities.push(entity);
+                    contactedEntities.push(entity);
                 }
             }
+
+            MY_LOG_FMT(debug, "explosionEntities size after: {}", contactedEntities.size());
         });
 }
 
@@ -112,56 +116,57 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
     auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
     auto physicsInfo = registry.try_get<PhysicsInfo>(explosionEntity);
 
-    if (explosionImpact && physicsInfo)
+    if (!explosionImpact || !physicsInfo)
+        return;
+
+    const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
+    float radiusCoef = 1.2f; // TODO: hack. Need to calculate it based on the texture size. Because position is
+                             // calculated from the center of the texture.
+    auto staticOriginalBodies =
+        GetPhysicalBodiesInRaduis(grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
+
+    // TODO: maybe better split entities to static and dynamic. And apply force only to dynamic.
+    SDL_Point cellSize = {2, 2}; // TODO: move to the game options.
+    auto splittedEntities = AddAndReturnSplittedPhysicalEntetiesToWorld(staticOriginalBodies, cellSize);
+
+    // TODO: add to debug options.
+    bool debugMiniDistructionEnabled = false; // true by default.
+    bool debugForceEnabled = false; // true by default.
+    bool debugDestroyOriginalObjectEmidiatly = true; // false by default.
+
+    if (debugMiniDistructionEnabled)
     {
-        const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
-        float radiusCoef = 1.2f; // TODO: hack. Need to calculate it based on the texture size. Because position is
-                                 // calculated from the center of the texture.
-        auto staticOriginalBodies =
-            GetPhysicalBodiesInRaduis(grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
-
-        // TODO: maybe better split entities to static and dynamic. And apply force only to dynamic.
-        SDL_Point cellSize = {2, 2}; // TODO: move to the game options.
-        auto splittedEntities = AddAndReturnSplittedPhysicalEntetiesToWorld(staticOriginalBodies, cellSize);
-
-        // TODO: add to debug options.
-        bool debugMiniDistructionEnabled = false; // true by default.
-        bool debugForceEnabled = false; // true by default.
-        bool debugDestroyOriginalObjectEmidiatly = true; // false by default.
-
-        if (debugMiniDistructionEnabled)
-        {
-            auto staticMicroBodiesToDestroy =
-                GetPhysicalBodiesInRaduis(splittedEntities, grenadePhysicsPos, explosionImpact->radius, b2_staticBody);
-            for (auto& entity : staticMicroBodiesToDestroy)
-                registryWrapper.Destroy(entity);
-        }
-
-        if (debugForceEnabled)
-        {
-            ApplyForceToPhysicalBodies(staticOriginalBodies, grenadePhysicsPos, explosionImpact->force);
-            StartCollisionDisableTimer(staticOriginalBodies);
-        }
-
-        if (debugDestroyOriginalObjectEmidiatly)
-        {
-            for (auto& entity : staticOriginalBodies)
-            {
-                registryWrapper.Destroy(entity);
-            }
-        }
-
-        registryWrapper.Destroy(explosionEntity);
-        audioSystem.PlaySoundEffect("explosion");
+        auto staticMicroBodiesToDestroy =
+            GetPhysicalBodiesInRaduis(splittedEntities, grenadePhysicsPos, explosionImpact->radius, b2_staticBody);
+        for (auto& entity : staticMicroBodiesToDestroy)
+            registryWrapper.Destroy(entity);
     }
+
+    if (debugForceEnabled)
+    {
+        ApplyForceToPhysicalBodies(staticOriginalBodies, grenadePhysicsPos, explosionImpact->force);
+        StartCollisionDisableTimer(staticOriginalBodies);
+    }
+
+    if (debugDestroyOriginalObjectEmidiatly)
+    {
+        for (auto& entity : staticOriginalBodies)
+        {
+            registryWrapper.Destroy(entity);
+        }
+    }
+
+    registryWrapper.Destroy(explosionEntity);
+    audioSystem.PlaySoundEffect("explosion");
 };
+
 void WeaponControlSystem::ProcessExplosionEntitiesQueue()
 {
-    while (!explosionEntities.empty())
+    while (!contactedEntities.empty())
     {
-        auto entity = explosionEntities.front();
+        auto entity = contactedEntities.front();
         TryToRunExplosionImpactComponent(entity);
-        explosionEntities.pop();
+        contactedEntities.pop();
     }
 };
 
@@ -237,7 +242,7 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
             // Create physics body for the pixel.
             auto pixelRectPosInTexture = glm::vec2(rect.x, rect.y);
             glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
-                cellSizeGlm * 1.5; // TODO: here is a hack with 1.5.
+                cellSizeGlm - glm::vec2{1, 1}; // TODO: here is a hack with {1, 1}.
             glm::vec2 pixelTileSize(rect.w - gap, rect.h - gap);
             auto pixelPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, pixelWorldPosition, pixelTileSize);
 

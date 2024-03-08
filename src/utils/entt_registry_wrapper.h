@@ -13,6 +13,7 @@ public: // Methods for debug - use in client code.
     entt::entity Create(const std::string& name);
     void Destroy(entt::entity entity);
     void LogAllEntitiesByTheirNames();
+    std::string TryGetName(entt::entity entity);
     // Get original registry.
     entt::registry& GetRegistry();
 };

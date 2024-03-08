@@ -15,7 +15,7 @@ class WeaponControlSystem
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
     float deltaTime;
-    std::queue<entt::entity> explosionEntities;
+    std::queue<entt::entity> contactedEntities;
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem);

@@ -65,7 +65,7 @@ SDLTextureRAII::SDLTextureRAII(SDL_Texture* texture) : texture(texture)
     if (!texture)
         throw std::runtime_error("SDLTextureRAII is nullptr");
 
-    MY_LOG_FMT(debug, "SDLTextureRAII created: {}", static_cast<void*>(texture));
+    MY_LOG_FMT(trace, "SDLTextureRAII created: {}", static_cast<void*>(texture));
 }
 
 SDLTextureRAII::~SDLTextureRAII()
@@ -75,7 +75,7 @@ SDLTextureRAII::~SDLTextureRAII()
         SDL_DestroyTexture(texture);
     }
 
-    MY_LOG_FMT(debug, "SDLTextureRAII destroyed: {}", static_cast<void*>(texture));
+    MY_LOG_FMT(trace, "SDLTextureRAII destroyed: {}", static_cast<void*>(texture));
 }
 
 SDLTextureRAII::SDLTextureRAII(SDLTextureRAII&& other) noexcept : texture(std::exchange(other.texture, nullptr))

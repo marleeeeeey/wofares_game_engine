@@ -41,6 +41,13 @@ void EnttRegistryWrapper::LogAllEntitiesByTheirNames()
             ids += std::to_string(static_cast<uint32_t>(entity)) + ", ";
         ids.pop_back();
         ids.pop_back();
-        MY_LOG_FMT(debug, "Entities with name: {} have ids: {}", name, ids);
+        MY_LOG_FMT(debug, "Entities with name: {} (count={}) have ids: {}", name, ids.size(), ids);
     }
+};
+
+std::string EnttRegistryWrapper::TryGetName(entt::entity entity)
+{
+    if (auto it = entityNamesById.find(entity); it != entityNamesById.end())
+        return it->second;
+    return "OBJECT REMOVED FROM REGISTRY";
 };
