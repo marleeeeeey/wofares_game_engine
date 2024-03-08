@@ -221,11 +221,14 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
         auto textureRects = DivideRectByCellSize(originalObjRenderingInfo.textureRect, cellSize);
         for (auto& rect : textureRects)
         {
+            // Create entity for the pixel.
+            auto pixelEntity = registryWrapper.Create("pixelTile");
+
             // Fill rendering info for the pixel.
             RenderingInfo pixelRenderingInfo;
 
             // TODO: add to debug options.
-            bool debugColoredPixelsRandomly = true; // true by default.
+            bool debugColoredPixelsRandomly = false; // true by default.
 
             if (debugColoredPixelsRandomly)
             {
@@ -244,10 +247,9 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
             glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
                 cellSizeGlm - glm::vec2{1, 1}; // TODO: here is a hack with {1, 1}.
             glm::vec2 pixelTileSize(rect.w - gap, rect.h - gap);
-            auto pixelPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, pixelWorldPosition, pixelTileSize);
+            auto pixelPhysicsBody = box2dBodyCreator.CreatePhysicsBody(pixelEntity, pixelWorldPosition, pixelTileSize);
 
-            // Create entity for the pixel with appropriate components.
-            auto pixelEntity = registryWrapper.Create("pixelTile");
+            // Fill the pixel entity with the rendering and physics info.
             registry.emplace<RenderingInfo>(pixelEntity, pixelRenderingInfo);
             registry.emplace<PhysicsInfo>(pixelEntity, pixelPhysicsBody);
             splittedEntities.push_back(pixelEntity);
