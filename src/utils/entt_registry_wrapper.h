@@ -5,6 +5,7 @@ class EnttRegistryWrapper
 {
     entt::registry& registry;
     std::map<entt::entity, std::string> entityNamesById;
+    std::map<entt::entity, std::string> removedEntityNamesById;
 public:
     explicit EnttRegistryWrapper(entt::registry& registry);
     EnttRegistryWrapper(const EnttRegistryWrapper&) = delete;

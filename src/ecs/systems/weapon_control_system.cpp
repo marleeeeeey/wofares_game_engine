@@ -25,8 +25,6 @@ WeaponControlSystem::WeaponControlSystem(
         Box2dEnttContactListener::ContactType::Begin,
         [this](entt::entity entityA, entt::entity entityB)
         {
-            MY_LOG_FMT(debug, "explosionEntities size before: {}", contactedEntities.size());
-
             for (const auto& entity : {entityA, entityB})
             {
                 // If the entity contains the ContactExplosionComponent.
@@ -41,8 +39,6 @@ WeaponControlSystem::WeaponControlSystem(
                     contactedEntities.push(entity);
                 }
             }
-
-            MY_LOG_FMT(debug, "explosionEntities size after: {}", contactedEntities.size());
         });
 }
 
@@ -130,7 +126,7 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
     auto splittedEntities = AddAndReturnSplittedPhysicalEntetiesToWorld(staticOriginalBodies, cellSize);
 
     // TODO: add to debug options.
-    bool debugMiniDistructionEnabled = false; // true by default.
+    bool debugMiniDistructionEnabled = true; // true by default.
     bool debugForceEnabled = false; // true by default.
     bool debugDestroyOriginalObjectEmidiatly = true; // false by default.
 
@@ -212,7 +208,8 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
         const glm::vec2 originalObjWorldPos = coordinatesTransformer.PhysicsToWorld(physicsPos);
 
         // Check if the original object is big enough to be splitted.
-        if (originalObjRenderingInfo.textureRect.w < cellSize.x || originalObjRenderingInfo.textureRect.h < cellSize.y)
+        if (originalObjRenderingInfo.textureRect.w <= cellSize.x ||
+            originalObjRenderingInfo.textureRect.h <= cellSize.y)
             continue;
 
         auto originalRectPosInTexture =

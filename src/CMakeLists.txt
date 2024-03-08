@@ -4,6 +4,12 @@ file(GLOB_RECURSE SOURCES "*.cpp")
 # Create an executable with the collected source files.
 add_executable(wofares ${SOURCES})
 
+target_compile_definitions(wofares
+    PRIVATE
+
+    # MY_DEBUG # TODO: Uncomment this to enable extra debug mode.
+)
+
 target_link_libraries(wofares
     PRIVATE
     glm
