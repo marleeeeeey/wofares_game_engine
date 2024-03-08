@@ -1,12 +1,14 @@
 #include "phisics_systems.h"
+#include "utils/entt_registry_wrapper.h"
 #include <ecs/components/game_components.h>
 #include <glm/glm.hpp>
 #include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>
 
-PhysicsSystem::PhysicsSystem(entt::registry& registry)
-  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    physicsWorld(gameState.physicsWorld), coordinatesTransformer(registry)
+PhysicsSystem::PhysicsSystem(EnttRegistryWrapper& registryWrapper)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
+    coordinatesTransformer(registry)
 {}
 
 void PhysicsSystem::Update(float deltaTime)
@@ -33,7 +35,7 @@ void PhysicsSystem::RemoveDistantObjects()
 
         if (!IsPointInsideBounds(pos, levelBounds))
         {
-            registry.destroy(entity);
+            registryWrapper.Destroy(entity);
         }
     }
 }

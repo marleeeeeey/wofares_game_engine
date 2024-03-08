@@ -1,4 +1,5 @@
 #include "map_loader_system.h"
+#include "utils/entt_registry_wrapper.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
 #include <fstream>
@@ -8,10 +9,10 @@
 #include <utils/glm_box2d_conversions.h>
 #include <utils/texture_process.h>
 
-MapLoaderSystem::MapLoaderSystem(entt::registry& registry, ResourceManager& resourceManager)
-  : registry(registry), resourceManager(resourceManager),
+MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    objectsFactory(registry, resourceManager), coordinatesTransformer(registry)
+    objectsFactory(registryWrapper, resourceManager), coordinatesTransformer(registry)
 {}
 
 void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
@@ -42,7 +43,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
     tileHeight = mapJson["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    colAndRowNumber = gameState.levelOptions.miniTileResolution;
+    colAndRowNumber = gameState.levelOptions.tileSplitFactor;
     miniWidth = tileWidth / colAndRowNumber;
     miniHeight = tileHeight / colAndRowNumber;
 
@@ -79,11 +80,11 @@ void MapLoaderSystem::UnloadMap()
 
     // Remove all entities that have a RenderingInfo component.
     for (auto entity : registry.view<RenderingInfo>())
-        registry.destroy(entity);
+        registryWrapper.Destroy(entity);
 
     // Remove all entities that have a PhysicalBody component.
     for (auto entity : registry.view<PhysicsInfo>())
-        registry.destroy(entity);
+        registryWrapper.Destroy(entity);
 
     if (Box2dObjectRAII::GetBodyCounter() != 0)
         MY_LOG_FMT(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
@@ -174,7 +175,7 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             glm::vec2 miniTileWorldPosition{miniTileWorldPositionX, miniTileWorldPositionY};
             glm::vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
 
-            auto entity = registry.create();
+            auto entity = registryWrapper.Create("miniTile");
             registry.emplace<RenderingInfo>(
                 entity, glm::vec2(miniWidth, miniHeight), tilesetTexture, miniTextureSrcRect);
             auto tilePhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, miniTileWorldPosition, miniTileSize);

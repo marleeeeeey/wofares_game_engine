@@ -1,16 +1,25 @@
 #include "weapon_control_system.h"
+#include "box2d/b2_body.h"
+#include "entt/entity/fwd.hpp"
+#include "utils/entt_registry_wrapper.h"
+#include "utils/sdl_colors.h"
+#include <SDL_rect.h>
 #include <box2d/b2_math.h>
 #include <ecs/components/game_components.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
+#include <utils/box2d_body_creator.h>
 #include <utils/box2d_entt_contact_listener.h>
 #include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/texture_process.h>
+#include <vector>
 
 WeaponControlSystem::WeaponControlSystem(
-    entt::registry& registry_, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem)
-  : registry(registry_), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    contactListener(contactListener), audioSystem(audioSystem)
+    EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
+    audioSystem(audioSystem)
 {
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::Begin,
@@ -18,6 +27,7 @@ WeaponControlSystem::WeaponControlSystem(
         {
             for (const auto& entity : {entityA, entityB})
             {
+                // If the entity contains the ContactExplosionComponent.
                 if (!registry.all_of<ContactExplosionComponent>(entity))
                     continue;
 
@@ -47,43 +57,40 @@ void WeaponControlSystem::UpdateTimerExplosionComponents()
     }
 }
 
-std::vector<entt::entity> WeaponControlSystem::GetPhysicalBodiesNearGrenade(
-    const b2Vec2& grenadePhysicsPos, float grenadeExplosionRadius)
+std::vector<entt::entity> WeaponControlSystem::GetPhysicalBodiesInRaduis(
+    const b2Vec2& grenadePhysicsPos, float grenadeExplosionRadius, std::optional<b2BodyType> bodyType)
 {
-    std::vector<entt::entity> physicalBodiesNearGrenade;
     auto viewTargets = registry.view<PhysicsInfo>();
-    for (auto& targetEntity : viewTargets)
-    {
-        auto& targetBody = viewTargets.get<PhysicsInfo>(targetEntity);
-
-        // Calculate distance between grenade and target.
-        const auto& targetPhysicsPos = targetBody.bodyRAII->GetBody()->GetPosition();
-        float distance = utils::distance(grenadePhysicsPos, targetPhysicsPos);
-
-        if (distance <= grenadeExplosionRadius)
-            physicalBodiesNearGrenade.push_back(targetEntity);
-    }
-    return physicalBodiesNearGrenade;
+    std::vector<entt::entity> targetsVector = {viewTargets.begin(), viewTargets.end()};
+    return GetPhysicalBodiesInRaduis(targetsVector, grenadePhysicsPos, grenadeExplosionRadius, bodyType);
 }
 
 void WeaponControlSystem::ApplyForceToPhysicalBodies(
     std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force)
 {
+    auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+    Box2dBodyCreator box2dBodyCreator(registry);
+    CoordinatesTransformer coordinatesTransformer(registry);
+
     for (auto& entity : physicalEntities)
     {
-        auto targetBody = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-        const auto& targetPhysicsPos = targetBody->GetPosition();
+        auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
+        auto& originalObjRenderingInfo = registry.get<RenderingInfo>(entity);
+        const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
+
+        // TODO replace original texture in rederingInfo to the random explosion fragment. Prepare png's for it.
 
         // Make target body as dynamic.
-        targetBody->SetType(b2_dynamicBody);
+        originalObjPhysicsInfo->SetType(b2_dynamicBody);
 
         // Calculate distance between grenade and target.
-        float distance = utils::distance(grenadePhysicsPos, targetPhysicsPos);
+        float distance = utils::distance(grenadePhysicsPos, physicsPos);
 
         // Apply force to the target.
         // Force direction is from grenade to target. Inside. This greate interesting effect.
-        auto forceVec = -(targetPhysicsPos - grenadePhysicsPos) * force;
-        targetBody->ApplyForceToCenter(forceVec, true);
+        auto forceVec = -(physicsPos - grenadePhysicsPos) * force;
+        originalObjPhysicsInfo->ApplyForceToCenter(forceVec, true);
     }
 }
 
@@ -104,13 +111,47 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
 {
     auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
     auto physicsInfo = registry.try_get<PhysicsInfo>(explosionEntity);
+
     if (explosionImpact && physicsInfo)
     {
         const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
-        auto entitiesUnderExploisonImpact = GetPhysicalBodiesNearGrenade(grenadePhysicsPos, explosionImpact->radius);
-        ApplyForceToPhysicalBodies(entitiesUnderExploisonImpact, grenadePhysicsPos, explosionImpact->force);
-        StartCollisionDisableTimer(entitiesUnderExploisonImpact);
-        registry.destroy(explosionEntity);
+        float radiusCoef = 1.2f; // TODO: hack. Need to calculate it based on the texture size. Because position is
+                                 // calculated from the center of the texture.
+        auto staticOriginalBodies =
+            GetPhysicalBodiesInRaduis(grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
+
+        // TODO: maybe better split entities to static and dynamic. And apply force only to dynamic.
+        SDL_Point cellSize = {2, 2}; // TODO: move to the game options.
+        auto splittedEntities = AddAndReturnSplittedPhysicalEntetiesToWorld(staticOriginalBodies, cellSize);
+
+        // TODO: add to debug options.
+        bool debugMiniDistructionEnabled = false; // true by default.
+        bool debugForceEnabled = false; // true by default.
+        bool debugDestroyOriginalObjectEmidiatly = true; // false by default.
+
+        if (debugMiniDistructionEnabled)
+        {
+            auto staticMicroBodiesToDestroy =
+                GetPhysicalBodiesInRaduis(splittedEntities, grenadePhysicsPos, explosionImpact->radius, b2_staticBody);
+            for (auto& entity : staticMicroBodiesToDestroy)
+                registryWrapper.Destroy(entity);
+        }
+
+        if (debugForceEnabled)
+        {
+            ApplyForceToPhysicalBodies(staticOriginalBodies, grenadePhysicsPos, explosionImpact->force);
+            StartCollisionDisableTimer(staticOriginalBodies);
+        }
+
+        if (debugDestroyOriginalObjectEmidiatly)
+        {
+            for (auto& entity : staticOriginalBodies)
+            {
+                registryWrapper.Destroy(entity);
+            }
+        }
+
+        registryWrapper.Destroy(explosionEntity);
         audioSystem.PlaySoundEffect("explosion");
     }
 };
@@ -145,4 +186,101 @@ void WeaponControlSystem::UpdateContactExplosionComponentTimer()
         auto& contactExplosion = contactExplosionsView.get<ContactExplosionComponent>(entity);
         contactExplosion.spawnSafeTime -= deltaTime;
     }
+};
+
+std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntetiesToWorld(
+    const std::vector<entt::entity>& physicalEntities, SDL_Point cellSize)
+{
+    auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+    Box2dBodyCreator box2dBodyCreator(registry);
+    CoordinatesTransformer coordinatesTransformer(registry);
+    glm::vec2 cellSizeGlm(cellSize.x, cellSize.y);
+
+    std::vector<entt::entity> splittedEntities;
+
+    for (auto& entity : physicalEntities)
+    {
+        auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
+        auto& originalObjRenderingInfo = registry.get<RenderingInfo>(entity);
+        const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
+        const glm::vec2 originalObjWorldPos = coordinatesTransformer.PhysicsToWorld(physicsPos);
+
+        // Check if the original object is big enough to be splitted.
+        if (originalObjRenderingInfo.textureRect.w < cellSize.x || originalObjRenderingInfo.textureRect.h < cellSize.y)
+            continue;
+
+        auto originalRectPosInTexture =
+            glm::vec2(originalObjRenderingInfo.textureRect.x, originalObjRenderingInfo.textureRect.y);
+
+        auto textureRects = DivideRectByCellSize(originalObjRenderingInfo.textureRect, cellSize);
+        for (auto& rect : textureRects)
+        {
+            // Fill rendering info for the pixel.
+            RenderingInfo pixelRenderingInfo;
+
+            // TODO: add to debug options.
+            bool debugColoredPixelsRandomly = true; // true by default.
+
+            if (debugColoredPixelsRandomly)
+            {
+                pixelRenderingInfo.colorName = GetRandomColorName();
+            }
+            else
+            {
+                pixelRenderingInfo.texturePtr = originalObjRenderingInfo.texturePtr;
+                pixelRenderingInfo.textureRect = rect;
+            }
+
+            pixelRenderingInfo.sdlSize = cellSizeGlm;
+
+            // Create physics body for the pixel.
+            auto pixelRectPosInTexture = glm::vec2(rect.x, rect.y);
+            glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
+                cellSizeGlm * 1.5; // TODO: here is a hack with 1.5.
+            glm::vec2 pixelTileSize(rect.w - gap, rect.h - gap);
+            auto pixelPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, pixelWorldPosition, pixelTileSize);
+
+            // Create entity for the pixel with appropriate components.
+            auto pixelEntity = registryWrapper.Create("pixelTile");
+            registry.emplace<RenderingInfo>(pixelEntity, pixelRenderingInfo);
+            registry.emplace<PhysicsInfo>(pixelEntity, pixelPhysicsBody);
+            splittedEntities.push_back(pixelEntity);
+        }
+    }
+
+    return splittedEntities;
+};
+
+std::vector<entt::entity> WeaponControlSystem::GetPhysicalBodiesInRaduis(
+    const std::vector<entt::entity>& entities, const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType)
+{
+    std::vector<entt::entity> result;
+
+    for (auto& entity : entities)
+    {
+        auto physicsInfo = registry.get<PhysicsInfo>(entity);
+        b2Body* body = physicsInfo.bodyRAII->GetBody();
+        const b2Vec2& physicsPos = body->GetPosition();
+
+        if (bodyType && body->GetType() != bodyType.value())
+            continue;
+
+        float distance = utils::distance(center, physicsPos);
+        if (distance <= radius)
+            result.push_back(entity);
+    }
+
+    return result;
+};
+
+std::vector<entt::entity> WeaponControlSystem::ExcludePlayersFromList(const std::vector<entt::entity>& entities)
+{
+    std::vector<entt::entity> result;
+    for (auto& entity : entities)
+    {
+        if (!registry.any_of<PlayerInfo>(entity))
+            result.push_back(entity);
+    }
+    return result;
 };

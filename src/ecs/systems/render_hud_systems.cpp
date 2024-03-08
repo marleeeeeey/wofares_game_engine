@@ -7,7 +7,6 @@
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
 
-
 HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
@@ -60,7 +59,7 @@ void HUDRenderSystem::RenderDebugMenu()
     // Draw controls the physics world.
     ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
     ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);
-    ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.miniTileResolution, 1, 8);
+    ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.tileSplitFactor, 1, 8);
     ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
     ImGui::SliderFloat(
         "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);

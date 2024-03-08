@@ -79,7 +79,9 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
         return std::make_pair(entityWithPropertiesA, entityWithPropertiesB);
     }
 
-    MY_LOG_FMT(debug, "One of the entities is not valid. entityA: {}, entityB: {}", entityA, entityB);
+    MY_LOG_FMT(
+        debug, "One of the entities is not valid. entityA: {}, entityB: {}", static_cast<uint32_t>(entityA),
+        static_cast<uint32_t>(entityB));
     return std::nullopt;
 }
 

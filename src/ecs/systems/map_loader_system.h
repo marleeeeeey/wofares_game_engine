@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/entt_registry_wrapper.h"
 #include "utils/level_info.h"
 #include "utils/resource_manager.h"
 #include "utils/sdl_RAII.h"
@@ -11,6 +12,7 @@
 
 class MapLoaderSystem
 {
+    EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     ResourceManager& resourceManager;
     GameOptions& gameState;
@@ -27,7 +29,7 @@ class MapLoaderSystem
     std::shared_ptr<SDLSurfaceRAII> tilesetSurface; // Optional. Used when Streaming access is needed.
     LevelInfo currentLevelInfo;
 public:
-    MapLoaderSystem(entt::registry& registry, ResourceManager& resourceManager);
+    MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
     void LoadMap(const LevelInfo& levelInfo);
     void UnloadMap();
 private:

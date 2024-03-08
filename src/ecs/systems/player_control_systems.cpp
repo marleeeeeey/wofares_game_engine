@@ -1,6 +1,7 @@
 #include "player_control_systems.h"
 #include "entt/entity/fwd.hpp"
 #include "glm/fwd.hpp"
+#include "utils/entt_registry_wrapper.h"
 #include <SDL.h>
 #include <ecs/components/game_components.h>
 #include <imgui_impl_sdl2.h>
@@ -10,10 +11,11 @@
 #include <utils/input_event_manager.h>
 
 PlayerControlSystem::PlayerControlSystem(
-    entt::registry& registry, InputEventManager& inputEventManager, Box2dEnttContactListener& contactListener)
-  : registry(registry), inputEventManager(inputEventManager), transformer(registry),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), box2dBodyCreator(registry),
-    contactListener(contactListener)
+    EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
+    Box2dEnttContactListener& contactListener)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), inputEventManager(inputEventManager),
+    transformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    box2dBodyCreator(registry), contactListener(contactListener)
 {
     inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonHold,
@@ -124,7 +126,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const SDL_Event& event)
         auto windowPos = glm::vec2(event.button.x, event.button.y);
         auto worldPos = transformer.CameraToWorld(windowPos);
 
-        auto entity = registry.create();
+        auto entity = registryWrapper.Create("buildingBlock");
         glm::vec2 sdlSize(10.0f, 10.0f);
         auto physicsBody = box2dBodyCreator.CreatePhysicsBody(entity, worldPos, sdlSize);
         registry.emplace<RenderingInfo>(entity, sdlSize, nullptr, SDL_Rect{}, ColorName::Green);
@@ -154,7 +156,9 @@ entt::entity PlayerControlSystem::SpawnFlyingEntity(
     const glm::vec2& sdlPos, const glm::vec2& sdlSize, const glm::vec2& forceDirection, float force)
 {
     // Create the flying entity.
-    auto flyingEntity = registry.create();
+    auto flyingEntity = registryWrapper.Create("flyingEntity");
+
+    // set entt name for the flying entity
 
     // Create a Box2D body for the flying entity.
     Box2dBodyCreator::Options options;

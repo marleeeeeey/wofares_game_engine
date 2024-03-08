@@ -1,10 +1,11 @@
 #include "objects_factory.h"
+#include "utils/entt_registry_wrapper.h"
 #include <ecs/components/game_components.h>
 #include <utils/box2d_body_creator.h>
 #include <utils/coordinates_transformer.h>
 
-ObjectsFactory::ObjectsFactory(entt::registry& registry, ResourceManager& resourceManager)
-  : registry(registry), resourceManager(resourceManager),
+ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
     box2dBodyCreator(registry)
 {}
@@ -19,7 +20,7 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
     auto playerSdlSize = renderingInfo.sdlSize;
     glm::vec2 playerSdlBBox = playerSdlSize - glm::vec2{gap, gap};
 
-    auto entity = registry.create();
+    auto entity = registryWrapper.Create("Player");
     registry.emplace<AnimationInfo>(entity, playerAnimation);
     registry.emplace<PlayerInfo>(entity);
 

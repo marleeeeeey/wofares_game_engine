@@ -4,10 +4,12 @@
 #include <utils/box2d_body_creator.h>
 #include <utils/box2d_entt_contact_listener.h>
 #include <utils/coordinates_transformer.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/input_event_manager.h>
 
 class PlayerControlSystem
 {
+    EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     InputEventManager& inputEventManager;
     GameOptions& gameState;
@@ -16,7 +18,8 @@ class PlayerControlSystem
     Box2dEnttContactListener& contactListener;
 public:
     PlayerControlSystem(
-        entt::registry& registry, InputEventManager& inputEventManager, Box2dEnttContactListener& contactListener);
+        EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
+        Box2dEnttContactListener& contactListener);
 private: // Callbacks for the InputEventManager.
     void HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerAttack(const InputEventManager::EventInfo& eventInfo);

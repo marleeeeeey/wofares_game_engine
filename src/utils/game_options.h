@@ -24,11 +24,11 @@ struct LevelOptions
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.0f};
-    size_t miniTileResolution{2};
+    size_t tileSplitFactor{2};
     bool preventCreationInvisibleTiles{true}; // TODO: implement this feature.
     float colisionDisableProbability{0.7f};
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(
-        LevelOptions, miniTileResolution, preventCreationInvisibleTiles, colisionDisableProbability)
+        LevelOptions, tileSplitFactor, preventCreationInvisibleTiles, colisionDisableProbability)
 };
 
 struct PhysicsOptions

@@ -30,3 +30,5 @@ SDL_Color GetSDLColor(ColorName colorName, Uint8 alpha = 255);
 void SetRenderDrawColor(SDL_Renderer* renderer, const SDL_Color& color);
 
 void SetRenderDrawColor(SDL_Renderer* renderer, ColorName colorName);
+
+ColorName GetRandomColorName();
