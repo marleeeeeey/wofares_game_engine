@@ -25,7 +25,7 @@ private: // Render helpers. TODO4: check if items can be removed.
     void RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color);
     void RenderTiledSquare(
-        std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo,
+        const glm::vec2& centerSdlPos, const float angle, const RenderingInfo& tileInfo,
         const SDL_RendererFlip& flip = SDL_FLIP_NONE);
     SDL_Rect GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize);
 };

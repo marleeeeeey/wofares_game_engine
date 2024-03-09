@@ -1,13 +1,19 @@
 #include "resource_manager.h"
-#include "utils/resource_cache.h"
+#include <SDL_rect.h>
 #include <cstddef>
 #include <filesystem>
-#include <fstream>
 #include <glob/glob.hpp>
 #include <my_common_cpp_utils/config.h>
+#include <my_common_cpp_utils/dict_utils.h>
+#include <my_common_cpp_utils/json_utils.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
+#include <my_common_cpp_utils/string_utils.h>
+#include <nlohmann/detail/macro_scope.hpp>
 #include <nlohmann/json.hpp>
+#include <utils/aseprite_data.h>
+#include <utils/resource_cache.h>
+#include <utils/texture_process.h>
 
 ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson)
   : resourceCashe(renderer)
@@ -66,71 +72,114 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
         tiledLevels.size(), musicPaths.size(), soundEffectPaths.size());
 }
 
-AnimationInfo ResourceManager::GetAnimation(const std::string& name)
+Animation ResourceManager::GetAnimation(const std::string& animationName)
 {
-    if (!animations.contains(name))
-        throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", name));
-    return animations[name];
+    if (!animations.contains(animationName))
+        throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", animationName));
+
+    if (animations[animationName].size() != 1)
+        throw std::runtime_error(MY_FMT("Animation with name '{}' has more than one tag", animationName));
+
+    // Get first animation tag.
+    return animations[animationName].begin()->second;
 }
 
-/**
- * Load aseprite animation from a json file. Example of the json file:
- * {
- *   "frames": {
- *     "m_walk 0.png": {
- *       "frame": { "x": 0, "y": 0, "w": 9, "h": 19 },
- *       ...
- *       "duration": 100
- *     },
- *     ...
- *   },
- *   "meta": {
- *     ...
- *     "image": "SPRITE-SHEET.png",
- *     ...
- *   }
- * }
- */
-AnimationInfo ResourceManager::ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath)
+Animation ResourceManager::GetAnimation(const std::string& animationName, const std::string& tagName)
 {
-    // Read aseprite animation json file.
-    std::ifstream asepriteAnimationJsonFile(asepriteAnimationJsonPath);
-    if (!asepriteAnimationJsonFile.is_open())
-    {
-        throw std::runtime_error(
-            MY_FMT("Failed to open aseprite animation file: {}", asepriteAnimationJsonPath.string()));
-    }
-    nlohmann::json asepriteJsonData;
-    asepriteAnimationJsonFile >> asepriteJsonData;
+    if (!animations.contains(animationName))
+        throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", animationName));
+
+    if (!animations[animationName].contains(tagName))
+        throw std::runtime_error(MY_FMT("Animation tag with name '{}' does not found in {}", tagName, animationName));
+
+    return animations[animationName][tagName];
+}
+
+namespace
+{
+
+AnimationFrame GetAnimationFrameFromAsepriteFrame(
+    const AsepriteData::Frame& asepriteFrame, std::shared_ptr<SDLTextureRAII> textureRAII)
+{
+    AnimationFrame animationFrame;
+    animationFrame.renderingInfo.texturePtr = textureRAII;
+    animationFrame.renderingInfo.textureRect = asepriteFrame.rectInTexture;
+    // TODO0: remove renderingInfo.sdlSize and use textureRect.w and textureRect.h instead.
+    animationFrame.renderingInfo.sdlSize = {asepriteFrame.rectInTexture.w, asepriteFrame.rectInTexture.h};
+    animationFrame.duration = asepriteFrame.duration_seconds;
+    return animationFrame;
+}
+
+} // namespace
+
+ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
+    const std::filesystem::path& asepriteAnimationJsonPath)
+{
+    auto asepriteJsonData = utils::LoadJsonFromFile(asepriteAnimationJsonPath);
+    AsepriteData asepriteData = LoadAsepriteData(asepriteJsonData);
 
     // Load texture.
-    const std::string imagePath = asepriteJsonData["meta"]["image"].get<std::string>();
-    auto animationTexturePath = asepriteAnimationJsonPath.parent_path() / imagePath;
-    auto textureRAII = resourceCashe.LoadTexture(animationTexturePath);
+    auto animationTexturePath = asepriteAnimationJsonPath.parent_path() / asepriteData.texturePath;
+    std::shared_ptr<SDLTextureRAII> textureRAII = resourceCashe.LoadTexture(animationTexturePath);
+    // Surface with sreaming access is needed to get hitbox rect.
+    std::shared_ptr<SDLSurfaceRAII> surfaceRAII = resourceCashe.LoadSurface(animationTexturePath);
 
-    // Create animation.
-    AnimationInfo animation;
-    for (const auto& framePair : asepriteJsonData["frames"].items())
+    TagToAnimationDict tagToAnimationDict;
+
+    if (!asepriteData.frameTags.empty())
     {
-        // Read frame info.
-        const auto& frame = framePair.value()["frame"];
-        int x = frame["x"];
-        int y = frame["y"];
-        int w = frame["w"];
-        int h = frame["h"];
-        int duration = framePair.value()["duration"];
+        std::optional<SDL_Rect> hitboxRect;
+        if (asepriteData.frameTags.contains("Hitbox"))
+        {
+            const SDL_Rect& rectInSurface = asepriteData.frames[asepriteData.frameTags["Hitbox"].from].rectInTexture;
+            hitboxRect = GetVisibleRect(surfaceRAII->get(), rectInSurface);
+        }
 
-        // Create animation frame.
-        AnimationFrame animationFrame;
-        animationFrame.renderingInfo.texturePtr = textureRAII;
-        animationFrame.renderingInfo.textureRect = {x, y, w, h};
-        animationFrame.renderingInfo.sdlSize = {w, h}; // TODO2: obsolete. Remove later.
-        animationFrame.duration = static_cast<float>(duration) / 1000.0f; // Convert to seconds.
+        for (const auto& [_, frameTag] : asepriteData.frameTags)
+        {
+            if (frameTag.name == "Hitbox")
+                continue; // Skip hitbox tag (it's not an animation tag, it's a tag for hitbox frame).
 
-        // Add frame to the animation.
-        animation.frames.push_back(std::move(animationFrame));
+            Animation animation;
+            animation.hitboxRect = hitboxRect;
+            for (size_t i = frameTag.from; i <= frameTag.to; ++i)
+            {
+                AnimationFrame animationFrame = GetAnimationFrameFromAsepriteFrame(asepriteData.frames[i], textureRAII);
+
+                MY_LOG_FMT(
+                    info, "Frame {} has texture rect: x={}, y={}, w={}, h={}", i,
+                    animationFrame.renderingInfo.textureRect.x, animationFrame.renderingInfo.textureRect.y,
+                    animationFrame.renderingInfo.textureRect.w, animationFrame.renderingInfo.textureRect.h);
+
+                animation.frames.push_back(std::move(animationFrame));
+            }
+            tagToAnimationDict[frameTag.name] = animation;
+        }
     }
-    return animation;
+    else
+    {
+        // If there are no tags, then create one animation with all frames.
+        Animation animation;
+        for (size_t i = 0; i < asepriteData.frames.size(); ++i)
+        {
+            AnimationFrame animationFrame = GetAnimationFrameFromAsepriteFrame(asepriteData.frames[i], textureRAII);
+            animation.frames.push_back(std::move(animationFrame));
+        }
+        tagToAnimationDict[""] = animation;
+    }
+
+    // Log names of loaded animations and tags.
+    MY_LOG_FMT(
+        info, "Loaded animation from '{}': {}", asepriteAnimationJsonPath.string(),
+        utils::JoinStrings(utils::GetKeys(tagToAnimationDict), ", "));
+    for (const auto& [tag, animation] : tagToAnimationDict)
+    {
+        MY_LOG_FMT(
+            info, "  Tag '{}' has {} frame(s), hitbox rect found: {}", tag, animation.frames.size(),
+            animation.hitboxRect.has_value());
+    }
+
+    return tagToAnimationDict;
 };
 
 LevelInfo ResourceManager::GetTiledLevel(const std::string& name)

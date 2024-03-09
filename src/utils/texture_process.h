@@ -15,6 +15,9 @@ std::vector<SDL_Rect> SplitRect(const SDL_Rect& rect, int m, int n);
 // Function to divide an SDL_Rect into smaller rectangles based on cell size.
 std::vector<SDL_Rect> DivideRectByCellSize(const SDL_Rect& rect, const SDL_Point& cellSize);
 
+// Function to get the visible rectangle of a surface.
+SDL_Rect GetVisibleRect(SDL_Surface* surface, const SDL_Rect& textureSrcRect);
+
 namespace details
 {
 std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::filesystem::path& imagePath);

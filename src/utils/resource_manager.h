@@ -34,16 +34,19 @@ class ResourceManager
     details::ResourceCache resourceCashe;
 
     using FriendlyName = std::string;
-    std::unordered_map<FriendlyName, AnimationInfo> animations;
+    using TagToAnimationDict = std::unordered_map<FriendlyName, Animation>;
+    std::unordered_map<FriendlyName, TagToAnimationDict> animations;
     std::unordered_map<FriendlyName, LevelInfo> tiledLevels;
     std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
     std::unordered_map<std::string, std::vector<std::filesystem::path>> soundEffectPaths;
 public:
     ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson);
 public: // ************************* Animations *************************
-    AnimationInfo GetAnimation(const std::string& name);
+    // Get animation by name without tag. If there
+    Animation GetAnimation(const std::string& animationName);
+    Animation GetAnimation(const std::string& animationName, const std::string& tagName);
 private:
-    AnimationInfo ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
+    TagToAnimationDict ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
 public: // ************************* Tiled levels *************************
     LevelInfo GetTiledLevel(const std::string& name);
 public: // ************************* Textures *************************

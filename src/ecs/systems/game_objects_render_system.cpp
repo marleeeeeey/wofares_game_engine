@@ -64,7 +64,9 @@ void GameObjectsRenderSystem::RenderTiles()
     for (auto entity : tilesView)
     {
         const auto& [tileInfo, physicalBody] = tilesView.get<RenderingInfo, PhysicsInfo>(entity);
-        RenderTiledSquare(physicalBody.bodyRAII, tileInfo);
+        const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
+        const float angle = physicalBody.bodyRAII->GetBody()->GetAngle();
+        RenderTiledSquare(sdlPos, angle, tileInfo);
     }
 }
 
@@ -118,17 +120,14 @@ void GameObjectsRenderSystem::RenderSquare(
 }
 
 void GameObjectsRenderSystem::RenderTiledSquare(
-    std::shared_ptr<Box2dObjectRAII> body, const RenderingInfo& tileInfo, const SDL_RendererFlip& flip)
+    const glm::vec2& centerSdlPos, const float angle, const RenderingInfo& tileInfo, const SDL_RendererFlip& flip)
 {
-    const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
-    const float angle = body->GetBody()->GetAngle();
-
     auto sdlSize = tileInfo.sdlSize;
-    SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
+    SDL_Rect destRect = GetRectWithCameraTransform(centerSdlPos, sdlSize);
 
     if (!tileInfo.texturePtr)
     {
-        RenderSquare(sdlPos, sdlSize, tileInfo.colorName, angle);
+        RenderSquare(centerSdlPos, sdlSize, tileInfo.colorName, angle);
         return;
     }
 
@@ -147,13 +146,39 @@ void GameObjectsRenderSystem::RenderAnimations()
 
     for (auto entity : view)
     {
-        const auto& [animation, body] = view.get<AnimationInfo, PhysicsInfo>(entity);
+        const auto& [animationInfo, body] = view.get<AnimationInfo, PhysicsInfo>(entity);
 
-        if (animation.isPlaying && !animation.frames.empty())
+        if (animationInfo.isPlaying && !animationInfo.animation.frames.empty())
         {
-            const auto& frame = animation.frames[animation.currentFrameIndex];
-            const auto& renderingInfo = frame.renderingInfo;
-            RenderTiledSquare(body.bodyRAII, renderingInfo, animation.flip);
+            // TODO0: Unify using the modulo operator in interface.
+            auto safeIndex = animationInfo.currentFrameIndex % animationInfo.animation.frames.size();
+
+            const auto& animation = animationInfo.animation;
+            const auto& frame = animation.frames[safeIndex];
+
+            MY_LOG_FMT(
+                trace, "safeIndex: {}, textureRect: x: {}, y: {}, w: {}, h: {}", safeIndex,
+                frame.renderingInfo.textureRect.x, frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w,
+                frame.renderingInfo.textureRect.h);
+
+            glm::vec2 hitboxOriginalCenter =
+                coordinatesTransformer.PhysicsToWorld(body.bodyRAII->GetBody()->GetPosition());
+            const float angle = body.bodyRAII->GetBody()->GetAngle();
+
+            // TODO0: Here is a bug. That's why I disable this code.
+            // If the hitboxRect is specified, we need to shift hitboxOriginalCenter to the center of the hitboxRect.
+            if (false && animation.hitboxRect)
+            {
+                const SDL_Rect& hitboxRect = *animation.hitboxRect;
+                auto textureSize = frame.renderingInfo.sdlSize;
+
+                auto textureCenter = textureSize / 2.0f;
+                auto hitboxCenter = glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
+                auto hitboxNewCenter = hitboxOriginalCenter - (textureCenter - hitboxCenter);
+                hitboxOriginalCenter = hitboxNewCenter;
+            }
+
+            RenderTiledSquare(hitboxOriginalCenter, angle, frame.renderingInfo, animationInfo.flip);
         }
     }
 }

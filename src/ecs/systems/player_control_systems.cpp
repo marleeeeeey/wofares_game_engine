@@ -92,7 +92,7 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
             const auto& playerBody = players.get<PhysicsInfo>(entity).bodyRAII->GetBody();
             const auto& animationInfo = players.get<AnimationInfo>(entity);
             // TODO2: use the size from specific bounding box.
-            const auto& playerSize = animationInfo.frames.front().renderingInfo.sdlSize;
+            const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sdlSize;
             const auto& weaponDirection = playerInfo.weaponDirection;
 
             // Calculate the position of the grenade slightly in front of the player.

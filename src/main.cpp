@@ -103,7 +103,7 @@ int main(int argc, char* args[])
         auto level1 = resourceManager.GetTiledLevel("level1");
         mapLoaderSystem.LoadMap(level1);
 
-        AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry());
+        AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry(), resourceManager);
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();

@@ -1,4 +1,5 @@
 #include "objects_factory.h"
+#include "my_common_cpp_utils/logger.h"
 #include "utils/entt_registry_wrapper.h"
 #include <ecs/components/game_components.h>
 #include <utils/box2d_body_creator.h>
@@ -14,11 +15,24 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
 {
     auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
 
-    AnimationInfo playerAnimation = resourceManager.GetAnimation("player_walk");
+    AnimationInfo playerAnimation;
+    playerAnimation.animation = resourceManager.GetAnimation("player_walk", "Run");
     playerAnimation.isPlaying = true;
-    auto& renderingInfo = playerAnimation.frames.front().renderingInfo;
-    auto playerSdlSize = renderingInfo.sdlSize;
-    glm::vec2 playerSdlBBox = playerSdlSize - glm::vec2{gap, gap};
+    auto& renderingInfo = playerAnimation.animation.frames.front().renderingInfo;
+
+    // Calculate the player's hitbox size.
+    glm::vec2 playerSdlBBox;
+    if (playerAnimation.animation.hitboxRect)
+    {
+        playerSdlBBox = glm::vec2(playerAnimation.animation.hitboxRect->w, playerAnimation.animation.hitboxRect->h);
+        MY_LOG_FMT(info, "Player hitbox found: {}", playerSdlBBox);
+    }
+    else
+    {
+        auto playerSdlSize = renderingInfo.sdlSize;
+        playerSdlBBox = playerSdlSize - glm::vec2{gap, gap};
+        MY_LOG_FMT(info, "Player hitbox not found, using default hitbox size: {}", playerSdlBBox);
+    }
 
     auto entity = registryWrapper.Create("Player");
     registry.emplace<AnimationInfo>(entity, playerAnimation);

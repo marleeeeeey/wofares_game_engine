@@ -1,7 +1,8 @@
 #include "animation_update_system.h"
 
-AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry)
-  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
+AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager)
+  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    resourceManager(resourceManager)
 {}
 
 void AnimationUpdateSystem::Update(float deltaTime)
@@ -16,21 +17,25 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
 
     for (auto entity : view)
     {
-        auto& animation = view.get<AnimationInfo>(entity);
+        auto& animationInfo = view.get<AnimationInfo>(entity);
 
-        if (animation.isPlaying)
+        if (animationInfo.isPlaying)
         {
-            animation.currentFrameTime += deltaTime * animation.speedFactor * 0.5;
+            animationInfo.currentFrameTime += deltaTime * animationInfo.speedFactor * 0.5;
 
-            if (animation.currentFrameTime >= animation.frames[animation.currentFrameIndex].duration)
+            // TODO0: Unify using the modulo operator in interface.
+            auto safeIndex = animationInfo.currentFrameIndex % animationInfo.animation.frames.size();
+
+            if (animationInfo.currentFrameTime >= animationInfo.animation.frames[safeIndex].duration)
             {
-                animation.currentFrameTime -= animation.frames[animation.currentFrameIndex].duration;
-                animation.currentFrameIndex = (animation.currentFrameIndex + 1) % animation.frames.size();
+                animationInfo.currentFrameTime -= animationInfo.animation.frames[safeIndex].duration;
+                animationInfo.currentFrameIndex =
+                    (animationInfo.currentFrameIndex + 1) % animationInfo.animation.frames.size();
 
                 // Stop the animation if it's not looped and the last frame is reached.
-                if (!animation.loop && animation.currentFrameIndex == 0)
+                if (!animationInfo.loop && animationInfo.currentFrameIndex == 0)
                 {
-                    animation.isPlaying = false;
+                    animationInfo.isPlaying = false;
                 }
             }
         }
@@ -49,7 +54,17 @@ void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
         auto body = physicsInfo.bodyRAII->GetBody();
         auto vel = body->GetLinearVelocity();
         float speed = glm::length(glm::vec2(vel.x, vel.y));
-        animationInfo.speedFactor = std::min(speed, 2.5f);
+
+        if (speed > 0.1f)
+        {
+            animationInfo.animation = resourceManager.GetAnimation("player_walk", "Run");
+            animationInfo.speedFactor = std::min(speed, 2.5f); // Limit max speed.
+        }
+        else
+        {
+            animationInfo.animation = resourceManager.GetAnimation("player_walk", "Idle");
+            animationInfo.speedFactor = 1.0f;
+        }
 
         // Change the animation direction based on the player's direction.
         if (playerInfo.weaponDirection.x < 0)

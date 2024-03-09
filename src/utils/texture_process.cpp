@@ -87,6 +87,47 @@ std::vector<SDL_Rect> DivideRectByCellSize(const SDL_Rect& rect, const SDL_Point
     return cells;
 }
 
+SDL_Rect GetVisibleRect(SDL_Surface* surface, const SDL_Rect& textureSrcRect)
+{
+    if (!surface)
+        throw std::runtime_error("[GetVisibleRect] Surface is NULL");
+
+    SDLSurfaceLockRAII lock(surface);
+    Uint32* pixels = static_cast<Uint32*>(surface->pixels);
+    int pitch = surface->pitch / 4; // pitch is in bytes, so divide by 4 to get the number of pixels.
+
+    int minX = std::numeric_limits<int>::max();
+    int minY = std::numeric_limits<int>::max();
+    int maxX = 0;
+    int maxY = 0;
+
+    for (int row = 0; row < textureSrcRect.h; ++row)
+    {
+        for (int col = 0; col < textureSrcRect.w; ++col)
+        {
+            Uint32 pixel = pixels[(textureSrcRect.y + row) * pitch + (textureSrcRect.x + col)];
+            Uint8 alpha = (pixel >> surface->format->Ashift) & 0xFF;
+
+            if (alpha > 0)
+            {
+                minX = std::min(minX, col + textureSrcRect.x);
+                maxX = std::max(maxX, col + textureSrcRect.x);
+                minY = std::min(minY, row + textureSrcRect.y);
+                maxY = std::max(maxY, row + textureSrcRect.y);
+            }
+        }
+    }
+
+    if (minX == std::numeric_limits<int>::max())
+    {
+        // No visible pixels found.
+        return {0, 0, 0, 0};
+    }
+
+    SDL_Rect visibleRect = {minX, minY, maxX - minX + 1, maxY - minY + 1};
+    return visibleRect;
+}
+
 namespace details
 {
 

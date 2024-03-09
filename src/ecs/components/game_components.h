@@ -24,9 +24,15 @@ struct AnimationFrame
     float duration; // Duration of the frame in seconds.
 };
 
-struct AnimationInfo
+struct Animation
 {
     std::vector<AnimationFrame> frames; // Frames of the animation.
+    std::optional<SDL_Rect> hitboxRect; // Hitbox of the animation.
+};
+
+struct AnimationInfo
+{
+    Animation animation; // Frames of the animation.
     float currentFrameTime = 0; // Time in seconds from the start of the current frame.
     size_t currentFrameIndex = 0; // Index of the current frame.
     bool isPlaying = false; // Is the animation playing.

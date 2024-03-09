@@ -7,8 +7,9 @@ class AnimationUpdateSystem
 {
     entt::registry& registry;
     GameOptions& gameState;
+    ResourceManager& resourceManager;
 public:
-    AnimationUpdateSystem(entt::registry& registry);
+    AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager);
     void UpdateAnimationProgressForAllEntities(float deltaTime);
     void UpdatePlayerAnimationDirectionAndSpeed();
     void Update(float deltaTime);
