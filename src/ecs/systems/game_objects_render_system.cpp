@@ -150,7 +150,7 @@ void GameObjectsRenderSystem::RenderAnimations()
 
         if (animationInfo.isPlaying && !animationInfo.animation.frames.empty())
         {
-            // TODO0: Unify using the modulo operator in interface.
+            // TODO1: Unify using the modulo operator in interface.
             auto safeIndex = animationInfo.currentFrameIndex % animationInfo.animation.frames.size();
 
             const auto& animation = animationInfo.animation;
@@ -165,16 +165,16 @@ void GameObjectsRenderSystem::RenderAnimations()
                 coordinatesTransformer.PhysicsToWorld(body.bodyRAII->GetBody()->GetPosition());
             const float angle = body.bodyRAII->GetBody()->GetAngle();
 
-            // TODO0: Here is a bug. That's why I disable this code.
-            // If the hitboxRect is specified, we need to shift hitboxOriginalCenter to the center of the hitboxRect.
-            if (false && animation.hitboxRect)
+            if (animation.hitboxRect)
             {
                 const SDL_Rect& hitboxRect = *animation.hitboxRect;
                 auto textureSize = frame.renderingInfo.sdlSize;
 
                 auto textureCenter = textureSize / 2.0f;
-                auto hitboxCenter = glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
-                auto hitboxNewCenter = hitboxOriginalCenter - (textureCenter - hitboxCenter);
+                auto hitboxCenter =
+                    glm::vec2(hitboxRect.x, hitboxRect.y) + glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
+                auto shift = hitboxCenter - textureCenter;
+                auto hitboxNewCenter = hitboxOriginalCenter - shift;
                 hitboxOriginalCenter = hitboxNewCenter;
             }
 

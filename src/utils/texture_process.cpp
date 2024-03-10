@@ -87,7 +87,7 @@ std::vector<SDL_Rect> DivideRectByCellSize(const SDL_Rect& rect, const SDL_Point
     return cells;
 }
 
-SDL_Rect GetVisibleRect(SDL_Surface* surface, const SDL_Rect& textureSrcRect)
+SDL_Rect GetVisibleRectInSurfaceCoordinates(SDL_Surface* surface, const SDL_Rect& textureSrcRect)
 {
     if (!surface)
         throw std::runtime_error("[GetVisibleRect] Surface is NULL");
@@ -127,6 +127,14 @@ SDL_Rect GetVisibleRect(SDL_Surface* surface, const SDL_Rect& textureSrcRect)
     SDL_Rect visibleRect = {minX, minY, maxX - minX + 1, maxY - minY + 1};
     return visibleRect;
 }
+
+SDL_Rect GetVisibleRectInSrcRectCoordinates(SDL_Surface* surface, const SDL_Rect& textureSrcRect)
+{
+    SDL_Rect visibleRect = GetVisibleRectInSurfaceCoordinates(surface, textureSrcRect);
+    visibleRect.x -= textureSrcRect.x;
+    visibleRect.y -= textureSrcRect.y;
+    return visibleRect;
+};
 
 namespace details
 {

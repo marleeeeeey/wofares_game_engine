@@ -132,7 +132,10 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
         if (asepriteData.frameTags.contains("Hitbox"))
         {
             const SDL_Rect& rectInSurface = asepriteData.frames[asepriteData.frameTags["Hitbox"].from].rectInTexture;
-            hitboxRect = GetVisibleRect(surfaceRAII->get(), rectInSurface);
+            hitboxRect = GetVisibleRectInSrcRectCoordinates(surfaceRAII->get(), rectInSurface);
+            MY_LOG_FMT(
+                info, "Hitbox rect found: x={}, y={}, w={}, h={}", hitboxRect->x, hitboxRect->y, hitboxRect->w,
+                hitboxRect->h);
         }
 
         for (const auto& [_, frameTag] : asepriteData.frameTags)
@@ -147,7 +150,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
                 AnimationFrame animationFrame = GetAnimationFrameFromAsepriteFrame(asepriteData.frames[i], textureRAII);
 
                 MY_LOG_FMT(
-                    info, "Frame {} has texture rect: x={}, y={}, w={}, h={}", i,
+                    debug, "Frame {} has texture rect: x={}, y={}, w={}, h={}", i,
                     animationFrame.renderingInfo.textureRect.x, animationFrame.renderingInfo.textureRect.y,
                     animationFrame.renderingInfo.textureRect.w, animationFrame.renderingInfo.textureRect.h);
 

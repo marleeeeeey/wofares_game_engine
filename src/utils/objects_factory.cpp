@@ -40,10 +40,11 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
 
     // Create a Box2D body for the player.
     Box2dBodyCreator::Options options;
-    options.shape = Box2dBodyCreator::Options::Shape::Capsule;
+    options.shape = Box2dBodyCreator::Options::Shape::Box; // TODO0: here is a bug with capsule bbox calculation.
     options.hasSensorBelowTheBody = true;
     options.isDynamic = true;
     auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, sdlPos, playerSdlBBox, options);
+    MY_LOG_FMT(info, "Create player body with bbox: {}", playerSdlBBox);
 
     registry.emplace<PhysicsInfo>(entity, playerPhysicsBody);
     return entity;

@@ -23,7 +23,7 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
         {
             animationInfo.currentFrameTime += deltaTime * animationInfo.speedFactor * 0.5;
 
-            // TODO0: Unify using the modulo operator in interface.
+            // TODO1: Unify using the modulo operator in interface.
             auto safeIndex = animationInfo.currentFrameIndex % animationInfo.animation.frames.size();
 
             if (animationInfo.currentFrameTime >= animationInfo.animation.frames[safeIndex].duration)
