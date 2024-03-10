@@ -1,8 +1,10 @@
 #include "weapon_control_system.h"
 #include "my_common_cpp_utils/config.h"
+#include "utils/coordinates_transformer.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
+#include <cstddef>
 #include <ecs/components/game_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_common_cpp_utils/logger.h>
@@ -17,10 +19,11 @@
 #include <vector>
 
 WeaponControlSystem::WeaponControlSystem(
-    EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem)
+    EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
+    ObjectsFactory& objectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
-    audioSystem(audioSystem)
+    audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry)
 {
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::Begin,
@@ -77,7 +80,6 @@ void WeaponControlSystem::ApplyForceToPhysicalBodies(
     for (auto& entity : physicalEntities)
     {
         auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-        auto& originalObjRenderingInfo = registry.get<RenderingInfo>(entity);
         const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
 
         // Make target body as dynamic.
@@ -114,12 +116,14 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
     if (!explosionImpact || !physicsInfo)
         return;
 
+    // Get all physical bodies in the explosion radius.
     const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
     auto staticOriginalBodies =
         GetPhysicalBodiesInRaduis(grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
 
+    // Split original objects to micro objects.
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "weaponControlSystem.cellSizeForMicroDistruction">();
     SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
     auto splittedEntities = AddAndReturnSplittedPhysicalEntetiesToWorld(staticOriginalBodies, cellSize);
@@ -136,12 +140,19 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
         registryWrapper.Destroy(entity);
     }
 
-    // TODO0 psedocode:
-    // 1. Create particles in the explosion radius.
-    // 2. Apply force to the particles.
-    // 3. Destroy the particles after some number of collisions.
-    // ApplyForceToPhysicalBodies(staticOriginalBodies, grenadePhysicsPos, explosionImpact->force);
-    // StartCollisionDisableTimer(staticOriginalBodies);
+    {
+        glm::vec2 centerSdl = coordinatesTransformer.PhysicsToWorld(grenadePhysicsPos);
+        float radiusSdl = coordinatesTransformer.PhysicsToWorld(explosionImpact->radius);
+        size_t fragmentsCount = static_cast<size_t>(radiusSdl * 0.2f * utils::Random<float>(1, 1.2));
+        std::vector<entt::entity> fragments;
+        for (size_t i = 0; i < fragmentsCount; ++i)
+        {
+            auto fragmentRandomPos = utils::GetRandomCoordinateAround(centerSdl, radiusSdl);
+            auto fragmentEntity = objectsFactory.CreateFragmentAfterExplosion(fragmentRandomPos);
+            fragments.push_back(fragmentEntity);
+        }
+        ApplyForceToPhysicalBodies(fragments, grenadePhysicsPos, 500.0f);
+    }
 
     // Destroy the explosion entity.
     registryWrapper.Destroy(explosionEntity);
@@ -157,19 +168,6 @@ void WeaponControlSystem::ProcessExplosionEntitiesQueue()
         auto entity = contactedEntities.front();
         TryToRunExplosionImpactComponent(entity);
         contactedEntities.pop();
-    }
-};
-
-void WeaponControlSystem::StartCollisionDisableTimer(const std::vector<entt::entity>& physicalEntities)
-{
-    for (auto& entity : physicalEntities)
-    {
-        // Exclude players from the list.
-        if (registry.any_of<PlayerInfo>(entity))
-            continue;
-
-        if (utils::RandomTrue(gameState.levelOptions.colisionDisableProbability))
-            registry.emplace_or_replace<CollisionDisableTimerComponent>(entity);
     }
 };
 

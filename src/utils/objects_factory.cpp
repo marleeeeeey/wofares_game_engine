@@ -11,28 +11,9 @@ ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceMan
     box2dBodyCreator(registry)
 {}
 
-entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
+entt::entity ObjectsFactory::CreatePlayer(const glm::vec2& sdlPos)
 {
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
-
-    AnimationInfo playerAnimation;
-    playerAnimation.animation = resourceManager.GetAnimation("player_walk", "Run");
-    playerAnimation.isPlaying = true;
-    auto& renderingInfo = playerAnimation.animation.frames.front().renderingInfo;
-
-    // Calculate the player's hitbox size.
-    glm::vec2 playerSdlBBox;
-    if (playerAnimation.animation.hitboxRect)
-    {
-        playerSdlBBox = glm::vec2(playerAnimation.animation.hitboxRect->w, playerAnimation.animation.hitboxRect->h);
-        MY_LOG_FMT(info, "Player hitbox found: {}", playerSdlBBox);
-    }
-    else
-    {
-        auto playerSdlSize = renderingInfo.sdlSize;
-        playerSdlBBox = playerSdlSize - glm::vec2{gap, gap};
-        MY_LOG_FMT(info, "Player hitbox not found, using default hitbox size: {}", playerSdlBBox);
-    }
+    AnimationInfo playerAnimation = CreateAnimationInfo("player_walk", "Run", ResourceManager::TagProps::ExactMatch);
 
     auto entity = registryWrapper.Create("Player");
     registry.emplace<AnimationInfo>(entity, playerAnimation);
@@ -43,9 +24,50 @@ entt::entity ObjectsFactory::createPlayer(const glm::vec2& sdlPos)
     options.shape = Box2dBodyCreator::Options::Shape::Capsule;
     options.hasSensorBelowTheBody = true;
     options.isDynamic = true;
-    auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, sdlPos, playerSdlBBox, options);
-    MY_LOG_FMT(info, "Create player body with bbox: {}", playerSdlBBox);
+    auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, sdlPos, playerAnimation.sdlBBox, options);
+    MY_LOG_FMT(info, "Create player body with bbox: {}", playerAnimation.sdlBBox);
 
     registry.emplace<PhysicsInfo>(entity, playerPhysicsBody);
     return entity;
 }
+
+entt::entity ObjectsFactory::CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos)
+{
+    AnimationInfo fragmentAnimation =
+        CreateAnimationInfo("explosionFragments", "Fragment[\\d]+", ResourceManager::TagProps::RandomByRegex);
+
+    auto entity = registryWrapper.Create("ExplosionFragment");
+    registry.emplace<AnimationInfo>(entity, fragmentAnimation);
+    registry.emplace<PhysicsInfo>(
+        entity, box2dBodyCreator.CreatePhysicsBody(entity, sdlWorldPos, fragmentAnimation.sdlBBox));
+    registry.emplace<CollisionDisableTimerComponent>(entity); // TODO0: replace it to CollisionDisableHitCountComponent
+    return entity;
+};
+
+AnimationInfo ObjectsFactory::CreateAnimationInfo(
+    const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps)
+{
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+
+    AnimationInfo animationInfo;
+    animationInfo.animation = resourceManager.GetAnimation(animationName, tagName, tagProps);
+    animationInfo.isPlaying = true;
+    auto& renderingInfo = animationInfo.animation.frames.front().renderingInfo;
+
+    if (animationInfo.animation.hitboxRect)
+    {
+        animationInfo.sdlBBox = glm::vec2(animationInfo.animation.hitboxRect->w, animationInfo.animation.hitboxRect->h);
+        MY_LOG_FMT(
+            info, "Hitbox for animation {} with tag {} found: {}", animationName, tagName, animationInfo.sdlBBox);
+    }
+    else
+    {
+        auto playerSdlSize = renderingInfo.sdlSize;
+        animationInfo.sdlBBox = playerSdlSize - glm::vec2{gap, gap};
+        MY_LOG_FMT(
+            info, "Hitbox for animation {} with tag {} not found, using default hitbox size: {}", animationName,
+            tagName, animationInfo.sdlBBox);
+    }
+
+    return animationInfo;
+};

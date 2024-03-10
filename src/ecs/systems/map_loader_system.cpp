@@ -121,7 +121,7 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
         if (object["type"] == "PlayerPosition")
         {
             auto playerSdlWorldPos = glm::vec2(object["x"], object["y"]);
-            objectsFactory.createPlayer(playerSdlWorldPos);
+            objectsFactory.CreatePlayer(playerSdlWorldPos);
         }
     }
 }

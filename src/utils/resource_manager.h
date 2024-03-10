@@ -42,10 +42,18 @@ class ResourceManager
 public:
     ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson);
 public: // ************************* Animations *************************
+    enum class TagProps
+    {
+        ExactMatch,
+        RandomByRegex
+    };
     // Get animation by name without tag. If there
     Animation GetAnimation(const std::string& animationName);
-    Animation GetAnimation(const std::string& animationName, const std::string& tagName);
+    Animation GetAnimation(
+        const std::string& animationName, const std::string& tagName, TagProps tagProps = TagProps::ExactMatch);
 private:
+    Animation GetAnimationExactMatch(const std::string& animationName, const std::string& tagName);
+    Animation GetAnimationByRegexRandomly(const std::string& animationName, const std::string& regexTagName);
     TagToAnimationDict ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
 public: // ************************* Tiled levels *************************
     LevelInfo GetTiledLevel(const std::string& name);

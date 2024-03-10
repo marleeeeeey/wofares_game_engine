@@ -15,5 +15,9 @@ class ObjectsFactory
     Box2dBodyCreator box2dBodyCreator;
 public:
     ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
-    entt::entity createPlayer(const glm::vec2& playerSdlWorldPos);
+    entt::entity CreatePlayer(const glm::vec2& playerSdlWorldPos);
+    entt::entity CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos);
+private:
+    AnimationInfo CreateAnimationInfo(
+        const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
 };

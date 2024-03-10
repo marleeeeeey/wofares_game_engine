@@ -1,3 +1,4 @@
+#include "utils/objects_factory.h"
 #include <ecs/components/game_components.h>
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
@@ -77,8 +78,10 @@ int main(int argc, char* args[])
         if (gameOptions.soundOptions.playBackgroundMusicOnStart)
             audioSystem.PlayMusic("background_music");
 
+        ObjectsFactory objectsFactory(registryWrapper, resourceManager);
+
         // Create a weapon control system and subscribe it to the contact listener.
-        WeaponControlSystem weaponControlSystem(registryWrapper, contactListener, audioSystem);
+        WeaponControlSystem weaponControlSystem(registryWrapper, contactListener, audioSystem, objectsFactory);
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;

@@ -4,7 +4,6 @@
 #include <entt/entt.hpp>
 #include <utils/game_options.h>
 
-
 // There are 3 coordinate systems in the game:
 // 1. World (game) coordinates.
 // 2. Camera (screen) coordinates.
@@ -22,8 +21,10 @@ public:
     glm::vec2 CameraToWorld(const glm::vec2& cameraPos) const;
     // World to Physics.
     b2Vec2 WorldToPhysics(const glm::vec2& worldPos) const;
+    float WorldToPhysics(float worldValue) const;
     // Physics to World.
     glm::vec2 PhysicsToWorld(const b2Vec2& physicsPos) const;
+    float PhysicsToWorld(float physicsValue) const;
     // Camera to Physics.
     b2Vec2 CameraToPhysics(const glm::vec2& cameraPos) const;
     // Physics to Camera.

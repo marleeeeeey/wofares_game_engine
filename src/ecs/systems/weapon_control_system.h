@@ -1,4 +1,7 @@
 #pragma once
+#include "utils/coordinates_transformer.h"
+#include "utils/objects_factory.h"
+#include "utils/resource_manager.h"
 #include <entt/entt.hpp>
 #include <optional>
 #include <queue>
@@ -14,11 +17,14 @@ class WeaponControlSystem
     GameOptions& gameState;
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
+    ObjectsFactory& objectsFactory;
     float deltaTime;
     std::queue<entt::entity> contactedEntities;
+    CoordinatesTransformer coordinatesTransformer;
 public:
     WeaponControlSystem(
-        EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem);
+        EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
+        ObjectsFactory& objectsFactory);
     void Update(float deltaTime);
 private:
     void UpdateTimerExplosionComponents();
@@ -29,8 +35,6 @@ private:
 private: // Low level functions.
     void ApplyForceToPhysicalBodies(
         std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force);
-    // Disable collisions after some time.
-    void StartCollisionDisableTimer(const std::vector<entt::entity>& physicalEntities);
 private: // TODO3: functions to move to shared code like utils.
     std::vector<entt::entity> GetPhysicalBodiesInRaduis(
         const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType);

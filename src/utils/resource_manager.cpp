@@ -84,7 +84,18 @@ Animation ResourceManager::GetAnimation(const std::string& animationName)
     return animations[animationName].begin()->second;
 }
 
-Animation ResourceManager::GetAnimation(const std::string& animationName, const std::string& tagName)
+Animation ResourceManager::GetAnimation(const std::string& animationName, const std::string& tagName, TagProps tagProps)
+{
+    if (tagProps == TagProps::ExactMatch)
+        return GetAnimationExactMatch(animationName, tagName);
+
+    if (tagProps == TagProps::RandomByRegex)
+        return GetAnimationByRegexRandomly(animationName, tagName);
+
+    throw std::runtime_error(MY_FMT("Unknown TagProps: {}", static_cast<int>(tagProps)));
+}
+
+Animation ResourceManager::GetAnimationExactMatch(const std::string& animationName, const std::string& tagName)
 {
     if (!animations.contains(animationName))
         throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", animationName));
@@ -94,6 +105,27 @@ Animation ResourceManager::GetAnimation(const std::string& animationName, const 
 
     return animations[animationName][tagName];
 }
+
+Animation ResourceManager::GetAnimationByRegexRandomly(
+    const std::string& animationName, const std::string& regexTagName)
+{
+    if (!animations.contains(animationName))
+        throw std::runtime_error(MY_FMT("Animation with name '{}' does not found", animationName));
+
+    std::vector<std::string> foundTags;
+    for (const auto& [tag, _] : animations[animationName])
+    {
+        if (std::regex_match(tag, std::regex(regexTagName)))
+            foundTags.push_back(tag);
+    }
+
+    if (foundTags.empty())
+        throw std::runtime_error(
+            MY_FMT("Animation tag with regex '{}' does not found in {}", regexTagName, animationName));
+
+    auto randomTag = utils::Random<size_t>(0, foundTags.size() - 1);
+    return animations[animationName][foundTags[randomTag]];
+};
 
 namespace
 {
