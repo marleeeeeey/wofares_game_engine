@@ -24,7 +24,7 @@ std::shared_ptr<Box2dObjectRAII> Box2dBodyCreator::CreatePhysicsBody(
     if (options.shape == Options::Shape::Box)
         AddBoxFixtureToBody(body, fixtureDef, sdlSize);
     else
-        AddCapsuleFixtureToBody(body, fixtureDef, sdlSize);
+        AddVerticalCapsuleFixtureToBody(body, fixtureDef, sdlSize);
 
     // Add a thin sensor below the body if needed.
     if (options.hasSensorBelowTheBody)
@@ -57,25 +57,23 @@ void Box2dBodyCreator::AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDe
     body->CreateFixture(&fixtureDef);
 };
 
-void Box2dBodyCreator::AddCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize)
+void Box2dBodyCreator::AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize)
 {
     // Convert world coordinates size to physical size for Box2D.
     b2Vec2 physicalSize = coordinatesTransformer.WorldToPhysics(sdlSize);
-    float radius = physicalSize.y / 2.0f; // Radius for the circular ends of the capsule.
-    float boxHeight = physicalSize.y - 2 * radius; // Height of the central rectangular part of the capsule.
+    float radius = physicalSize.x / 2.0f; // Use width for radius to ensure the capsule fits within the given rectangle.
+    float boxHeight = physicalSize.y - 2 * radius; // Calculate the height of the central rectangular part.
 
-    // Add the central rectangular part of the capsule if needed.
-    // This part is added only if the capsule is tall enough to require a central section besides the circular ends.
+    // Check if a central rectangular part is necessary.
     if (boxHeight > 0)
     {
         b2PolygonShape boxShape;
-        boxShape.SetAsBox(physicalSize.x / 2.0f, boxHeight / 2.0f, b2Vec2(0, 0), 0);
+        boxShape.SetAsBox(radius, boxHeight / 2.0f, b2Vec2(0, 0), 0);
         fixtureDef.shape = &boxShape;
         body->CreateFixture(&fixtureDef);
     }
 
     // Add the top circular end of the capsule.
-    // The position is offset upwards by half the height of the central part.
     b2CircleShape topCircle;
     topCircle.m_p.Set(0, -boxHeight / 2.0f);
     topCircle.m_radius = radius;
@@ -83,7 +81,6 @@ void Box2dBodyCreator::AddCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtu
     body->CreateFixture(&fixtureDef);
 
     // Add the bottom circular end of the capsule.
-    // The position is offset downwards by half the height of the central part.
     b2CircleShape bottomCircle;
     bottomCircle.m_p.Set(0, boxHeight / 2.0f);
     bottomCircle.m_radius = radius;

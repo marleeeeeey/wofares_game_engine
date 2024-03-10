@@ -4,7 +4,6 @@
 #include <utils/coordinates_transformer.h>
 #include <utils/game_options.h>
 
-
 class Box2dBodyCreator
 {
 public: // Public types.
@@ -37,7 +36,7 @@ public: // Public methods.
 private: // Low-x1 level methods.
     b2Body* CreatePhysicsBody(entt::entity entity, const glm::vec2& sdlPos, b2BodyType bodyType);
     void AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
-    void AddCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
+    void AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
     void AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& sdlSize);
 private: // Low-x2 level methods.
     b2FixtureDef GetFixtureWithOptions(const Options::Fixture& options);
