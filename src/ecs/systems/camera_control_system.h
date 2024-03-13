@@ -2,7 +2,7 @@
 #include "utils/coordinates_transformer.h"
 #include <entt/entt.hpp>
 #include <utils/game_options.h>
-#include <utils/input_event_manager.h>
+#include <utils/systems/input_event_manager.h>
 
 class CameraControlSystem
 {

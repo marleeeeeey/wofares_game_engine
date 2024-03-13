@@ -1,7 +1,7 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <utils/game_options.h>
-#include <utils/resource_manager.h>
+#include <utils/resources/resource_manager.h>
 
 class AnimationUpdateSystem
 {

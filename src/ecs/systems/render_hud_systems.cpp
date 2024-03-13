@@ -2,10 +2,11 @@
 #include <ecs/components/game_components.h>
 #include <imgui.h>
 #include <my_common_cpp_utils/logger.h>
+#include <utils/RAII/imgui_RAII.h>
 #include <utils/game_options.h>
-#include <utils/imgui_RAII.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
+
 
 HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))

@@ -1,14 +1,15 @@
 #pragma once
 #include "utils/coordinates_transformer.h"
-#include "utils/objects_factory.h"
-#include "utils/resource_manager.h"
+#include "utils/factories/objects_factory.h"
+#include "utils/resources/resource_manager.h"
 #include <entt/entt.hpp>
 #include <optional>
 #include <queue>
-#include <utils/audio_system.h>
-#include <utils/box2d_entt_contact_listener.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/game_options.h>
+#include <utils/systems/audio_system.h>
+#include <utils/systems/box2d_entt_contact_listener.h>
+
 
 class WeaponControlSystem
 {
@@ -27,14 +28,15 @@ public:
         ObjectsFactory& objectsFactory);
     void Update(float deltaTime);
 private:
+    void SubscribeToContactEvents();
+    void OnContactWithExplosionComponent(entt::entity explosionEntity, entt::entity contactedEntity);
+private:
     void UpdateTimerExplosionComponents();
     void UpdateContactExplosionComponentTimer();
+    void UpdateCollisionDisableHitCountComponent();
     void ProcessExplosionEntitiesQueue();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
-    void TryToRunExplosionImpactComponent(entt::entity explosionEntity);
-private: // Low level functions.
-    void ApplyForceToPhysicalBodies(
-        std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force);
+    void DoExplosion(entt::entity explosionEntity);
 private: // TODO3: functions to move to shared code like utils.
     std::vector<entt::entity> GetPhysicalBodiesInRaduis(
         const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType);

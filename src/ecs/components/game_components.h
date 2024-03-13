@@ -3,8 +3,8 @@
 #include <box2d/box2d.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <utils/box2d_RAII.h>
-#include <utils/sdl_RAII.h>
+#include <utils/RAII/box2d_RAII.h>
+#include <utils/RAII/sdl_RAII.h>
 
 // ********************************* Rendering components *********************************
 
@@ -71,6 +71,11 @@ struct PhysicsInfo
 struct CollisionDisableTimerComponent
 {
     float timeToDisableCollision = 1.1f; // Time in seconds to disable collision.
+};
+
+struct CollisionDisableHitCountComponent
+{
+    size_t hitCount = 0; // Number of hits before the collision is disabled.
 };
 
 // ********************************* Weapon components *********************************

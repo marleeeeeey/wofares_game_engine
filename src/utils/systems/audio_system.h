@@ -1,6 +1,6 @@
 #pragma once
 #include <my_common_cpp_utils/config.h>
-#include <utils/resource_manager.h>
+#include <utils/resources/resource_manager.h>
 
 class AudioSystem
 {

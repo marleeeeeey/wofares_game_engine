@@ -5,9 +5,9 @@
 #include <fstream>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
-#include <utils/box2d_body_creator.h>
+#include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
-#include <utils/texture_process.h>
+#include <utils/sdl_texture_process.h>
 
 MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),

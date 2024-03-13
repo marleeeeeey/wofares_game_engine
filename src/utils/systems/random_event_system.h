@@ -2,7 +2,7 @@
 #include "utils/game_options.h"
 #include <entt/entt.hpp>
 #include <random>
-#include <utils/audio_system.h>
+#include <utils/systems/audio_system.h>
 
 class RandomEventSystem
 {

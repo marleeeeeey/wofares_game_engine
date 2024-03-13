@@ -23,6 +23,7 @@ void RandomEventSystem::ProduceEvilLaugh()
 {
     audioSystem.PlaySoundEffect("evil_laugh");
 };
+
 float RandomEventSystem::GenerateNextEventTime(float averageInterval)
 {
     std::uniform_real_distribution<float> distribution(averageInterval * 0.5, averageInterval * 1.5);

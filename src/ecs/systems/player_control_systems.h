@@ -1,11 +1,11 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
-#include <utils/box2d_body_creator.h>
-#include <utils/box2d_entt_contact_listener.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
-#include <utils/input_event_manager.h>
+#include <utils/factories/box2d_body_creator.h>
+#include <utils/systems/box2d_entt_contact_listener.h>
+#include <utils/systems/input_event_manager.h>
 
 class PlayerControlSystem
 {

@@ -3,7 +3,7 @@
 #include <ecs/components/game_components.h>
 #include <entt/entt.hpp>
 #include <utils/coordinates_transformer.h>
-#include <utils/resource_manager.h>
+#include <utils/resources/resource_manager.h>
 #include <utils/sdl_colors.h>
 
 class GameObjectsRenderSystem

@@ -3,14 +3,14 @@
 #include <utils/game_options.h>
 
 GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
-  : registry(registry), inputEventManager(inputEventManager)
+  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    inputEventManager(inputEventManager)
 {
     SubscribeToInputEvents();
 }
 
 void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
 {
-    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     bool isEscPressed = event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_ESCAPE;
 
     if (isEscPressed || event.type == SDL_QUIT)
@@ -21,7 +21,6 @@ void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
 
 void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
 {
-    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     auto& originalEvent = eventInfo.originalEvent;
 
     if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
@@ -32,7 +31,6 @@ void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventMa
 
 void GameStateControlSystem::HandleSpaceReleaseAfterHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
 {
-    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
     auto& originalEvent = eventInfo.originalEvent;
 
     if (originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)

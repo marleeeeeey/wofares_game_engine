@@ -1,6 +1,6 @@
 #pragma once
-#include <utils/input_event_manager.h>
-#include <utils/sdl_RAII.h>
+#include <utils/RAII/sdl_RAII.h>
+#include <utils/systems/input_event_manager.h>
 
 class ScreenModeControlSystem
 {

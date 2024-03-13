@@ -1,10 +1,10 @@
 #pragma once
-#include "utils/texture_process.h"
+#include "utils/sdl_texture_process.h"
 #include <entt/entt.hpp>
-#include <utils/box2d_body_creator.h>
 #include <utils/entt_registry_wrapper.h>
+#include <utils/factories/box2d_body_creator.h>
 #include <utils/game_options.h>
-#include <utils/resource_manager.h>
+#include <utils/resources/resource_manager.h>
 
 class ObjectsFactory
 {

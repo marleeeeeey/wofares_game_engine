@@ -1,27 +1,27 @@
-#include "utils/objects_factory.h"
+#include "utils/factories/objects_factory.h"
 #include <ecs/components/game_components.h>
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
-#include <ecs/systems/event_queue_system.h>
 #include <ecs/systems/game_objects_render_system.h>
-#include <ecs/systems/game_state_control_system.h>
 #include <ecs/systems/map_loader_system.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
-#include <ecs/systems/random_event_system.h>
 #include <ecs/systems/render_hud_systems.h>
-#include <ecs/systems/screen_mode_control_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/json_utils.h>
 #include <my_common_cpp_utils/logger.h>
-#include <utils/audio_system.h>
+#include <utils/RAII/imgui_sdl_RAII.h>
+#include <utils/RAII/sdl_RAII.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/file_system.h>
-#include <utils/imgui_sdl_RAII.h>
-#include <utils/input_event_manager.h>
-#include <utils/resource_manager.h>
-#include <utils/sdl_RAII.h>
+#include <utils/resources/resource_manager.h>
+#include <utils/systems/audio_system.h>
+#include <utils/systems/event_queue_system.h>
+#include <utils/systems/game_state_control_system.h>
+#include <utils/systems/input_event_manager.h>
+#include <utils/systems/random_event_system.h>
+#include <utils/systems/screen_mode_control_system.h>
 
 int main(int argc, char* args[])
 {

@@ -2,10 +2,10 @@
 #include "my_common_cpp_utils/logger.h"
 #include "my_common_cpp_utils/math_utils.h"
 #include "utils/entt_registry_wrapper.h"
-#include "utils/texture_process.h"
+#include "utils/sdl_texture_process.h"
 #include <ecs/components/game_components.h>
-#include <utils/box2d_body_creator.h>
 #include <utils/coordinates_transformer.h>
+#include <utils/factories/box2d_body_creator.h>
 
 ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),

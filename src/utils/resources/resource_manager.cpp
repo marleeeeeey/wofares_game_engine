@@ -11,9 +11,9 @@
 #include <my_common_cpp_utils/string_utils.h>
 #include <nlohmann/detail/macro_scope.hpp>
 #include <nlohmann/json.hpp>
-#include <utils/aseprite_data.h>
-#include <utils/resource_cache.h>
-#include <utils/texture_process.h>
+#include <utils/resources/aseprite_data.h>
+#include <utils/resources/resource_cache.h>
+#include <utils/sdl_texture_process.h>
 
 ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson)
   : resourceCashe(renderer)

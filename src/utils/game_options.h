@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <utils/sdl_RAII.h>
+#include <utils/RAII/sdl_RAII.h>
 
 struct LevelPhysicsBounds
 {

@@ -1,10 +1,12 @@
 #pragma once
+#include "utils/game_options.h"
 #include <entt/entt.hpp>
-#include <utils/input_event_manager.h>
+#include <utils/systems/input_event_manager.h>
 
 class GameStateControlSystem
 {
     entt::registry& registry;
+    GameOptions& gameState;
     InputEventManager& inputEventManager;
 public:
     GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager);

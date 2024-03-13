@@ -1,6 +1,7 @@
 #include "weapon_control_system.h"
 #include "my_common_cpp_utils/config.h"
 #include "utils/coordinates_transformer.h"
+#include "utils/physics_methods.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
@@ -10,13 +11,13 @@
 #include <entt/entity/fwd.hpp>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
-#include <utils/box2d_body_creator.h>
-#include <utils/box2d_entt_contact_listener.h>
 #include <utils/box2d_helpers.h>
 #include <utils/entt_registry_wrapper.h>
+#include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/sdl_colors.h>
-#include <utils/texture_process.h>
+#include <utils/sdl_texture_process.h>
+#include <utils/systems/box2d_entt_contact_listener.h>
 #include <vector>
 
 WeaponControlSystem::WeaponControlSystem(
@@ -26,26 +27,46 @@ WeaponControlSystem::WeaponControlSystem(
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
     audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry)
 {
+    SubscribeToContactEvents();
+}
+
+void WeaponControlSystem::Update(float deltaTime)
+{
+    this->deltaTime = deltaTime;
+    UpdateTimerExplosionComponents();
+    UpdateContactExplosionComponentTimer();
+    ProcessExplosionEntitiesQueue();
+}
+
+void WeaponControlSystem::SubscribeToContactEvents()
+{
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::Begin,
         [this](entt::entity entityA, entt::entity entityB)
         {
-            for (const auto& entity : {entityA, entityB})
+            for (const auto& explosionEntity : {entityA, entityB})
             {
                 // If the entity contains the ContactExplosionComponent.
-                if (!registry.all_of<ContactExplosionComponent>(entity))
+                if (!registry.all_of<ContactExplosionComponent>(explosionEntity))
                     continue;
 
-                auto& contactExplosion = registry.get<ContactExplosionComponent>(entity);
-                if (contactExplosion.spawnSafeTime <= 0.0f)
-                {
-                    // Update Box2D object is not allowed in the contact listener. Because Box2D is in simulation
-                    // step. So, we need to store entities in the queue and update them in the main loop.
-                    contactedEntities.push(entity);
-                }
+                // Other entity is the entity that was contacted with the explosion.
+                auto contactedEntity = entityA == explosionEntity ? entityB : entityA;
+
+                OnContactWithExplosionComponent(explosionEntity, contactedEntity);
             }
         });
 }
+
+// Not allowed to update Box2D object in the contact listener. Because Box2D is in simulation step.
+void WeaponControlSystem::OnContactWithExplosionComponent(entt::entity explosionEntity, entt::entity contactedEntity)
+{
+    auto& contactExplosion = registry.get<ContactExplosionComponent>(explosionEntity);
+    if (contactExplosion.spawnSafeTime <= 0.0f)
+    {
+        contactedEntities.push(explosionEntity);
+    }
+};
 
 void WeaponControlSystem::UpdateTimerExplosionComponents()
 {
@@ -57,7 +78,7 @@ void WeaponControlSystem::UpdateTimerExplosionComponents()
 
         if (timerExplosion.timeToExplode <= 0.0f)
         {
-            TryToRunExplosionImpactComponent(timerEntity);
+            DoExplosion(timerEntity);
         }
     }
 }
@@ -70,46 +91,12 @@ std::vector<entt::entity> WeaponControlSystem::GetPhysicalBodiesInRaduis(
     return GetPhysicalBodiesInRaduis(targetsVector, grenadePhysicsPos, grenadeExplosionRadius, bodyType);
 }
 
-void WeaponControlSystem::ApplyForceToPhysicalBodies(
-    std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force)
-{
-    auto physicsWorld = gameState.physicsWorld;
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
-    Box2dBodyCreator box2dBodyCreator(registry);
-    CoordinatesTransformer coordinatesTransformer(registry);
-
-    for (auto& entity : physicalEntities)
-    {
-        auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-        const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
-
-        // Make target body as dynamic.
-        originalObjPhysicsInfo->SetType(b2_dynamicBody);
-
-        // Calculate distance between grenade and target.
-        float distance = utils::distance(grenadePhysicsPos, physicsPos);
-
-        // Apply force to the target.
-        // Force direction is from grenade to target. Inside. This greate interesting effect.
-        auto forceVec = -(physicsPos - grenadePhysicsPos) * force;
-        originalObjPhysicsInfo->ApplyForceToCenter(forceVec, true);
-    }
-}
-
-void WeaponControlSystem::Update(float deltaTime)
-{
-    this->deltaTime = deltaTime;
-    UpdateTimerExplosionComponents();
-    UpdateContactExplosionComponentTimer();
-    ProcessExplosionEntitiesQueue();
-}
-
 void WeaponControlSystem::OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity)
 {
     MY_LOG(info, "Bazooka contact with tile");
 };
 
-void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosionEntity)
+void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
 {
     auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
     auto physicsInfo = registry.try_get<PhysicsInfo>(explosionEntity);
@@ -152,7 +139,8 @@ void WeaponControlSystem::TryToRunExplosionImpactComponent(entt::entity explosio
             auto fragmentEntity = objectsFactory.CreateFragmentAfterExplosion(fragmentRandomPos);
             fragments.push_back(fragmentEntity);
         }
-        ApplyForceToPhysicalBodies(fragments, grenadePhysicsPos, 500.0f);
+        PhysicsMethods physicsMethods(registry);
+        physicsMethods.ApplyForceToPhysicalBodies(fragments, grenadePhysicsPos, 500.0f);
     }
 
     // Destroy the explosion entity.
@@ -167,7 +155,7 @@ void WeaponControlSystem::ProcessExplosionEntitiesQueue()
     while (!contactedEntities.empty())
     {
         auto entity = contactedEntities.front();
-        TryToRunExplosionImpactComponent(entity);
+        DoExplosion(entity);
         contactedEntities.pop();
     }
 };
@@ -241,7 +229,7 @@ std::vector<entt::entity> WeaponControlSystem::GetPhysicalBodiesInRaduis(
         if (bodyType && body->GetType() != bodyType.value())
             continue;
 
-        float distance = utils::distance(center, physicsPos);
+        float distance = utils::CaclDistance(center, physicsPos);
         if (distance <= radius)
             result.push_back(entity);
     }

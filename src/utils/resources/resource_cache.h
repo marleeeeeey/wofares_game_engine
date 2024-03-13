@@ -3,8 +3,8 @@
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
-#include <utils/sdl_RAII.h>
-#include <utils/sdl_audio_RAII.h>
+#include <utils/RAII/sdl_RAII.h>
+#include <utils/RAII/sdl_audio_RAII.h>
 #include <utils/sdl_colors.h>
 
 namespace details
