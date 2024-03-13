@@ -166,27 +166,19 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
                 }
             }
 
+            // Create tile entity.
             float miniTileWorldPositionX = layerCol * tileWidth + miniCol * miniWidth;
             float miniTileWorldPositionY = layerRow * tileHeight + miniRow * miniHeight;
             glm::vec2 miniTileWorldPosition{miniTileWorldPositionX, miniTileWorldPositionY};
-            glm::vec2 miniTileSize(miniWidth - gap, miniHeight - gap);
-
-            auto entity = registryWrapper.Create("miniTile");
-            registry.emplace<RenderingInfo>(
-                entity, glm::vec2(miniWidth, miniHeight), tilesetTexture, miniTextureSrcRect);
-            auto tilePhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, miniTileWorldPosition, miniTileSize);
+            auto textureRect = TextureRect{tilesetTexture, miniTextureSrcRect};
+            auto tileEntity = objectsFactory.CreateTile(miniTileWorldPosition, miniWidth, textureRect);
 
             // Update level bounds.
-            const b2Vec2& bodyPosition = tilePhysicsBody->GetBody()->GetPosition();
+            auto bodyRAII = registry.get<PhysicsInfo>(tileEntity).bodyRAII;
+            const b2Vec2& bodyPosition = bodyRAII->GetBody()->GetPosition();
             auto& levelBounds = gameState.levelOptions.levelBox2dBounds;
             levelBounds.min = Vec2Min(levelBounds.min, bodyPosition);
             levelBounds.max = Vec2Max(levelBounds.max, bodyPosition);
-
-            // Apply randomly: static/dynamic body.
-            tilePhysicsBody->GetBody()->SetType(
-                utils::RandomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
-
-            registry.emplace<PhysicsInfo>(entity, tilePhysicsBody);
 
             createdTiles++;
         }

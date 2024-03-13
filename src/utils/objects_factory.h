@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/texture_process.h"
 #include <entt/entt.hpp>
 #include <utils/box2d_body_creator.h>
 #include <utils/entt_registry_wrapper.h>
@@ -15,6 +16,8 @@ class ObjectsFactory
     Box2dBodyCreator box2dBodyCreator;
 public:
     ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
+    entt::entity CreateTile(
+        glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
     entt::entity CreatePlayer(const glm::vec2& playerSdlWorldPos);
     entt::entity CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos);
 private:

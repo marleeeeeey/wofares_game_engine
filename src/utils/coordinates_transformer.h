@@ -14,19 +14,29 @@ class CoordinatesTransformer
     const float box2DtoSDL;
     const float sdlToBox2D;
 public:
+    enum class Type
+    {
+        Position,
+        Length,
+    };
+
     CoordinatesTransformer(entt::registry& registry);
-    // World to Camera (World to Screen).
-    glm::vec2 WorldToCamera(const glm::vec2& worldPos) const;
-    // Camera to World (Screen to World).
-    glm::vec2 CameraToWorld(const glm::vec2& cameraPos) const;
+    // World to Screen.
+    glm::vec2 WorldToScreen(const glm::vec2& worldPos, Type type = Type::Position) const;
+    float WorldToScreen(float worldValue) const;
+    // Screen to World.
+    glm::vec2 ScreenToWorld(const glm::vec2& screenPos, Type type = Type::Position) const;
+    float ScreenToWorld(float screenValue) const;
     // World to Physics.
-    b2Vec2 WorldToPhysics(const glm::vec2& worldPos) const;
+    b2Vec2 WorldToPhysics(const glm::vec2& worldPos, Type type = Type::Position) const;
     float WorldToPhysics(float worldValue) const;
     // Physics to World.
-    glm::vec2 PhysicsToWorld(const b2Vec2& physicsPos) const;
+    glm::vec2 PhysicsToWorld(const b2Vec2& physicsPos, Type type = Type::Position) const;
     float PhysicsToWorld(float physicsValue) const;
-    // Camera to Physics.
-    b2Vec2 CameraToPhysics(const glm::vec2& cameraPos) const;
-    // Physics to Camera.
-    glm::vec2 PhysicsToCamera(const b2Vec2& physicsPos) const;
+    // Screen to Physics.
+    b2Vec2 ScreenToPhysics(const glm::vec2& screenPos, Type type = Type::Position) const;
+    float ScreenToPhysics(float screenValue) const;
+    // Physics to Screen.
+    glm::vec2 PhysicsToScreen(const b2Vec2& physicsPos, Type type = Type::Position) const;
+    float PhysicsToScreen(float physicsValue) const;
 };

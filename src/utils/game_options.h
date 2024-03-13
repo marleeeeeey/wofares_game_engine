@@ -43,7 +43,7 @@ struct PhysicsOptions
 struct WindowOptions
 {
     unsigned fps{60};
-    glm::vec2 windowSize{800, 600}; // TODO4: support for json serialization.
+    glm::vec2 windowSize{1600, 900}; // TODO4: support for json serialization.
     float cameraScale{1.0f};
     glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};

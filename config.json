@@ -11,7 +11,7 @@
     },
     "windowOptions": {
       "fps": 60,
-      "cameraScale": 4,
+      "cameraScale": 2,
       "box2DtoSDL": 48,
       "showGrid": false
     },
@@ -22,9 +22,9 @@
     }
   },
   "weaponControlSystem": {
-    "cellSizeForMicroDistruction": 2,
-    "debug": {
-      "useColoredMicroTiles": false
-    }
+    "cellSizeForMicroDistruction": 2
+  },
+  "CameraControlSystem": {
+    "mousePosImpactOnCameraAnchor": false
   }
 }

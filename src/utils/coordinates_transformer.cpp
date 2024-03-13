@@ -5,21 +5,41 @@ CoordinatesTransformer::CoordinatesTransformer(entt::registry& registry)
     box2DtoSDL(gameState.windowOptions.box2DtoSDL), sdlToBox2D(1.0f / box2DtoSDL)
 {}
 
-glm::vec2 CoordinatesTransformer::WorldToCamera(const glm::vec2& worldPos) const
+glm::vec2 CoordinatesTransformer::WorldToScreen(const glm::vec2& worldPos, Type type) const
 {
-    auto& rOpt = gameState.windowOptions;
-    glm::vec2 transformedPosition = (worldPos - rOpt.cameraCenterSdl) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
+    auto& windowOpt = gameState.windowOptions;
+
+    if (type == Type::Length)
+        return worldPos * windowOpt.cameraScale;
+
+    glm::vec2 transformedPosition =
+        (worldPos - windowOpt.cameraCenterSdl) * windowOpt.cameraScale + windowOpt.windowSize / 2.0f;
     return transformedPosition;
 }
 
-glm::vec2 CoordinatesTransformer::CameraToWorld(const glm::vec2& cameraPos) const
+float CoordinatesTransformer::WorldToScreen(float worldValue) const
 {
-    auto& rOpt = gameState.windowOptions;
-    glm::vec2 worldPosition = ((cameraPos - rOpt.windowSize / 2.0f) / rOpt.cameraScale) + rOpt.cameraCenterSdl;
+    return worldValue * gameState.windowOptions.cameraScale;
+};
+
+glm::vec2 CoordinatesTransformer::ScreenToWorld(const glm::vec2& screenPos, Type type) const
+{
+    auto& windowOpt = gameState.windowOptions;
+
+    if (type == Type::Length)
+        return screenPos / windowOpt.cameraScale;
+
+    glm::vec2 worldPosition =
+        ((screenPos - windowOpt.windowSize / 2.0f) / windowOpt.cameraScale) + windowOpt.cameraCenterSdl;
     return worldPosition;
 }
 
-b2Vec2 CoordinatesTransformer::WorldToPhysics(const glm::vec2& worldPos) const
+float CoordinatesTransformer::ScreenToWorld(float screenValue) const
+{
+    return screenValue / gameState.windowOptions.cameraScale;
+};
+
+b2Vec2 CoordinatesTransformer::WorldToPhysics(const glm::vec2& worldPos, [[maybe_unused]] Type type) const
 {
     return b2Vec2(worldPos.x * sdlToBox2D, worldPos.y * sdlToBox2D);
 }
@@ -29,7 +49,7 @@ float CoordinatesTransformer::WorldToPhysics(float worldValue) const
     return worldValue * sdlToBox2D;
 };
 
-glm::vec2 CoordinatesTransformer::PhysicsToWorld(const b2Vec2& physicsPos) const
+glm::vec2 CoordinatesTransformer::PhysicsToWorld(const b2Vec2& physicsPos, [[maybe_unused]] Type type) const
 {
     return glm::vec2(physicsPos.x * box2DtoSDL, physicsPos.y * box2DtoSDL);
 }
@@ -39,12 +59,22 @@ float CoordinatesTransformer::PhysicsToWorld(float physicsValue) const
     return physicsValue * box2DtoSDL;
 };
 
-b2Vec2 CoordinatesTransformer::CameraToPhysics(const glm::vec2& cameraPos) const
+b2Vec2 CoordinatesTransformer::ScreenToPhysics(const glm::vec2& screenPos, Type type) const
 {
-    return WorldToPhysics(CameraToWorld(cameraPos));
+    return WorldToPhysics(ScreenToWorld(screenPos, type), type);
 }
 
-glm::vec2 CoordinatesTransformer::PhysicsToCamera(const b2Vec2& physicsPos) const
+float CoordinatesTransformer::ScreenToPhysics(float screenValue) const
 {
-    return WorldToCamera(PhysicsToWorld(physicsPos));
+    return WorldToPhysics(ScreenToWorld(screenValue));
+};
+
+glm::vec2 CoordinatesTransformer::PhysicsToScreen(const b2Vec2& physicsPos, Type type) const
+{
+    return WorldToScreen(PhysicsToWorld(physicsPos, type), type);
 }
+
+float CoordinatesTransformer::PhysicsToScreen(float physicsValue) const
+{
+    return WorldToScreen(PhysicsToWorld(physicsValue));
+};

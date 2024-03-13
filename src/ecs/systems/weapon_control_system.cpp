@@ -4,6 +4,7 @@
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
+#include <cassert>
 #include <cstddef>
 #include <ecs/components/game_components.h>
 #include <entt/entity/fwd.hpp>
@@ -210,37 +211,15 @@ std::vector<entt::entity> WeaponControlSystem::AddAndReturnSplittedPhysicalEntet
         auto textureRects = DivideRectByCellSize(originalObjRenderingInfo.textureRect, cellSize);
         for (auto& rect : textureRects)
         {
-            // Create entity for the pixel.
-            auto pixelEntity = registryWrapper.Create("pixelTile");
-
-            // Fill rendering info for the pixel.
-            RenderingInfo pixelRenderingInfo;
-
-            auto& debugColoredPixelsRandomly =
-                utils::GetConfig<bool, "weaponControlSystem.debug.useColoredMicroTiles">();
-
-            if (debugColoredPixelsRandomly)
-            {
-                pixelRenderingInfo.colorName = GetRandomColorName();
-            }
-            else
-            {
-                pixelRenderingInfo.texturePtr = originalObjRenderingInfo.texturePtr;
-                pixelRenderingInfo.textureRect = rect;
-            }
-
-            pixelRenderingInfo.sdlSize = cellSizeGlm;
-
-            // Create physics body for the pixel.
+            // Caclulate position of the pixel in the world.
             auto pixelRectPosInTexture = glm::vec2(rect.x, rect.y);
             glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
                 cellSizeGlm - glm::vec2{1, 1}; // TODO1: here is a hack with {1, 1}.
-            glm::vec2 pixelTileSize(rect.w - gap, rect.h - gap);
-            auto pixelPhysicsBody = box2dBodyCreator.CreatePhysicsBody(pixelEntity, pixelWorldPosition, pixelTileSize);
 
-            // Fill the pixel entity with the rendering and physics info.
-            registry.emplace<RenderingInfo>(pixelEntity, pixelRenderingInfo);
-            registry.emplace<PhysicsInfo>(pixelEntity, pixelPhysicsBody);
+            assert(cellSize.x == cellSize.y);
+            auto pixelEntity = objectsFactory.CreateTile(
+                pixelWorldPosition, cellSize.x, TextureRect{originalObjRenderingInfo.texturePtr, rect}, "PixeledTile");
+
             splittedEntities.push_back(pixelEntity);
         }
     }

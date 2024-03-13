@@ -128,7 +128,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const InputEventManager::Ev
         auto physicsWorld = gameState.physicsWorld;
 
         auto windowPos = glm::vec2(event.button.x, event.button.y);
-        auto worldPos = transformer.CameraToWorld(windowPos);
+        auto worldPos = transformer.ScreenToWorld(windowPos);
 
         auto entity = registryWrapper.Create("buildingBlock");
         glm::vec2 sdlSize(10.0f, 10.0f);
@@ -151,7 +151,7 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
             auto playerBody = physicalBody.bodyRAII->GetBody();
 
             glm::vec2 mouseWindowPos{event.motion.x, event.motion.y};
-            glm::vec2 playerWindowPos = transformer.PhysicsToCamera(playerBody->GetPosition());
+            glm::vec2 playerWindowPos = transformer.PhysicsToScreen(playerBody->GetPosition());
             glm::vec2 directionVec = mouseWindowPos - playerWindowPos;
             playerInfo.weaponDirection = glm::normalize(directionVec);
         }

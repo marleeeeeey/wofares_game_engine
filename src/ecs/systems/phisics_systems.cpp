@@ -50,7 +50,7 @@ void PhysicsSystem::UpdatePlayersWeaponDirection()
 
         auto& lastMousePosInWindow = gameState.windowOptions.lastMousePosInWindow;
         glm::vec2 playerPosInWindow =
-            coordinatesTransformer.PhysicsToCamera(physicalBody.bodyRAII->GetBody()->GetPosition());
+            coordinatesTransformer.PhysicsToScreen(physicalBody.bodyRAII->GetBody()->GetPosition());
 
         playerInfo.weaponDirection = glm::normalize(lastMousePosInWindow - playerPosInWindow);
     }

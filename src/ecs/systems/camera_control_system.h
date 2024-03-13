@@ -4,7 +4,6 @@
 #include <utils/game_options.h>
 #include <utils/input_event_manager.h>
 
-
 class CameraControlSystem
 {
     entt::registry& registry;
@@ -17,5 +16,5 @@ public:
 private:
     void HandleCameraMovementAndScale(const SDL_Event& event);
     void HandleMouseScreenPosition(const SDL_Event& event);
-    void PosiotioningCameraToPlayer(float deltaTime);
+    void PositioningCameraToPlayer(float deltaTime);
 };

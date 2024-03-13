@@ -53,8 +53,6 @@ int main(int argc, char* args[])
         auto& gameOptions = registry.emplace<GameOptions>(
             registryWrapper.Create("gameOptions"), utils::GetConfig<GameOptions, "gameOptions">());
 
-        gameOptions.windowOptions.cameraCenterSdl = gameOptions.windowOptions.windowSize / 2.0f;
-
         // Create a physics world with gravity and store it in the registry.
         b2Vec2 gravity(0.0f, +9.8f);
         gameOptions.physicsWorld = std::make_shared<b2World>(gravity);

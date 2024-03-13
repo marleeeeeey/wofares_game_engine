@@ -4,6 +4,12 @@
 #include <memory>
 #include <utils/sdl_RAII.h>
 
+struct TextureRect
+{
+    std::shared_ptr<SDLTextureRAII> texture; // Pointer to the texture.
+    SDL_Rect rect; // Rectangle in the texture corresponding to the tile.
+};
+
 bool IsTileInvisible(SDL_Surface* surface, const SDL_Rect& miniTextureSrcRect);
 
 // TileId is 1-based. Tiled uses 1-based indexing.
