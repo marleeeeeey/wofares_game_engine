@@ -18,8 +18,8 @@
     {
       "label": "Wofares (Windows) 2. Build",
       "type": "shell",
-      "command": "cmake --build ${workspaceFolder}/build -- -k 0", // stop on first error
-      // "command": "cmake --build ${workspaceFolder}/build", // continue on error
+      // "command": "cmake --build ${workspaceFolder}/build -- -k 0", // stop on first error
+      "command": "cmake --build ${workspaceFolder}/build", // continue on error
       "dependsOn": [
         "Wofares (Windows) 1. Configure"
       ]

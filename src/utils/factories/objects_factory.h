@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/coordinates_transformer.h"
 #include "utils/sdl_texture_process.h"
 #include <entt/entt.hpp>
 #include <utils/entt_registry_wrapper.h>
@@ -14,13 +15,17 @@ class ObjectsFactory
     GameOptions& gameState;
     std::shared_ptr<b2World> physicsWorld;
     Box2dBodyCreator box2dBodyCreator;
+    CoordinatesTransformer transformer;
 public:
     ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
+public: // On map load.
     entt::entity CreateTile(
         glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
     entt::entity CreatePlayer(const glm::vec2& playerSdlWorldPos);
+public: // On player action.
     entt::entity SpawnFlyingEntity(
         const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force);
+    entt::entity CreateBullet(entt::entity shooterPlayer, float force);
 public: // Explosions.
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
     std::vector<entt::entity> SpawnSplittedPhysicalEnteties(

@@ -15,7 +15,7 @@ PlayerControlSystem::PlayerControlSystem(
     EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
     Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), inputEventManager(inputEventManager),
-    transformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), transformer(registry),
     box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory)
 {
     SubscribeToInputEvents();
@@ -96,41 +96,11 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
 {
     if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
     {
-        auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
-        auto physicsWorld = gameState.physicsWorld;
         const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
-        CoordinatesTransformer transformer(registry);
-
         for (auto entity : players)
         {
-            const auto& playerInfo = players.get<PlayerInfo>(entity);
-            const auto& playerBody = players.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-            const auto& animationInfo = players.get<AnimationInfo>(entity);
-            // TODO2: use the size from specific bounding box.
-            const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sdlSize;
-            const auto& weaponDirection = playerInfo.weaponDirection;
-
-            // Calculate the position of the grenade slightly in front of the player.
-            glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
-            glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x;
-            glm::vec2 projectileSize(5, 5);
-
-            // Spawn flying entity.
             float force = std::min(eventInfo.holdDuration * 10.0f, 3.0f);
-            auto flyingEntity =
-                objectsFactory.SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
-
-            // Apply the explosion component to the flying entity.
-            if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka)
-            {
-                registry.emplace<ContactExplosionComponent>(flyingEntity);
-                registry.emplace<ExplosionImpactComponent>(flyingEntity);
-            }
-            else if (playerInfo.currentWeapon == PlayerInfo::Weapon::Grenade)
-            {
-                registry.emplace<TimerExplosionComponent>(flyingEntity);
-                registry.emplace<ExplosionImpactComponent>(flyingEntity);
-            }
+            objectsFactory.CreateBullet(entity, force);
         }
     }
 }

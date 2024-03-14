@@ -10,6 +10,14 @@ target_compile_definitions(wofares
     # MY_DEBUG # TODO5: Uncomment this to enable extra debug mode.
 )
 
+target_compile_options(wofares PRIVATE
+    -Wall
+    -Wextra
+
+    # -Werror
+    # -Wpedantic
+)
+
 target_link_libraries(wofares
     PRIVATE
     glm

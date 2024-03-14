@@ -63,7 +63,6 @@ void WeaponControlSystem::SubscribeToContactEvents()
                 if (!registry.all_of<CollisionDisableHitCountComponent>(entity))
                     continue;
 
-                auto hitCountEntity = entityA == entity ? entityB : entityA;
                 UpdateCollisionDisableHitCountComponent(entity);
             }
         });
@@ -86,9 +85,6 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
         return;
 
     hitCount->hitCount--;
-
-    // log number of hits
-    MY_LOG_FMT(info, "Number of hits: {}", hitCount->hitCount);
 
     if (hitCount->hitCount <= 0)
     {

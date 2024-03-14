@@ -13,7 +13,7 @@
 ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
-    box2dBodyCreator(registry)
+    box2dBodyCreator(registry), transformer(registry)
 {}
 
 entt::entity ObjectsFactory::CreateTile(
@@ -114,6 +114,46 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     physicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
 
     return flyingEntity;
+};
+
+entt::entity ObjectsFactory::CreateBullet(entt::entity entity, float force)
+{
+    if (!registry.all_of<PlayerInfo, PhysicsInfo, AnimationInfo>(entity))
+    {
+        MY_LOG_FMT(
+            warn, "[CreateBullet] entity does not have all of the required components. Entity: {}",
+            static_cast<int>(entity));
+        return entt::null;
+    }
+
+    const auto& playerInfo = registry.get<PlayerInfo>(entity);
+    const auto& playerBody = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
+    const auto& animationInfo = registry.get<AnimationInfo>(entity);
+    // TODO2: use the size from specific bounding box.
+    const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sdlSize;
+    const auto& weaponDirection = playerInfo.weaponDirection;
+
+    // Calculate the position of the grenade slightly in front of the player.
+    glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
+    glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x;
+    glm::vec2 projectileSize(5, 5);
+
+    // Spawn flying entity.
+    auto bulletEntity = SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
+
+    // Apply the explosion component to the flying entity.
+    if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka)
+    {
+        registry.emplace<ContactExplosionComponent>(bulletEntity);
+        registry.emplace<ExplosionImpactComponent>(bulletEntity);
+    }
+    else if (playerInfo.currentWeapon == PlayerInfo::Weapon::Grenade)
+    {
+        registry.emplace<TimerExplosionComponent>(bulletEntity);
+        registry.emplace<ExplosionImpactComponent>(bulletEntity);
+    }
+
+    return bulletEntity;
 };
 
 std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld)
