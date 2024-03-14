@@ -15,5 +15,5 @@ public:
     PhysicsMethods(entt::registry& registry);
 public: // Client methods.
     void ApplyForceToPhysicalBodies(
-        std::vector<entt::entity> physicalEntities, const b2Vec2& grenadePhysicsPos, float force);
+        std::vector<entt::entity> physicalEntities, const glm::vec2& forceCenterWorld, float force);
 };

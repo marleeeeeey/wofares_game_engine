@@ -19,8 +19,16 @@ public:
     entt::entity CreateTile(
         glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
     entt::entity CreatePlayer(const glm::vec2& playerSdlWorldPos);
+    entt::entity SpawnFlyingEntity(
+        const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force);
+public: // Explosions.
+    // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
+    std::vector<entt::entity> SpawnSplittedPhysicalEnteties(
+        const std::vector<entt::entity>& entities, SDL_Point cellSize);
+public: // Fragments.
     entt::entity CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos);
-private:
+    std::vector<entt::entity> SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld);
+private: // Animation.
     AnimationInfo CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
 };

@@ -1,9 +1,10 @@
 #include "phisics_systems.h"
-#include "utils/entt_registry_wrapper.h"
 #include <ecs/components/game_components.h>
 #include <glm/glm.hpp>
 #include <utils/box2d_helpers.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/math_utils.h>
 
 PhysicsSystem::PhysicsSystem(EnttRegistryWrapper& registryWrapper)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
@@ -33,7 +34,7 @@ void PhysicsSystem::RemoveDistantObjects()
         auto& physicalBody = physicalBodies.get<PhysicsInfo>(entity);
         b2Vec2 pos = physicalBody.bodyRAII->GetBody()->GetPosition();
 
-        if (!IsPointInsideBounds(pos, levelBounds))
+        if (!utils::IsPointInsideBounds(pos, levelBounds))
         {
             registryWrapper.Destroy(entity);
         }

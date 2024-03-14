@@ -15,6 +15,7 @@
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/file_system.h>
+#include <utils/primitives_renderer.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/systems/audio_system.h>
 #include <utils/systems/event_queue_system.h>
@@ -86,14 +87,16 @@ int main(int argc, char* args[])
         EventQueueSystem eventQueueSystem(inputEventManager);
 
         // Subscribe all systems that need to handle input events.
-        PlayerControlSystem playerControlSystem(registryWrapper, inputEventManager, contactListener);
+        PlayerControlSystem playerControlSystem(registryWrapper, inputEventManager, contactListener, objectsFactory);
         CameraControlSystem cameraControlSystem(registryWrapper.GetRegistry(), inputEventManager);
         GameStateControlSystem gameStateControlSystem(registryWrapper.GetRegistry(), inputEventManager);
 
         // Create a systems with no input events.
+        PrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
         PhysicsSystem physicsSystem(registryWrapper);
         RandomEventSystem randomEventSystem(registryWrapper.GetRegistry(), audioSystem);
-        GameObjectsRenderSystem gameObjectsRenderSystem(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
+        GameObjectsRenderSystem gameObjectsRenderSystem(
+            registryWrapper.GetRegistry(), renderer.get(), resourceManager, primitivesRenderer);
         HUDRenderSystem hudRenderSystem(registryWrapper.GetRegistry(), renderer.get());
         MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager);
 

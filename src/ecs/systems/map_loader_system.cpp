@@ -7,7 +7,9 @@
 #include <my_common_cpp_utils/math_utils.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/math_utils.h>
 #include <utils/sdl_texture_process.h>
+
 
 MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
@@ -177,8 +179,8 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             auto bodyRAII = registry.get<PhysicsInfo>(tileEntity).bodyRAII;
             const b2Vec2& bodyPosition = bodyRAII->GetBody()->GetPosition();
             auto& levelBounds = gameState.levelOptions.levelBox2dBounds;
-            levelBounds.min = Vec2Min(levelBounds.min, bodyPosition);
-            levelBounds.max = Vec2Max(levelBounds.max, bodyPosition);
+            levelBounds.min = utils::Vec2Min(levelBounds.min, bodyPosition);
+            levelBounds.max = utils::Vec2Max(levelBounds.max, bodyPosition);
 
             createdTiles++;
         }

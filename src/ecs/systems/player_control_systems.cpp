@@ -12,10 +12,10 @@
 
 PlayerControlSystem::PlayerControlSystem(
     EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
-    Box2dEnttContactListener& contactListener)
+    Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), inputEventManager(inputEventManager),
     transformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    box2dBodyCreator(registry), contactListener(contactListener)
+    box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory)
 {
     inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonHold,
@@ -102,7 +102,8 @@ void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo&
 
             // Spawn flying entity.
             float force = std::min(eventInfo.holdDuration * 10.0f, 3.0f);
-            auto flyingEntity = SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
+            auto flyingEntity =
+                objectsFactory.SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
 
             // Apply the explosion component to the flying entity.
             if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka)
@@ -156,30 +157,6 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
             playerInfo.weaponDirection = glm::normalize(directionVec);
         }
     }
-};
-
-entt::entity PlayerControlSystem::SpawnFlyingEntity(
-    const glm::vec2& sdlPos, const glm::vec2& sdlSize, const glm::vec2& forceDirection, float force)
-{
-    // Create the flying entity.
-    auto flyingEntity = registryWrapper.Create("flyingEntity");
-
-    // set entt name for the flying entity
-
-    // Create a Box2D body for the flying entity.
-    Box2dBodyCreator::Options options;
-    options.isDynamic = true;
-    auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, sdlPos, sdlSize, options);
-
-    registry.emplace<RenderingInfo>(flyingEntity, sdlSize);
-    registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
-
-    // Apply the force to the flying entity.
-    b2Vec2 forceVec = b2Vec2(force, 0);
-    forceVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), forceVec);
-    physicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
-
-    return flyingEntity;
 };
 
 void PlayerControlSystem::HandlePlayerEndSensorContact(entt::entity entityA, entt::entity entityB)

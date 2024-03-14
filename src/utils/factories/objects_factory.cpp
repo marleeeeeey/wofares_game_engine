@@ -2,6 +2,8 @@
 #include "my_common_cpp_utils/logger.h"
 #include "my_common_cpp_utils/math_utils.h"
 #include "utils/entt_registry_wrapper.h"
+#include "utils/math_utils.h"
+#include "utils/physics_methods.h"
 #include "utils/sdl_texture_process.h"
 #include <ecs/components/game_components.h>
 #include <utils/coordinates_transformer.h>
@@ -88,4 +90,87 @@ AnimationInfo ObjectsFactory::CreateAnimationInfo(
     }
 
     return animationInfo;
+};
+
+entt::entity ObjectsFactory::SpawnFlyingEntity(
+    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force)
+{
+    // Create the flying entity.
+    auto flyingEntity = registryWrapper.Create("flyingEntity");
+
+    // Create a Box2D body for the flying entity.
+    Box2dBodyCreator::Options options;
+    options.isDynamic = true;
+    auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
+
+    registry.emplace<RenderingInfo>(flyingEntity, sizeWorld);
+    registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
+
+    // Apply the force to the flying entity.
+    b2Vec2 forceVec = b2Vec2(force, 0);
+    forceVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), forceVec);
+    physicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
+
+    return flyingEntity;
+};
+
+std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld)
+{
+    size_t fragmentsCount = static_cast<size_t>(radiusWorld * 0.2f * utils::Random<float>(1, 1.2));
+    std::vector<entt::entity> fragments;
+    for (size_t i = 0; i < fragmentsCount; ++i)
+    {
+        auto fragmentRandomPos = utils::GetRandomCoordinateAround(centerWorld, radiusWorld);
+        auto fragmentEntity = CreateFragmentAfterExplosion(fragmentRandomPos);
+        fragments.push_back(fragmentEntity);
+    }
+    PhysicsMethods physicsMethods(registry);
+    physicsMethods.ApplyForceToPhysicalBodies(fragments, centerWorld, 500.0f);
+
+    return fragments;
+};
+
+std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
+    const std::vector<entt::entity>& physicalEntities, SDL_Point cellSize)
+{
+    auto physicsWorld = gameState.physicsWorld;
+    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+    Box2dBodyCreator box2dBodyCreator(registry);
+    CoordinatesTransformer coordinatesTransformer(registry);
+    glm::vec2 cellSizeGlm(cellSize.x, cellSize.y);
+
+    std::vector<entt::entity> splittedEntities;
+
+    for (auto& entity : physicalEntities)
+    {
+        auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
+        auto& originalObjRenderingInfo = registry.get<RenderingInfo>(entity);
+        const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
+        const glm::vec2 originalObjWorldPos = coordinatesTransformer.PhysicsToWorld(physicsPos);
+
+        // Check if the original object is big enough to be splitted.
+        if (originalObjRenderingInfo.textureRect.w <= cellSize.x ||
+            originalObjRenderingInfo.textureRect.h <= cellSize.y)
+            continue;
+
+        auto originalRectPosInTexture =
+            glm::vec2(originalObjRenderingInfo.textureRect.x, originalObjRenderingInfo.textureRect.y);
+
+        auto textureRects = utils::DivideRectByCellSize(originalObjRenderingInfo.textureRect, cellSize);
+        for (auto& rect : textureRects)
+        {
+            // Caclulate position of the pixel in the world.
+            auto pixelRectPosInTexture = glm::vec2(rect.x, rect.y);
+            glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
+                cellSizeGlm - glm::vec2{1, 1}; // TODO1: here is a hack with {1, 1}.
+
+            assert(cellSize.x == cellSize.y);
+            auto pixelEntity = CreateTile(
+                pixelWorldPosition, cellSize.x, TextureRect{originalObjRenderingInfo.texturePtr, rect}, "PixeledTile");
+
+            splittedEntities.push_back(pixelEntity);
+        }
+    }
+
+    return splittedEntities;
 };

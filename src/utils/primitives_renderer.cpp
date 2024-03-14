@@ -1,0 +1,126 @@
+#include "primitives_renderer.h"
+#include <numbers>
+
+PrimitivesRenderer::PrimitivesRenderer(
+    entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
+  : registry(registry), renderer(renderer), resourceManager(resourceManager),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
+{}
+
+SDL_Rect PrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize)
+{
+    auto& rOpt = gameState.windowOptions;
+
+    glm::vec2 transformedPosition = (sdlPos - rOpt.cameraCenterSdl) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
+
+    // Have to render from the center of the object. Because the Box2D body is in the center of the object.
+    SDL_Rect rect = {
+        static_cast<int>(transformedPosition.x - sdlSize.x * rOpt.cameraScale / 2),
+        static_cast<int>(transformedPosition.y - sdlSize.y * rOpt.cameraScale / 2),
+        static_cast<int>(sdlSize.x * rOpt.cameraScale), static_cast<int>(sdlSize.y * rOpt.cameraScale)};
+
+    return rect;
+}
+
+void PrimitivesRenderer::RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle)
+{
+    std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
+    double angleDegrees = angle * (180.0 / M_PI);
+    SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
+    SDL_Point center = {destRect.w / 2, destRect.h / 2};
+    SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
+}
+
+void PrimitivesRenderer::RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color)
+{
+    const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
+    float angle = body->GetBody()->GetAngle();
+    RenderSquare(sdlPos, sdlSize, color, angle);
+}
+
+void PrimitivesRenderer::RenderTiledSquare(
+    const glm::vec2& centerSdlPos, const float angle, const RenderingInfo& tileInfo, const SDL_RendererFlip& flip)
+{
+    auto sdlSize = tileInfo.sdlSize;
+    SDL_Rect destRect = GetRectWithCameraTransform(centerSdlPos, sdlSize);
+
+    if (!tileInfo.texturePtr)
+    {
+        RenderSquare(centerSdlPos, sdlSize, tileInfo.colorName, angle);
+        return;
+    }
+
+    // Calculate the angle in degrees.
+    SDL_Point center = {destRect.w / 2, destRect.h / 2};
+    double angleDegrees = angle * 180.0 / std::numbers::pi;
+
+    // Render the tile with the calculated angle.
+    SDL_RenderCopyEx(
+        renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, flip);
+}
+
+void PrimitivesRenderer::RenderAnimation(
+    const AnimationInfo& animationInfo, glm::vec2 physicsBodyCenterWorld, float angle)
+{
+    if (animationInfo.animation.frames.empty())
+        return;
+
+    // TODO1: Unify using the modulo operator in interface.
+    auto safeIndex = animationInfo.currentFrameIndex % animationInfo.animation.frames.size();
+
+    const auto& animation = animationInfo.animation;
+    const auto& frame = animation.frames[safeIndex];
+
+    MY_LOG_FMT(
+        trace, "safeIndex: {}, textureRect: x: {}, y: {}, w: {}, h: {}", safeIndex, frame.renderingInfo.textureRect.x,
+        frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w, frame.renderingInfo.textureRect.h);
+
+    if (animation.hitboxRect)
+    {
+        const SDL_Rect& hitboxRect = *animation.hitboxRect;
+        auto textureSize = frame.renderingInfo.sdlSize;
+
+        auto textureCenter = textureSize / 2.0f;
+        auto hitboxCenter = glm::vec2(hitboxRect.x, hitboxRect.y) + glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
+        auto shift = hitboxCenter - textureCenter;
+        auto hitboxNewCenter = physicsBodyCenterWorld - shift;
+        physicsBodyCenterWorld = hitboxNewCenter;
+    }
+
+    RenderTiledSquare(physicsBodyCenterWorld, angle, frame.renderingInfo, animationInfo.flip);
+};
+
+void PrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)
+{
+    auto textureRAII = backgroundInfo.texture;
+    if (!textureRAII)
+    {
+        MY_LOG_FMT(warn, "No background texture to render");
+        return;
+    }
+    auto backgroundTexture = textureRAII->get();
+
+    auto textureScale = backgroundInfo.textureScale;
+    auto backgroundSpeed = backgroundInfo.speedFactor;
+
+    int textureWidth, textureHeight;
+    SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &textureWidth, &textureHeight);
+
+    // Calculate the size of the texture after scaling.
+    textureWidth *= textureScale;
+    textureHeight *= textureScale;
+
+    // Calculate the background offset depending on the camera position and the "depth" of the background.
+    auto backgroundCenter = gameState.windowOptions.cameraCenterSdl * backgroundInfo.speedFactor;
+    auto backgroundTopLeft = backgroundCenter - glm::vec2(textureWidth, textureHeight) / 2.0f;
+
+    // Set the destination rectangle for the texture.
+    SDL_Rect dstRect;
+    dstRect.x = backgroundTopLeft.x;
+    dstRect.y = backgroundTopLeft.y;
+    dstRect.w = textureWidth;
+    dstRect.h = textureHeight;
+
+    // Render the background texture.
+    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &dstRect);
+};

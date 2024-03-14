@@ -1,12 +1,13 @@
 #include "game_objects_render_system.h"
 #include <my_common_cpp_utils/logger.h>
-#include <numbers>
 #include <utils/glm_box2d_conversions.h>
 
 GameObjectsRenderSystem::GameObjectsRenderSystem(
-    entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
+    entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager,
+    PrimitivesRenderer& primitivesRenderer)
   : registry(registry), renderer(renderer), resourceManager(resourceManager),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry),
+    primitivesRenderer(primitivesRenderer)
 {}
 
 void GameObjectsRenderSystem::Render()
@@ -16,7 +17,6 @@ void GameObjectsRenderSystem::Render()
     SDL_RenderClear(renderer);
 
     RenderBackground();
-
     RenderTiles();
     RenderAnimations();
     RenderPlayerWeaponDirection();
@@ -25,37 +25,7 @@ void GameObjectsRenderSystem::Render()
 void GameObjectsRenderSystem::RenderBackground()
 {
     auto backgroundInfo = gameState.levelOptions.backgroundInfo;
-    auto textureRAII = backgroundInfo.texture;
-    if (!textureRAII)
-    {
-        MY_LOG_FMT(warn, "No background texture to render");
-        return;
-    }
-    auto backgroundTexture = textureRAII->get();
-
-    auto textureScale = backgroundInfo.textureScale;
-    auto backgroundSpeed = backgroundInfo.speedFactor;
-
-    int textureWidth, textureHeight;
-    SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &textureWidth, &textureHeight);
-
-    // Calculate the size of the texture after scaling.
-    textureWidth *= textureScale;
-    textureHeight *= textureScale;
-
-    // Calculate the background offset depending on the camera position and the "depth" of the background.
-    auto backgroundCenter = gameState.windowOptions.cameraCenterSdl * backgroundInfo.speedFactor;
-    auto backgroundTopLeft = backgroundCenter - glm::vec2(textureWidth, textureHeight) / 2.0f;
-
-    // Set the destination rectangle for the texture.
-    SDL_Rect dstRect;
-    dstRect.x = backgroundTopLeft.x;
-    dstRect.y = backgroundTopLeft.y;
-    dstRect.w = textureWidth;
-    dstRect.h = textureHeight;
-
-    // Render the background texture.
-    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &dstRect);
+    primitivesRenderer.RenderBackground(backgroundInfo);
 };
 
 void GameObjectsRenderSystem::RenderTiles()
@@ -66,7 +36,7 @@ void GameObjectsRenderSystem::RenderTiles()
         const auto& [tileInfo, physicalBody] = tilesView.get<RenderingInfo, PhysicsInfo>(entity);
         const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
         const float angle = physicalBody.bodyRAII->GetBody()->GetAngle();
-        RenderTiledSquare(sdlPos, angle, tileInfo);
+        primitivesRenderer.RenderTiledSquare(sdlPos, angle, tileInfo);
     }
 }
 
@@ -82,62 +52,8 @@ void GameObjectsRenderSystem::RenderPlayerWeaponDirection()
             coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
         glm::vec2 weaponWorldSize = renderingInfo.sdlSize / 2.0f;
         glm::vec2 weaponWorldPos = playerSdlPos + playerInfo.weaponDirection * renderingInfo.sdlSize / 2;
-        RenderSquare(weaponWorldPos, weaponWorldSize, ColorName::Red, 0);
+        primitivesRenderer.RenderSquare(weaponWorldPos, weaponWorldSize, ColorName::Red, 0);
     }
-}
-
-SDL_Rect GameObjectsRenderSystem::GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize)
-{
-    auto& rOpt = gameState.windowOptions;
-
-    glm::vec2 transformedPosition = (sdlPos - rOpt.cameraCenterSdl) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
-
-    // Have to render from the center of the object. Because the Box2D body is in the center of the object.
-    SDL_Rect rect = {
-        static_cast<int>(transformedPosition.x - sdlSize.x * rOpt.cameraScale / 2),
-        static_cast<int>(transformedPosition.y - sdlSize.y * rOpt.cameraScale / 2),
-        static_cast<int>(sdlSize.x * rOpt.cameraScale), static_cast<int>(sdlSize.y * rOpt.cameraScale)};
-
-    return rect;
-}
-
-void GameObjectsRenderSystem::RenderSquare(
-    const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle)
-{
-    std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
-    double angleDegrees = angle * (180.0 / M_PI);
-    SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
-    SDL_Point center = {destRect.w / 2, destRect.h / 2};
-    SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
-}
-
-void GameObjectsRenderSystem::RenderSquare(
-    std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color)
-{
-    const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
-    float angle = body->GetBody()->GetAngle();
-    RenderSquare(sdlPos, sdlSize, color, angle);
-}
-
-void GameObjectsRenderSystem::RenderTiledSquare(
-    const glm::vec2& centerSdlPos, const float angle, const RenderingInfo& tileInfo, const SDL_RendererFlip& flip)
-{
-    auto sdlSize = tileInfo.sdlSize;
-    SDL_Rect destRect = GetRectWithCameraTransform(centerSdlPos, sdlSize);
-
-    if (!tileInfo.texturePtr)
-    {
-        RenderSquare(centerSdlPos, sdlSize, tileInfo.colorName, angle);
-        return;
-    }
-
-    // Calculate the angle in degrees.
-    SDL_Point center = {destRect.w / 2, destRect.h / 2};
-    double angleDegrees = angle * 180.0 / std::numbers::pi;
-
-    // Render the tile with the calculated angle.
-    SDL_RenderCopyEx(
-        renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, flip);
 }
 
 void GameObjectsRenderSystem::RenderAnimations()
@@ -146,39 +62,13 @@ void GameObjectsRenderSystem::RenderAnimations()
 
     for (auto entity : view)
     {
-        const auto& [animationInfo, body] = view.get<AnimationInfo, PhysicsInfo>(entity);
+        const auto& [animationInfo, physicsInfo] = view.get<AnimationInfo, PhysicsInfo>(entity);
 
-        if (animationInfo.isPlaying && !animationInfo.animation.frames.empty())
-        {
-            // TODO1: Unify using the modulo operator in interface.
-            auto safeIndex = animationInfo.currentFrameIndex % animationInfo.animation.frames.size();
+        // Caclulate the position and angle of the animation.
+        auto body = physicsInfo.bodyRAII->GetBody();
+        glm::vec2 physicsBodyCenterWorld = coordinatesTransformer.PhysicsToWorld(body->GetPosition());
+        const float angle = body->GetAngle();
 
-            const auto& animation = animationInfo.animation;
-            const auto& frame = animation.frames[safeIndex];
-
-            MY_LOG_FMT(
-                trace, "safeIndex: {}, textureRect: x: {}, y: {}, w: {}, h: {}", safeIndex,
-                frame.renderingInfo.textureRect.x, frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w,
-                frame.renderingInfo.textureRect.h);
-
-            glm::vec2 hitboxOriginalCenter =
-                coordinatesTransformer.PhysicsToWorld(body.bodyRAII->GetBody()->GetPosition());
-            const float angle = body.bodyRAII->GetBody()->GetAngle();
-
-            if (animation.hitboxRect)
-            {
-                const SDL_Rect& hitboxRect = *animation.hitboxRect;
-                auto textureSize = frame.renderingInfo.sdlSize;
-
-                auto textureCenter = textureSize / 2.0f;
-                auto hitboxCenter =
-                    glm::vec2(hitboxRect.x, hitboxRect.y) + glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
-                auto shift = hitboxCenter - textureCenter;
-                auto hitboxNewCenter = hitboxOriginalCenter - shift;
-                hitboxOriginalCenter = hitboxNewCenter;
-            }
-
-            RenderTiledSquare(hitboxOriginalCenter, angle, frame.renderingInfo, animationInfo.flip);
-        }
+        primitivesRenderer.RenderAnimation(animationInfo, physicsBodyCenterWorld, angle);
     }
 }
