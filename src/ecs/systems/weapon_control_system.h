@@ -17,7 +17,6 @@ class WeaponControlSystem
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
     ObjectsFactory& objectsFactory;
-    float deltaTime;
     std::queue<entt::entity> contactedEntities;
     CoordinatesTransformer coordinatesTransformer;
     CollectObjects collectObjects;
@@ -30,8 +29,9 @@ private:
     void SubscribeToContactEvents();
     void OnContactWithExplosionComponent(entt::entity explosionEntity, entt::entity contactedEntity);
 private:
-    void UpdateTimerExplosionComponents();
-    void UpdateContactExplosionComponentTimer();
+    void UpdateTimerExplosionComponents(float deltaTime);
+    void UpdateContactExplosionComponentTimer(float deltaTime);
+    void UpdateCollisionDisableTimerComponent(float deltaTime);
     void UpdateCollisionDisableHitCountComponent();
     void ProcessExplosionEntitiesQueue();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);

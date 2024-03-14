@@ -21,7 +21,6 @@ void PhysicsSystem::Update(float deltaTime)
     SetPlayersRotationToZero(); // players should not rotate.
     UpdatePlayersWeaponDirection();
     RemoveDistantObjects();
-    UpdateCollisionDisableTimerComponent(deltaTime);
 };
 
 void PhysicsSystem::RemoveDistantObjects()
@@ -56,27 +55,6 @@ void PhysicsSystem::UpdatePlayersWeaponDirection()
         playerInfo.weaponDirection = glm::normalize(lastMousePosInWindow - playerPosInWindow);
     }
 }
-
-void PhysicsSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
-{
-    auto collisionDisableTimers = registry.view<CollisionDisableTimerComponent>();
-    for (auto entity : collisionDisableTimers)
-    {
-        auto& collisionDisableTimer = collisionDisableTimers.get<CollisionDisableTimerComponent>(entity);
-        collisionDisableTimer.timeToDisableCollision -= deltaTime;
-
-        if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
-        {
-            registry.remove<CollisionDisableTimerComponent>(entity);
-            auto physicsInfo = registry.try_get<PhysicsInfo>(entity);
-            if (physicsInfo)
-            {
-                auto body = physicsInfo->bodyRAII->GetBody();
-                utils::DisableCollisionForTheBody(body);
-            }
-        }
-    }
-};
 
 void PhysicsSystem::SetPlayersRotationToZero()
 {

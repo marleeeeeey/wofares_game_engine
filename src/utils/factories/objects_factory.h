@@ -28,7 +28,7 @@ public: // Explosions.
 public: // Fragments.
     entt::entity CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos);
     std::vector<entt::entity> SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld);
-private: // Animation.
+private: // Animations.
     AnimationInfo CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
 };

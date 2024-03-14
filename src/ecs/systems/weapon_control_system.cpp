@@ -30,9 +30,9 @@ WeaponControlSystem::WeaponControlSystem(
 
 void WeaponControlSystem::Update(float deltaTime)
 {
-    this->deltaTime = deltaTime;
-    UpdateTimerExplosionComponents();
-    UpdateContactExplosionComponentTimer();
+    UpdateTimerExplosionComponents(deltaTime);
+    UpdateContactExplosionComponentTimer(deltaTime);
+    UpdateCollisionDisableTimerComponent(deltaTime);
     ProcessExplosionEntitiesQueue();
 }
 
@@ -66,7 +66,7 @@ void WeaponControlSystem::OnContactWithExplosionComponent(entt::entity explosion
     }
 };
 
-void WeaponControlSystem::UpdateTimerExplosionComponents()
+void WeaponControlSystem::UpdateTimerExplosionComponents(float deltaTime)
 {
     auto timersView = registry.view<TimerExplosionComponent>();
     for (auto& timerEntity : timersView)
@@ -139,12 +139,33 @@ void WeaponControlSystem::ProcessExplosionEntitiesQueue()
     }
 };
 
-void WeaponControlSystem::UpdateContactExplosionComponentTimer()
+void WeaponControlSystem::UpdateContactExplosionComponentTimer(float deltaTime)
 {
     auto contactExplosionsView = registry.view<ContactExplosionComponent>();
     for (auto& entity : contactExplosionsView)
     {
         auto& contactExplosion = contactExplosionsView.get<ContactExplosionComponent>(entity);
         contactExplosion.spawnSafeTime -= deltaTime;
+    }
+};
+
+void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
+{
+    auto collisionDisableTimers = registry.view<CollisionDisableTimerComponent>();
+    for (auto entity : collisionDisableTimers)
+    {
+        auto& collisionDisableTimer = collisionDisableTimers.get<CollisionDisableTimerComponent>(entity);
+        collisionDisableTimer.timeToDisableCollision -= deltaTime;
+
+        if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
+        {
+            registry.remove<CollisionDisableTimerComponent>(entity);
+            auto physicsInfo = registry.try_get<PhysicsInfo>(entity);
+            if (physicsInfo)
+            {
+                auto body = physicsInfo->bodyRAII->GetBody();
+                utils::DisableCollisionForTheBody(body);
+            }
+        }
     }
 };
