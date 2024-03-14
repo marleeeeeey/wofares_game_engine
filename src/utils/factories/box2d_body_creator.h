@@ -12,7 +12,8 @@ public: // Public types.
         enum class Shape
         {
             Box,
-            Capsule
+            Capsule,
+            Circle,
         } shape;
 
         struct Fixture
@@ -36,6 +37,7 @@ public: // Public methods.
 private: // Low-x1 level methods.
     b2Body* CreatePhysicsBody(entt::entity entity, const glm::vec2& sdlPos, b2BodyType bodyType);
     void AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
+    void AddCircleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
     void AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
     void AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& sdlSize);
 private: // Low-x2 level methods.

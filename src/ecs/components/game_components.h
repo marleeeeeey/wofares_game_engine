@@ -51,6 +51,8 @@ struct PlayerInfo
         None,
         Bazooka,
         Grenade,
+        Uzi,
+        Pistol
     };
 
     size_t number = 0;
@@ -89,7 +91,7 @@ struct TimerExplosionComponent
 // Like a bazooka projectile. Explodes when it touches a tile.
 struct ContactExplosionComponent
 {
-    float spawnSafeTime = 0.01f; // Time in seconds before the explosion is activated.
+    float spawnSafeTime = 0.0f; // Time in seconds before the explosion is activated.
 };
 
 // Like a bomb. Explodes when a remote trigger is activated.

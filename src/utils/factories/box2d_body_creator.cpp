@@ -23,8 +23,12 @@ std::shared_ptr<Box2dObjectRAII> Box2dBodyCreator::CreatePhysicsBody(
     // Add a fixture to the body.
     if (options.shape == Options::Shape::Box)
         AddBoxFixtureToBody(body, fixtureDef, sdlSize);
-    else
+    else if (options.shape == Options::Shape::Circle)
+        AddCircleFixtureToBody(body, fixtureDef, sdlSize);
+    else if (options.shape == Options::Shape::Capsule)
         AddVerticalCapsuleFixtureToBody(body, fixtureDef, sdlSize);
+    else
+        throw std::runtime_error("[CreatePhysicsBody] Unknown shape type");
 
     // Add a thin sensor below the body if needed.
     if (options.hasSensorBelowTheBody)
@@ -53,6 +57,15 @@ void Box2dBodyCreator::AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDe
     b2PolygonShape shape;
     b2Vec2 physicalSize = coordinatesTransformer.WorldToPhysics(sdlSize);
     shape.SetAsBox(physicalSize.x / 2.0, physicalSize.y / 2.0);
+    fixtureDef.shape = &shape;
+    body->CreateFixture(&fixtureDef);
+};
+
+void Box2dBodyCreator::AddCircleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize)
+{
+    b2CircleShape shape;
+    b2Vec2 physicalSize = coordinatesTransformer.WorldToPhysics(sdlSize);
+    shape.m_radius = physicalSize.x / 2.0;
     fixtureDef.shape = &shape;
     body->CreateFixture(&fixtureDef);
 };

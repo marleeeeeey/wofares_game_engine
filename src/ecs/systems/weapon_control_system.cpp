@@ -8,11 +8,11 @@
 #include <entt/entity/fwd.hpp>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
-#include <utils/box2d_body_settings_helper.h>
 #include <utils/collect_objects.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/physics_body_tuner.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_texture_process.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
@@ -23,7 +23,7 @@ WeaponControlSystem::WeaponControlSystem(
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
     audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry),
-    collectObjects(registry, objectsFactory), box2dBodySettingsHelper(registry)
+    collectObjects(registry, objectsFactory), PhysicsBodyTuner(registry)
 {
     SubscribeToContactEvents();
 }
@@ -89,7 +89,7 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
     if (hitCount->hitCount <= 0)
     {
         registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
-        box2dBodySettingsHelper.DisableCollisionForTheEntity(hitCountEntity);
+        PhysicsBodyTuner.DisableCollisionForTheEntity(hitCountEntity);
     }
 };
 
@@ -145,9 +145,12 @@ void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
         registryWrapper.Destroy(entity);
     }
 
-    glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePhysicsPos);
-    float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(explosionImpact->radius);
-    objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
+    if (utils::GetConfig<bool, "WeaponControlSystem.createExplosionFragments">())
+    {
+        glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePhysicsPos);
+        float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(explosionImpact->radius);
+        objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
+    }
 
     // Destroy the explosion entity.
     registryWrapper.Destroy(explosionEntity);
@@ -187,7 +190,7 @@ void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
         if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
         {
             registry.remove<CollisionDisableTimerComponent>(entity);
-            box2dBodySettingsHelper.DisableCollisionForTheEntity(entity);
+            PhysicsBodyTuner.DisableCollisionForTheEntity(entity);
         }
     }
 };

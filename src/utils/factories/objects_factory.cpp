@@ -7,13 +7,14 @@
 #include "utils/physics_methods.h"
 #include "utils/sdl_texture_process.h"
 #include <ecs/components/game_components.h>
+#include <unordered_map>
 #include <utils/coordinates_transformer.h>
 #include <utils/factories/box2d_body_creator.h>
 
 ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
-    box2dBodyCreator(registry), transformer(registry)
+    box2dBodyCreator(registry), transformer(registry), bodyTuner(registry)
 {}
 
 entt::entity ObjectsFactory::CreateTile(
@@ -103,6 +104,7 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     // Create a Box2D body for the flying entity.
     Box2dBodyCreator::Options options;
     options.isDynamic = true;
+    options.shape = Box2dBodyCreator::Options::Shape::Circle;
     auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
 
     registry.emplace<RenderingInfo>(flyingEntity, sizeWorld);
@@ -135,22 +137,32 @@ entt::entity ObjectsFactory::CreateBullet(entt::entity entity, float force)
 
     // Calculate the position of the grenade slightly in front of the player.
     glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
-    glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x;
-    glm::vec2 projectileSize(5, 5);
+    glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x / 2.0f;
+
+    // Map weapon to projectile size and explosion impact component.
+    const std::unordered_map<PlayerInfo::Weapon, std::tuple<glm::vec2, ExplosionImpactComponent>>
+        weaponToProjectileSize = {
+            {PlayerInfo::Weapon::Bazooka, {glm::vec2(5, 5), {0.5f, 1000.0f}}},
+            {PlayerInfo::Weapon::Grenade, {glm::vec2(4, 4), {0.3f, 800.0f}}},
+            {PlayerInfo::Weapon::Uzi, {glm::vec2(2, 2), {0.2f, 200.0f}}},
+            {PlayerInfo::Weapon::Pistol, {glm::vec2(1, 1), {0.1f, 50.0f}}},
+        };
+    auto [projectileSize, explosionImpact] = weaponToProjectileSize.at(playerInfo.currentWeapon);
 
     // Spawn flying entity.
-    auto bulletEntity = SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
+    entt::entity bulletEntity = SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
+    bodyTuner.SetBulletFlagForTheEntity(bulletEntity, true);
 
-    // Apply the explosion component to the flying entity.
-    if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka)
+    registry.emplace<ExplosionImpactComponent>(bulletEntity, explosionImpact);
+
+    // Apply the specific explosion component to the bullet entity.
+    if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka || playerInfo.currentWeapon == PlayerInfo::Weapon::Uzi)
     {
         registry.emplace<ContactExplosionComponent>(bulletEntity);
-        registry.emplace<ExplosionImpactComponent>(bulletEntity);
     }
     else if (playerInfo.currentWeapon == PlayerInfo::Weapon::Grenade)
     {
         registry.emplace<TimerExplosionComponent>(bulletEntity);
-        registry.emplace<ExplosionImpactComponent>(bulletEntity);
     }
 
     return bulletEntity;

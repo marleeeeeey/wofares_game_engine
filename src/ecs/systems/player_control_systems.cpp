@@ -7,6 +7,7 @@
 #include <ecs/components/game_components.h>
 #include <imgui_impl_sdl2.h>
 #include <my_common_cpp_utils/logger.h>
+#include <unordered_map>
 #include <utils/coordinates_transformer.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/systems/input_event_manager.h>
@@ -29,8 +30,16 @@ void PlayerControlSystem::SubscribeToInputEvents()
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerMovement(eventInfo); });
 
     inputEventManager.Subscribe(
+        InputEventManager::EventType::ButtonHold,
+        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerChangeWeapon(eventInfo); });
+
+    inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonReleaseAfterHold,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttack(eventInfo); });
+        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttackOnReleaseButton(eventInfo); });
+
+    inputEventManager.Subscribe(
+        InputEventManager::EventType::ButtonHold,
+        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttackOnHoldButton(eventInfo); });
 
     inputEventManager.Subscribe(
         InputEventManager::EventType::RawSdlEvent,
@@ -92,14 +101,46 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
     }
 }
 
-void PlayerControlSystem::HandlePlayerAttack(const InputEventManager::EventInfo& eventInfo)
+void PlayerControlSystem::HandlePlayerAttackOnReleaseButton(const InputEventManager::EventInfo& eventInfo)
 {
     if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
     {
         const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
         for (auto entity : players)
         {
-            float force = std::min(eventInfo.holdDuration * 10.0f, 3.0f);
+            const auto& playerInfo = registry.get<PlayerInfo>(entity);
+
+            // Map current weapon to specific force.
+            std::unordered_map<PlayerInfo::Weapon, float> weaponToForce = {
+                {PlayerInfo::Weapon::Bazooka, std::min(eventInfo.holdDuration * 10.0f, 3.0f)},
+                {PlayerInfo::Weapon::Grenade, std::min(eventInfo.holdDuration * 10.0f, 3.0f)}};
+
+            if (weaponToForce.find(playerInfo.currentWeapon) == weaponToForce.end())
+                continue;
+
+            auto force = weaponToForce[playerInfo.currentWeapon];
+            objectsFactory.CreateBullet(entity, force);
+        }
+    }
+}
+
+void PlayerControlSystem::HandlePlayerAttackOnHoldButton(const InputEventManager::EventInfo& eventInfo)
+{
+    if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
+    {
+        const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
+        for (auto entity : players)
+        {
+            const auto& playerInfo = registry.get<PlayerInfo>(entity);
+
+            // Map current weapon to specific force.
+            std::unordered_map<PlayerInfo::Weapon, float> weaponToForce = {
+                {PlayerInfo::Weapon::Uzi, 1.0}, {PlayerInfo::Weapon::Pistol, 0.5}};
+
+            if (weaponToForce.find(playerInfo.currentWeapon) == weaponToForce.end())
+                continue;
+
+            auto force = weaponToForce[playerInfo.currentWeapon];
             objectsFactory.CreateBullet(entity, force);
         }
     }
@@ -141,6 +182,33 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
             glm::vec2 directionVec = mouseWindowPos - playerWindowPos;
             playerInfo.weaponDirection = glm::normalize(directionVec);
         }
+    }
+};
+
+void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::EventInfo& eventInfo)
+{
+    auto event = eventInfo.originalEvent;
+
+    if (event.type != SDL_KEYDOWN)
+        return;
+
+    auto weaponIndex = event.key.keysym.sym - SDLK_1; // Get zero-based index of the weapon.
+    auto weaponEnumRange = magic_enum::enum_values<PlayerInfo::Weapon>();
+
+    if (weaponIndex < 0 || weaponIndex >= static_cast<int>(weaponEnumRange.size()))
+        return;
+
+    const auto& players = registry.view<PlayerInfo>();
+    for (auto entity : players)
+    {
+        auto& playerInfo = players.get<PlayerInfo>(entity);
+        auto newWeapon = weaponEnumRange[weaponIndex];
+
+        if (newWeapon == playerInfo.currentWeapon)
+            continue;
+
+        playerInfo.currentWeapon = weaponEnumRange[weaponIndex];
+        MY_LOG_FMT(info, "Player {} changed weapon to {}", playerInfo.number, playerInfo.currentWeapon);
     }
 };
 

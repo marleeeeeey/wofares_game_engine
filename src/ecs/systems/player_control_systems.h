@@ -27,9 +27,11 @@ private: // Subscriptions.
     void SubscribeToContactListener();
 private: // Callbacks for the InputEventManager.
     void HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo);
-    void HandlePlayerAttack(const InputEventManager::EventInfo& eventInfo);
+    void HandlePlayerAttackOnReleaseButton(const InputEventManager::EventInfo& eventInfo);
+    void HandlePlayerAttackOnHoldButton(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerBuildingAction(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo);
+    void HandlePlayerChangeWeapon(const InputEventManager::EventInfo& eventInfo);
 private: // Methods to set the ground contact flag.
     void HandlePlayerBeginPlayerContact(entt::entity entityA, entt::entity entityB);
     void HandlePlayerEndPlayerContact(entt::entity entityA, entt::entity entityB);

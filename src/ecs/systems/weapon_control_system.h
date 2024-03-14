@@ -4,9 +4,9 @@
 #include "utils/factories/objects_factory.h"
 #include <entt/entt.hpp>
 #include <queue>
-#include <utils/box2d_body_settings_helper.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/game_options.h>
+#include <utils/physics_body_tuner.h>
 #include <utils/systems/audio_system.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
 
@@ -21,7 +21,7 @@ class WeaponControlSystem
     std::queue<entt::entity> contactedEntities;
     CoordinatesTransformer coordinatesTransformer;
     CollectObjects collectObjects;
-    Box2dBodySettingsHelper box2dBodySettingsHelper;
+    PhysicsBodyTuner PhysicsBodyTuner;
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
