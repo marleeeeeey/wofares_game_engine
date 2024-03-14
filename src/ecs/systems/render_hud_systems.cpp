@@ -1,4 +1,5 @@
 #include "render_hud_systems.h"
+#include "my_common_cpp_utils/config.h"
 #include <ecs/components/game_components.h>
 #include <imgui.h>
 #include <my_common_cpp_utils/logger.h>
@@ -7,14 +8,13 @@
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
 
-
 HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
 void HUDRenderSystem::Render()
 {
-    if (gameState.windowOptions.showGrid)
+    if (utils::GetConfig<bool, "HUDRenderSystem.showGrid">())
         RenderGrid();
 
     RenderDebugMenu();
@@ -51,28 +51,12 @@ void HUDRenderSystem::RenderDebugMenu()
     ImGui::Text(MY_FMT("Space pressed duration on up event: {:.2f}", gameState.debugInfo.spacePressedDurationOnUpEvent)
                     .c_str());
 
-    ImGui::Checkbox("Show Grid", &gameState.windowOptions.showGrid);
-
     // Print last mouse position.
     const auto& lastMousePosition = gameState.windowOptions.lastMousePosInWindow;
     ImGui::Text(MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
 
     // Draw controls the physics world.
-    ImGui::SliderInt("Velocity Iterations", (int*)&gameState.physicsOptions.velocityIterations, 1, 10);
-    ImGui::SliderInt("Position Iterations", (int*)&gameState.physicsOptions.positionIterations, 1, 10);
-    ImGui::SliderInt("Mini Tile Resolution", (int*)&gameState.levelOptions.tileSplitFactor, 1, 8);
     ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
-    ImGui::SliderFloat(
-        "Gap Between Physical And Visual", &gameState.physicsOptions.gapBetweenPhysicalAndVisual, 0.0f, 1.0f);
-    ImGui::SliderFloat("Colision Disable Probability", &gameState.levelOptions.colisionDisableProbability, 0.0f, 1.0f);
-
-    // box2DtoSDL setting.
-    float box2DtoSdlStep = 4.0f;
-    float& box2DtoSDL = gameState.windowOptions.box2DtoSDL;
-    int intValue = static_cast<int>(box2DtoSDL / box2DtoSdlStep);
-    if (ImGui::SliderInt(MY_FMT("Box2D to SDL coef, x{:.2f}", box2DtoSdlStep).c_str(), &intValue, 8, 14))
-        box2DtoSDL = intValue * box2DtoSdlStep;
-    ImGui::Text(MY_FMT("Box2D to SDL: {:.2f}", box2DtoSDL).c_str());
 
     ImGui::End();
 }

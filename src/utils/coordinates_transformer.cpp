@@ -1,8 +1,9 @@
 #include "coordinates_transformer.h"
+#include "my_common_cpp_utils/config.h"
 
 CoordinatesTransformer::CoordinatesTransformer(entt::registry& registry)
   : gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    box2DtoSDL(gameState.windowOptions.box2DtoSDL), sdlToBox2D(1.0f / box2DtoSDL)
+    box2DtoSDL(utils::GetConfig<float, "CoordinatesTransformer.box2DtoSDL">()), sdlToBox2D(1.0f / box2DtoSDL)
 {}
 
 glm::vec2 CoordinatesTransformer::WorldToScreen(const glm::vec2& worldPos, Type type) const

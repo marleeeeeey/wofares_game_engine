@@ -24,20 +24,6 @@ struct LevelOptions
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
     float dynamicBodyProbability{0.0f};
-    size_t tileSplitFactor{2};
-    float colisionDisableProbability{0.7f};
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LevelOptions, tileSplitFactor, colisionDisableProbability)
-};
-
-struct PhysicsOptions
-{
-    int32 velocityIterations{6};
-    int32 positionIterations{2};
-    // Gap between physical and visual objects. Used to prevent dragging of physical objects.
-    // Also affects the destructibility of stacks of tiles. The smaller the gap, the easier it is to destroy the stack.
-    // The bigger the gap, the harder it is to destroy the stack => less random destruction.
-    float gapBetweenPhysicalAndVisual{0.5f};
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(PhysicsOptions, velocityIterations, positionIterations, gapBetweenPhysicalAndVisual)
 };
 
 struct WindowOptions
@@ -47,9 +33,7 @@ struct WindowOptions
     float cameraScale{1.0f};
     glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};
-    float box2DtoSDL = 48.0f; // 1 meter in Box2D is XX pixels in SDL.
-    bool showGrid{false};
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(WindowOptions, fps, cameraScale, box2DtoSDL, showGrid)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(WindowOptions, fps, cameraScale)
 };
 
 struct ControlOptions
@@ -57,15 +41,6 @@ struct ControlOptions
     bool quit{false}; // Flag to control game loop exit
     bool reloadMap{false};
     bool isSceneCaptured{false};
-};
-
-struct SoundOptions
-{
-    float masterVolume{0.0f};
-    bool playBackgroundMusicOnStart{false};
-    float randomSoundEventInterval{10}; // Interval between random sound events in seconds.
-    float nextSoundEventTime{0.0f}; // Time of the next random sound event.
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(SoundOptions, masterVolume, playBackgroundMusicOnStart, randomSoundEventInterval)
 };
 
 struct DebugInfo
@@ -78,10 +53,8 @@ struct GameOptions
 {
     std::shared_ptr<b2World> physicsWorld;
     LevelOptions levelOptions;
-    PhysicsOptions physicsOptions;
     WindowOptions windowOptions;
     ControlOptions controlOptions;
-    SoundOptions soundOptions;
     DebugInfo debugInfo;
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameOptions, levelOptions, physicsOptions, windowOptions, soundOptions)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameOptions, windowOptions)
 };

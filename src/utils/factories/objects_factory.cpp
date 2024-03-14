@@ -1,4 +1,5 @@
 #include "objects_factory.h"
+#include "my_common_cpp_utils/config.h"
 #include "my_common_cpp_utils/logger.h"
 #include "my_common_cpp_utils/math_utils.h"
 #include "utils/entt_registry_wrapper.h"
@@ -18,7 +19,7 @@ ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceMan
 entt::entity ObjectsFactory::CreateTile(
     glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name)
 {
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+    auto& gap = utils::GetConfig<float, "ObjectsFactory.gapBetweenPhysicalAndVisual">();
     glm::vec2 bodySizeWorld(sizeWorld - gap, sizeWorld - gap);
 
     auto entity = registryWrapper.Create(name);
@@ -72,7 +73,7 @@ entt::entity ObjectsFactory::CreateFragmentAfterExplosion(const glm::vec2& sdlWo
 AnimationInfo ObjectsFactory::CreateAnimationInfo(
     const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps)
 {
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
+    auto& gap = utils::GetConfig<float, "ObjectsFactory.gapBetweenPhysicalAndVisual">();
 
     AnimationInfo animationInfo;
     animationInfo.animation = resourceManager.GetAnimation(animationName, tagName, tagProps);
@@ -134,7 +135,6 @@ std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
     const std::vector<entt::entity>& physicalEntities, SDL_Point cellSize)
 {
     auto physicsWorld = gameState.physicsWorld;
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
     Box2dBodyCreator box2dBodyCreator(registry);
     CoordinatesTransformer coordinatesTransformer(registry);
     glm::vec2 cellSizeGlm(cellSize.x, cellSize.y);

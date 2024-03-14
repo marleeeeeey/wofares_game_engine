@@ -10,7 +10,8 @@ class RandomEventSystem
     entt::registry& registry;
     GameOptions& gameState;
     std::default_random_engine rng;
-    float elapsedTime;
+    float elapsedTime{0.0f};
+    float nextSoundEventTime{0.0f}; // Time of the next random sound event.
 public:
     RandomEventSystem(entt::registry& registry, AudioSystem& audioSystem);
     void Update(float deltaTime);

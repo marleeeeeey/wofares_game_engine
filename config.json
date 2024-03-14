@@ -1,30 +1,43 @@
 {
-  "gameOptions": {
-    "levelOptions": {
-      "tileSplitFactor": 2,
-      "colisionDisableProbability": 1
-    },
-    "physicsOptions": {
-      "velocityIterations": 6,
-      "positionIterations": 2,
-      "gapBetweenPhysicalAndVisual": 0
-    },
+  "GameOptions": {
+    // TODO2: Reorder the windowOptions to specific system
     "windowOptions": {
       "fps": 60,
-      "cameraScale": 2,
-      "box2DtoSDL": 48,
-      "showGrid": false
-    },
-    "soundOptions": {
-      "masterVolume": 0,
-      "playBackgroundMusicOnStart": false,
-      "randomSoundEventInterval": 10
+      "cameraScale": 2
     }
   },
-  "weaponControlSystem": {
+  "WeaponControlSystem": {
     "cellSizeForMicroDistruction": 2
   },
   "CameraControlSystem": {
     "mousePosImpactOnCameraAnchor": false
+  },
+  "PlayerControlSystem": {
+    "playerControlsWorksOnGroundOnly": true
+  },
+  "AudioSystem": {
+    "masterVolume": 0
+  },
+  "RandomEventSystem": {
+    "randomSoundEventInterval_sec": 10
+  },
+  "PhysicsSystem": {
+    "velocityIterations": 6,
+    "positionIterations": 2
+  },
+  "MapLoaderSystem": {
+    "tileSplitFactor": 2
+  },
+  "ObjectsFactory": {
+    // Gap between physical and visual objects. Used to prevent dragging of physical objects.
+    // Also affects the destructibility of stacks of tiles. The smaller the gap, the easier it is to destroy the stack.
+    // The bigger the gap, the harder it is to destroy the stack => less random destruction.
+    "gapBetweenPhysicalAndVisual": 0
+  },
+  "CoordinatesTransformer": {
+    "box2DtoSDL": 48
+  },
+  "HUDRenderSystem": {
+    "showGrid": false
   }
 }

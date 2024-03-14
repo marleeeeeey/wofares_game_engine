@@ -2,7 +2,7 @@
 #include <SDL_mixer.h>
 
 AudioSystem::AudioSystem(ResourceManager& resourceManager)
-  : resourceManager(resourceManager), masterVolume(utils::GetConfig<float, "gameOptions.soundOptions.masterVolume">())
+  : resourceManager(resourceManager), masterVolume(utils::GetConfig<float, "AudioSystem.masterVolume">())
 {}
 
 void AudioSystem::PlayMusic(const std::string& musicName)

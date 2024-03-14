@@ -1,4 +1,5 @@
 #include "phisics_systems.h"
+#include "my_common_cpp_utils/config.h"
 #include <ecs/components/game_components.h>
 #include <glm/glm.hpp>
 #include <utils/box2d_helpers.h>
@@ -14,9 +15,11 @@ PhysicsSystem::PhysicsSystem(EnttRegistryWrapper& registryWrapper)
 
 void PhysicsSystem::Update(float deltaTime)
 {
+    auto& velocityIterations = utils::GetConfig<int, "PhysicsSystem.velocityIterations">();
+    auto& positionIterations = utils::GetConfig<int, "PhysicsSystem.positionIterations">();
+
     // Update the physics world with Box2D engine.
-    physicsWorld->Step(
-        deltaTime, gameState.physicsOptions.velocityIterations, gameState.physicsOptions.positionIterations);
+    physicsWorld->Step(deltaTime, velocityIterations, positionIterations);
 
     SetPlayersRotationToZero(); // players should not rotate.
     UpdatePlayersWeaponDirection();

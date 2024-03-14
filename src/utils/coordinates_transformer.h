@@ -11,8 +11,8 @@
 class CoordinatesTransformer
 {
     const GameOptions& gameState;
-    const float box2DtoSDL;
-    const float sdlToBox2D;
+    const float box2DtoSDL; // 1 meter in Box2D is XX pixels in SDL.
+    const float sdlToBox2D; // 1 pixel in SDL is XX meters in Box2D.
 public:
     enum class Type
     {

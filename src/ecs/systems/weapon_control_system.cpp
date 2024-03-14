@@ -102,7 +102,7 @@ void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
         grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
 
     // Split original objects to micro objects.
-    auto& cellSizeForMicroDistruction = utils::GetConfig<int, "weaponControlSystem.cellSizeForMicroDistruction">();
+    auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();
     SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
     auto splittedEntities = objectsFactory.SpawnSplittedPhysicalEnteties(staticOriginalBodies, cellSize);
 

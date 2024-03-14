@@ -1,6 +1,7 @@
 #include "player_control_systems.h"
 #include "entt/entity/fwd.hpp"
 #include "glm/fwd.hpp"
+#include "my_common_cpp_utils/config.h"
 #include "utils/entt_registry_wrapper.h"
 #include <SDL.h>
 #include <ecs/components/game_components.h>
@@ -17,6 +18,12 @@ PlayerControlSystem::PlayerControlSystem(
     transformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory)
 {
+    SubscribeToInputEvents();
+    SubscribeToContactListener();
+}
+
+void PlayerControlSystem::SubscribeToInputEvents()
+{
     inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonHold,
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerMovement(eventInfo); });
@@ -32,15 +39,17 @@ PlayerControlSystem::PlayerControlSystem(
     inputEventManager.Subscribe(
         InputEventManager::EventType::RawSdlEvent,
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerWeaponDirection(eventInfo); });
+};
 
-    // Subscribe to the contact listener to handle the ground contact flag.
+void PlayerControlSystem::SubscribeToContactListener()
+{
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::BeginSensor,
-        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerBeginSensorContact(entityA, entityB); });
+        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerBeginPlayerContact(entityA, entityB); });
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::EndSensor,
-        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerEndSensorContact(entityA, entityB); });
-}
+        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerEndPlayerContact(entityA, entityB); });
+};
 
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
 {
@@ -54,6 +63,12 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
     {
         const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
+
+        // If the player is not on the ground, then don't allow to move or jump.
+        bool playerControlsWorksOnGroundOnly =
+            utils::GetConfig<bool, "PlayerControlSystem.playerControlsWorksOnGroundOnly">();
+        if (playerControlsWorksOnGroundOnly && playerInfo.countOfGroundContacts <= 0)
+            continue;
 
         auto mass = body->GetMass();
         movingForce *= mass;
@@ -159,19 +174,19 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
     }
 };
 
-void PlayerControlSystem::HandlePlayerEndSensorContact(entt::entity entityA, entt::entity entityB)
+void PlayerControlSystem::HandlePlayerEndPlayerContact(entt::entity entityA, entt::entity entityB)
 {
-    SetGroundContactFlagIfPlayer(entityA, false);
-    SetGroundContactFlagIfPlayer(entityB, false);
+    SetGroundContactFlagIfEntityIsPlayer(entityA, false);
+    SetGroundContactFlagIfEntityIsPlayer(entityB, false);
 };
 
-void PlayerControlSystem::HandlePlayerBeginSensorContact(entt::entity entityA, entt::entity entityB)
+void PlayerControlSystem::HandlePlayerBeginPlayerContact(entt::entity entityA, entt::entity entityB)
 {
-    SetGroundContactFlagIfPlayer(entityA, true);
-    SetGroundContactFlagIfPlayer(entityB, true);
+    SetGroundContactFlagIfEntityIsPlayer(entityA, true);
+    SetGroundContactFlagIfEntityIsPlayer(entityB, true);
 };
 
-void PlayerControlSystem::SetGroundContactFlagIfPlayer(entt::entity entity, bool value)
+void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value)
 {
     auto playerInfo = registry.try_get<PlayerInfo>(entity);
     if (playerInfo)

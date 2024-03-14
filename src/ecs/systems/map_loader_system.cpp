@@ -1,4 +1,5 @@
 #include "map_loader_system.h"
+#include "my_common_cpp_utils/config.h"
 #include "utils/entt_registry_wrapper.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
@@ -9,7 +10,6 @@
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
 #include <utils/sdl_texture_process.h>
-
 
 MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
@@ -42,7 +42,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
     tileHeight = mapJson["tileheight"];
 
     // Calculate mini tile size: 4x4 mini tiles in one big tile.
-    colAndRowNumber = gameState.levelOptions.tileSplitFactor;
+    colAndRowNumber = utils::GetConfig<size_t, "MapLoaderSystem.tileSplitFactor">();
     miniWidth = tileWidth / colAndRowNumber;
     miniHeight = tileHeight / colAndRowNumber;
 
@@ -94,7 +94,6 @@ void MapLoaderSystem::UnloadMap()
 void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
 {
     auto physicsWorld = gameState.physicsWorld;
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
 
     int layerCols = layer["width"];
     int layerRows = layer["height"];
@@ -142,7 +141,6 @@ void MapLoaderSystem::CalculateLevelBoundsWithBufferZone()
 void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
 {
     auto physicsWorld = gameState.physicsWorld;
-    auto gap = gameState.physicsOptions.gapBetweenPhysicalAndVisual;
 
     SDL_Rect textureSrcRect = CalculateSrcRect(tileId, tileWidth, tileHeight, tilesetTexture);
 

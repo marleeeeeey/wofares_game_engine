@@ -8,6 +8,7 @@
 #include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/weapon_control_system.h>
+#include <iostream>
 #include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/json_utils.h>
 #include <my_common_cpp_utils/logger.h>
@@ -52,7 +53,7 @@ int main(int argc, char* args[])
 
         // Create a game state entity.
         auto& gameOptions = registry.emplace<GameOptions>(
-            registryWrapper.Create("gameOptions"), utils::GetConfig<GameOptions, "gameOptions">());
+            registryWrapper.Create("GameOptions"), utils::GetConfig<GameOptions, "GameOptions">());
 
         // Create a physics world with gravity and store it in the registry.
         b2Vec2 gravity(0.0f, +9.8f);
@@ -74,8 +75,7 @@ int main(int argc, char* args[])
         MY_LOG_FMT(info, "Assets settings loaded: {}", assetsSettingsFilePath.string());
         ResourceManager resourceManager(renderer.get(), assetsSettingsJson);
         AudioSystem audioSystem(resourceManager);
-        if (gameOptions.soundOptions.playBackgroundMusicOnStart)
-            audioSystem.PlayMusic("background_music");
+        audioSystem.PlayMusic("background_music");
 
         ObjectsFactory objectsFactory(registryWrapper, resourceManager);
 
@@ -157,6 +157,9 @@ int main(int argc, char* args[])
     }
     catch (const std::runtime_error& e)
     {
+        // This line is needed to log exceptions from the logger. Because the logger is used in the catch block.
+        std::cout << "Unhandled exception catched in main: " << e.what() << std::endl;
+
         MY_LOG_FMT(warn, "Unhandled exception catched in main: {}", e.what());
         return -1;
     }
