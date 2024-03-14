@@ -2,7 +2,6 @@
 #include "my_common_cpp_utils/config.h"
 #include <ecs/components/game_components.h>
 #include <glm/glm.hpp>
-#include <utils/box2d_helpers.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>

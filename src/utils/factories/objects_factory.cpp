@@ -66,7 +66,8 @@ entt::entity ObjectsFactory::CreateFragmentAfterExplosion(const glm::vec2& sdlWo
     registry.emplace<AnimationInfo>(entity, fragmentAnimation);
     registry.emplace<PhysicsInfo>(
         entity, box2dBodyCreator.CreatePhysicsBody(entity, sdlWorldPos, fragmentAnimation.sdlBBox));
-    registry.emplace<CollisionDisableTimerComponent>(entity); // TODO0: replace it to CollisionDisableHitCountComponent
+    registry.emplace<CollisionDisableHitCountComponent>(
+        entity, utils::GetConfig<size_t, "ObjectsFactory.numberOfHitsToDisableCollisionsForFragments">());
     return entity;
 };
 

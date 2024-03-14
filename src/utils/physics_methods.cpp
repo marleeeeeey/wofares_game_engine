@@ -1,5 +1,4 @@
 #include "physics_methods.h"
-#include <utils/box2d_helpers.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
 

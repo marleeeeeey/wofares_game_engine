@@ -4,6 +4,7 @@
 #include "utils/factories/objects_factory.h"
 #include <entt/entt.hpp>
 #include <queue>
+#include <utils/box2d_body_settings_helper.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/game_options.h>
 #include <utils/systems/audio_system.h>
@@ -20,6 +21,7 @@ class WeaponControlSystem
     std::queue<entt::entity> contactedEntities;
     CoordinatesTransformer coordinatesTransformer;
     CollectObjects collectObjects;
+    Box2dBodySettingsHelper box2dBodySettingsHelper;
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
@@ -32,7 +34,7 @@ private:
     void UpdateTimerExplosionComponents(float deltaTime);
     void UpdateContactExplosionComponentTimer(float deltaTime);
     void UpdateCollisionDisableTimerComponent(float deltaTime);
-    void UpdateCollisionDisableHitCountComponent();
+    void UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity);
     void ProcessExplosionEntitiesQueue();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
     void DoExplosion(entt::entity explosionEntity);

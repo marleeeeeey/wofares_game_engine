@@ -8,7 +8,7 @@
 #include <entt/entity/fwd.hpp>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
-#include <utils/box2d_helpers.h>
+#include <utils/box2d_body_settings_helper.h>
 #include <utils/collect_objects.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
@@ -23,7 +23,7 @@ WeaponControlSystem::WeaponControlSystem(
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
     audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry),
-    collectObjects(registry, objectsFactory)
+    collectObjects(registry, objectsFactory), box2dBodySettingsHelper(registry)
 {
     SubscribeToContactEvents();
 }
@@ -48,10 +48,23 @@ void WeaponControlSystem::SubscribeToContactEvents()
                 if (!registry.all_of<ContactExplosionComponent>(explosionEntity))
                     continue;
 
-                // Other entity is the entity that was contacted with the explosion.
                 auto contactedEntity = entityA == explosionEntity ? entityB : entityA;
-
                 OnContactWithExplosionComponent(explosionEntity, contactedEntity);
+            }
+        });
+
+    contactListener.SubscribeContact(
+        Box2dEnttContactListener::ContactType::Begin,
+        [this](entt::entity entityA, entt::entity entityB)
+        {
+            for (const auto& entity : {entityA, entityB})
+            {
+                // If the entity contains the CollisionDisableHitCountComponent.
+                if (!registry.all_of<CollisionDisableHitCountComponent>(entity))
+                    continue;
+
+                auto hitCountEntity = entityA == entity ? entityB : entityA;
+                UpdateCollisionDisableHitCountComponent(entity);
             }
         });
 }
@@ -63,6 +76,24 @@ void WeaponControlSystem::OnContactWithExplosionComponent(entt::entity explosion
     if (contactExplosion.spawnSafeTime <= 0.0f)
     {
         contactedEntities.push(explosionEntity);
+    }
+};
+
+void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity)
+{
+    auto hitCount = registry.try_get<CollisionDisableHitCountComponent>(hitCountEntity);
+    if (!hitCount)
+        return;
+
+    hitCount->hitCount--;
+
+    // log number of hits
+    MY_LOG_FMT(info, "Number of hits: {}", hitCount->hitCount);
+
+    if (hitCount->hitCount <= 0)
+    {
+        registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
+        box2dBodySettingsHelper.DisableCollisionForTheEntity(hitCountEntity);
     }
 };
 
@@ -160,12 +191,7 @@ void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
         if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
         {
             registry.remove<CollisionDisableTimerComponent>(entity);
-            auto physicsInfo = registry.try_get<PhysicsInfo>(entity);
-            if (physicsInfo)
-            {
-                auto body = physicsInfo->bodyRAII->GetBody();
-                utils::DisableCollisionForTheBody(body);
-            }
+            box2dBodySettingsHelper.DisableCollisionForTheEntity(entity);
         }
     }
 };

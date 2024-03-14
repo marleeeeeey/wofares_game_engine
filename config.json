@@ -13,7 +13,7 @@
     "mousePosImpactOnCameraAnchor": false
   },
   "PlayerControlSystem": {
-    "playerControlsWorksOnGroundOnly": true
+    "playerControlsWorksOnGroundOnly": false
   },
   "AudioSystem": {
     "masterVolume": 0
@@ -32,7 +32,8 @@
     // Gap between physical and visual objects. Used to prevent dragging of physical objects.
     // Also affects the destructibility of stacks of tiles. The smaller the gap, the easier it is to destroy the stack.
     // The bigger the gap, the harder it is to destroy the stack => less random destruction.
-    "gapBetweenPhysicalAndVisual": 0
+    "gapBetweenPhysicalAndVisual": 0,
+    "numberOfHitsToDisableCollisionsForFragments": 7
   },
   "CoordinatesTransformer": {
     "box2DtoSDL": 48
