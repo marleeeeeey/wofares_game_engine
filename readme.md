@@ -27,7 +27,7 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 
 ### Build and run from console
 
-```cmd
+```
 git clone --recursive https://github.com/marleeeeeey/wofares-game.git
 cd wofares-game
 git submodule update --init --recursive
@@ -35,14 +35,14 @@ mkdir build
 cd build
 cmake -G "Ninja" DCMAKE_CXX_COMPILER=clang++ -B . -S ..
 cmake --build .
-# copy ${workspaceFolder}/config.json ${workspaceFolder}/build/src/config.json
-# copy_directory ${workspaceFolder}/thirdparty/game_assets/wofares/assets ${workspaceFolder}/build/src/assets
+cmake -E copy ../config.json ./src/config.json
+cmake -E copy_directory ../thirdparty/game_assets/wofares/assets ./src/assets
 src/wofares.exe
 ```
 
 ### File Structure
 
-```cmd
+```
 wofares/
 ├── CMakeLists.txt          # Main CMakeLists file for the project. Used to search dependencies and set up the project.
 ├── thirdparty/
