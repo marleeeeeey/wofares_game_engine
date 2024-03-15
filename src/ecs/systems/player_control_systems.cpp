@@ -23,6 +23,15 @@ PlayerControlSystem::PlayerControlSystem(
     SubscribeToContactListener();
 }
 
+void PlayerControlSystem::Update(float deltaTime)
+{
+    const auto& players = registry.view<PlayerInfo>();
+    for (auto entity : players)
+    {
+        UpdateFireRateAndReloadTime(entity, deltaTime);
+    }
+};
+
 void PlayerControlSystem::SubscribeToInputEvents()
 {
     inputEventManager.Subscribe(
@@ -108,18 +117,10 @@ void PlayerControlSystem::HandlePlayerAttackOnReleaseButton(const InputEventMana
         const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
         for (auto entity : players)
         {
-            const auto& playerInfo = registry.get<PlayerInfo>(entity);
-
-            // Map current weapon to specific force.
-            std::unordered_map<PlayerInfo::Weapon, float> weaponToForce = {
-                {PlayerInfo::Weapon::Bazooka, std::min(eventInfo.holdDuration * 10.0f, 3.0f)},
-                {PlayerInfo::Weapon::Grenade, std::min(eventInfo.holdDuration * 10.0f, 3.0f)}};
-
-            if (weaponToForce.find(playerInfo.currentWeapon) == weaponToForce.end())
-                continue;
-
-            auto force = weaponToForce[playerInfo.currentWeapon];
-            objectsFactory.CreateBullet(entity, force);
+            // TODO2: Make in no linear way.
+            float throwingForce = std::min(eventInfo.holdDuration * 0.3f, 0.2f);
+            MY_LOG_FMT(debug, "Throwing force: {}", throwingForce);
+            MakeShotIfPossible(entity, throwingForce);
         }
     }
 }
@@ -131,17 +132,8 @@ void PlayerControlSystem::HandlePlayerAttackOnHoldButton(const InputEventManager
         const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
         for (auto entity : players)
         {
-            const auto& playerInfo = registry.get<PlayerInfo>(entity);
-
-            // Map current weapon to specific force.
-            std::unordered_map<PlayerInfo::Weapon, float> weaponToForce = {
-                {PlayerInfo::Weapon::Uzi, 1.0}, {PlayerInfo::Weapon::Pistol, 0.5}};
-
-            if (weaponToForce.find(playerInfo.currentWeapon) == weaponToForce.end())
-                continue;
-
-            auto force = weaponToForce[playerInfo.currentWeapon];
-            objectsFactory.CreateBullet(entity, force);
+            float throwingForce = 0.0f;
+            MakeShotIfPossible(entity, throwingForce);
         }
     }
 }
@@ -193,7 +185,7 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
         return;
 
     auto weaponIndex = event.key.keysym.sym - SDLK_1; // Get zero-based index of the weapon.
-    auto weaponEnumRange = magic_enum::enum_values<PlayerInfo::Weapon>();
+    auto weaponEnumRange = magic_enum::enum_values<WeaponType>();
 
     if (weaponIndex < 0 || weaponIndex >= static_cast<int>(weaponEnumRange.size()))
         return;
@@ -207,8 +199,14 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
         if (newWeapon == playerInfo.currentWeapon)
             continue;
 
+        if (!playerInfo.weapons.contains(newWeapon))
+        {
+            MY_LOG_FMT(warn, "Player {} does not have {} weapon", playerInfo.number, newWeapon);
+            continue;
+        }
+
         playerInfo.currentWeapon = weaponEnumRange[weaponIndex];
-        MY_LOG_FMT(info, "Player {} changed weapon to {}", playerInfo.number, playerInfo.currentWeapon);
+        MY_LOG_FMT(trace, "Player {} changed weapon to {}", playerInfo.number, playerInfo.currentWeapon);
     }
 };
 
@@ -231,5 +229,108 @@ void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity enti
     {
         playerInfo->countOfGroundContacts += value ? 1 : -1;
         MY_LOG_FMT(debug, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
+    }
+};
+
+entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, float throwingForce)
+{
+    if (!registry.all_of<PlayerInfo>(playerEntity))
+    {
+        MY_LOG_FMT(
+            trace, "[MakeShotIfPossible] entity does not have all of the required components. Entity: {}",
+            static_cast<int>(playerEntity));
+        return entt::null;
+    }
+
+    auto& playerInfo = registry.get<PlayerInfo>(playerEntity);
+
+    // Check if the throwing force is zero for the grenade.
+    if (throwingForce <= 0 && playerInfo.currentWeapon == WeaponType::Grenade)
+    {
+        MY_LOG_FMT(
+            trace, "[MakeShotIfPossible] Throwing force shouldn't be zero for weapon {}. Entity: {}, force: {}",
+            playerInfo.currentWeapon, static_cast<int>(playerEntity), throwingForce);
+        return entt::null;
+    }
+
+    // Check if player has weapon set as current.
+    if (!playerInfo.weapons.contains(playerInfo.currentWeapon))
+    {
+        MY_LOG_FMT(
+            trace, "[MakeShotIfPossible] Player does not have {} weapon set as current. Entity: {}",
+            playerInfo.currentWeapon, static_cast<int>(playerEntity));
+        return entt::null;
+    }
+    WeaponProps& currentWeaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
+
+    // Check if player has ammo for the weapon.
+    if (currentWeaponProps.ammoInClip == 0)
+    {
+        MY_LOG_FMT(
+            trace, "[MakeShotIfPossible] Player does not have ammo in clip for the {} weapon. Entity: {}",
+            playerInfo.currentWeapon, static_cast<int>(playerEntity));
+        return entt::null;
+    }
+
+    // Check if player is in the reload process.
+    if (currentWeaponProps.remainingReloadTime > 0)
+    {
+        MY_LOG_FMT(
+            warn, "[MakeShotIfPossible] Player is in the reload process. Entity: {}", static_cast<int>(playerEntity));
+        return entt::null;
+    }
+
+    // Check if player in the fire rate cooldown.
+    if (currentWeaponProps.remainingFireRate > 0)
+    {
+        MY_LOG_FMT(
+            trace, "[MakeShotIfPossible] Player is in the fire rate cooldown. Entity: {}",
+            static_cast<int>(playerEntity));
+        return entt::null;
+    }
+
+    // Update player ammo.
+    currentWeaponProps.ammoInClip -= 1;
+    currentWeaponProps.remainingFireRate = currentWeaponProps.fireRate;
+    if (currentWeaponProps.ammoInClip == 0)
+    {
+        // TODO2: Start reloading sound and animation.
+        currentWeaponProps.remainingReloadTime = currentWeaponProps.reloadTime;
+    }
+
+    // Calculate initial bullet speed.
+    float initialBulletSpeed = currentWeaponProps.bulletEjectionForce / currentWeaponProps.bulletMass;
+    initialBulletSpeed += throwingForce; // Add throwing force for the grenade with zero initial speed.
+    initialBulletSpeed *= 40; // TODO2: Remove this magic number.
+
+    // Create a bullet.
+    auto bulletEntity = objectsFactory.CreateBullet(playerEntity, initialBulletSpeed);
+    return bulletEntity;
+};
+
+void PlayerControlSystem::UpdateFireRateAndReloadTime(entt::entity playerEntity, float deltaTime)
+{
+    auto& playerInfo = registry.get<PlayerInfo>(playerEntity);
+    for (auto& [weaponType, weaponProps] : playerInfo.weapons)
+    {
+        if (weaponProps.remainingFireRate > 0)
+        {
+            weaponProps.remainingFireRate -= deltaTime;
+        }
+
+        if (weaponProps.remainingReloadTime > 0)
+        {
+            weaponProps.remainingReloadTime -= deltaTime;
+
+            if (weaponProps.remainingReloadTime <= 0)
+            {
+                // TODO2: Stop reloading sound and animation.
+                weaponProps.ammoInClip = std::min(weaponProps.clipSize, weaponProps.ammoInStorage);
+                weaponProps.ammoInStorage -= weaponProps.ammoInClip;
+                MY_LOG_FMT(
+                    trace, "Player {} reloaded weapon {}. Ammo in clip: {}, ammo in storage: {}", playerInfo.number,
+                    weaponType, weaponProps.ammoInClip, weaponProps.ammoInStorage);
+            }
+        }
     }
 };

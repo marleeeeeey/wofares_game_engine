@@ -3,8 +3,10 @@
 #include <box2d/box2d.h>
 #include <glm/glm.hpp>
 #include <memory>
+#include <unordered_map>
 #include <utils/RAII/box2d_RAII.h>
 #include <utils/RAII/sdl_RAII.h>
+#include <utils/weapon.h>
 
 // ********************************* Rendering components *********************************
 
@@ -46,19 +48,10 @@ struct AnimationInfo
 
 struct PlayerInfo
 {
-    enum class Weapon
-    {
-        None,
-        Bazooka,
-        Grenade,
-        Uzi,
-        Pistol
-    };
-
     size_t number = 0;
-    Weapon currentWeapon = Weapon::Bazooka;
+    std::unordered_map<WeaponType, WeaponProps> weapons;
+    WeaponType currentWeapon = WeaponType::Bazooka;
     glm::vec2 weaponDirection = {1, 0};
-    float timeToReload = 1.0f; // Time in seconds to reload the weapon. TODO: implement it.
     size_t countOfGroundContacts = 0; // Flag indicating whether the player can jump.
 };
 

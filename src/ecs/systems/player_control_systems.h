@@ -22,6 +22,8 @@ public:
     PlayerControlSystem(
         EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
         Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory);
+public: // Update.
+    void Update(float deltaTime);
 private: // Subscriptions.
     void SubscribeToInputEvents();
     void SubscribeToContactListener();
@@ -32,8 +34,11 @@ private: // Callbacks for the InputEventManager.
     void HandlePlayerBuildingAction(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerChangeWeapon(const InputEventManager::EventInfo& eventInfo);
-private: // Methods to set the ground contact flag.
+private: // Callback for contact listener. Uses to set the ground contact flag.
     void HandlePlayerBeginPlayerContact(entt::entity entityA, entt::entity entityB);
     void HandlePlayerEndPlayerContact(entt::entity entityA, entt::entity entityB);
     void SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value);
+private: // Shooting.
+    entt::entity MakeShotIfPossible(entt::entity playerEntity, float throwingForce);
+    void UpdateFireRateAndReloadTime(entt::entity playerEntity, float deltaTime);
 };

@@ -27,7 +27,7 @@ public: // On map load.
 public: // On player action.
     entt::entity SpawnFlyingEntity(
         const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force);
-    entt::entity CreateBullet(entt::entity shooterPlayer, float force);
+    entt::entity CreateBullet(entt::entity playerEntity, float initialBulletSpeed);
 public: // Explosions.
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
     std::vector<entt::entity> SpawnSplittedPhysicalEnteties(

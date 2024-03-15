@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <utils/game_options.h>
 
-
 class HUDRenderSystem
 {
     entt::registry& registry;
@@ -17,4 +16,5 @@ public:
 private:
     void RenderDebugMenu();
     void RenderGrid();
+    void DrawPlayersWindowInfo();
 };

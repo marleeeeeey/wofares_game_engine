@@ -18,11 +18,12 @@ void HUDRenderSystem::Render()
         RenderGrid();
 
     RenderDebugMenu();
+    DrawPlayersWindowInfo();
 }
 
 void HUDRenderSystem::RenderDebugMenu()
 {
-    ImGui::Begin("HUD");
+    ImGui::Begin("Debug Menu");
 
     if (ImGui::Button("Reload Map"))
         gameState.controlOptions.reloadMap = true;
@@ -106,3 +107,29 @@ void HUDRenderSystem::RenderGrid()
     // Draw the center of screen point
     DrawCross(renderer, gameState.windowOptions.windowSize / 2.0f, 20, screenCenterColor);
 }
+
+void HUDRenderSystem::DrawPlayersWindowInfo()
+{
+    for (auto entity : registry.view<PlayerInfo>())
+    {
+        auto& playerInfo = registry.get<PlayerInfo>(entity);
+        ImGui::Begin(MY_FMT("Player {} HUD", playerInfo.number).c_str());
+
+        // Encrease font size.
+        ImGui::SetWindowFontScale(3);
+
+        std::string reloadingStatus = "";
+        if (playerInfo.weapons.at(playerInfo.currentWeapon).remainingReloadTime > 0)
+            reloadingStatus = "Reloading...";
+        else if (playerInfo.weapons.at(playerInfo.currentWeapon).remainingFireRate > 0)
+            reloadingStatus = "Fire rate...";
+
+        ImGui::Text(MY_FMT(
+                        "{}, Ammo: {}/{} {}", playerInfo.currentWeapon,
+                        playerInfo.weapons.at(playerInfo.currentWeapon).ammoInClip,
+                        playerInfo.weapons.at(playerInfo.currentWeapon).ammoInStorage, reloadingStatus)
+                        .c_str());
+
+        ImGui::End();
+    }
+};

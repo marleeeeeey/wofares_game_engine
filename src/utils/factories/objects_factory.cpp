@@ -3,6 +3,7 @@
 #include "my_common_cpp_utils/logger.h"
 #include "my_common_cpp_utils/math_utils.h"
 #include "utils/entt_registry_wrapper.h"
+#include "utils/factories/weapon_props_factory.h"
 #include "utils/math_utils.h"
 #include "utils/physics_methods.h"
 #include "utils/sdl_texture_process.h"
@@ -44,7 +45,8 @@ entt::entity ObjectsFactory::CreatePlayer(const glm::vec2& sdlPos)
 
     auto entity = registryWrapper.Create("Player");
     registry.emplace<AnimationInfo>(entity, playerAnimation);
-    registry.emplace<PlayerInfo>(entity);
+    auto& playerInfo = registry.emplace<PlayerInfo>(entity);
+    playerInfo.weapons = WeaponPropsFactory::CreateAllWeaponsSet();
 
     // Create a Box2D body for the player.
     Box2dBodyCreator::Options options;
@@ -96,7 +98,7 @@ AnimationInfo ObjectsFactory::CreateAnimationInfo(
 };
 
 entt::entity ObjectsFactory::SpawnFlyingEntity(
-    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force)
+    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float initialSpeed)
 {
     // Create the flying entity.
     auto flyingEntity = registryWrapper.Create("flyingEntity");
@@ -104,65 +106,70 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     // Create a Box2D body for the flying entity.
     Box2dBodyCreator::Options options;
     options.isDynamic = true;
-    options.shape = Box2dBodyCreator::Options::Shape::Circle;
+    options.shape = Box2dBodyCreator::Options::Shape::Box;
     auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
 
     registry.emplace<RenderingInfo>(flyingEntity, sizeWorld);
     registry.emplace<PhysicsInfo>(flyingEntity, physicsBody);
 
     // Apply the force to the flying entity.
-    b2Vec2 forceVec = b2Vec2(force, 0);
-    forceVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), forceVec);
-    physicsBody->GetBody()->ApplyLinearImpulseToCenter(forceVec, true);
+    b2Vec2 speedVec = b2Vec2(initialSpeed, 0);
+    speedVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), speedVec);
+    physicsBody->GetBody()->SetLinearVelocity(speedVec);
 
     return flyingEntity;
 };
 
-entt::entity ObjectsFactory::CreateBullet(entt::entity entity, float force)
+// TODO1: maybe used initialSpeed instead of initialForce.
+entt::entity ObjectsFactory::CreateBullet(entt::entity playerEntity, float initialBulletSpeed)
 {
-    if (!registry.all_of<PlayerInfo, PhysicsInfo, AnimationInfo>(entity))
+    if (!registry.all_of<PlayerInfo, PhysicsInfo, AnimationInfo>(playerEntity))
     {
         MY_LOG_FMT(
-            warn, "[CreateBullet] entity does not have all of the required components. Entity: {}",
-            static_cast<int>(entity));
+            warn, "[CreateBullet] Player does not have all of the required components. Entity: {}",
+            static_cast<int>(playerEntity));
         return entt::null;
     }
+    const auto& playerInfo = registry.get<PlayerInfo>(playerEntity);
 
-    const auto& playerInfo = registry.get<PlayerInfo>(entity);
-    const auto& playerBody = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-    const auto& animationInfo = registry.get<AnimationInfo>(entity);
-    // TODO2: use the size from specific bounding box.
-    const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sdlSize;
-    const auto& weaponDirection = playerInfo.weaponDirection;
+    // 1. Check if player has weapon set as current.
+    if (!playerInfo.weapons.contains(playerInfo.currentWeapon))
+    {
+        MY_LOG_FMT(
+            trace, "[CreateBullet] Player does not have {} weapon set as current. Entity: {}", playerInfo.currentWeapon,
+            static_cast<int>(playerEntity));
+        return entt::null;
+    }
+    const WeaponProps& currentWeaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
 
-    // Calculate the position of the grenade slightly in front of the player.
-    glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
-    glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x / 2.0f;
-
-    // Map weapon to projectile size and explosion impact component.
-    const std::unordered_map<PlayerInfo::Weapon, std::tuple<glm::vec2, ExplosionImpactComponent>>
-        weaponToProjectileSize = {
-            {PlayerInfo::Weapon::Bazooka, {glm::vec2(5, 5), {0.5f, 1000.0f}}},
-            {PlayerInfo::Weapon::Grenade, {glm::vec2(4, 4), {0.3f, 800.0f}}},
-            {PlayerInfo::Weapon::Uzi, {glm::vec2(2, 2), {0.2f, 200.0f}}},
-            {PlayerInfo::Weapon::Pistol, {glm::vec2(1, 1), {0.1f, 50.0f}}},
-        };
-    auto [projectileSize, explosionImpact] = weaponToProjectileSize.at(playerInfo.currentWeapon);
+    // 4. Create bullet entity.
+    ExplosionImpactComponent explosionImpact;
+    explosionImpact.force = currentWeaponProps.damageForce;
+    explosionImpact.radius = transformer.WorldToPhysics(currentWeaponProps.damageRadiusWorld);
 
     // Spawn flying entity.
-    entt::entity bulletEntity = SpawnFlyingEntity(positionInFrontOfPlayer, projectileSize, weaponDirection, force);
+    const auto& playerBody = registry.get<PhysicsInfo>(playerEntity).bodyRAII->GetBody();
+    const auto& animationInfo = registry.get<AnimationInfo>(playerEntity);
+    // TODO0: use the size from specific bounding box. Do not like that Animation info impact on physics.
+    const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sdlSize;
+    const auto& weaponDirection = playerInfo.weaponDirection;
+    glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
+    glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x / 2.0f;
+    entt::entity bulletEntity = SpawnFlyingEntity(
+        positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed);
     bodyTuner.SetBulletFlagForTheEntity(bulletEntity, true);
 
     registry.emplace<ExplosionImpactComponent>(bulletEntity, explosionImpact);
 
     // Apply the specific explosion component to the bullet entity.
-    if (playerInfo.currentWeapon == PlayerInfo::Weapon::Bazooka || playerInfo.currentWeapon == PlayerInfo::Weapon::Uzi)
-    {
-        registry.emplace<ContactExplosionComponent>(bulletEntity);
-    }
-    else if (playerInfo.currentWeapon == PlayerInfo::Weapon::Grenade)
+
+    if (playerInfo.currentWeapon == WeaponType::Grenade)
     {
         registry.emplace<TimerExplosionComponent>(bulletEntity);
+    }
+    else
+    {
+        registry.emplace<ContactExplosionComponent>(bulletEntity);
     }
 
     return bulletEntity;

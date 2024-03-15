@@ -132,6 +132,7 @@ int main(int argc, char* args[])
 
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);
+            playerControlSystem.Update(deltaTime);
             weaponControlSystem.Update(deltaTime);
             cameraControlSystem.Update(deltaTime);
 
