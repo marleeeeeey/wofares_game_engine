@@ -2,7 +2,6 @@
 #include <SDL.h>
 #include <algorithm>
 #include <box2d/box2d.h>
-#include <vector>
 
 namespace utils
 {
@@ -27,11 +26,5 @@ bool IsPointInsideBounds(const Point& point, const Bounds& bounds)
 {
     return point.x >= bounds.min.x && point.x <= bounds.max.x && point.y >= bounds.min.y && point.y <= bounds.max.y;
 }
-
-// Split rect into m x n smaller rects.
-std::vector<SDL_Rect> SplitRect(const SDL_Rect& rect, int m, int n);
-
-// Function to divide an SDL_Rect into smaller rectangles based on cell size.
-std::vector<SDL_Rect> DivideRectByCellSize(const SDL_Rect& rect, const SDL_Point& cellSize);
 
 } // namespace utils

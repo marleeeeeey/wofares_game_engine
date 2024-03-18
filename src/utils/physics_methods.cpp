@@ -1,4 +1,5 @@
 #include "physics_methods.h"
+#include <ecs/components/physics_components.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
 
@@ -14,18 +15,15 @@ void PhysicsMethods::ApplyForceToPhysicalBodies(
 
     for (auto& entity : physicalEntities)
     {
-        auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
-        const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
+        auto originalObjPhysicsInfo = registry.get<PhysicsComponent>(entity).bodyRAII->GetBody();
+        const b2Vec2& posPhysics = originalObjPhysicsInfo->GetPosition();
 
         // Make target body as dynamic.
         originalObjPhysicsInfo->SetType(b2_dynamicBody);
 
-        // Calculate distance between grenade and target.
-        float distance = utils::CaclDistance(forceCenterPhysics, physicsPos);
-
         // Apply force to the target.
         // Force direction is from grenade to target. Inside. This greate interesting effect.
-        auto forceVec = -(physicsPos - forceCenterPhysics) * force;
+        auto forceVec = -(posPhysics - forceCenterPhysics) * force;
         originalObjPhysicsInfo->ApplyForceToCenter(forceVec, true);
     }
 }

@@ -7,46 +7,48 @@ PrimitivesRenderer::PrimitivesRenderer(
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
 {}
 
-SDL_Rect PrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& sdlPos, const glm::vec2& sdlSize)
+SDL_Rect PrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& posWorld, const glm::vec2& sizeWorld)
 {
     auto& rOpt = gameState.windowOptions;
 
-    glm::vec2 transformedPosition = (sdlPos - rOpt.cameraCenterSdl) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
+    glm::vec2 transformedPosition = (posWorld - rOpt.cameraCenterSdl) * rOpt.cameraScale + rOpt.windowSize / 2.0f;
 
     // Have to render from the center of the object. Because the Box2D body is in the center of the object.
     SDL_Rect rect = {
-        static_cast<int>(transformedPosition.x - sdlSize.x * rOpt.cameraScale / 2),
-        static_cast<int>(transformedPosition.y - sdlSize.y * rOpt.cameraScale / 2),
-        static_cast<int>(sdlSize.x * rOpt.cameraScale), static_cast<int>(sdlSize.y * rOpt.cameraScale)};
+        static_cast<int>(transformedPosition.x - sizeWorld.x * rOpt.cameraScale / 2),
+        static_cast<int>(transformedPosition.y - sizeWorld.y * rOpt.cameraScale / 2),
+        static_cast<int>(sizeWorld.x * rOpt.cameraScale), static_cast<int>(sizeWorld.y * rOpt.cameraScale)};
 
     return rect;
 }
 
-void PrimitivesRenderer::RenderSquare(const glm::vec2& sdlPos, const glm::vec2& sdlSize, ColorName color, float angle)
+void PrimitivesRenderer::RenderSquare(
+    const glm::vec2& posWorld, const glm::vec2& sizeWorld, ColorName color, float angle)
 {
     std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
     double angleDegrees = angle * (180.0 / M_PI);
-    SDL_Rect destRect = GetRectWithCameraTransform(sdlPos, sdlSize);
+    SDL_Rect destRect = GetRectWithCameraTransform(posWorld, sizeWorld);
     SDL_Point center = {destRect.w / 2, destRect.h / 2};
     SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
 }
 
-void PrimitivesRenderer::RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sdlSize, ColorName color)
+void PrimitivesRenderer::RenderSquare(
+    std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sizeWorld, ColorName color)
 {
-    const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
+    const glm::vec2 posWorld = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
     float angle = body->GetBody()->GetAngle();
-    RenderSquare(sdlPos, sdlSize, color, angle);
+    RenderSquare(posWorld, sizeWorld, color, angle);
 }
 
 void PrimitivesRenderer::RenderTiledSquare(
-    const glm::vec2& centerSdlPos, const float angle, const RenderingInfo& tileInfo, const SDL_RendererFlip& flip)
+    const glm::vec2& centerWorld, const float angle, const RenderingComponent& tileInfo, const SDL_RendererFlip& flip)
 {
-    auto sdlSize = tileInfo.sdlSize;
-    SDL_Rect destRect = GetRectWithCameraTransform(centerSdlPos, sdlSize);
+    auto sizeWorld = tileInfo.sizeWorld;
+    SDL_Rect destRect = GetRectWithCameraTransform(centerWorld, sizeWorld);
 
     if (!tileInfo.texturePtr)
     {
-        RenderSquare(centerSdlPos, sdlSize, tileInfo.colorName, angle);
+        RenderSquare(centerWorld, sizeWorld, tileInfo.colorName, angle);
         return;
     }
 
@@ -59,8 +61,7 @@ void PrimitivesRenderer::RenderTiledSquare(
         renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, flip);
 }
 
-void PrimitivesRenderer::RenderAnimation(
-    const AnimationInfo& animationInfo, glm::vec2 physicsBodyCenterWorld, float angle)
+void PrimitivesRenderer::RenderAnimation(const AnimationComponent& animationInfo, glm::vec2 centerWorld, float angle)
 {
     if (animationInfo.animation.frames.empty())
         return;
@@ -78,16 +79,16 @@ void PrimitivesRenderer::RenderAnimation(
     if (animation.hitboxRect)
     {
         const SDL_Rect& hitboxRect = *animation.hitboxRect;
-        auto textureSize = frame.renderingInfo.sdlSize;
+        auto textureSize = frame.renderingInfo.sizeWorld;
 
         auto textureCenter = textureSize / 2.0f;
         auto hitboxCenter = glm::vec2(hitboxRect.x, hitboxRect.y) + glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
         auto shift = hitboxCenter - textureCenter;
-        auto hitboxNewCenter = physicsBodyCenterWorld - shift;
-        physicsBodyCenterWorld = hitboxNewCenter;
+        auto hitboxNewCenter = centerWorld - shift;
+        centerWorld = hitboxNewCenter;
     }
 
-    RenderTiledSquare(physicsBodyCenterWorld, angle, frame.renderingInfo, animationInfo.flip);
+    RenderTiledSquare(centerWorld, angle, frame.renderingInfo, animationInfo.flip);
 };
 
 void PrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)
@@ -101,7 +102,6 @@ void PrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)
     auto backgroundTexture = textureRAII->get();
 
     auto textureScale = backgroundInfo.textureScale;
-    auto backgroundSpeed = backgroundInfo.speedFactor;
 
     int textureWidth, textureHeight;
     SDL_QueryTexture(backgroundTexture, nullptr, nullptr, &textureWidth, &textureHeight);

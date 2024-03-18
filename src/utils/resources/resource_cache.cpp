@@ -1,8 +1,8 @@
 #include "resource_cache.h"
-#include "utils/RAII/sdl_RAII.h"
-#include "utils/sdl_colors.h"
 #include <filesystem>
 #include <my_common_cpp_utils/logger.h>
+#include <utils/RAII/sdl_RAII.h>
+#include <utils/sdl_colors.h>
 #include <utils/sdl_texture_process.h>
 
 namespace details

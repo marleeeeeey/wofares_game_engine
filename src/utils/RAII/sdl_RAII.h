@@ -1,7 +1,7 @@
 #pragma once
-#include "SDL_pixels.h"
-#include "SDL_render.h"
 #include <SDL.h>
+#include <SDL_pixels.h>
+#include <SDL_render.h>
 #include <glm/glm.hpp>
 #include <string>
 

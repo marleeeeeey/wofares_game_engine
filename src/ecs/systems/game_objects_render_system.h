@@ -1,6 +1,5 @@
 #pragma once
 #include <SDL.h>
-#include <ecs/components/game_components.h>
 #include <entt/entt.hpp>
 #include <utils/coordinates_transformer.h>
 #include <utils/primitives_renderer.h>
@@ -11,9 +10,9 @@ class GameObjectsRenderSystem
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
+    ResourceManager& resourceManager;
     GameOptions& gameState;
     CoordinatesTransformer coordinatesTransformer;
-    ResourceManager& resourceManager;
     PrimitivesRenderer& primitivesRenderer;
 public:
     GameObjectsRenderSystem(

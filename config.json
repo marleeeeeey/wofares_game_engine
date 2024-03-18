@@ -37,7 +37,7 @@
     "numberOfHitsToDisableCollisionsForFragments": 7
   },
   "CoordinatesTransformer": {
-    "box2DtoSDL": 48
+    "box2DtoWorld": 48
   },
   "HUDRenderSystem": {
     "showGrid": false

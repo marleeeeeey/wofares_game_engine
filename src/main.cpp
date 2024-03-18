@@ -1,5 +1,3 @@
-#include "utils/factories/objects_factory.h"
-#include <ecs/components/game_components.h>
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/game_objects_render_system.h>
@@ -15,6 +13,7 @@
 #include <utils/RAII/imgui_sdl_RAII.h>
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/entt_registry_wrapper.h>
+#include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
 #include <utils/primitives_renderer.h>
 #include <utils/resources/resource_manager.h>

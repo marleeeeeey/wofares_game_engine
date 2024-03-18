@@ -1,4 +1,7 @@
 #include "game_objects_render_system.h"
+#include <ecs/components/animation_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/player_components.h>
 #include <my_common_cpp_utils/logger.h>
 #include <utils/glm_box2d_conversions.h>
 
@@ -30,39 +33,41 @@ void GameObjectsRenderSystem::RenderBackground()
 
 void GameObjectsRenderSystem::RenderTiles()
 {
-    auto tilesView = registry.view<RenderingInfo, PhysicsInfo>();
+    auto tilesView = registry.view<RenderingComponent, PhysicsComponent>();
     for (auto entity : tilesView)
     {
-        const auto& [tileInfo, physicalBody] = tilesView.get<RenderingInfo, PhysicsInfo>(entity);
-        const glm::vec2 sdlPos = coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
+        const auto& [tileInfo, physicalBody] = tilesView.get<RenderingComponent, PhysicsComponent>(entity);
+        const glm::vec2 posWorld =
+            coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
         const float angle = physicalBody.bodyRAII->GetBody()->GetAngle();
-        primitivesRenderer.RenderTiledSquare(sdlPos, angle, tileInfo);
+        primitivesRenderer.RenderTiledSquare(posWorld, angle, tileInfo);
     }
 }
 
 void GameObjectsRenderSystem::RenderPlayerWeaponDirection()
 {
-    auto players = registry.view<PhysicsInfo, RenderingInfo, PlayerInfo>();
+    auto players = registry.view<PhysicsComponent, RenderingComponent, PlayerComponent>();
     for (auto entity : players)
     {
-        auto [physicalBody, renderingInfo, playerInfo] = players.get<PhysicsInfo, RenderingInfo, PlayerInfo>(entity);
+        auto [physicalBody, renderingInfo, playerInfo] =
+            players.get<PhysicsComponent, RenderingComponent, PlayerComponent>(entity);
 
         // Draw the weapon.
-        const glm::vec2 playerSdlPos =
+        const glm::vec2 playerPosWorld =
             coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
-        glm::vec2 weaponWorldSize = renderingInfo.sdlSize / 2.0f;
-        glm::vec2 weaponWorldPos = playerSdlPos + playerInfo.weaponDirection * renderingInfo.sdlSize / 2;
-        primitivesRenderer.RenderSquare(weaponWorldPos, weaponWorldSize, ColorName::Red, 0);
+        glm::vec2 weaponSizeWorld = renderingInfo.sizeWorld / 2.0f;
+        glm::vec2 weaponPosWorld = playerPosWorld + playerInfo.weaponDirection * renderingInfo.sizeWorld / 2;
+        primitivesRenderer.RenderSquare(weaponPosWorld, weaponSizeWorld, ColorName::Red, 0);
     }
 }
 
 void GameObjectsRenderSystem::RenderAnimations()
 {
-    auto view = registry.view<AnimationInfo, PhysicsInfo>();
+    auto view = registry.view<AnimationComponent, PhysicsComponent>();
 
     for (auto entity : view)
     {
-        const auto& [animationInfo, physicsInfo] = view.get<AnimationInfo, PhysicsInfo>(entity);
+        const auto& [animationInfo, physicsInfo] = view.get<AnimationComponent, PhysicsComponent>(entity);
 
         // Caclulate the position and angle of the animation.
         auto body = physicsInfo.bodyRAII->GetBody();

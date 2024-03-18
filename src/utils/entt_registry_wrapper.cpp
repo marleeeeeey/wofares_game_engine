@@ -1,5 +1,5 @@
 #include "entt_registry_wrapper.h"
-#include "entt/entity/fwd.hpp"
+#include <entt/entt.hpp>
 #include <my_common_cpp_utils/logger.h>
 
 EnttRegistryWrapper::EnttRegistryWrapper(entt::registry& registry) : registry(registry)

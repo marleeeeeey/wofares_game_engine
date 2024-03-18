@@ -1,8 +1,8 @@
 #pragma once
-#include "utils/factories/box2d_body_creator.h"
-#include "utils/game_options.h"
 #include <box2d/box2d.h>
 #include <entt/entt.hpp>
+#include <utils/factories/box2d_body_creator.h>
+#include <utils/game_options.h>
 #include <vector>
 
 class PhysicsMethods

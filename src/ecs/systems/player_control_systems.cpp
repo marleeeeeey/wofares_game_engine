@@ -1,14 +1,16 @@
 #include "player_control_systems.h"
-#include "entt/entity/fwd.hpp"
-#include "glm/fwd.hpp"
-#include "my_common_cpp_utils/config.h"
-#include "utils/entt_registry_wrapper.h"
 #include <SDL.h>
-#include <ecs/components/game_components.h>
+#include <ecs/components/animation_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/player_components.h>
+#include <entt/entt.hpp>
+#include <glm/fwd.hpp>
 #include <imgui_impl_sdl2.h>
+#include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <unordered_map>
 #include <utils/coordinates_transformer.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/systems/input_event_manager.h>
 
@@ -25,7 +27,7 @@ PlayerControlSystem::PlayerControlSystem(
 
 void PlayerControlSystem::Update(float deltaTime)
 {
-    const auto& players = registry.view<PlayerInfo>();
+    const auto& players = registry.view<PlayerComponent>();
     for (auto entity : players)
     {
         UpdateFireRateAndReloadTime(entity, deltaTime);
@@ -76,10 +78,10 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
 
     auto& originalEvent = eventInfo.originalEvent;
 
-    const auto& players = registry.view<PlayerInfo, PhysicsInfo>();
+    const auto& players = registry.view<PlayerComponent, PhysicsComponent>();
     for (auto entity : players)
     {
-        const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
+        const auto& [playerInfo, physicalBody] = players.get<PlayerComponent, PhysicsComponent>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
 
         // If the player is not on the ground, then don't allow to move or jump.
@@ -114,7 +116,7 @@ void PlayerControlSystem::HandlePlayerAttackOnReleaseButton(const InputEventMana
 {
     if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
     {
-        const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
+        const auto& players = registry.view<PlayerComponent, PhysicsComponent, AnimationComponent>();
         for (auto entity : players)
         {
             // TODO2: Make in no linear way.
@@ -129,7 +131,7 @@ void PlayerControlSystem::HandlePlayerAttackOnHoldButton(const InputEventManager
 {
     if (eventInfo.originalEvent.button.button == SDL_BUTTON_LEFT)
     {
-        const auto& players = registry.view<PlayerInfo, PhysicsInfo, AnimationInfo>();
+        const auto& players = registry.view<PlayerComponent, PhysicsComponent, AnimationComponent>();
         for (auto entity : players)
         {
             float throwingForce = 0.0f;
@@ -144,16 +146,9 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const InputEventManager::Ev
 
     if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_RIGHT)
     {
-        auto physicsWorld = gameState.physicsWorld;
-
-        auto windowPos = glm::vec2(event.button.x, event.button.y);
-        auto worldPos = coordinatesTransformer.ScreenToWorld(windowPos);
-
-        auto entity = registryWrapper.Create("buildingBlock");
-        glm::vec2 sdlSize(10.0f, 10.0f);
-        auto physicsBody = box2dBodyCreator.CreatePhysicsBody(entity, worldPos, sdlSize);
-        registry.emplace<RenderingInfo>(entity, sdlSize, nullptr, SDL_Rect{}, ColorName::Green);
-        registry.emplace<PhysicsInfo>(entity, physicsBody);
+        glm::vec2 posWindow = glm::vec2(event.button.x, event.button.y);
+        glm::vec2 posWorld = coordinatesTransformer.ScreenToWorld(posWindow);
+        objectsFactory.SpawnBuildingBlock(posWorld);
     }
 };
 
@@ -163,15 +158,15 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
 
     if (event.type == SDL_MOUSEMOTION)
     {
-        const auto& players = registry.view<PlayerInfo, PhysicsInfo>();
+        const auto& players = registry.view<PlayerComponent, PhysicsComponent>();
         for (auto entity : players)
         {
-            const auto& [playerInfo, physicalBody] = players.get<PlayerInfo, PhysicsInfo>(entity);
+            const auto& [playerInfo, physicalBody] = players.get<PlayerComponent, PhysicsComponent>(entity);
             auto playerBody = physicalBody.bodyRAII->GetBody();
 
-            glm::vec2 mouseWindowPos{event.motion.x, event.motion.y};
-            glm::vec2 playerWindowPos = coordinatesTransformer.PhysicsToScreen(playerBody->GetPosition());
-            glm::vec2 directionVec = mouseWindowPos - playerWindowPos;
+            glm::vec2 mousePosScreen{event.motion.x, event.motion.y};
+            glm::vec2 playerPosScreen = coordinatesTransformer.PhysicsToScreen(playerBody->GetPosition());
+            glm::vec2 directionVec = mousePosScreen - playerPosScreen;
             playerInfo.weaponDirection = glm::normalize(directionVec);
         }
     }
@@ -190,10 +185,10 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
     if (weaponIndex < 0 || weaponIndex >= static_cast<int>(weaponEnumRange.size()))
         return;
 
-    const auto& players = registry.view<PlayerInfo>();
+    const auto& players = registry.view<PlayerComponent>();
     for (auto entity : players)
     {
-        auto& playerInfo = players.get<PlayerInfo>(entity);
+        auto& playerInfo = players.get<PlayerComponent>(entity);
         auto newWeapon = weaponEnumRange[weaponIndex];
 
         if (newWeapon == playerInfo.currentWeapon)
@@ -224,7 +219,7 @@ void PlayerControlSystem::HandlePlayerBeginPlayerContact(entt::entity entityA, e
 
 void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value)
 {
-    auto playerInfo = registry.try_get<PlayerInfo>(entity);
+    auto playerInfo = registry.try_get<PlayerComponent>(entity);
     if (playerInfo)
     {
         playerInfo->countOfGroundContacts += value ? 1 : -1;
@@ -234,7 +229,7 @@ void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity enti
 
 entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, float throwingForce)
 {
-    if (!registry.all_of<PlayerInfo>(playerEntity))
+    if (!registry.all_of<PlayerComponent>(playerEntity))
     {
         MY_LOG_FMT(
             trace, "[MakeShotIfPossible] entity does not have all of the required components. Entity: {}",
@@ -242,7 +237,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
         return entt::null;
     }
 
-    auto& playerInfo = registry.get<PlayerInfo>(playerEntity);
+    auto& playerInfo = registry.get<PlayerComponent>(playerEntity);
 
     // Check if the throwing force is zero for the grenade.
     if (throwingForce <= 0 && playerInfo.currentWeapon == WeaponType::Grenade)
@@ -304,13 +299,13 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     initialBulletSpeed *= 40; // TODO2: Remove this magic number.
 
     // Create a bullet.
-    auto bulletEntity = objectsFactory.CreateBullet(playerEntity, initialBulletSpeed);
+    auto bulletEntity = objectsFactory.SpawnBullet(playerEntity, initialBulletSpeed);
     return bulletEntity;
 };
 
 void PlayerControlSystem::UpdateFireRateAndReloadTime(entt::entity playerEntity, float deltaTime)
 {
-    auto& playerInfo = registry.get<PlayerInfo>(playerEntity);
+    auto& playerInfo = registry.get<PlayerComponent>(playerEntity);
     for (auto& [weaponType, weaponProps] : playerInfo.weapons)
     {
         if (weaponProps.remainingFireRate > 0)

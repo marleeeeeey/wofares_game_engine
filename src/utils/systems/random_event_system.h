@@ -6,9 +6,9 @@
 
 class RandomEventSystem
 {
-    AudioSystem& audioSystem;
     entt::registry& registry;
     GameOptions& gameState;
+    AudioSystem& audioSystem;
     std::default_random_engine rng;
     float elapsedTime{0.0f};
     float nextSoundEventTime{0.0f}; // Time of the next random sound event.

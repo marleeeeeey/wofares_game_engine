@@ -1,15 +1,17 @@
 #include "map_loader_system.h"
-#include "my_common_cpp_utils/config.h"
-#include "utils/entt_registry_wrapper.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
+#include <ecs/components/physics_components.h>
 #include <fstream>
+#include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
+#include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
 #include <utils/sdl_texture_process.h>
+
 
 MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
@@ -78,11 +80,11 @@ void MapLoaderSystem::UnloadMap()
     gameState.levelOptions.levelBox2dBounds = {};
 
     // Remove all entities that have a RenderingInfo component.
-    for (auto entity : registry.view<RenderingInfo>())
+    for (auto entity : registry.view<RenderingComponent>())
         registryWrapper.Destroy(entity);
 
     // Remove all entities that have a PhysicalBody component.
-    for (auto entity : registry.view<PhysicsInfo>())
+    for (auto entity : registry.view<PhysicsComponent>())
         registryWrapper.Destroy(entity);
 
     if (Box2dObjectRAII::GetBodyCounter() != 0)
@@ -121,8 +123,8 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
     {
         if (object["type"] == "PlayerPosition")
         {
-            auto playerSdlWorldPos = glm::vec2(object["x"], object["y"]);
-            objectsFactory.CreatePlayer(playerSdlWorldPos);
+            auto posWorld = glm::vec2(object["x"], object["y"]);
+            objectsFactory.SpawnPlayer(posWorld);
         }
     }
 }
@@ -171,10 +173,10 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             float miniTileWorldPositionY = layerRow * tileHeight + miniRow * miniHeight;
             glm::vec2 miniTileWorldPosition{miniTileWorldPositionX, miniTileWorldPositionY};
             auto textureRect = TextureRect{tilesetTexture, miniTextureSrcRect};
-            auto tileEntity = objectsFactory.CreateTile(miniTileWorldPosition, miniWidth, textureRect);
+            auto tileEntity = objectsFactory.SpawnTile(miniTileWorldPosition, miniWidth, textureRect);
 
             // Update level bounds.
-            auto bodyRAII = registry.get<PhysicsInfo>(tileEntity).bodyRAII;
+            auto bodyRAII = registry.get<PhysicsComponent>(tileEntity).bodyRAII;
             const b2Vec2& bodyPosition = bodyRAII->GetBody()->GetPosition();
             auto& levelBounds = gameState.levelOptions.levelBox2dBounds;
             levelBounds.min = utils::Vec2Min(levelBounds.min, bodyPosition);

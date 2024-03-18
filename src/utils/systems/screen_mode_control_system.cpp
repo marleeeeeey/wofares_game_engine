@@ -1,6 +1,6 @@
 #include "screen_mode_control_system.h"
-#include "SDL_video.h"
-#include "utils/systems/input_event_manager.h"
+#include <SDL_video.h>
+#include <utils/systems/input_event_manager.h>
 
 ScreenModeControlSystem::ScreenModeControlSystem(InputEventManager& inputEventManager, SDLWindowRAII& window)
   : inputEventManager(inputEventManager), window(window)

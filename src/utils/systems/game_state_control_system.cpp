@@ -1,5 +1,4 @@
 #include "game_state_control_system.h"
-#include <ecs/components/game_components.h>
 #include <utils/game_options.h>
 
 GameStateControlSystem::GameStateControlSystem(entt::registry& registry, InputEventManager& inputEventManager)

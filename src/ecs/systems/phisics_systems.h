@@ -7,8 +7,8 @@
 
 class PhysicsSystem
 {
-    entt::registry& registry;
     EnttRegistryWrapper& registryWrapper;
+    entt::registry& registry;
     GameOptions& gameState;
     std::shared_ptr<b2World> physicsWorld;
     CoordinatesTransformer coordinatesTransformer;

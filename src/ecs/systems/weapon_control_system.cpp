@@ -1,14 +1,15 @@
 #include "weapon_control_system.h"
-#include "my_common_cpp_utils/config.h"
-#include "utils/coordinates_transformer.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
-#include <ecs/components/game_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
+#include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
 #include <utils/collect_objects.h>
+#include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
@@ -116,17 +117,17 @@ void WeaponControlSystem::OnBazookaContactWithTile(entt::entity bazookaEntity, e
 void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
 {
     auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
-    auto physicsInfo = registry.try_get<PhysicsInfo>(explosionEntity);
+    auto physicsInfo = registry.try_get<PhysicsComponent>(explosionEntity);
 
     if (!explosionImpact || !physicsInfo)
         return;
 
     // Get all physical bodies in the explosion radius.
-    const b2Vec2& grenadePhysicsPos = physicsInfo->bodyRAII->GetBody()->GetPosition();
+    const b2Vec2& grenadePosPhysics = physicsInfo->bodyRAII->GetBody()->GetPosition();
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
     auto staticOriginalBodies = collectObjects.GetPhysicalBodiesInRaduis(
-        grenadePhysicsPos, explosionImpact->radius * radiusCoef, b2_staticBody);
+        grenadePosPhysics, explosionImpact->radius * radiusCoef, b2_staticBody);
 
     // Split original objects to micro objects.
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();
@@ -135,7 +136,7 @@ void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
 
     // Destroy micro objects in the explosion radius.
     auto staticMicroBodiesToDestroy = collectObjects.GetPhysicalBodiesInRaduis(
-        splittedEntities, grenadePhysicsPos, explosionImpact->radius, b2_staticBody);
+        splittedEntities, grenadePosPhysics, explosionImpact->radius, b2_staticBody);
     for (auto& entity : staticMicroBodiesToDestroy)
         registryWrapper.Destroy(entity);
 
@@ -147,7 +148,7 @@ void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
 
     if (utils::GetConfig<bool, "WeaponControlSystem.createExplosionFragments">())
     {
-        glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePhysicsPos);
+        glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePosPhysics);
         float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(explosionImpact->radius);
         objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
     }

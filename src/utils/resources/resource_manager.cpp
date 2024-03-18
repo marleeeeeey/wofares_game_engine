@@ -29,7 +29,6 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
     // Load tiled level names.
     for (const auto& tiledLevelPair : assetsSettingsJson["maps"].items())
     {
-        const std::string& tiledLevelName = tiledLevelPair.key();
         LevelInfo levelInfo = tiledLevelPair.value().get<LevelInfo>();
         if (!std::filesystem::exists(levelInfo.tiledMapPath))
             throw std::runtime_error(MY_FMT("Tiled level file does not found: {}", levelInfo.tiledMapPath.string()));
@@ -136,8 +135,7 @@ AnimationFrame GetAnimationFrameFromAsepriteFrame(
     AnimationFrame animationFrame;
     animationFrame.renderingInfo.texturePtr = textureRAII;
     animationFrame.renderingInfo.textureRect = asepriteFrame.rectInTexture;
-    // TODO0: remove renderingInfo.sdlSize and use textureRect.w and textureRect.h instead.
-    animationFrame.renderingInfo.sdlSize = {asepriteFrame.rectInTexture.w, asepriteFrame.rectInTexture.h};
+    animationFrame.renderingInfo.sizeWorld = {asepriteFrame.rectInTexture.w, asepriteFrame.rectInTexture.h};
     animationFrame.duration = asepriteFrame.duration_seconds;
     return animationFrame;
 }

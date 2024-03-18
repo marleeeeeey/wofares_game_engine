@@ -1,7 +1,9 @@
 #include "render_hud_systems.h"
-#include "my_common_cpp_utils/config.h"
-#include <ecs/components/game_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/player_components.h>
+#include <ecs/components/rendering_components.h>
 #include <imgui.h>
+#include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <utils/RAII/imgui_RAII.h>
 #include <utils/game_options.h>
@@ -29,13 +31,13 @@ void HUDRenderSystem::RenderDebugMenu()
         gameState.controlOptions.reloadMap = true;
 
     // Caclulare count of tiles, players and dynamic bodies:
-    auto tiles = registry.view<RenderingInfo>();
-    auto players = registry.view<PlayerInfo>();
-    auto dynamicBodies = registry.view<PhysicsInfo>();
+    auto tiles = registry.view<RenderingComponent>();
+    auto players = registry.view<PlayerComponent>();
+    auto dynamicBodies = registry.view<PhysicsComponent>();
     size_t dynamicBodiesCount = 0;
     for (auto entity : dynamicBodies)
     {
-        auto body = dynamicBodies.get<PhysicsInfo>(entity).bodyRAII->GetBody();
+        auto body = dynamicBodies.get<PhysicsComponent>(entity).bodyRAII->GetBody();
         if (body->GetType() == b2_dynamicBody)
             dynamicBodiesCount++;
     }
@@ -69,7 +71,6 @@ void HUDRenderSystem::RenderGrid()
     const int gridSize = 32;
     const SDL_Color gridColor = GetSDLColor(ColorName::Grey);
     const SDL_Color screenCenterColor = GetSDLColor(ColorName::Red);
-    const SDL_Color originColor = GetSDLColor(ColorName::Green);
 
     // Get the window size to determine the drawing area
     int windowWidth = static_cast<int>(gameState.windowOptions.windowSize.x);
@@ -110,9 +111,9 @@ void HUDRenderSystem::RenderGrid()
 
 void HUDRenderSystem::DrawPlayersWindowInfo()
 {
-    for (auto entity : registry.view<PlayerInfo>())
+    for (auto entity : registry.view<PlayerComponent>())
     {
-        auto& playerInfo = registry.get<PlayerInfo>(entity);
+        auto& playerInfo = registry.get<PlayerComponent>(entity);
         ImGui::Begin(MY_FMT("Player {} HUD", playerInfo.number).c_str());
 
         // Encrease font size.

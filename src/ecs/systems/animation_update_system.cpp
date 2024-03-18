@@ -1,4 +1,7 @@
 #include "animation_update_system.h"
+#include <ecs/components/animation_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/player_components.h>
 
 AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager)
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
@@ -13,11 +16,11 @@ void AnimationUpdateSystem::Update(float deltaTime)
 
 void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTime)
 {
-    auto view = registry.view<AnimationInfo>();
+    auto view = registry.view<AnimationComponent>();
 
     for (auto entity : view)
     {
-        auto& animationInfo = view.get<AnimationInfo>(entity);
+        auto& animationInfo = view.get<AnimationComponent>(entity);
 
         if (animationInfo.isPlaying)
         {
@@ -44,11 +47,12 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
 
 void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
 {
-    auto view = registry.view<AnimationInfo, PlayerInfo, PhysicsInfo>();
+    auto view = registry.view<AnimationComponent, PlayerComponent, PhysicsComponent>();
 
     for (auto entity : view)
     {
-        const auto& [animationInfo, playerInfo, physicsInfo] = view.get<AnimationInfo, PlayerInfo, PhysicsInfo>(entity);
+        const auto& [animationInfo, playerInfo, physicsInfo] =
+            view.get<AnimationComponent, PlayerComponent, PhysicsComponent>(entity);
 
         // Change the animation speed based on the player's speed.
         auto body = physicsInfo.bodyRAII->GetBody();

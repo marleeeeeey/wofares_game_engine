@@ -1,6 +1,5 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include <ecs/components/game_components.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <utils/game_options.h>

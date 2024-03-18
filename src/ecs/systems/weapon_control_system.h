@@ -1,10 +1,10 @@
 #pragma once
-#include "utils/collect_objects.h"
-#include "utils/coordinates_transformer.h"
-#include "utils/factories/objects_factory.h"
 #include <entt/entt.hpp>
 #include <queue>
+#include <utils/collect_objects.h>
+#include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
+#include <utils/factories/objects_factory.h>
 #include <utils/game_options.h>
 #include <utils/physics_body_tuner.h>
 #include <utils/systems/audio_system.h>

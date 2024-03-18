@@ -1,5 +1,5 @@
 #include "physics_body_tuner.h"
-#include <ecs/components/game_components.h>
+#include <ecs/components/physics_components.h>
 
 PhysicsBodyTuner::PhysicsBodyTuner(entt::registry& registry) : registry(registry)
 {}
@@ -18,7 +18,7 @@ void PhysicsBodyTuner::DisableCollisionForTheBody(b2Body* body)
 
 void PhysicsBodyTuner::DisableCollisionForTheEntity(entt::entity entity)
 {
-    auto physicsInfo = registry.try_get<PhysicsInfo>(entity);
+    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
     if (physicsInfo)
     {
         auto body = physicsInfo->bodyRAII->GetBody();
@@ -33,7 +33,7 @@ void PhysicsBodyTuner::SetBulletFlagForTheBody(b2Body* body, bool value)
 
 void PhysicsBodyTuner::SetBulletFlagForTheEntity(entt::entity entity, bool value)
 {
-    auto physicsInfo = registry.try_get<PhysicsInfo>(entity);
+    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
     if (physicsInfo)
     {
         auto body = physicsInfo->bodyRAII->GetBody();

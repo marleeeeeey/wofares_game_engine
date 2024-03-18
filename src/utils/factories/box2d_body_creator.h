@@ -33,13 +33,13 @@ public: // Public methods.
     Box2dBodyCreator(entt::registry& registry);
     // entity is used to store entity in the physics body.
     std::shared_ptr<Box2dObjectRAII> CreatePhysicsBody(
-        entt::entity entity, const glm::vec2& sdlPos, const glm::vec2& sdlSize, const Options& options = {});
+        entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld, const Options& options = {});
 private: // Low-x1 level methods.
-    b2Body* CreatePhysicsBody(entt::entity entity, const glm::vec2& sdlPos, b2BodyType bodyType);
-    void AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
-    void AddCircleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
-    void AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sdlSize);
-    void AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& sdlSize);
+    b2Body* CreatePhysicsBody(entt::entity entity, const glm::vec2& posWorld, b2BodyType bodyType);
+    void AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld);
+    void AddCircleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld);
+    void AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld);
+    void AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& sizeWorld);
 private: // Low-x2 level methods.
     b2FixtureDef GetFixtureWithOptions(const Options::Fixture& options);
 private: // State.

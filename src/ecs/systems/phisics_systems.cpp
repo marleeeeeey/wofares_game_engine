@@ -1,7 +1,8 @@
 #include "phisics_systems.h"
-#include "my_common_cpp_utils/config.h"
-#include <ecs/components/game_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/player_components.h>
 #include <glm/glm.hpp>
+#include <my_common_cpp_utils/config.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
@@ -29,13 +30,13 @@ void PhysicsSystem::RemoveDistantObjects()
 {
     auto levelBounds = gameState.levelOptions.levelBox2dBounds;
 
-    auto physicalBodies = registry.view<PhysicsInfo>();
+    auto physicalBodies = registry.view<PhysicsComponent>();
     for (auto entity : physicalBodies)
     {
-        auto& physicalBody = physicalBodies.get<PhysicsInfo>(entity);
-        b2Vec2 pos = physicalBody.bodyRAII->GetBody()->GetPosition();
+        auto& physicalBody = physicalBodies.get<PhysicsComponent>(entity);
+        b2Vec2 posPhysics = physicalBody.bodyRAII->GetBody()->GetPosition();
 
-        if (!utils::IsPointInsideBounds(pos, levelBounds))
+        if (!utils::IsPointInsideBounds(posPhysics, levelBounds))
         {
             registryWrapper.Destroy(entity);
         }
@@ -45,10 +46,10 @@ void PhysicsSystem::RemoveDistantObjects()
 // Set the direction of the weapon of the player to the last mouse position.
 void PhysicsSystem::UpdatePlayersWeaponDirection()
 {
-    auto players = registry.view<PhysicsInfo, PlayerInfo>();
+    auto players = registry.view<PhysicsComponent, PlayerComponent>();
     for (auto entity : players)
     {
-        const auto& [physicalBody, playerInfo] = players.get<PhysicsInfo, PlayerInfo>(entity);
+        const auto& [physicalBody, playerInfo] = players.get<PhysicsComponent, PlayerComponent>(entity);
 
         auto& lastMousePosInWindow = gameState.windowOptions.lastMousePosInWindow;
         glm::vec2 playerPosInWindow =
@@ -60,11 +61,10 @@ void PhysicsSystem::UpdatePlayersWeaponDirection()
 
 void PhysicsSystem::SetPlayersRotationToZero()
 {
-    auto players = registry.view<PlayerInfo, PhysicsInfo>();
+    auto players = registry.view<PlayerComponent, PhysicsComponent>();
     for (auto entity : players)
     {
-        auto& playerInfo = players.get<PlayerInfo>(entity);
-        auto& physicalBody = players.get<PhysicsInfo>(entity);
+        auto& physicalBody = players.get<PhysicsComponent>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
         body->SetAngularVelocity(0);
         body->SetTransform(body->GetPosition(), 0);

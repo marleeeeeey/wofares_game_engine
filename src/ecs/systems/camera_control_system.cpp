@@ -1,6 +1,7 @@
 #include "camera_control_system.h"
 #include <SDL_mouse.h>
-#include <ecs/components/game_components.h>
+#include <ecs/components/physics_components.h>
+#include <ecs/components/player_components.h>
 #include <my_common_cpp_utils/config.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/game_options.h>
@@ -78,48 +79,47 @@ void CameraControlSystem::Update(float deltaTime)
 void CameraControlSystem::PositioningCameraToPlayer(float deltaTime)
 {
     // Convert everything to world coordinates.
-    auto mouseWorldPos = coordinatesTransformer.ScreenToWorld(gameState.windowOptions.lastMousePosInWindow);
-    auto& cameraCenterWorldPos = gameState.windowOptions.cameraCenterSdl;
+    auto mousePosWorld = coordinatesTransformer.ScreenToWorld(gameState.windowOptions.lastMousePosInWindow);
+    auto& cameraCenterPosWorld = gameState.windowOptions.cameraCenterSdl;
     glm::vec2 windowSize =
         coordinatesTransformer.ScreenToWorld(gameState.windowOptions.windowSize, CoordinatesTransformer::Type::Length);
 
-    auto players = registry.view<PlayerInfo, PhysicsInfo>();
+    auto players = registry.view<PlayerComponent, PhysicsComponent>();
     for (auto entity : players)
     {
-        const auto& physicsInfo = players.get<PhysicsInfo>(entity);
+        const auto& physicsInfo = players.get<PhysicsComponent>(entity);
         auto playerBody = physicsInfo.bodyRAII->GetBody();
-        auto playerWorldPos = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
+        auto playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
 
-        glm::vec2 cameraAnchorWorldPos = playerWorldPos;
+        glm::vec2 cameraAnchorPosWorld = playerPosWorld;
 
         bool mousePosImpactOnCameraAnchor =
             utils::GetConfig<bool, "CameraControlSystem.mousePosImpactOnCameraAnchor">();
 
         if (mousePosImpactOnCameraAnchor)
         {
-            cameraAnchorWorldPos = (playerWorldPos + mouseWorldPos) * 0.5f;
+            cameraAnchorPosWorld = (playerPosWorld + mousePosWorld) * 0.5f;
         }
 
-        glm::vec2 diffSdl = cameraAnchorWorldPos - cameraCenterWorldPos;
-        float distanceSdl = glm::length(diffSdl);
+        glm::vec2 diffSdl = cameraAnchorPosWorld - cameraCenterPosWorld;
 
         // Define "dead zone" in which the player can move without causing the camera to move.
         glm::vec2 windowProportion = windowSize * 0.3f;
 
         // Calculate the bounds of the window relative to the camera's current center.
-        glm::vec2 windowMin = cameraCenterWorldPos - windowProportion / 2.0f;
-        glm::vec2 windowMax = cameraCenterWorldPos + windowProportion / 2.0f;
+        glm::vec2 windowMin = cameraCenterPosWorld - windowProportion / 2.0f;
+        glm::vec2 windowMax = cameraCenterPosWorld + windowProportion / 2.0f;
 
         // If the player is too far from the center of the camera, move the camera.
-        if (cameraAnchorWorldPos.x < windowMin.x || cameraAnchorWorldPos.x > windowMax.x ||
-            cameraAnchorWorldPos.y < windowMin.y || cameraAnchorWorldPos.y > windowMax.y)
+        if (cameraAnchorPosWorld.x < windowMin.x || cameraAnchorPosWorld.x > windowMax.x ||
+            cameraAnchorPosWorld.y < windowMin.y || cameraAnchorPosWorld.y > windowMax.y)
         {
             // Smoothing factor (value between 0 and 1, where closer to 0 - smoother following)
             static const float smoothFactor = 0.01f;
 
             // "Ease out" interpolation
             float factor = 1.0f - pow(1.0f - smoothFactor, deltaTime * 60.0f);
-            cameraCenterWorldPos += diffSdl * factor;
+            cameraCenterPosWorld += diffSdl * factor;
         }
     }
 };
