@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/angle_policy.h"
 #include <ecs/components/animation_components.h>
 #include <entt/entt.hpp>
 #include <utils/coordinates_transformer.h>
@@ -28,7 +29,7 @@ public: // Main game objects.
     entt::entity SpawnTile(
         glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
     entt::entity SpawnPlayer(const glm::vec2& posWorld);
-    entt::entity SpawnBullet(entt::entity playerEntity, float initialBulletSpeed);
+    entt::entity SpawnBullet(entt::entity playerEntity, float initialBulletSpeed, AnglePolicy anglePolicy);
     entt::entity SpawnBuildingBlock(glm::vec2 posWorld);
 public: // Explosions.
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
@@ -40,5 +41,6 @@ private: // Helpers
     AnimationComponent CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
     entt::entity SpawnFlyingEntity(
-        const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force);
+        const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force,
+        AnglePolicy anglePolicy);
 };

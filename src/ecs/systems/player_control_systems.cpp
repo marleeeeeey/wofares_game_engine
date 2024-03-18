@@ -65,10 +65,12 @@ void PlayerControlSystem::SubscribeToContactListener()
 {
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::BeginSensor,
-        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerBeginPlayerContact(entityA, entityB); });
+        [this](const Box2dEnttContactListener::ContactInfo& contactInfo)
+        { HandlePlayerBeginPlayerContact(contactInfo); });
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::EndSensor,
-        [this](entt::entity entityA, entt::entity entityB) { HandlePlayerEndPlayerContact(entityA, entityB); });
+        [this](const Box2dEnttContactListener::ContactInfo& contactInfo)
+        { HandlePlayerEndPlayerContact(contactInfo); });
 };
 
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
@@ -205,16 +207,16 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
     }
 };
 
-void PlayerControlSystem::HandlePlayerEndPlayerContact(entt::entity entityA, entt::entity entityB)
+void PlayerControlSystem::HandlePlayerEndPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo)
 {
-    SetGroundContactFlagIfEntityIsPlayer(entityA, false);
-    SetGroundContactFlagIfEntityIsPlayer(entityB, false);
+    SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityA, false);
+    SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityB, false);
 };
 
-void PlayerControlSystem::HandlePlayerBeginPlayerContact(entt::entity entityA, entt::entity entityB)
+void PlayerControlSystem::HandlePlayerBeginPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo)
 {
-    SetGroundContactFlagIfEntityIsPlayer(entityA, true);
-    SetGroundContactFlagIfEntityIsPlayer(entityB, true);
+    SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityA, true);
+    SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityB, true);
 };
 
 void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value)
@@ -299,7 +301,8 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     initialBulletSpeed *= 40; // TODO2: Remove this magic number.
 
     // Create a bullet.
-    auto bulletEntity = objectsFactory.SpawnBullet(playerEntity, initialBulletSpeed);
+    auto bulletEntity =
+        objectsFactory.SpawnBullet(playerEntity, initialBulletSpeed, currentWeaponProps.bulletAnglePolicy);
     return bulletEntity;
 };
 

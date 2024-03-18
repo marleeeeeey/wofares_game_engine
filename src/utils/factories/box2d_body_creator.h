@@ -1,5 +1,6 @@
 #pragma once
 #include "entt/entity/fwd.hpp"
+#include <ecs/components/physics_components.h>
 #include <utils/RAII/box2d_RAII.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/game_options.h>

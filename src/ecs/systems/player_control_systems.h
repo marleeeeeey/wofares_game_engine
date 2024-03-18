@@ -35,8 +35,8 @@ private: // Callbacks for the InputEventManager.
     void HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerChangeWeapon(const InputEventManager::EventInfo& eventInfo);
 private: // Callback for contact listener. Uses to set the ground contact flag.
-    void HandlePlayerBeginPlayerContact(entt::entity entityA, entt::entity entityB);
-    void HandlePlayerEndPlayerContact(entt::entity entityA, entt::entity entityB);
+    void HandlePlayerBeginPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo);
+    void HandlePlayerEndPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo);
     void SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value);
 private: // Shooting.
     entt::entity MakeShotIfPossible(entt::entity playerEntity, float throwingForce);

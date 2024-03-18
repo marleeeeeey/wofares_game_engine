@@ -8,6 +8,13 @@
 class Box2dEnttContactListener : public b2ContactListener
 {
 public:
+    struct ContactInfo
+    {
+        entt::entity entityA;
+        entt::entity entityB;
+        b2Contact* contact;
+    };
+
     /**
      * IMPORTANT: ContactListener is called by Box2D during the simulation. It is not safe to modify the type of a Box2D
      * body. Attempting to change the type of a b2Body (e.g., from dynamic to static or vice versa) while the Box2D
@@ -19,7 +26,7 @@ public:
      * To safely change a body's type in reaction to collisions, consider deferring the change until after the
      * physics simulation step has completed.
      */
-    using ContactListener = std::function<void(entt::entity, entt::entity)>;
+    using ContactListener = std::function<void(const Box2dEnttContactListener::ContactInfo& contactInfo)>;
 
     enum class ContactType
     {

@@ -24,7 +24,7 @@ WeaponControlSystem::WeaponControlSystem(
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
     audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry),
-    collectObjects(registry, objectsFactory), PhysicsBodyTuner(registry)
+    collectObjects(registry, objectsFactory), physicsBodyTuner(registry)
 {
     SubscribeToContactEvents();
 }
@@ -41,24 +41,32 @@ void WeaponControlSystem::SubscribeToContactEvents()
 {
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::Begin,
-        [this](entt::entity entityA, entt::entity entityB)
+        [this](const Box2dEnttContactListener::ContactInfo& contactInfo)
         {
-            for (const auto& explosionEntity : {entityA, entityB})
+            for (const auto& explosionEntity : {contactInfo.entityA, contactInfo.entityB})
             {
                 // If the entity contains the ContactExplosionComponent.
-                if (!registry.all_of<ContactExplosionComponent>(explosionEntity))
+                if (!registry.all_of<ContactExplosionComponent, PhysicsComponent>(explosionEntity))
                     continue;
 
-                auto contactedEntity = entityA == explosionEntity ? entityB : entityA;
-                OnContactWithExplosionComponent(explosionEntity, contactedEntity);
+                auto physicsComponent = registry.get<PhysicsComponent>(explosionEntity);
+
+                std::optional<b2Vec2> contactPointPhysics;
+                if (contactInfo.contact->GetManifold()->pointCount > 0)
+                {
+                    auto localPoint = contactInfo.contact->GetManifold()->points[0].localPoint;
+                    contactPointPhysics = physicsComponent.bodyRAII->GetBody()->GetWorldPoint(localPoint);
+                }
+
+                OnContactWithExplosionComponent({explosionEntity, contactPointPhysics});
             }
         });
 
     contactListener.SubscribeContact(
         Box2dEnttContactListener::ContactType::Begin,
-        [this](entt::entity entityA, entt::entity entityB)
+        [this](const Box2dEnttContactListener::ContactInfo& contactInfo)
         {
-            for (const auto& entity : {entityA, entityB})
+            for (const auto& entity : {contactInfo.entityA, contactInfo.entityB})
             {
                 // If the entity contains the CollisionDisableHitCountComponent.
                 if (!registry.all_of<CollisionDisableHitCountComponent>(entity))
@@ -70,12 +78,13 @@ void WeaponControlSystem::SubscribeToContactEvents()
 }
 
 // Not allowed to update Box2D object in the contact listener. Because Box2D is in simulation step.
-void WeaponControlSystem::OnContactWithExplosionComponent(entt::entity explosionEntity, entt::entity contactedEntity)
+void WeaponControlSystem::OnContactWithExplosionComponent(
+    const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
-    auto& contactExplosion = registry.get<ContactExplosionComponent>(explosionEntity);
+    auto& contactExplosion = registry.get<ContactExplosionComponent>(explosionEntityWithContactPoint.explosionEntity);
     if (contactExplosion.spawnSafeTime <= 0.0f)
     {
-        contactedEntities.push(explosionEntity);
+        explosionEntities.push(explosionEntityWithContactPoint);
     }
 };
 
@@ -90,7 +99,7 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
     if (hitCount->hitCount <= 0)
     {
         registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
-        PhysicsBodyTuner.DisableCollisionForTheEntity(hitCountEntity);
+        physicsBodyTuner.DisableCollisionForTheEntity(hitCountEntity);
     }
 };
 
@@ -104,7 +113,7 @@ void WeaponControlSystem::UpdateTimerExplosionComponents(float deltaTime)
 
         if (timerExplosion.timeToExplode <= 0.0f)
         {
-            DoExplosion(timerEntity);
+            DoExplosion({timerEntity, std::nullopt});
         }
     }
 }
@@ -114,8 +123,10 @@ void WeaponControlSystem::OnBazookaContactWithTile(entt::entity bazookaEntity, e
     MY_LOG(info, "Bazooka contact with tile");
 };
 
-void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
+void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
+    auto& explosionEntity = explosionEntityWithContactPoint.explosionEntity;
+
     auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
     auto physicsInfo = registry.try_get<PhysicsComponent>(explosionEntity);
 
@@ -123,7 +134,9 @@ void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
         return;
 
     // Get all physical bodies in the explosion radius.
-    const b2Vec2& grenadePosPhysics = physicsInfo->bodyRAII->GetBody()->GetPosition();
+    const b2Vec2 grenadePosPhysics =
+        explosionEntityWithContactPoint.contactPointPhysics.value_or(physicsInfo->bodyRAII->GetBody()->GetPosition());
+
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
     auto staticOriginalBodies = collectObjects.GetPhysicalBodiesInRaduis(
@@ -162,11 +175,11 @@ void WeaponControlSystem::DoExplosion(entt::entity explosionEntity)
 
 void WeaponControlSystem::ProcessExplosionEntitiesQueue()
 {
-    while (!contactedEntities.empty())
+    while (!explosionEntities.empty())
     {
-        auto entity = contactedEntities.front();
+        auto entity = explosionEntities.front();
         DoExplosion(entity);
-        contactedEntities.pop();
+        explosionEntities.pop();
     }
 };
 
@@ -191,7 +204,7 @@ void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
         if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
         {
             registry.remove<CollisionDisableTimerComponent>(entity);
-            PhysicsBodyTuner.DisableCollisionForTheEntity(entity);
+            physicsBodyTuner.DisableCollisionForTheEntity(entity);
         }
     }
 };

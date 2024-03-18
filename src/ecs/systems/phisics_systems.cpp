@@ -15,13 +15,12 @@ PhysicsSystem::PhysicsSystem(EnttRegistryWrapper& registryWrapper)
 
 void PhysicsSystem::Update(float deltaTime)
 {
+    // Update the physics world with Box2D engine.
     auto& velocityIterations = utils::GetConfig<int, "PhysicsSystem.velocityIterations">();
     auto& positionIterations = utils::GetConfig<int, "PhysicsSystem.positionIterations">();
-
-    // Update the physics world with Box2D engine.
     physicsWorld->Step(deltaTime, velocityIterations, positionIterations);
 
-    SetPlayersRotationToZero(); // players should not rotate.
+    UpdateAngleRegardingWithAnglePolicy();
     UpdatePlayersWeaponDirection();
     RemoveDistantObjects();
 };
@@ -59,14 +58,29 @@ void PhysicsSystem::UpdatePlayersWeaponDirection()
     }
 }
 
-void PhysicsSystem::SetPlayersRotationToZero()
+void PhysicsSystem::UpdateAngleRegardingWithAnglePolicy()
 {
-    auto players = registry.view<PlayerComponent, PhysicsComponent>();
-    for (auto entity : players)
+    auto physicsComponens = registry.view<PhysicsComponent>();
+    for (auto entity : physicsComponens)
     {
-        auto& physicalBody = players.get<PhysicsComponent>(entity);
-        auto body = physicalBody.bodyRAII->GetBody();
-        body->SetAngularVelocity(0);
-        body->SetTransform(body->GetPosition(), 0);
+        auto& physicsComponent = physicsComponens.get<PhysicsComponent>(entity);
+        auto body = physicsComponent.bodyRAII->GetBody();
+
+        if (physicsComponent.anglePolicy == AnglePolicy::VelocityDirection)
+        {
+            b2Vec2 velocity = body->GetLinearVelocity();
+            float angle = atan2(velocity.y, velocity.x);
+            body->SetTransform(body->GetPosition(), angle);
+        }
+
+        if (physicsComponent.anglePolicy == AnglePolicy::Fixed)
+        {
+            body->SetFixedRotation(true);
+        }
+
+        if (physicsComponent.anglePolicy == AnglePolicy::Dynamic)
+        {
+            body->SetFixedRotation(false);
+        }
     }
 };

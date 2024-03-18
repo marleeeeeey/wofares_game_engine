@@ -33,7 +33,7 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
     WeaponProps props;
     props.bulletMass = 0.5;
     props.bulletEjectionForce = 0.1;
-    props.projectileSizeWorld = {3, 3};
+    props.bulletAnglePolicy = AnglePolicy::VelocityDirection;
     props.damageRadiusWorld = 25;
     props.damageForce = 10;
     props.ammoInStorage = 10;
@@ -49,6 +49,7 @@ WeaponProps WeaponPropsFactory::CreateGrenade()
     WeaponProps props = CreateBazooka();
     props.bulletMass = 0.3;
     props.bulletEjectionForce = 0.0;
+    props.bulletAnglePolicy = AnglePolicy::Dynamic;
     props.damageRadiusWorld = 20;
     props.damageForce *= 0.7;
     props.ammoInStorage = 5;
@@ -64,6 +65,7 @@ WeaponProps WeaponPropsFactory::CreateUzi()
     WeaponProps props = CreateBazooka();
     props.bulletMass = 0.05;
     props.bulletEjectionForce = 0.05;
+    props.bulletAnglePolicy = AnglePolicy::VelocityDirection;
     props.damageRadiusWorld = 10;
     props.damageForce = 5;
     props.ammoInStorage = 120;
@@ -79,6 +81,7 @@ WeaponProps WeaponPropsFactory::CreateShotgun()
     WeaponProps props = CreateUzi();
     props.bulletMass = 0.1;
     props.bulletEjectionForce = 3;
+    props.bulletAnglePolicy = AnglePolicy::VelocityDirection;
     props.damageRadiusWorld = 20;
     props.damageForce *= 10;
     props.ammoInStorage = 60;

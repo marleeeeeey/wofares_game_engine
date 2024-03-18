@@ -1,11 +1,12 @@
 #pragma once
 #include <memory>
 #include <utils/RAII/box2d_RAII.h>
+#include <utils/angle_policy.h>
 
 struct PhysicsComponent
 {
-    // Used also for the rendering to retrieve angle and position.
-    std::shared_ptr<Box2dObjectRAII> bodyRAII;
+    std::shared_ptr<Box2dObjectRAII> bodyRAII; // Used also for the rendering to retrieve angle and position.
+    AnglePolicy anglePolicy = AnglePolicy::Dynamic;
 };
 
 struct CollisionDisableTimerComponent

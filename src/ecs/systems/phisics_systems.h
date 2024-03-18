@@ -18,5 +18,5 @@ public:
 private:
     void RemoveDistantObjects();
     void UpdatePlayersWeaponDirection();
-    void SetPlayersRotationToZero();
+    void UpdateAngleRegardingWithAnglePolicy();
 };

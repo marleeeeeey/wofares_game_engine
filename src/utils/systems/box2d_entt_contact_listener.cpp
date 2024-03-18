@@ -15,7 +15,7 @@ void Box2dEnttContactListener::BeginContact(b2Contact* contact)
         {
             if (!entityWithPropsA.isSensor && !entityWithPropsB.isSensor)
             {
-                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+                listener({entityWithPropsA.entity, entityWithPropsB.entity, contact});
             }
         }
 
@@ -23,7 +23,7 @@ void Box2dEnttContactListener::BeginContact(b2Contact* contact)
         {
             if (entityWithPropsA.isSensor || entityWithPropsB.isSensor)
             {
-                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+                listener({entityWithPropsA.entity, entityWithPropsB.entity, contact});
             }
         }
     }
@@ -39,7 +39,7 @@ void Box2dEnttContactListener::EndContact(b2Contact* contact)
         {
             if (!entityWithPropsA.isSensor && !entityWithPropsB.isSensor)
             {
-                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+                listener({entityWithPropsA.entity, entityWithPropsB.entity, contact});
             }
         }
 
@@ -47,7 +47,7 @@ void Box2dEnttContactListener::EndContact(b2Contact* contact)
         {
             if (entityWithPropsA.isSensor || entityWithPropsB.isSensor)
             {
-                listener(entityWithPropsA.entity, entityWithPropsB.entity);
+                listener({entityWithPropsA.entity, entityWithPropsB.entity, contact});
             }
         }
     }

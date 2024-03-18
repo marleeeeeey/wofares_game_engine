@@ -7,6 +7,7 @@
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
 #include <unordered_map>
+#include <utils/angle_policy.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
@@ -38,7 +39,7 @@ entt::entity ObjectsFactory::SpawnTile(
     tilePhysicsBody->GetBody()->SetType(
         utils::RandomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
 
-    registry.emplace<PhysicsComponent>(entity, tilePhysicsBody);
+    registry.emplace<PhysicsComponent>(entity, tilePhysicsBody, AnglePolicy::Dynamic);
 
     return entity;
 };
@@ -63,7 +64,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
     options.isDynamic = true;
     auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerAnimation.hitboxWorld, options);
     MY_LOG_FMT(info, "Create player body with bbox: {}", playerAnimation.hitboxWorld);
-    registry.emplace<PhysicsComponent>(entity, playerPhysicsBody);
+    registry.emplace<PhysicsComponent>(entity, playerPhysicsBody, AnglePolicy::Fixed);
 
     return entity;
 }
@@ -107,7 +108,8 @@ AnimationComponent ObjectsFactory::CreateAnimationInfo(
 };
 
 entt::entity ObjectsFactory::SpawnFlyingEntity(
-    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float initialSpeed)
+    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float initialSpeed,
+    AnglePolicy anglePolicy)
 {
     // Create the flying entity.
     auto flyingEntity = registryWrapper.Create("flyingEntity");
@@ -119,7 +121,7 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
 
     registry.emplace<RenderingComponent>(flyingEntity, sizeWorld);
-    registry.emplace<PhysicsComponent>(flyingEntity, physicsBody);
+    registry.emplace<PhysicsComponent>(flyingEntity, physicsBody, anglePolicy);
 
     // Apply the force to the flying entity.
     b2Vec2 speedVec = b2Vec2(initialSpeed, 0);
@@ -129,7 +131,7 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     return flyingEntity;
 };
 
-entt::entity ObjectsFactory::SpawnBullet(entt::entity playerEntity, float initialBulletSpeed)
+entt::entity ObjectsFactory::SpawnBullet(entt::entity playerEntity, float initialBulletSpeed, AnglePolicy anglePolicy)
 {
     if (!registry.all_of<PlayerComponent, PhysicsComponent, AnimationComponent>(playerEntity))
     {
@@ -164,7 +166,8 @@ entt::entity ObjectsFactory::SpawnBullet(entt::entity playerEntity, float initia
     glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
     glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponDirection * playerSize.x / 2.0f;
     entt::entity bulletEntity = SpawnFlyingEntity(
-        positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed);
+        positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed,
+        anglePolicy);
     bodyTuner.SetBulletFlagForTheEntity(bulletEntity, true);
 
     // TODO1: Think about merging all explosion components into one.

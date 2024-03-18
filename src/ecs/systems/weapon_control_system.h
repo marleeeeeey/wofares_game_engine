@@ -12,16 +12,22 @@
 
 class WeaponControlSystem
 {
+    struct ExplosionEntityWithContactPoint
+    {
+        entt::entity explosionEntity;
+        std::optional<b2Vec2> contactPointPhysics;
+    };
+
     EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     GameOptions& gameState;
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
     ObjectsFactory& objectsFactory;
-    std::queue<entt::entity> contactedEntities;
+    std::queue<ExplosionEntityWithContactPoint> explosionEntities;
     CoordinatesTransformer coordinatesTransformer;
     CollectObjects collectObjects;
-    PhysicsBodyTuner PhysicsBodyTuner;
+    PhysicsBodyTuner physicsBodyTuner;
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
@@ -29,7 +35,7 @@ public:
     void Update(float deltaTime);
 private:
     void SubscribeToContactEvents();
-    void OnContactWithExplosionComponent(entt::entity explosionEntity, entt::entity contactedEntity);
+    void OnContactWithExplosionComponent(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
 private:
     void UpdateTimerExplosionComponents(float deltaTime);
     void UpdateContactExplosionComponentTimer(float deltaTime);
@@ -37,5 +43,5 @@ private:
     void UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity);
     void ProcessExplosionEntitiesQueue();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
-    void DoExplosion(entt::entity explosionEntity);
+    void DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
 };
