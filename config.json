@@ -41,5 +41,8 @@
   },
   "HUDRenderSystem": {
     "showGrid": false
+  },
+  "GameObjectsRenderSystem": {
+    "renderPlayerHitbox": false
   }
 }

@@ -2,6 +2,7 @@
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
+#include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <utils/glm_box2d_conversions.h>
 
@@ -75,5 +76,11 @@ void GameObjectsRenderSystem::RenderAnimations()
         const float angle = body->GetAngle();
 
         primitivesRenderer.RenderAnimation(animationInfo, physicsBodyCenterWorld, angle);
+
+        if (utils::GetConfig<bool, "GameObjectsRenderSystem.renderPlayerHitbox">())
+        {
+            primitivesRenderer.RenderSquare(
+                physicsBodyCenterWorld, animationInfo.GetHitboxSize(), ColorName::Green, angle);
+        }
     }
 }

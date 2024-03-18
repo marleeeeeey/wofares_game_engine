@@ -1,5 +1,6 @@
 #include "box2d_body_tuner.h"
 #include "my_common_cpp_utils/logger.h"
+#include "my_common_cpp_utils/math_utils.h"
 #include <ecs/components/physics_components.h>
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
@@ -22,11 +23,11 @@ void Box2dBodyTuner::DisableCollisionForTheBody(b2Body* body)
 void Box2dBodyTuner::DisableCollisionForTheEntity(entt::entity entity)
 {
     auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (physicsInfo)
-    {
-        auto body = physicsInfo->bodyRAII->GetBody();
-        DisableCollisionForTheBody(body);
-    }
+    if (!physicsInfo)
+        return;
+
+    auto body = physicsInfo->bodyRAII->GetBody();
+    DisableCollisionForTheBody(body);
 };
 
 void Box2dBodyTuner::SetBulletFlagForTheBody(b2Body* body, bool value)
@@ -37,19 +38,19 @@ void Box2dBodyTuner::SetBulletFlagForTheBody(b2Body* body, bool value)
 void Box2dBodyTuner::SetBulletFlagForTheEntity(entt::entity entity, bool value)
 {
     auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (physicsInfo)
-    {
-        auto body = physicsInfo->bodyRAII->GetBody();
-        SetBulletFlagForTheBody(body, value);
-    }
+    if (!physicsInfo)
+        return;
+
+    auto body = physicsInfo->bodyRAII->GetBody();
+    SetBulletFlagForTheBody(body, value);
 }
 
 void Box2dBodyTuner::UpdateFixtureShapeForTheBody(b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions options)
 {
     RemoveAllFixturesFromTheBody(body);
-
     auto fixtureDef = GetFixtureWithOptions(options.fixture);
     CreateFixtureShapeForTheBody(body, fixtureDef, sizeWorld, options);
+    body->ResetMassData();
 };
 
 void Box2dBodyTuner::CreateFixtureShapeForTheBody(b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions options)
@@ -62,30 +63,31 @@ void Box2dBodyTuner::CreateFixtureShapeForTheEntity(
     entt::entity entity, const glm::vec2& sizeWorld, Box2dBodyOptions options)
 {
     auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (physicsInfo)
-    {
-        auto body = physicsInfo->bodyRAII->GetBody();
-        physicsInfo->options = options;
-        physicsInfo->sizeWorld = sizeWorld;
-        CreateFixtureShapeForTheBody(body, sizeWorld, options);
-    }
+    if (!physicsInfo)
+        return;
+
+    auto body = physicsInfo->bodyRAII->GetBody();
+    physicsInfo->options = options;
+    physicsInfo->sizeWorld = sizeWorld;
+    CreateFixtureShapeForTheBody(body, sizeWorld, options);
 };
 
 void Box2dBodyTuner::UpdateFixtureShapeSizeForTheEntity(entt::entity entity, const glm::vec2& sizeWorld)
 {
     auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (physicsInfo)
-    {
-        auto body = physicsInfo->bodyRAII->GetBody();
+    if (!physicsInfo)
+        return;
 
-        if (physicsInfo->sizeWorld == sizeWorld)
-            return;
+    auto body = physicsInfo->bodyRAII->GetBody();
 
-        physicsInfo->sizeWorld = sizeWorld;
+    if (physicsInfo->sizeWorld == sizeWorld)
+        return;
 
-        // TODO0: This method doesn't work well. Player become not movable after the first call.
-        UpdateFixtureShapeForTheBody(body, sizeWorld, physicsInfo->options);
-    }
+    physicsInfo->sizeWorld = sizeWorld;
+
+    // TODO4: This method makes the body to lose it's contacts for a short period of time.
+    // That is why this method should be called as rarely as possible.
+    UpdateFixtureShapeForTheBody(body, sizeWorld, physicsInfo->options);
 };
 
 void Box2dBodyTuner::CreateFixtureShapeForTheBody(
