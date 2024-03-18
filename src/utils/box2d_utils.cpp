@@ -1,14 +1,14 @@
-#include "physics_methods.h"
+#include "box2d_utils.h"
 #include <ecs/components/physics_components.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
 
-PhysicsMethods::PhysicsMethods(entt::registry& registry)
+Box2dUtils::Box2dUtils(entt::registry& registry)
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     box2dBodyCreator(registry), coordinatesTransformer(registry)
 {}
 
-void PhysicsMethods::ApplyForceToPhysicalBodies(
+void Box2dUtils::ApplyForceToPhysicalBodies(
     std::vector<entt::entity> physicalEntities, const glm::vec2& forceCenterWorld, float force)
 {
     auto forceCenterPhysics = coordinatesTransformer.WorldToPhysics(forceCenterWorld);

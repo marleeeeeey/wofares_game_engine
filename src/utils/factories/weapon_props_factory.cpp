@@ -34,9 +34,10 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
     props.bulletMass = 0.5;
     props.bulletEjectionForce = 0.1;
     props.bulletAnglePolicy = AnglePolicy::VelocityDirection;
+    props.projectileSizeWorld = {16, 8};
     props.damageRadiusWorld = 25;
     props.damageForce = 10;
-    props.ammoInStorage = 10;
+    props.ammoInStorage = 100;
     props.ammoInClip = 1;
     props.clipSize = 1;
     props.reloadTime = 2.0f;

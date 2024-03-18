@@ -1,13 +1,13 @@
-#include "primitives_renderer.h"
+#include "sdl_primitives_renderer.h"
 #include <numbers>
 
-PrimitivesRenderer::PrimitivesRenderer(
+SdlPrimitivesRenderer::SdlPrimitivesRenderer(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
   : registry(registry), renderer(renderer), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
 {}
 
-SDL_Rect PrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& posWorld, const glm::vec2& sizeWorld)
+SDL_Rect SdlPrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& posWorld, const glm::vec2& sizeWorld)
 {
     auto& rOpt = gameState.windowOptions;
 
@@ -22,7 +22,7 @@ SDL_Rect PrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& posWorl
     return rect;
 }
 
-void PrimitivesRenderer::RenderSquare(
+void SdlPrimitivesRenderer::RenderSquare(
     const glm::vec2& posWorld, const glm::vec2& sizeWorld, ColorName color, float angle)
 {
     std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
@@ -32,7 +32,7 @@ void PrimitivesRenderer::RenderSquare(
     SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
 }
 
-void PrimitivesRenderer::RenderSquare(
+void SdlPrimitivesRenderer::RenderSquare(
     std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sizeWorld, ColorName color)
 {
     const glm::vec2 posWorld = coordinatesTransformer.PhysicsToWorld(body->GetBody()->GetPosition());
@@ -40,7 +40,7 @@ void PrimitivesRenderer::RenderSquare(
     RenderSquare(posWorld, sizeWorld, color, angle);
 }
 
-void PrimitivesRenderer::RenderTiledSquare(
+void SdlPrimitivesRenderer::RenderTiledSquare(
     const glm::vec2& centerWorld, const float angle, const RenderingComponent& tileInfo, const SDL_RendererFlip& flip)
 {
     auto sizeWorld = tileInfo.sizeWorld;
@@ -61,7 +61,7 @@ void PrimitivesRenderer::RenderTiledSquare(
         renderer, tileInfo.texturePtr->get(), &tileInfo.textureRect, &destRect, angleDegrees, &center, flip);
 }
 
-void PrimitivesRenderer::RenderAnimation(const AnimationComponent& animationInfo, glm::vec2 centerWorld, float angle)
+void SdlPrimitivesRenderer::RenderAnimation(const AnimationComponent& animationInfo, glm::vec2 centerWorld, float angle)
 {
     if (animationInfo.animation.frames.empty())
         return;
@@ -91,7 +91,7 @@ void PrimitivesRenderer::RenderAnimation(const AnimationComponent& animationInfo
     RenderTiledSquare(centerWorld, angle, frame.renderingInfo, animationInfo.flip);
 };
 
-void PrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)
+void SdlPrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)
 {
     auto textureRAII = backgroundInfo.texture;
     if (!textureRAII)

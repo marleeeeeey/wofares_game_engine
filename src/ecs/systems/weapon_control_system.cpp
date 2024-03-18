@@ -8,12 +8,12 @@
 #include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/logger.h>
 #include <my_common_cpp_utils/math_utils.h>
-#include <utils/collect_objects.h>
+#include <utils/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
+#include <utils/entt_collect_objects.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
-#include <utils/physics_body_tuner.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_texture_process.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
@@ -24,7 +24,7 @@ WeaponControlSystem::WeaponControlSystem(
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
     audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry),
-    collectObjects(registry, objectsFactory), physicsBodyTuner(registry)
+    collectObjects(registry), physicsBodyTuner(registry)
 {
     SubscribeToContactEvents();
 }

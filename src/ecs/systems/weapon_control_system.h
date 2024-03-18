@@ -1,12 +1,12 @@
 #pragma once
 #include <entt/entt.hpp>
 #include <queue>
-#include <utils/collect_objects.h>
+#include <utils/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
+#include <utils/entt_collect_objects.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/game_options.h>
-#include <utils/physics_body_tuner.h>
 #include <utils/systems/audio_system.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
 
@@ -26,8 +26,8 @@ class WeaponControlSystem
     ObjectsFactory& objectsFactory;
     std::queue<ExplosionEntityWithContactPoint> explosionEntities;
     CoordinatesTransformer coordinatesTransformer;
-    CollectObjects collectObjects;
-    PhysicsBodyTuner physicsBodyTuner;
+    EnttCollectObjects collectObjects;
+    Box2dBodyTuner physicsBodyTuner;
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,

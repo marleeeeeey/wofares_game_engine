@@ -8,11 +8,11 @@
 #include <my_common_cpp_utils/math_utils.h>
 #include <unordered_map>
 #include <utils/angle_policy.h>
+#include <utils/box2d_utils.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/factories/weapon_props_factory.h>
-#include <utils/physics_methods.h>
 #include <utils/sdl_texture_process.h>
 #include <utils/sdl_utils.h>
 
@@ -58,12 +58,13 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
     playerInfo.weapons = WeaponPropsFactory::CreateAllWeaponsSet();
 
     // PhysicsInfo.
-    Box2dBodyCreator::Options options;
-    options.shape = Box2dBodyCreator::Options::Shape::Capsule;
-    options.hasSensorBelowTheBody = true;
-    options.isDynamic = true;
-    auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerAnimation.hitboxWorld, options);
-    MY_LOG_FMT(info, "Create player body with bbox: {}", playerAnimation.hitboxWorld);
+    Box2dBodyOptions options;
+    options.shape = Box2dBodyOptions::Shape::Capsule;
+    options.sensor = Box2dBodyOptions::Sensor::ThinSensorBelow;
+    options.dynamic = Box2dBodyOptions::DynamicOptions::Dynamic;
+    auto playerPhysicsBody =
+        box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerAnimation.hitboxSizeWorld, options);
+    MY_LOG_FMT(info, "Create player body with bbox: {}", playerAnimation.hitboxSizeWorld);
     registry.emplace<PhysicsComponent>(entity, playerPhysicsBody, AnglePolicy::Fixed);
 
     return entity;
@@ -77,7 +78,7 @@ entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& posWor
     auto entity = registryWrapper.Create("ExplosionFragment");
     registry.emplace<AnimationComponent>(entity, fragmentAnimation);
     registry.emplace<PhysicsComponent>(
-        entity, box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentAnimation.hitboxWorld));
+        entity, box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentAnimation.hitboxSizeWorld));
     registry.emplace<CollisionDisableHitCountComponent>(
         entity, utils::GetConfig<size_t, "ObjectsFactory.numberOfHitsToDisableCollisionsForFragments">());
     return entity;
@@ -95,13 +96,13 @@ AnimationComponent ObjectsFactory::CreateAnimationInfo(
 
     if (animationInfo.animation.hitboxRect)
     {
-        animationInfo.hitboxWorld =
+        animationInfo.hitboxSizeWorld =
             glm::vec2(animationInfo.animation.hitboxRect->w, animationInfo.animation.hitboxRect->h);
     }
     else
     {
         auto playerSdlSize = renderingInfo.sizeWorld;
-        animationInfo.hitboxWorld = playerSdlSize - glm::vec2{gap, gap};
+        animationInfo.hitboxSizeWorld = playerSdlSize - glm::vec2{gap, gap};
     }
 
     return animationInfo;
@@ -115,9 +116,9 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     auto flyingEntity = registryWrapper.Create("flyingEntity");
 
     // Create a Box2D body for the flying entity.
-    Box2dBodyCreator::Options options;
-    options.isDynamic = true;
-    options.shape = Box2dBodyCreator::Options::Shape::Box;
+    Box2dBodyOptions options;
+    options.dynamic = Box2dBodyOptions::DynamicOptions::Dynamic;
+    options.shape = Box2dBodyOptions::Shape::Box;
     auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
 
     registry.emplace<RenderingComponent>(flyingEntity, sizeWorld);
@@ -160,11 +161,12 @@ entt::entity ObjectsFactory::SpawnBullet(entt::entity playerEntity, float initia
     // Spawn flying entity.
     const auto& playerBody = registry.get<PhysicsComponent>(playerEntity).bodyRAII->GetBody();
     const auto& animationInfo = registry.get<AnimationComponent>(playerEntity);
-    // TODO0: use the size from specific bounding box. Do not like that Animation info impact on physics.
-    const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sizeWorld;
+    const auto& playerSizeWorld = animationInfo.hitboxSizeWorld;
     const auto& weaponDirection = playerInfo.weaponDirection;
     glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
-    glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponDirection * playerSize.x / 2.0f;
+    auto weaponInitialPointShift =
+        weaponDirection * (playerSizeWorld.x / 2.0f + currentWeaponProps.projectileSizeWorld.x);
+    glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponInitialPointShift;
     entt::entity bulletEntity = SpawnFlyingEntity(
         positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed,
         anglePolicy);
@@ -207,7 +209,7 @@ std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2
         auto fragmentEntity = SpawnFragmentAfterExplosion(fragmentRandomPosWorld);
         fragments.push_back(fragmentEntity);
     }
-    PhysicsMethods physicsMethods(registry);
+    Box2dUtils physicsMethods(registry);
     physicsMethods.ApplyForceToPhysicalBodies(fragments, centerWorld, 500.0f);
 
     return fragments;

@@ -9,7 +9,7 @@
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl_colors.h>
 
-class PrimitivesRenderer
+class SdlPrimitivesRenderer
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
@@ -17,7 +17,7 @@ class PrimitivesRenderer
     GameOptions& gameState;
     CoordinatesTransformer coordinatesTransformer;
 public:
-    PrimitivesRenderer(entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager);
+    SdlPrimitivesRenderer(entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager);
 public:
     void RenderSquare(const glm::vec2& posWorld, const glm::vec2& sizeWorld, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sizeWorld, ColorName color);

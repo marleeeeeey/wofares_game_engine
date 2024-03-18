@@ -1,14 +1,13 @@
-#include "collect_objects.h"
+#include "entt_collect_objects.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <utils/math_utils.h>
 
-CollectObjects::CollectObjects(entt::registry& registry, ObjectsFactory& objectsFactory)
-  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    objectsFactory(objectsFactory)
+EnttCollectObjects::EnttCollectObjects(entt::registry& registry)
+  : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
-std::vector<entt::entity> CollectObjects::GetPhysicalBodiesInRaduis(
+std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
     const b2Vec2& grenadePhysicsPos, float grenadeExplosionRadius, std::optional<b2BodyType> bodyType)
 {
     auto viewTargets = registry.view<PhysicsComponent>();
@@ -16,7 +15,7 @@ std::vector<entt::entity> CollectObjects::GetPhysicalBodiesInRaduis(
     return GetPhysicalBodiesInRaduis(targetsVector, grenadePhysicsPos, grenadeExplosionRadius, bodyType);
 }
 
-std::vector<entt::entity> CollectObjects::GetPhysicalBodiesInRaduis(
+std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
     const std::vector<entt::entity>& entities, const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType)
 {
     std::vector<entt::entity> result;
@@ -38,7 +37,7 @@ std::vector<entt::entity> CollectObjects::GetPhysicalBodiesInRaduis(
     return result;
 };
 
-std::vector<entt::entity> CollectObjects::ExcludePlayersFromList(const std::vector<entt::entity>& entities)
+std::vector<entt::entity> EnttCollectObjects::ExcludePlayersFromList(const std::vector<entt::entity>& entities)
 {
     std::vector<entt::entity> result;
     for (auto& entity : entities)

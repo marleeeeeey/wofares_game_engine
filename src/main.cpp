@@ -15,8 +15,8 @@
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
-#include <utils/primitives_renderer.h>
 #include <utils/resources/resource_manager.h>
+#include <utils/sdl_primitives_renderer.h>
 #include <utils/systems/audio_system.h>
 #include <utils/systems/event_queue_system.h>
 #include <utils/systems/game_state_control_system.h>
@@ -91,7 +91,7 @@ int main(int argc, char* args[])
         GameStateControlSystem gameStateControlSystem(registryWrapper.GetRegistry(), inputEventManager);
 
         // Create a systems with no input events.
-        PrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
+        SdlPrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
         PhysicsSystem physicsSystem(registryWrapper);
         RandomEventSystem randomEventSystem(registryWrapper.GetRegistry(), audioSystem);
         GameObjectsRenderSystem gameObjectsRenderSystem(

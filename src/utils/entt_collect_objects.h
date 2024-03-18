@@ -6,13 +6,12 @@
 #include <optional>
 #include <utils/factories/objects_factory.h>
 
-class CollectObjects
+class EnttCollectObjects
 {
     entt::registry& registry;
     GameOptions& gameState;
-    ObjectsFactory& objectsFactory;
 public:
-    CollectObjects(entt::registry& registry, ObjectsFactory& objectsFactory);
+    EnttCollectObjects(entt::registry& registry);
 public:
     std::vector<entt::entity> GetPhysicalBodiesInRaduis(
         const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType);

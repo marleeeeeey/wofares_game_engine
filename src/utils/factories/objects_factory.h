@@ -2,11 +2,11 @@
 #include "utils/angle_policy.h"
 #include <ecs/components/animation_components.h>
 #include <entt/entt.hpp>
+#include <utils/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/game_options.h>
-#include <utils/physics_body_tuner.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl_texture_process.h>
 
@@ -22,7 +22,7 @@ class ObjectsFactory
     std::shared_ptr<b2World> physicsWorld;
     Box2dBodyCreator box2dBodyCreator;
     CoordinatesTransformer coordinatesTransformer;
-    PhysicsBodyTuner bodyTuner;
+    Box2dBodyTuner bodyTuner;
 public:
     ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
 public: // Main game objects.

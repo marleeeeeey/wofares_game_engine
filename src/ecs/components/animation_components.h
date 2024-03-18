@@ -11,5 +11,5 @@ struct AnimationComponent
     bool loop = true; // Should the animation loop.
     SDL_RendererFlip flip = SDL_FLIP_NONE; // Flip of the animation.
     float speedFactor = 1.0f;
-    glm::vec2 hitboxWorld; // Bounding box of the animation in pixels. Not for client usage.
+    glm::vec2 hitboxSizeWorld; // Size of the hitbox in pixels.
 };

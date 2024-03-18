@@ -5,14 +5,14 @@
 #include <utils/game_options.h>
 #include <vector>
 
-class PhysicsMethods
+class Box2dUtils
 {
     entt::registry& registry;
     GameOptions& gameState;
     Box2dBodyCreator box2dBodyCreator;
     CoordinatesTransformer coordinatesTransformer;
 public:
-    PhysicsMethods(entt::registry& registry);
+    Box2dUtils(entt::registry& registry);
 public: // Client methods.
     void ApplyForceToPhysicalBodies(
         std::vector<entt::entity> physicalEntities, const glm::vec2& forceCenterWorld, float force);
