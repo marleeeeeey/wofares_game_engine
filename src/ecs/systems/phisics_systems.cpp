@@ -1,4 +1,5 @@
 #include "phisics_systems.h"
+#include "utils/box2d_body_options.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <glm/glm.hpp>
@@ -66,19 +67,19 @@ void PhysicsSystem::UpdateAngleRegardingWithAnglePolicy()
         auto& physicsComponent = physicsComponens.get<PhysicsComponent>(entity);
         auto body = physicsComponent.bodyRAII->GetBody();
 
-        if (physicsComponent.anglePolicy == AnglePolicy::VelocityDirection)
+        if (physicsComponent.options.anglePolicy == Box2dBodyOptions::AnglePolicy::VelocityDirection)
         {
             b2Vec2 velocity = body->GetLinearVelocity();
             float angle = atan2(velocity.y, velocity.x);
             body->SetTransform(body->GetPosition(), angle);
         }
 
-        if (physicsComponent.anglePolicy == AnglePolicy::Fixed)
+        if (physicsComponent.options.anglePolicy == Box2dBodyOptions::AnglePolicy::Fixed)
         {
             body->SetFixedRotation(true);
         }
 
-        if (physicsComponent.anglePolicy == AnglePolicy::Dynamic)
+        if (physicsComponent.options.anglePolicy == Box2dBodyOptions::AnglePolicy::Dynamic)
         {
             body->SetFixedRotation(false);
         }

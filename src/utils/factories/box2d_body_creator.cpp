@@ -9,7 +9,5 @@ Box2dBodyCreator::Box2dBodyCreator(entt::registry& registry)
 std::shared_ptr<Box2dObjectRAII> Box2dBodyCreator::CreatePhysicsBody(
     entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld, const Box2dBodyOptions& options)
 {
-    b2Body* body = bodyTuner.CreatePhysicsBodyWithNoShape(entity, posWorld, options);
-    bodyTuner.CreateFixtureShapeForTheBody(body, sizeWorld, options);
-    return std::make_shared<Box2dObjectRAII>(body, physicsWorld);
+    return bodyTuner.CreatePhysicsBody(entity, posWorld, sizeWorld, options);
 }

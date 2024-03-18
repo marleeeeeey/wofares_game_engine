@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/angle_policy.h"
+#include "utils/box2d_body_options.h"
 #include <glm/glm.hpp>
 
 enum class WeaponType
@@ -15,7 +15,8 @@ struct WeaponProps
 public: // Bullet.
     float bulletMass = 0.1; // Mass of the bullet, kg.
     float bulletEjectionForce = 0.1; // Force of the bullet ejection. For grenades it should be zero.
-    AnglePolicy bulletAnglePolicy = AnglePolicy::VelocityDirection; // Angle policy of the bullet.
+    Box2dBodyOptions::AnglePolicy bulletAnglePolicy =
+        Box2dBodyOptions::AnglePolicy::VelocityDirection; // Angle policy of the bullet.
 public: // Damage.
     glm::vec2 projectileSizeWorld = {10, 5}; // Size of the projectile in pixels.
     size_t damageRadiusWorld = 10; // Radius of the damage in pixels.

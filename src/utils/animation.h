@@ -12,6 +12,5 @@ struct AnimationFrame
 struct Animation
 {
     std::vector<AnimationFrame> frames; // Frames of the animation.
-    std::optional<SDL_Rect>
-        hitboxRect; // Hitbox of the animation. TODO0: Remove the similar one item from AnimationComponent.
+    std::optional<SDL_Rect> hitboxRect; // Hitbox of the animation.
 };

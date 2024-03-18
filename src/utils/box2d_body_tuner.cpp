@@ -1,4 +1,5 @@
 #include "box2d_body_tuner.h"
+#include "my_common_cpp_utils/logger.h"
 #include <ecs/components/physics_components.h>
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
@@ -43,48 +44,63 @@ void Box2dBodyTuner::SetBulletFlagForTheEntity(entt::entity entity, bool value)
     }
 }
 
-void Box2dBodyTuner::UpdateFixtureShapeForTheBody(
-    b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions::Shape shape, Box2dBodyOptions::Sensor sensor)
+void Box2dBodyTuner::UpdateFixtureShapeForTheBody(b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions options)
 {
-    auto fixtureDef = GetFixtureDefFromFirstFixtureOfTheBody(body);
-    if (!fixtureDef)
-        throw std::runtime_error("[UpdateHitboxShapeForTheBody] Body has no fixtures.");
-
     RemoveAllFixturesFromTheBody(body);
-    CreateFixtureShapeForTheBody(body, *fixtureDef, sizeWorld, shape, sensor);
+
+    auto fixtureDef = GetFixtureWithOptions(options.fixture);
+    CreateFixtureShapeForTheBody(body, fixtureDef, sizeWorld, options);
 };
 
 void Box2dBodyTuner::CreateFixtureShapeForTheBody(b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions options)
 {
     b2FixtureDef fixtureDef = GetFixtureWithOptions(options.fixture);
-    CreateFixtureShapeForTheBody(body, fixtureDef, sizeWorld, options.shape, options.sensor);
+    CreateFixtureShapeForTheBody(body, fixtureDef, sizeWorld, options);
 };
 
-void Box2dBodyTuner::UpdateFixtureShapeForTheEntity(
-    entt::entity entity, const glm::vec2& sizeWorld, Box2dBodyOptions::Shape shape, Box2dBodyOptions::Sensor sensor)
+void Box2dBodyTuner::CreateFixtureShapeForTheEntity(
+    entt::entity entity, const glm::vec2& sizeWorld, Box2dBodyOptions options)
 {
     auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
     if (physicsInfo)
     {
         auto body = physicsInfo->bodyRAII->GetBody();
-        UpdateFixtureShapeForTheBody(body, sizeWorld, shape, sensor);
+        physicsInfo->options = options;
+        physicsInfo->sizeWorld = sizeWorld;
+        CreateFixtureShapeForTheBody(body, sizeWorld, options);
+    }
+};
+
+void Box2dBodyTuner::UpdateFixtureShapeSizeForTheEntity(entt::entity entity, const glm::vec2& sizeWorld)
+{
+    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
+    if (physicsInfo)
+    {
+        auto body = physicsInfo->bodyRAII->GetBody();
+
+        if (physicsInfo->sizeWorld == sizeWorld)
+            return;
+
+        physicsInfo->sizeWorld = sizeWorld;
+
+        // TODO0: This method doesn't work well. Player become not movable after the first call.
+        UpdateFixtureShapeForTheBody(body, sizeWorld, physicsInfo->options);
     }
 };
 
 void Box2dBodyTuner::CreateFixtureShapeForTheBody(
-    b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld, Box2dBodyOptions::Shape shape,
-    Box2dBodyOptions::Sensor sensor)
+    b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld, Box2dBodyOptions options)
 {
-    if (shape == Box2dBodyOptions::Shape::Box)
+    if (options.shape == Box2dBodyOptions::Shape::Box)
         AddBoxFixtureToBody(body, fixtureDef, sizeWorld);
-    else if (shape == Box2dBodyOptions::Shape::Circle)
+    else if (options.shape == Box2dBodyOptions::Shape::Circle)
         AddCircleFixtureToBody(body, fixtureDef, sizeWorld);
-    else if (shape == Box2dBodyOptions::Shape::Capsule)
+    else if (options.shape == Box2dBodyOptions::Shape::Capsule)
         AddVerticalCapsuleFixtureToBody(body, fixtureDef, sizeWorld);
     else
         throw std::runtime_error("[CreateHitboxShapeForTheBody] Unknown shape type");
 
-    if (sensor == Box2dBodyOptions::Sensor::ThinSensorBelow)
+    if (options.sensor == Box2dBodyOptions::Sensor::ThinSensorBelow)
         AddThinSensorBelowTheBody(body, sizeWorld);
 };
 
@@ -168,21 +184,6 @@ void Box2dBodyTuner::RemoveAllFixturesFromTheBody(b2Body* body)
     }
 };
 
-std::optional<b2FixtureDef> Box2dBodyTuner::GetFixtureDefFromFirstFixtureOfTheBody(b2Body* body)
-{
-    b2Fixture* fixture = body->GetFixtureList();
-    if (fixture == nullptr)
-        return std::nullopt;
-
-    b2FixtureDef fixtureDef;
-    fixtureDef.density = fixture->GetDensity();
-    fixtureDef.friction = fixture->GetFriction();
-    fixtureDef.restitution = fixture->GetRestitution();
-    fixtureDef.isSensor = fixture->IsSensor();
-    fixtureDef.filter = fixture->GetFilterData();
-    return fixtureDef;
-};
-
 b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(
     entt::entity entity, const glm::vec2& posWorld, b2BodyType bodyType)
 {
@@ -224,4 +225,12 @@ b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(
     }
 
     return CreatePhysicsBodyWithNoShape(entity, posWorld, bodyType);
+};
+
+std::shared_ptr<Box2dObjectRAII> Box2dBodyTuner::CreatePhysicsBody(
+    entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld, const Box2dBodyOptions& options)
+{
+    b2Body* body = CreatePhysicsBodyWithNoShape(entity, posWorld, options);
+    CreateFixtureShapeForTheBody(body, sizeWorld, options);
+    return std::make_shared<Box2dObjectRAII>(body, physicsWorld);
 };

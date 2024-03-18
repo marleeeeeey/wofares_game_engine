@@ -5,7 +5,7 @@
 
 AnimationUpdateSystem::AnimationUpdateSystem(entt::registry& registry, ResourceManager& resourceManager)
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    resourceManager(resourceManager)
+    resourceManager(resourceManager), box2dBodyTuner(registry)
 {}
 
 void AnimationUpdateSystem::Update(float deltaTime)
@@ -69,6 +69,9 @@ void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
             animationInfo.animation = resourceManager.GetAnimation("player_walk", "Idle");
             animationInfo.speedFactor = 1.0f;
         }
+
+        // Update shape because the animation might have changed.
+        box2dBodyTuner.UpdateFixtureShapeSizeForTheEntity(entity, animationInfo.GetHitboxSize());
 
         // Change the animation direction based on the player's direction.
         if (playerInfo.weaponDirection.x < 0)
