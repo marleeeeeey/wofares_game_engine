@@ -9,7 +9,7 @@ class CameraControlSystem
     entt::registry& registry;
     GameOptions& gameState;
     InputEventManager& inputEventManager;
-    CoordinatesTransformer transformer;
+    CoordinatesTransformer coordinatesTransformer;
 public:
     CameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager);
     void Update(float deltaTime);

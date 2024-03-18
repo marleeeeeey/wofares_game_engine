@@ -31,7 +31,6 @@ std::unordered_map<WeaponType, WeaponProps> WeaponPropsFactory::CreateAllWeapons
 WeaponProps WeaponPropsFactory::CreateBazooka()
 {
     WeaponProps props;
-    props.type = WeaponType::Bazooka;
     props.bulletMass = 0.5;
     props.bulletEjectionForce = 0.1;
     props.projectileSizeWorld = {3, 3};
@@ -48,7 +47,6 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
 WeaponProps WeaponPropsFactory::CreateGrenade()
 {
     WeaponProps props = CreateBazooka();
-    props.type = WeaponType::Grenade;
     props.bulletMass = 0.3;
     props.bulletEjectionForce = 0.0;
     props.damageRadiusWorld = 20;
@@ -64,7 +62,6 @@ WeaponProps WeaponPropsFactory::CreateGrenade()
 WeaponProps WeaponPropsFactory::CreateUzi()
 {
     WeaponProps props = CreateBazooka();
-    props.type = WeaponType::Uzi;
     props.bulletMass = 0.05;
     props.bulletEjectionForce = 0.05;
     props.damageRadiusWorld = 10;
@@ -80,7 +77,6 @@ WeaponProps WeaponPropsFactory::CreateUzi()
 WeaponProps WeaponPropsFactory::CreateShotgun()
 {
     WeaponProps props = CreateUzi();
-    props.type = WeaponType::Shotgun;
     props.bulletMass = 0.1;
     props.bulletEjectionForce = 3;
     props.damageRadiusWorld = 20;

@@ -14,7 +14,7 @@ class PlayerControlSystem
     entt::registry& registry;
     InputEventManager& inputEventManager;
     GameOptions& gameState;
-    CoordinatesTransformer transformer;
+    CoordinatesTransformer coordinatesTransformer;
     Box2dBodyCreator box2dBodyCreator;
     Box2dEnttContactListener& contactListener;
     ObjectsFactory& objectsFactory;

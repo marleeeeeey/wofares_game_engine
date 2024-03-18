@@ -11,7 +11,6 @@ enum class WeaponType
 
 struct WeaponProps
 {
-    WeaponType type = WeaponType::Bazooka;
 public: // Bullet.
     float bulletMass = 0.1; // Mass of the bullet, kg.
     float bulletEjectionForce = 0.1; // Force of the bullet ejection. For grenades it should be zero.

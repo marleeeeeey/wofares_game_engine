@@ -11,11 +11,12 @@
 #include <unordered_map>
 #include <utils/coordinates_transformer.h>
 #include <utils/factories/box2d_body_creator.h>
+#include <utils/sdl_utils.h>
 
 ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
-    box2dBodyCreator(registry), transformer(registry), bodyTuner(registry)
+    box2dBodyCreator(registry), coordinatesTransformer(registry), bodyTuner(registry)
 {}
 
 entt::entity ObjectsFactory::CreateTile(
@@ -41,26 +42,29 @@ entt::entity ObjectsFactory::CreateTile(
 
 entt::entity ObjectsFactory::CreatePlayer(const glm::vec2& sdlPos)
 {
-    AnimationInfo playerAnimation = CreateAnimationInfo("player_walk", "Run", ResourceManager::TagProps::ExactMatch);
-
     auto entity = registryWrapper.Create("Player");
+
+    // AnimationInfo.
+    AnimationInfo playerAnimation = CreateAnimationInfo("player_walk", "Run", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationInfo>(entity, playerAnimation);
+
+    // PlayerInfo.
     auto& playerInfo = registry.emplace<PlayerInfo>(entity);
     playerInfo.weapons = WeaponPropsFactory::CreateAllWeaponsSet();
 
-    // Create a Box2D body for the player.
+    // PhysicsInfo.
     Box2dBodyCreator::Options options;
     options.shape = Box2dBodyCreator::Options::Shape::Capsule;
     options.hasSensorBelowTheBody = true;
     options.isDynamic = true;
     auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, sdlPos, playerAnimation.sdlBBox, options);
     MY_LOG_FMT(info, "Create player body with bbox: {}", playerAnimation.sdlBBox);
-
     registry.emplace<PhysicsInfo>(entity, playerPhysicsBody);
+
     return entity;
 }
 
-entt::entity ObjectsFactory::CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos)
+entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& sdlWorldPos)
 {
     AnimationInfo fragmentAnimation =
         CreateAnimationInfo("explosionFragments", "Fragment[\\d]+", ResourceManager::TagProps::RandomByRegex);
@@ -120,7 +124,6 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     return flyingEntity;
 };
 
-// TODO1: maybe used initialSpeed instead of initialForce.
 entt::entity ObjectsFactory::CreateBullet(entt::entity playerEntity, float initialBulletSpeed)
 {
     if (!registry.all_of<PlayerInfo, PhysicsInfo, AnimationInfo>(playerEntity))
@@ -145,7 +148,7 @@ entt::entity ObjectsFactory::CreateBullet(entt::entity playerEntity, float initi
     // 4. Create bullet entity.
     ExplosionImpactComponent explosionImpact;
     explosionImpact.force = currentWeaponProps.damageForce;
-    explosionImpact.radius = transformer.WorldToPhysics(currentWeaponProps.damageRadiusWorld);
+    explosionImpact.radius = coordinatesTransformer.WorldToPhysics(currentWeaponProps.damageRadiusWorld);
 
     // Spawn flying entity.
     const auto& playerBody = registry.get<PhysicsInfo>(playerEntity).bodyRAII->GetBody();
@@ -153,16 +156,17 @@ entt::entity ObjectsFactory::CreateBullet(entt::entity playerEntity, float initi
     // TODO0: use the size from specific bounding box. Do not like that Animation info impact on physics.
     const auto& playerSize = animationInfo.animation.frames.front().renderingInfo.sdlSize;
     const auto& weaponDirection = playerInfo.weaponDirection;
-    glm::vec2 playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
+    glm::vec2 playerWorldPos = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
     glm::vec2 positionInFrontOfPlayer = playerWorldPos + weaponDirection * playerSize.x / 2.0f;
     entt::entity bulletEntity = SpawnFlyingEntity(
         positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed);
     bodyTuner.SetBulletFlagForTheEntity(bulletEntity, true);
 
+    // TODO1: Think about merging all explosion components into one.
+    // All weapons setting should be in one place - WeaponProps.
     registry.emplace<ExplosionImpactComponent>(bulletEntity, explosionImpact);
 
     // Apply the specific explosion component to the bullet entity.
-
     if (playerInfo.currentWeapon == WeaponType::Grenade)
     {
         registry.emplace<TimerExplosionComponent>(bulletEntity);
@@ -182,7 +186,7 @@ std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2
     for (size_t i = 0; i < fragmentsCount; ++i)
     {
         auto fragmentRandomPos = utils::GetRandomCoordinateAround(centerWorld, radiusWorld);
-        auto fragmentEntity = CreateFragmentAfterExplosion(fragmentRandomPos);
+        auto fragmentEntity = SpawnFragmentAfterExplosion(fragmentRandomPos);
         fragments.push_back(fragmentEntity);
     }
     PhysicsMethods physicsMethods(registry);
@@ -194,10 +198,7 @@ std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2
 std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
     const std::vector<entt::entity>& physicalEntities, SDL_Point cellSize)
 {
-    auto physicsWorld = gameState.physicsWorld;
-    Box2dBodyCreator box2dBodyCreator(registry);
-    CoordinatesTransformer coordinatesTransformer(registry);
-    glm::vec2 cellSizeGlm(cellSize.x, cellSize.y);
+    assert(cellSize.x == cellSize.y);
 
     std::vector<entt::entity> splittedEntities;
 
@@ -206,27 +207,25 @@ std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
         auto originalObjPhysicsInfo = registry.get<PhysicsInfo>(entity).bodyRAII->GetBody();
         auto& originalObjRenderingInfo = registry.get<RenderingInfo>(entity);
         const b2Vec2& physicsPos = originalObjPhysicsInfo->GetPosition();
-        const glm::vec2 originalObjWorldPos = coordinatesTransformer.PhysicsToWorld(physicsPos);
+        const glm::vec2 originalObjCenterWorld = coordinatesTransformer.PhysicsToWorld(physicsPos);
+        const SDL_Rect& originalTextureRect = originalObjRenderingInfo.textureRect;
 
         // Check if the original object is big enough to be splitted.
-        if (originalObjRenderingInfo.textureRect.w <= cellSize.x ||
-            originalObjRenderingInfo.textureRect.h <= cellSize.y)
+        if (originalTextureRect.w <= cellSize.x || originalTextureRect.h <= cellSize.y)
             continue;
 
-        auto originalRectPosInTexture =
-            glm::vec2(originalObjRenderingInfo.textureRect.x, originalObjRenderingInfo.textureRect.y);
+        auto originalRectCenterInTexture = utils::GetCenterOfRect(originalTextureRect);
 
-        auto textureRects = utils::DivideRectByCellSize(originalObjRenderingInfo.textureRect, cellSize);
-        for (auto& rect : textureRects)
+        auto pixelTextureRects = utils::DivideRectByCellSize(originalTextureRect, cellSize);
+        for (auto& pixelTextureRect : pixelTextureRects)
         {
-            // Caclulate position of the pixel in the world.
-            auto pixelRectPosInTexture = glm::vec2(rect.x, rect.y);
-            glm::vec2 pixelWorldPosition = originalObjWorldPos + (pixelRectPosInTexture - originalRectPosInTexture) -
-                cellSizeGlm - glm::vec2{1, 1}; // TODO1: here is a hack with {1, 1}.
+            auto pixelRectCenterInTexture = utils::GetCenterOfRect(pixelTextureRect);
+            auto pixelCenterShift = pixelRectCenterInTexture - originalRectCenterInTexture;
+            glm::vec2 pixelCenterWorld = originalObjCenterWorld + pixelCenterShift;
 
-            assert(cellSize.x == cellSize.y);
             auto pixelEntity = CreateTile(
-                pixelWorldPosition, cellSize.x, TextureRect{originalObjRenderingInfo.texturePtr, rect}, "PixeledTile");
+                pixelCenterWorld, cellSize.x, TextureRect{originalObjRenderingInfo.texturePtr, pixelTextureRect},
+                "PixeledTile");
 
             splittedEntities.push_back(pixelEntity);
         }

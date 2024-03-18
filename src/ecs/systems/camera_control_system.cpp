@@ -7,7 +7,7 @@
 
 CameraControlSystem::CameraControlSystem(entt::registry& registry, InputEventManager& inputEventManager)
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    inputEventManager(inputEventManager), transformer(registry)
+    inputEventManager(inputEventManager), coordinatesTransformer(registry)
 {
     inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
                                 { HandleCameraMovementAndScale(eventInfo.originalEvent); });
@@ -78,17 +78,17 @@ void CameraControlSystem::Update(float deltaTime)
 void CameraControlSystem::PositioningCameraToPlayer(float deltaTime)
 {
     // Convert everything to world coordinates.
-    auto mouseWorldPos = transformer.ScreenToWorld(gameState.windowOptions.lastMousePosInWindow);
+    auto mouseWorldPos = coordinatesTransformer.ScreenToWorld(gameState.windowOptions.lastMousePosInWindow);
     auto& cameraCenterWorldPos = gameState.windowOptions.cameraCenterSdl;
     glm::vec2 windowSize =
-        transformer.ScreenToWorld(gameState.windowOptions.windowSize, CoordinatesTransformer::Type::Length);
+        coordinatesTransformer.ScreenToWorld(gameState.windowOptions.windowSize, CoordinatesTransformer::Type::Length);
 
     auto players = registry.view<PlayerInfo, PhysicsInfo>();
     for (auto entity : players)
     {
         const auto& physicsInfo = players.get<PhysicsInfo>(entity);
         auto playerBody = physicsInfo.bodyRAII->GetBody();
-        auto playerWorldPos = transformer.PhysicsToWorld(playerBody->GetPosition());
+        auto playerWorldPos = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
 
         glm::vec2 cameraAnchorWorldPos = playerWorldPos;
 

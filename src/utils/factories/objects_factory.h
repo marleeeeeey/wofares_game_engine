@@ -16,26 +16,24 @@ class ObjectsFactory
     GameOptions& gameState;
     std::shared_ptr<b2World> physicsWorld;
     Box2dBodyCreator box2dBodyCreator;
-    CoordinatesTransformer transformer;
+    CoordinatesTransformer coordinatesTransformer;
     PhysicsBodyTuner bodyTuner;
 public:
     ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
-public: // On map load.
+public: // Main game objects.
     entt::entity CreateTile(
         glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
     entt::entity CreatePlayer(const glm::vec2& playerSdlWorldPos);
-public: // On player action.
-    entt::entity SpawnFlyingEntity(
-        const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force);
     entt::entity CreateBullet(entt::entity playerEntity, float initialBulletSpeed);
 public: // Explosions.
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
     std::vector<entt::entity> SpawnSplittedPhysicalEnteties(
         const std::vector<entt::entity>& entities, SDL_Point cellSize);
-public: // Fragments.
-    entt::entity CreateFragmentAfterExplosion(const glm::vec2& sdlWorldPos);
+    entt::entity SpawnFragmentAfterExplosion(const glm::vec2& sdlWorldPos);
     std::vector<entt::entity> SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld);
-private: // Animations.
+private: // Helpers
     AnimationInfo CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
+    entt::entity SpawnFlyingEntity(
+        const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force);
 };

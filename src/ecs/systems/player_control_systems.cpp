@@ -16,7 +16,7 @@ PlayerControlSystem::PlayerControlSystem(
     EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
     Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), inputEventManager(inputEventManager),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), transformer(registry),
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry),
     box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory)
 {
     SubscribeToInputEvents();
@@ -147,7 +147,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const InputEventManager::Ev
         auto physicsWorld = gameState.physicsWorld;
 
         auto windowPos = glm::vec2(event.button.x, event.button.y);
-        auto worldPos = transformer.ScreenToWorld(windowPos);
+        auto worldPos = coordinatesTransformer.ScreenToWorld(windowPos);
 
         auto entity = registryWrapper.Create("buildingBlock");
         glm::vec2 sdlSize(10.0f, 10.0f);
@@ -170,7 +170,7 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
             auto playerBody = physicalBody.bodyRAII->GetBody();
 
             glm::vec2 mouseWindowPos{event.motion.x, event.motion.y};
-            glm::vec2 playerWindowPos = transformer.PhysicsToScreen(playerBody->GetPosition());
+            glm::vec2 playerWindowPos = coordinatesTransformer.PhysicsToScreen(playerBody->GetPosition());
             glm::vec2 directionVec = mouseWindowPos - playerWindowPos;
             playerInfo.weaponDirection = glm::normalize(directionVec);
         }
