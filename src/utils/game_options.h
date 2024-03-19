@@ -23,7 +23,6 @@ struct LevelOptions
     BackgroundInfo backgroundInfo;
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
-    float dynamicBodyProbability{0.0f};
 };
 
 struct WindowOptions

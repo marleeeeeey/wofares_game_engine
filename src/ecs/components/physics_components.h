@@ -7,7 +7,6 @@ struct PhysicsComponent
 {
     std::shared_ptr<Box2dObjectRAII> bodyRAII; // Used also for the rendering to retrieve angle and position.
     Box2dBodyOptions options;
-    glm::vec2 sizeWorld; // TODO0: Create factory to simplify creation of the PhysicsComponent.
 };
 
 struct CollisionDisableTimerComponent

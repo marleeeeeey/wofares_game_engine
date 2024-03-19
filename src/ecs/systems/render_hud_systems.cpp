@@ -58,9 +58,6 @@ void HUDRenderSystem::RenderDebugMenu()
     const auto& lastMousePosition = gameState.windowOptions.lastMousePosInWindow;
     ImGui::Text(MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
 
-    // Draw controls the physics world.
-    ImGui::SliderFloat("Dynamic Body Probability", &gameState.levelOptions.dynamicBodyProbability, 0.0f, 1.0f);
-
     ImGui::End();
 }
 

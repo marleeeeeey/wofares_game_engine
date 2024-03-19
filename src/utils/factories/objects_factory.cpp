@@ -33,15 +33,9 @@ entt::entity ObjectsFactory::SpawnTile(
         entity, glm::vec2(sizeWorld, sizeWorld), textureRect.texture, textureRect.rect);
 
     // Create a Box2D body for the tile.
-    auto tilePhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld);
-
-    // Apply randomly: static/dynamic body.
-    tilePhysicsBody->GetBody()->SetType(
-        utils::RandomTrue(gameState.levelOptions.dynamicBodyProbability) ? b2_dynamicBody : b2_staticBody);
-
     Box2dBodyOptions options;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
-    registry.emplace<PhysicsComponent>(entity, tilePhysicsBody, options, bodySizeWorld);
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld, options);
 
     return entity;
 };
@@ -63,12 +57,11 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
     Box2dBodyOptions options;
     options.shape = Box2dBodyOptions::Shape::Capsule;
     options.sensor = Box2dBodyOptions::Sensor::ThinSensorBelow;
-    options.dynamic = Box2dBodyOptions::DynamicOptions::Dynamic;
+    options.dynamic = Box2dBodyOptions::DynamicOption::Dynamic;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
-    auto playerPhysicsBody = box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG_FMT(info, "Create player body with bbox: {}", playerHitboxSizeWorld);
-    registry.emplace<PhysicsComponent>(entity, playerPhysicsBody, options, playerHitboxSizeWorld);
 
     return entity;
 }
@@ -81,9 +74,7 @@ entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& posWor
 
     auto entity = registryWrapper.Create("ExplosionFragment");
     registry.emplace<AnimationComponent>(entity, fragmentAnimation);
-    Box2dBodyOptions options;
-    registry.emplace<PhysicsComponent>(
-        entity, box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentSizeWorld), options, fragmentSizeWorld);
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentSizeWorld);
     registry.emplace<CollisionDisableHitCountComponent>(
         entity, utils::GetConfig<size_t, "ObjectsFactory.numberOfHitsToDisableCollisionsForFragments">());
     return entity;
@@ -107,18 +98,17 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
 
     // Create a Box2D body for the flying entity.
     Box2dBodyOptions options;
-    options.dynamic = Box2dBodyOptions::DynamicOptions::Dynamic;
+    options.dynamic = Box2dBodyOptions::DynamicOption::Dynamic;
     options.shape = Box2dBodyOptions::Shape::Box;
     options.anglePolicy = anglePolicy;
-    auto physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
+    auto& physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
 
     registry.emplace<RenderingComponent>(flyingEntity, sizeWorld);
-    registry.emplace<PhysicsComponent>(flyingEntity, physicsBody, options, sizeWorld);
 
     // Apply the force to the flying entity.
     b2Vec2 speedVec = b2Vec2(initialSpeed, 0);
     speedVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), speedVec);
-    physicsBody->GetBody()->SetLinearVelocity(speedVec);
+    physicsBody.bodyRAII->GetBody()->SetLinearVelocity(speedVec);
 
     return flyingEntity;
 };
@@ -162,7 +152,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     entt::entity bulletEntity = SpawnFlyingEntity(
         positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed,
         anglePolicy);
-    bodyTuner.SetBulletFlagForTheEntity(bulletEntity, true);
+    bodyTuner.ApplyOption(bulletEntity, Box2dBodyOptions::BulletPolicy::Bullet);
 
     // TODO1: Think about merging all explosion components into one.
     // All weapons setting should be in one place - WeaponProps.
@@ -185,10 +175,8 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
 {
     auto entity = registryWrapper.Create("BuildingBlock");
     glm::vec2 sizeWorld(10.0f, 10.0f);
-    auto physicsBody = box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld);
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld);
     registry.emplace<RenderingComponent>(entity, sizeWorld, nullptr, SDL_Rect{}, ColorName::Green);
-    Box2dBodyOptions options;
-    registry.emplace<PhysicsComponent>(entity, physicsBody, options, sizeWorld);
     return entity;
 };
 

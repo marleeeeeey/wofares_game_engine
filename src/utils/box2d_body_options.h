@@ -1,14 +1,8 @@
 #pragma once
+#include <glm/glm.hpp>
 
 struct Box2dBodyOptions
 {
-    enum class Shape
-    {
-        Box,
-        Capsule,
-        Circle,
-    } shape = Shape::Box;
-
     struct Fixture
     {
         float density = 10.0f; // Density to calculate mass.
@@ -16,17 +10,24 @@ struct Box2dBodyOptions
         float restitution = 0.2f; // Restitution to apply to the body.
     } fixture;
 
+    enum class Shape
+    {
+        Box,
+        Capsule,
+        Circle,
+    } shape = Shape::Box;
+
     enum class Sensor
     {
-        NoSensor,
-        ThinSensorBelow,
+        NoSensor, // No sensor.
+        ThinSensorBelow, // Thin sensor below the body. Wight slightly less than the body.
     } sensor = Sensor::NoSensor;
 
-    enum class DynamicOptions
+    enum class DynamicOption
     {
-        Static,
-        Dynamic,
-    } dynamic = DynamicOptions::Static;
+        Static, // The object does not move.
+        Dynamic, // The object moves according to the Box2D physics. Behavior may be changed by AnglePolicy.
+    } dynamic = DynamicOption::Static;
 
     enum class AnglePolicy
     {
@@ -34,4 +35,21 @@ struct Box2dBodyOptions
         Fixed, // The object does not rotate.
         VelocityDirection // The object has the direction of the velocity vector.
     } anglePolicy = AnglePolicy::Dynamic;
+
+    enum class CollisionPolicy
+    {
+        CollideWithAll, // The object collides with all other objects.
+        NoCollision, // The object does not collide with other objects.
+    } collisionPolicy = CollisionPolicy::CollideWithAll;
+
+    enum class BulletPolicy
+    {
+        NotBullet, // The object is not a bullet.
+        Bullet, // The object is a bullet.
+    } bulletPolicy = BulletPolicy::NotBullet;
+
+    struct Hitbox
+    {
+        glm::vec2 sizeWorld; // Size of the hitbox in the world coordinates.
+    } hitbox;
 };

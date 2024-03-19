@@ -71,7 +71,7 @@ void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
         }
 
         // Update shape because the animation might have changed.
-        box2dBodyTuner.UpdateFixtureShapeSizeForTheEntity(entity, animationInfo.GetHitboxSize());
+        box2dBodyTuner.ApplyOption(entity, Box2dBodyOptions::Hitbox{animationInfo.GetHitboxSize()});
 
         // Change the animation direction based on the player's direction.
         if (playerInfo.weaponDirection.x < 0)

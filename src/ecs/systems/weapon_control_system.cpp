@@ -99,7 +99,7 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
     if (hitCount->hitCount <= 0)
     {
         registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
-        physicsBodyTuner.DisableCollisionForTheEntity(hitCountEntity);
+        physicsBodyTuner.ApplyOption(hitCountEntity, Box2dBodyOptions::CollisionPolicy::NoCollision);
     }
 };
 
@@ -204,7 +204,7 @@ void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
         if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
         {
             registry.remove<CollisionDisableTimerComponent>(entity);
-            physicsBodyTuner.DisableCollisionForTheEntity(entity);
+            physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::CollisionPolicy::NoCollision);
         }
     }
 };

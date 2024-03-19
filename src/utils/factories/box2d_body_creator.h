@@ -14,7 +14,8 @@ class Box2dBodyCreator
 public:
     Box2dBodyCreator(entt::registry& registry);
     // entity is used to store entity in the physics body.
-    std::shared_ptr<Box2dObjectRAII> CreatePhysicsBody(
-        entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld,
-        const Box2dBodyOptions& options = {});
+    PhysicsComponent& CreatePhysicsBody(
+        entt::entity entity, const glm::vec2& posWorld, const Box2dBodyOptions& options);
+    PhysicsComponent& CreatePhysicsBody(
+        entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld, Box2dBodyOptions options = {});
 };

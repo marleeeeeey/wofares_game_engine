@@ -1,6 +1,4 @@
 #include "box2d_body_tuner.h"
-#include "my_common_cpp_utils/logger.h"
-#include "my_common_cpp_utils/math_utils.h"
 #include <ecs/components/physics_components.h>
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
@@ -8,103 +6,175 @@ Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
     physicsWorld(registry.get<GameOptions>(registry.view<GameOptions>().front()).physicsWorld)
 {}
 
-void Box2dBodyTuner::DisableCollisionForTheBody(b2Body* body)
+PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
+    entt::entity entity, const glm::vec2& posWorld, const Box2dBodyOptions& options)
 {
+    b2Body* body = CreatePhysicsBodyWithNoShape(entity, posWorld);
+    auto box2dObjectRAII = std::make_shared<Box2dObjectRAII>(body, physicsWorld);
+    PhysicsComponent& physicsComponent = registry.emplace<PhysicsComponent>(entity, box2dObjectRAII, options);
+
+    ApplyOption(entity, options.fixture);
+    ApplyOption(entity, options.shape);
+    ApplyOption(entity, options.sensor);
+    ApplyOption(entity, options.dynamic);
+    ApplyOption(entity, options.anglePolicy);
+    ApplyOption(entity, options.collisionPolicy);
+    ApplyOption(entity, options.bulletPolicy);
+    ApplyOption(entity, options.hitbox);
+
+    return physicsComponent;
+}
+
+PhysicsComponent& Box2dBodyTuner::GetPhysicsComponent(entt::entity entity)
+{
+    return registry.get<PhysicsComponent>(entity);
+};
+
+// ************************************* Options setters. *************************************
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Fixture& fixtureOptions)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.fixture = fixtureOptions;
+
+    b2Fixture* fixture = body->GetFixtureList();
+    while (fixture != nullptr)
+    {
+        fixture->SetDensity(fixtureOptions.density);
+        fixture->SetFriction(fixtureOptions.friction);
+        fixture->SetRestitution(fixtureOptions.restitution);
+        fixture = fixture->GetNext();
+    }
+};
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Shape& option)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.shape = option;
+
+    RemoveAllFixturesExceptSensorsFromTheBody(body);
+
+    auto fixtureDef = CalcFixtureDefFromOptions(physicsComponent.options.fixture);
+
+    if (option == Box2dBodyOptions::Shape::Box)
+        AddBoxFixtureToBody(body, fixtureDef, physicsComponent.options.hitbox.sizeWorld);
+    else if (option == Box2dBodyOptions::Shape::Circle)
+        AddCircleFixtureToBody(body, fixtureDef, physicsComponent.options.hitbox.sizeWorld);
+    else if (option == Box2dBodyOptions::Shape::Capsule)
+        AddVerticalCapsuleFixtureToBody(body, fixtureDef, physicsComponent.options.hitbox.sizeWorld);
+    else
+        throw std::runtime_error("[ApplyOption] Unknown shape type");
+};
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Sensor& option)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.sensor = option;
+
+    RemoveAllSensorsFromTheBody(body);
+
+    if (option == Box2dBodyOptions::Sensor::ThinSensorBelow)
+        AddThinSensorBelowTheBody(body, physicsComponent.options.hitbox.sizeWorld);
+    else if (option == Box2dBodyOptions::Sensor::NoSensor)
+        return;
+    else
+        throw std::runtime_error("[ApplyOption] Unknown sensor type");
+};
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::DynamicOption& option)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.dynamic = option;
+    body->SetType(option == Box2dBodyOptions::DynamicOption::Dynamic ? b2_dynamicBody : b2_staticBody);
+};
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::AnglePolicy& option)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.anglePolicy = option;
+
+    if (option == Box2dBodyOptions::AnglePolicy::Dynamic)
+        body->SetFixedRotation(false);
+    else if (option == Box2dBodyOptions::AnglePolicy::Fixed)
+        body->SetFixedRotation(true);
+    else if (option == Box2dBodyOptions::AnglePolicy::VelocityDirection)
+        // Do nothing. The angle will be set in the physics system.
+        return;
+    else
+        throw std::runtime_error("[ApplyOption] Unknown angle policy");
+};
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::CollisionPolicy& option)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.collisionPolicy = option;
+
     b2Fixture* fixture = body->GetFixtureList();
     while (fixture != nullptr)
     {
         b2Filter filter = fixture->GetFilterData();
-        filter.maskBits = 0x0000; // Mask to ignore all collisions.
+
+        if (option == Box2dBodyOptions::CollisionPolicy::NoCollision)
+        {
+            filter.categoryBits = 0x0000; // Mask to ignore all collisions.
+        }
+        else if (option == Box2dBodyOptions::CollisionPolicy::CollideWithAll)
+        {
+            filter.categoryBits = 0x0001; // Mask to collide with all.
+        }
+        else
+        {
+            throw std::runtime_error("[ApplyOption] Unknown collision policy");
+        }
+
         fixture->SetFilterData(filter);
         fixture = fixture->GetNext();
     }
 };
 
-void Box2dBodyTuner::DisableCollisionForTheEntity(entt::entity entity)
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::BulletPolicy& option)
 {
-    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (!physicsInfo)
-        return;
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto body = physicsComponent.bodyRAII->GetBody();
+    physicsComponent.options.bulletPolicy = option;
 
-    auto body = physicsInfo->bodyRAII->GetBody();
-    DisableCollisionForTheBody(body);
+    body->SetBullet(option == Box2dBodyOptions::BulletPolicy::Bullet);
 };
 
-void Box2dBodyTuner::SetBulletFlagForTheBody(b2Body* body, bool value)
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hitbox& hitbox)
 {
-    body->SetBullet(value);
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    auto& objectHitbox = physicsComponent.options.hitbox;
+
+    if (objectHitbox.sizeWorld == hitbox.sizeWorld)
+        return;
+
+    objectHitbox = hitbox;
+
+    ApplyOption(entity, physicsComponent.options.shape);
+};
+
+// ************************************* Create empty physics body. *************************************
+
+b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(entt::entity entity, const glm::vec2& posWorld)
+{
+    b2BodyDef bodyDef;
+    b2Vec2 posPhysics = coordinatesTransformer.WorldToPhysics(posWorld);
+    bodyDef.position.Set(posPhysics.x, posPhysics.y);
+    b2Body* body = physicsWorld->CreateBody(&bodyDef);
+
+    // Set the entity to the Box2D body user data. It will be used to get the entity from the Box2D body.
+    body->GetUserData().pointer = static_cast<uintptr_t>(entity);
+    return body;
 }
 
-void Box2dBodyTuner::SetBulletFlagForTheEntity(entt::entity entity, bool value)
-{
-    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (!physicsInfo)
-        return;
-
-    auto body = physicsInfo->bodyRAII->GetBody();
-    SetBulletFlagForTheBody(body, value);
-}
-
-void Box2dBodyTuner::UpdateFixtureShapeForTheBody(b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions options)
-{
-    RemoveAllFixturesFromTheBody(body);
-    auto fixtureDef = GetFixtureWithOptions(options.fixture);
-    CreateFixtureShapeForTheBody(body, fixtureDef, sizeWorld, options);
-    body->ResetMassData();
-};
-
-void Box2dBodyTuner::CreateFixtureShapeForTheBody(b2Body* body, const glm::vec2& sizeWorld, Box2dBodyOptions options)
-{
-    b2FixtureDef fixtureDef = GetFixtureWithOptions(options.fixture);
-    CreateFixtureShapeForTheBody(body, fixtureDef, sizeWorld, options);
-};
-
-void Box2dBodyTuner::CreateFixtureShapeForTheEntity(
-    entt::entity entity, const glm::vec2& sizeWorld, Box2dBodyOptions options)
-{
-    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (!physicsInfo)
-        return;
-
-    auto body = physicsInfo->bodyRAII->GetBody();
-    physicsInfo->options = options;
-    physicsInfo->sizeWorld = sizeWorld;
-    CreateFixtureShapeForTheBody(body, sizeWorld, options);
-};
-
-void Box2dBodyTuner::UpdateFixtureShapeSizeForTheEntity(entt::entity entity, const glm::vec2& sizeWorld)
-{
-    auto physicsInfo = registry.try_get<PhysicsComponent>(entity);
-    if (!physicsInfo)
-        return;
-
-    auto body = physicsInfo->bodyRAII->GetBody();
-
-    if (physicsInfo->sizeWorld == sizeWorld)
-        return;
-
-    physicsInfo->sizeWorld = sizeWorld;
-
-    // TODO4: This method makes the body to lose it's contacts for a short period of time.
-    // That is why this method should be called as rarely as possible.
-    UpdateFixtureShapeForTheBody(body, sizeWorld, physicsInfo->options);
-};
-
-void Box2dBodyTuner::CreateFixtureShapeForTheBody(
-    b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld, Box2dBodyOptions options)
-{
-    if (options.shape == Box2dBodyOptions::Shape::Box)
-        AddBoxFixtureToBody(body, fixtureDef, sizeWorld);
-    else if (options.shape == Box2dBodyOptions::Shape::Circle)
-        AddCircleFixtureToBody(body, fixtureDef, sizeWorld);
-    else if (options.shape == Box2dBodyOptions::Shape::Capsule)
-        AddVerticalCapsuleFixtureToBody(body, fixtureDef, sizeWorld);
-    else
-        throw std::runtime_error("[CreateHitboxShapeForTheBody] Unknown shape type");
-
-    if (options.sensor == Box2dBodyOptions::Sensor::ThinSensorBelow)
-        AddThinSensorBelowTheBody(body, sizeWorld);
-};
+// ************************************* Add simple fixtures to the body. *************************************
 
 void Box2dBodyTuner::AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld)
 {
@@ -175,64 +245,49 @@ void Box2dBodyTuner::AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& si
     body->CreateFixture(&sensorDef);
 };
 
-void Box2dBodyTuner::RemoveAllFixturesFromTheBody(b2Body* body)
+// ************************************* Remove fixtures from the body. *************************************
+
+void Box2dBodyTuner::RemoveAllFixturesExceptSensorsFromTheBody(b2Body* body)
 {
     b2Fixture* fixture = body->GetFixtureList();
     while (fixture != nullptr)
     {
+        if (fixture->IsSensor())
+        {
+            fixture = fixture->GetNext();
+            continue;
+        }
+
         b2Fixture* nextFixture = fixture->GetNext();
         body->DestroyFixture(fixture);
         fixture = nextFixture;
     }
 };
 
-b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(
-    entt::entity entity, const glm::vec2& posWorld, b2BodyType bodyType)
+void Box2dBodyTuner::RemoveAllSensorsFromTheBody(b2Body* body)
 {
-    b2BodyDef bodyDef;
-    bodyDef.type = bodyType;
-    b2Vec2 posPhysics = coordinatesTransformer.WorldToPhysics(posWorld);
-    bodyDef.position.Set(posPhysics.x, posPhysics.y);
-    b2Body* body = physicsWorld->CreateBody(&bodyDef);
+    b2Fixture* fixture = body->GetFixtureList();
+    while (fixture != nullptr)
+    {
+        if (!fixture->IsSensor())
+        {
+            fixture = fixture->GetNext();
+            continue;
+        }
 
-    // Set the entity to the Box2D body user data. It will be used to get the entity from the Box2D body.
-    body->GetUserData().pointer = static_cast<uintptr_t>(entity);
-    return body;
+        b2Fixture* nextFixture = fixture->GetNext();
+        body->DestroyFixture(fixture);
+        fixture = nextFixture;
+    }
 };
 
-b2FixtureDef Box2dBodyTuner::GetFixtureWithOptions(const Box2dBodyOptions::Fixture& options)
+// ************************************* Get fixture def. *************************************
+
+b2FixtureDef Box2dBodyTuner::CalcFixtureDefFromOptions(const Box2dBodyOptions::Fixture& options)
 {
     b2FixtureDef fixtureDef;
     fixtureDef.density = options.density;
     fixtureDef.friction = options.friction;
     fixtureDef.restitution = options.restitution;
     return fixtureDef;
-};
-
-b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(
-    entt::entity entity, const glm::vec2& posWorld, Box2dBodyOptions options)
-{
-    b2BodyType bodyType;
-    if (options.dynamic == Box2dBodyOptions::DynamicOptions::Dynamic)
-    {
-        bodyType = b2_dynamicBody;
-    }
-    else if (options.dynamic == Box2dBodyOptions::DynamicOptions::Static)
-    {
-        bodyType = b2_staticBody;
-    }
-    else
-    {
-        throw std::runtime_error("[CreatePhysicsBody] Unknown dynamic type");
-    }
-
-    return CreatePhysicsBodyWithNoShape(entity, posWorld, bodyType);
-};
-
-std::shared_ptr<Box2dObjectRAII> Box2dBodyTuner::CreatePhysicsBody(
-    entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld, const Box2dBodyOptions& options)
-{
-    b2Body* body = CreatePhysicsBodyWithNoShape(entity, posWorld, options);
-    CreateFixtureShapeForTheBody(body, sizeWorld, options);
-    return std::make_shared<Box2dObjectRAII>(body, physicsWorld);
 };

@@ -1,11 +1,18 @@
 {
   "version": "2.0.0",
   "tasks": [
-    // task to make build dirrectory
+    {
+      "label": "Wofares (Windows) 0. Clean console",
+      "type": "shell",
+      "command": "cls",
+    },
     {
       "label": "Wofares (Windows) 0. Make build directory",
       "type": "shell",
       "command": "mkdir ${workspaceFolder}\\build 2>nul || (exit 0)",
+      "dependsOn": [
+        "Wofares (Windows) 0. Clean console"
+      ]
     },
     {
       "label": "Wofares (Windows) 1. Configure",
@@ -18,8 +25,8 @@
     {
       "label": "Wofares (Windows) 2. Build",
       "type": "shell",
-      // "command": "cmake --build ${workspaceFolder}/build -- -k 0", // stop on first error
-      "command": "cmake --build ${workspaceFolder}/build", // continue on error
+      "command": "cmake --build ${workspaceFolder}/build -- -k 0", // stop on first error
+      // "command": "cmake --build ${workspaceFolder}/build", // continue on error
       "dependsOn": [
         "Wofares (Windows) 1. Configure"
       ]
