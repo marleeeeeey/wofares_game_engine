@@ -32,6 +32,7 @@ target_link_libraries(wofares
     box2d
     my_common_cpp_utils
     SDL2_mixer::SDL2_mixer
+    asio::asio # header-only
 )
 
 target_include_directories(wofares

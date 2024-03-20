@@ -19,6 +19,12 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 - Visual Studio Code (recommended for development).
   - Clangd extension (recommended for code analysis). Project is configured to generate `compile_commands.json` for Clangd.
 
+### Installing dependencies (Windows)
+
+```
+vcpkg install sdl2-mixer asio
+```
+
 ### Build and run from Visual Studio Code
 
 - `git clone --recursive https://github.com/marleeeeeey/wofares-game.git` to clone the repository and its submodules.
