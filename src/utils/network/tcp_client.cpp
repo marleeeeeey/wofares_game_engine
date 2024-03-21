@@ -8,8 +8,24 @@ void TcpClient::Connect(const std::string& host, const std::string& port)
 {
     asio::ip::tcp::resolver resolver(io_context);
     asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(host, port);
+
+    // check if endpoint is valid
+    if (endpoints.empty())
+    {
+        throw std::runtime_error("[TcpClient::Connect] Invalid endpoint");
+    }
+
     asio::ip::tcp::socket socket(io_context);
-    asio::connect(socket, endpoints);
+
+    try
+    {
+        asio::connect(socket, endpoints);
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error("[TcpClient::Connect] " + std::string(e.what()));
+    }
+
     tcpJsonSession = std::make_shared<TcpJsonSession>(std::move(socket));
 }
 
@@ -31,4 +47,13 @@ std::future<nlohmann::json> TcpClient::Receive()
     }
 
     return tcpJsonSession->Receive();
+}
+
+void TcpClient::Disconnect()
+{
+    if (tcpJsonSession)
+    {
+        tcpJsonSession->Close();
+        tcpJsonSession.reset();
+    }
 }

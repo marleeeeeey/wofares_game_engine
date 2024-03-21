@@ -9,6 +9,9 @@ class TcpJsonSession : std::enable_shared_from_this<TcpJsonSession>
     asio::ip::tcp::socket socket_;
 public:
     TcpJsonSession(asio::ip::tcp::socket socket);
+    ~TcpJsonSession();
+public: // Main interface.
     std::future<void> Send(const nlohmann::json& j);
     std::future<nlohmann::json> Receive();
+    void Close();
 };

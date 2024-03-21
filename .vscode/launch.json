@@ -7,11 +7,29 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug",
+      "name": "Debug Wofares",
       "program": "${workspaceFolder}/build/src/wofares.exe",
       "args": [],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "Wofares (Windows) 4. Copy assets"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug TcpServer",
+      "program": "${workspaceFolder}/build/tests/network_test/network_test.exe",
+      "args": ["server"],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Wofares (Windows) 2. Build"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug TcpClient",
+      "program": "${workspaceFolder}/build/tests/network_test/network_test.exe",
+      "args": ["client"],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Wofares (Windows) 2. Build"
     }
   ]
 }

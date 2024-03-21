@@ -3,6 +3,11 @@
 TcpJsonSession::TcpJsonSession(asio::ip::tcp::socket socket) : socket_(std::move(socket))
 {}
 
+TcpJsonSession::~TcpJsonSession()
+{
+    Close();
+}
+
 std::future<void> TcpJsonSession::Send(const nlohmann::json& j)
 {
     auto promise = std::make_shared<std::promise<void>>();
@@ -12,9 +17,11 @@ std::future<void> TcpJsonSession::Send(const nlohmann::json& j)
     std::string header = std::to_string(message.length()) + "\n"; // Preamble with size
     std::string to_send = header + message; // Concatenation of preamble and message
 
+    std::shared_ptr<TcpJsonSession> self = shared_from_this();
+
     asio::async_write(
         socket_, asio::buffer(to_send),
-        [self = shared_from_this(), promise](std::error_code ec, std::size_t /*length*/)
+        [self, promise](std::error_code ec, std::size_t /*length*/)
         {
             if (!ec)
             {
@@ -74,4 +81,14 @@ std::future<nlohmann::json> TcpJsonSession::Receive()
         });
 
     return promise->get_future();
+}
+
+void TcpJsonSession::Close()
+{
+    if (socket_.is_open())
+    {
+        std::error_code ec;
+        (void)socket_.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+        (void)socket_.close(ec);
+    }
 }

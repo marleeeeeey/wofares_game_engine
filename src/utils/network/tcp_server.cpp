@@ -1,4 +1,5 @@
 #include "tcp_server.h"
+#include <cstddef>
 
 TcpServer::TcpServer(asio::io_context& io_context, const std::string& host, const std::string& port)
   : io_context_(io_context), acceptor_(asio::make_strand(io_context))
@@ -18,8 +19,11 @@ void TcpServer::StartAccept()
         {
             if (!ec)
             {
+                // TODO3: size_t type has a very big limit, but it have. Think how to reuse disconnected ids.
+                static size_t newSessionId = 0;
+                newSessionId++;
                 auto session = std::make_shared<TcpJsonSession>(std::move(socket));
-                sessions_.push_back(session);
+                sessions_[newSessionId] = session;
 
                 // TODO0: Notify about new connection.
             }
@@ -30,32 +34,41 @@ void TcpServer::StartAccept()
         });
 }
 
-std::vector<std::future<void>> TcpServer::Broadcast(const nlohmann::json& j)
+std::unordered_map<size_t, std::future<void>> TcpServer::Broadcast(const nlohmann::json& j)
 {
     if (sessions_.empty())
     {
         throw std::runtime_error("[TcpServer::Broadcast] No clients connected");
     }
 
-    std::vector<std::future<void>> futures;
-    for (auto& session : sessions_)
+    std::unordered_map<size_t, std::future<void>> futures;
+    for (auto& [id, session] : sessions_)
     {
-        futures.push_back(session->Send(j));
+        futures[id] = session->Send(j);
     }
     return futures;
 }
 
-void TcpServer::ReceiveFromSession(size_t session_index)
+// Possible to run this method for several sessions one after another
+// without waiting for the previous one session to finish.
+std::future<nlohmann::json> TcpServer::ReceiveFromSession(size_t sessionIndex)
 {
-    if (session_index < sessions_.size())
-    {
-        auto session = sessions_[session_index];
-        auto future = session->Receive();
-
-        // TODO0: Handle the future with the received data.
-    }
-    else
+    if (!sessions_.contains(sessionIndex))
     {
         throw std::runtime_error("[TcpServer::ReceiveFromSession] Invalid session index");
     }
+
+    auto session = sessions_[sessionIndex];
+    auto future = session->Receive();
+    return future;
+}
+
+void TcpServer::CloseSession(size_t sessionIndex)
+{
+    if (!sessions_.contains(sessionIndex))
+    {
+        throw std::runtime_error("[TcpServer::CloseSession] Invalid session index");
+    }
+
+    sessions_.erase(sessionIndex); // It close the socket on object destruction
 }
