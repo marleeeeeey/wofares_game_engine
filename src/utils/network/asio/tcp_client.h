@@ -2,7 +2,7 @@
 #include <asio.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <utils/network/tcp_json_session.h>
+#include <utils/network/asio/tcp_json_session.h>
 
 class TcpClient
 {

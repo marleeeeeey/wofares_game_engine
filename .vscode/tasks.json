@@ -55,6 +55,22 @@
       "dependsOn": [
         "Wofares (Windows) 4. Copy assets"
       ]
+    },
+    {
+      "label": "Wofares (Windows) 6. Run Test Network Server",
+      "type": "shell",
+      "command": "start ${workspaceFolder}/build/tests/test_tcp_server/test_tcp_server.exe",
+      "dependsOn": [
+        "Wofares (Windows) 2. Build"
+      ]
+    },
+    {
+      "label": "Wofares (Windows) 7. Run Test Network Client",
+      "type": "shell",
+      "command": "start ${workspaceFolder}/build/tests/test_tcp_client/test_tcp_client.exe",
+      "dependsOn": [
+        "Wofares (Windows) 2. Build"
+      ]
     }
   ]
 }

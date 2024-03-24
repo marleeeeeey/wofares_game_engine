@@ -4,7 +4,7 @@
 
 // std::enable_shared_from_this<TcpJsonSession> used to allow shared_from_this() in async handlers.
 // It is used to keep the TcpJsonSession object alive while asynchronous operations are in progress.
-class TcpJsonSession : std::enable_shared_from_this<TcpJsonSession>
+class TcpJsonSession : public std::enable_shared_from_this<TcpJsonSession>
 {
     asio::ip::tcp::socket socket_;
 public:

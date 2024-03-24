@@ -1,1 +1,2 @@
-add_subdirectory(network_test)
+add_subdirectory(test_tcp_client)
+add_subdirectory(test_tcp_server)
