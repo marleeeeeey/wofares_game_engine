@@ -52,7 +52,9 @@ int main(int argc, char* args[])
 
         // Initialize the SteamNetworkingSockets library.
         SteamNetworkingInitRAII::Options steamNetworkingOptions;
-        steamNetworkingOptions.debugSeverity = k_ESteamNetworkingSocketsDebugOutputType_Everything;
+        steamNetworkingOptions.debugSeverity =
+            utils::GetConfig<ESteamNetworkingSocketsDebugOutputType, "Networking.debugSeverity">();
+        MY_LOG_FMT(info, "[SteamNetworking] debugSeverity: {}", steamNetworkingOptions.debugSeverity);
         SteamNetworkingInitRAII steamNetworkingInitRAII(steamNetworkingOptions);
         SteamNetworkingInitRAII::SetDebugCallback(
             []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
