@@ -3,7 +3,7 @@
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <glm/glm.hpp>
-#include <my_common_cpp_utils/config.h>
+#include <my_cpp_utils/config.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>

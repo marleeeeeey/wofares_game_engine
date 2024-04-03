@@ -1,6 +1,6 @@
 #include "entt_registry_wrapper.h"
 #include <entt/entt.hpp>
-#include <my_common_cpp_utils/logger.h>
+#include <my_cpp_utils/logger.h>
 
 EnttRegistryWrapper::EnttRegistryWrapper(entt::registry& registry) : registry(registry)
 {}

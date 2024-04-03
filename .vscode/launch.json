@@ -8,10 +8,9 @@
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/build/src/wofares.exe",
+      "program": "build/src/wofares.exe",
       "args": [],
-      "cwd": "${workspaceFolder}",
-      "preLaunchTask": "Wofares (Windows) 4. Copy assets"
+      "preLaunchTask": "(Windows) 40. Copy assets"
     }
   ]
 }

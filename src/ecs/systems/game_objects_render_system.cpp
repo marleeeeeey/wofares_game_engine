@@ -2,8 +2,8 @@
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
-#include <my_common_cpp_utils/config.h>
-#include <my_common_cpp_utils/logger.h>
+#include <my_cpp_utils/config.h>
+#include <my_cpp_utils/logger.h>
 #include <utils/glm_box2d_conversions.h>
 
 GameObjectsRenderSystem::GameObjectsRenderSystem(

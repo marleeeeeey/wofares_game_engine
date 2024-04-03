@@ -2,50 +2,59 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Wofares (Windows) 0. Clean console",
+      "label": "(Windows) 00. Remove build, vcpkg and vcpkg_installed folders",
+      "type": "shell",
+      "command": "rmdir /s /q build vcpkg vcpkg_installed",
+    },
+    {
+      "label": "(Windows) 03. Install vcpkg",
+      "type": "shell",
+      "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-windows"
+    },
+    {
+      "label": "(Windows) 05. Clean console",
       "type": "shell",
       "command": "cls",
     },
     {
-      "label": "Wofares (Windows) 1. Configure",
+      "label": "(Windows) 10. Configure",
       "type": "shell",
-      "command": "cmake -S ${workspaceFolder} -B ${workspaceFolder}\\build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "command": "cmake -S . -B build -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
-        "Wofares (Windows) 0. Clean console"
+        "(Windows) 05. Clean console"
       ]
     },
     {
-      "label": "Wofares (Windows) 2. Build",
+      "label": "(Windows) 20. Build",
       "type": "shell",
-      "command": "cmake --build ${workspaceFolder}/build -- -k 0", // stop on first error
-      // "command": "cmake --build ${workspaceFolder}/build", // continue on error
+      "command": "cmake --build build -- -k 0", // stop on first error
+      // "command": "cmake --build build", // continue on error
       "dependsOn": [
-        "Wofares (Windows) 1. Configure"
+        "(Windows) 10. Configure"
       ]
     },
     {
-      "label": "Wofares (Windows) 3. Copy config.json",
+      "label": "(Windows) 30. Copy config.json",
       "type": "shell",
-      "command": "cmake -E copy ${workspaceFolder}/config.json ${workspaceFolder}/build/src/config.json",
+      "command": "cmake -E copy config.json build/src/config.json",
       "dependsOn": [
-        "Wofares (Windows) 2. Build"
-      ]
-    },
-
-    {
-      "label": "Wofares (Windows) 4. Copy assets",
-      "type": "shell",
-      "command": "cmake -E copy_directory ${workspaceFolder}/thirdparty/game_assets/wofares/assets ${workspaceFolder}/build/src/assets",
-      "dependsOn": [
-        "Wofares (Windows) 3. Copy config.json"
+        "(Windows) 20. Build"
       ]
     },
     {
-      "label": "Wofares (Windows) 5. Run",
+      "label": "(Windows) 40. Copy assets",
+      "type": "shell",
+      "command": "cmake -E copy_directory thirdparty/game_assets/wofares/assets build/src/assets",
+      "dependsOn": [
+        "(Windows) 30. Copy config.json"
+      ]
+    },
+    {
+      "label": "(Windows) 50. Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/src/wofares.exe",
       "dependsOn": [
-        "Wofares (Windows) 4. Copy assets"
+        "(Windows) 40. Copy assets"
       ]
     }
   ]

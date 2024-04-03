@@ -1,15 +1,12 @@
-[submodule "thirdparty/glm"]
-	path = thirdparty/glm
-	url = https://github.com/g-truc/glm.git
 [submodule "thirdparty/imgui"]
 	path = thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "thirdparty/my_common_cpp_utils"]
-	path = thirdparty/my_common_cpp_utils
-	url = git@github.com:marleeeeeey/my_common_cpp_utils.git
 [submodule "thirdparty/game_assets"]
 	path = thirdparty/game_assets
 	url = git@github.com:marleeeeeey/game_assets.git
 [submodule "thirdparty/glob"]
 	path = thirdparty/glob
 	url = git@github.com:p-ranav/glob.git
+[submodule "thirdparty/my_cpp_utils"]
+	path = thirdparty/my_cpp_utils
+	url = git@github.com:marleeeeeey/my_cpp_utils.git

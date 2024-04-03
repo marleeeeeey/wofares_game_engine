@@ -1,8 +1,8 @@
 # Recursively collect all .cpp files from the current source directory and subdirectories.
-file(GLOB_RECURSE SOURCES "*.cpp")
+file(GLOB_RECURSE WOFARES_SOURCES "*.cpp")
 
 # Create an executable with the collected source files.
-add_executable(wofares ${SOURCES})
+add_executable(wofares ${WOFARES_SOURCES})
 
 target_compile_definitions(wofares
     PRIVATE
@@ -25,18 +25,14 @@ target_link_libraries(wofares
     box2d::box2d
     EnTT::EnTT
     GameNetworkingSockets::shared
-    magic_enum::magic_enum
-    nlohmann_json::nlohmann_json
     SDL2_image::SDL2_image
     SDL2_mixer::SDL2_mixer
     SDL2::SDL2
     SDL2::SDL2main
-    spdlog::spdlog
 
     # custom build libraries:
     imgui # Because of this package unavailability in linux package manager.
-    glm::glm # Because of linkage error when using vcpkg.
-    my_common_cpp_utils
+    my_cpp_utils
 )
 
 target_include_directories(wofares

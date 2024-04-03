@@ -2,7 +2,7 @@
 #include <SDL_mouse.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
-#include <my_common_cpp_utils/config.h>
+#include <my_cpp_utils/config.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/game_options.h>
 

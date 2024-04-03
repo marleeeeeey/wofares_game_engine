@@ -5,9 +5,9 @@
 #include <ecs/components/physics_components.h>
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
-#include <my_common_cpp_utils/config.h>
-#include <my_common_cpp_utils/logger.h>
-#include <my_common_cpp_utils/math_utils.h>
+#include <my_cpp_utils/config.h>
+#include <my_cpp_utils/logger.h>
+#include <my_cpp_utils/math_utils.h>
 #include <utils/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_collect_objects.h>

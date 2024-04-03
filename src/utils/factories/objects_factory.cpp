@@ -4,9 +4,9 @@
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
 #include <ecs/components/weapon_components.h>
-#include <my_common_cpp_utils/config.h>
-#include <my_common_cpp_utils/logger.h>
-#include <my_common_cpp_utils/math_utils.h>
+#include <my_cpp_utils/config.h>
+#include <my_cpp_utils/logger.h>
+#include <my_cpp_utils/math_utils.h>
 #include <unordered_map>
 #include <utils/box2d_utils.h>
 #include <utils/coordinates_transformer.h>

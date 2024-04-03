@@ -23,11 +23,16 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 
 ```
 git clone --recursive https://github.com/marleeeeeey/wofares-game.git
-cd wofares-game
-git submodule update --init --recursive
 ```
 
-### Build and run (Windows)
+### Build, run and debug via VSCode tasks (Windows)
+
+- Open the project folder in VSCode.
+- Run task: `(Windows) 03. Install vcpkg`.
+- Run task: `(Windows) 50. Run`.
+- For debugging press `F5`.
+
+### Build, run and debug manually (Windows)
 
 To build Wofares on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
 
@@ -38,6 +43,7 @@ This project define it's dependences:
 First, we bootstrap a project-specific installation of vcpkg ("manifest mode") in the default location, `<project root>/vcpkg`. From the project root, run these commands:
 
 ```
+cd wofares-game
 git clone https://github.com/microsoft/vcpkg
 .\vcpkg\bootstrap-vcpkg.bat
 ```
@@ -55,7 +61,7 @@ Next build the project files. There are different options for
 4. Enable `CMAKE_EXPORT_COMPILE_COMMANDS` to generate a `compile_commands.json` file for clangd.
 
 ```
-cmake -S . -B build -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake -S . -B build -G "Ninja" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cd build
 cmake --build .
 ```
@@ -67,14 +73,11 @@ cmake -E copy ../config.json ./src/config.json
 cmake -E copy_directory ../thirdparty/game_assets/wofares/assets ./src/assets
 ```
 
-### Run the Game
+Run the game:
 
-Run `src\wofares.exe`.
-
-### VSCode Development and Debugging
-
-- Open the project folder in VSCode.
-- Press `F5` to build and run the game under the debug. This action triggers the CMake configuration, project build, copy assets and game launch.
+```
+src\wofares.exe
+```
 
 ### File Structure
 

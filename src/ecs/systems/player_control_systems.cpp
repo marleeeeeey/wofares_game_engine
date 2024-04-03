@@ -6,8 +6,8 @@
 #include <entt/entt.hpp>
 #include <glm/fwd.hpp>
 #include <imgui_impl_sdl2.h>
-#include <my_common_cpp_utils/config.h>
-#include <my_common_cpp_utils/logger.h>
+#include <my_cpp_utils/config.h>
+#include <my_cpp_utils/logger.h>
 #include <unordered_map>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>

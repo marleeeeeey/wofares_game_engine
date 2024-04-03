@@ -1,5 +1,5 @@
 #include "random_event_system.h"
-#include <my_common_cpp_utils/config.h>
+#include <my_cpp_utils/config.h>
 
 RandomEventSystem::RandomEventSystem(entt::registry& registry, AudioSystem& audioSystem)
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),

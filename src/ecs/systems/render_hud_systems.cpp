@@ -3,8 +3,8 @@
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
 #include <imgui.h>
-#include <my_common_cpp_utils/config.h>
-#include <my_common_cpp_utils/logger.h>
+#include <my_cpp_utils/config.h>
+#include <my_cpp_utils/logger.h>
 #include <utils/RAII/imgui_RAII.h>
 #include <utils/game_options.h>
 #include <utils/sdl_colors.h>

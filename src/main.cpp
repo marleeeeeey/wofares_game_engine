@@ -8,9 +8,9 @@
 #include <ecs/systems/weapon_control_system.h>
 #include <iostream>
 #include <magic_enum.hpp>
-#include <my_common_cpp_utils/config.h>
-#include <my_common_cpp_utils/json_utils.h>
-#include <my_common_cpp_utils/logger.h>
+#include <my_cpp_utils/config.h>
+#include <my_cpp_utils/json_utils.h>
+#include <my_cpp_utils/logger.h>
 #include <utils/RAII/imgui_sdl_RAII.h>
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/entt_registry_wrapper.h>

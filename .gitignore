@@ -7,3 +7,4 @@ imgui.ini
 *.log
 .VSCodeCounter/*
 vcpkg_installed/*
+vcpkg*

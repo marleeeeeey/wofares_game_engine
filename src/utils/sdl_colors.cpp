@@ -1,7 +1,7 @@
 #include "sdl_colors.h"
 #include <magic_enum.hpp>
 #include <map>
-#include <my_common_cpp_utils/math_utils.h>
+#include <my_cpp_utils/math_utils.h>
 
 SDL_Color GetSDLColor(ColorName colorName, Uint8 alpha)
 {

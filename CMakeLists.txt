@@ -14,20 +14,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generate compile_commands.json.
 find_package(box2d CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 find_package(GameNetworkingSockets CONFIG REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_image CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
 
 # ###################################################################
 # ####################### Add subdirectories ########################
 # ###################################################################
-add_subdirectory(thirdparty/my_common_cpp_utils)
-set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
-set(GLM_DISABLE_AUTO_DETECTION ON CACHE BOOL "" FORCE)
-add_subdirectory(thirdparty/glm)
+add_subdirectory(thirdparty/my_cpp_utils)
 add_subdirectory(src)
 
 # ###################################################################

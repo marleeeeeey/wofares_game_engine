@@ -1,5 +1,5 @@
 #include "coordinates_transformer.h"
-#include <my_common_cpp_utils/config.h>
+#include <my_cpp_utils/config.h>
 
 CoordinatesTransformer::CoordinatesTransformer(entt::registry& registry)
   : gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
