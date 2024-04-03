@@ -1,0 +1,2 @@
+add_subdirectory(test_tcp_client)
+add_subdirectory(test_tcp_server)

@@ -17,7 +17,7 @@
     {
       "label": "Wofares (Windows) 1. Configure",
       "type": "shell",
-      "command": "cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder} -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "command": "cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder} -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
         "Wofares (Windows) 0. Make build directory"
       ]
@@ -54,6 +54,22 @@
       "command": "${workspaceFolder}/build/src/wofares.exe",
       "dependsOn": [
         "Wofares (Windows) 4. Copy assets"
+      ]
+    },
+    {
+      "label": "Wofares (Windows) 6. Run Test Network Server",
+      "type": "shell",
+      "command": "start ${workspaceFolder}/build/tests/test_tcp_server/test_tcp_server.exe",
+      "dependsOn": [
+        "Wofares (Windows) 2. Build"
+      ]
+    },
+    {
+      "label": "Wofares (Windows) 7. Run Test Network Client",
+      "type": "shell",
+      "command": "start ${workspaceFolder}/build/tests/test_tcp_client/test_tcp_client.exe",
+      "dependsOn": [
+        "Wofares (Windows) 2. Build"
       ]
     }
   ]

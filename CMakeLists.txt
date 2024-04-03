@@ -15,10 +15,18 @@ message(STATUS "CMAKE_TOOLCHAIN_FILE is set to ${CMAKE_TOOLCHAIN_FILE}")
 string(REGEX REPLACE "/scripts/buildsystems/vcpkg.cmake$" "" VCPKG_ROOT_DIR "${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "VCPKG root dir: ${VCPKG_ROOT_DIR}")
 
+# ###################################################################
+# ############### Searching some packages in system #################
+# ###################################################################
+find_package(asio CONFIG REQUIRED)
+
 # TODO5: here is a hack to make SDL_image linkable via cmake. Fix it and make cross-platform.
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${VCPKG_ROOT_DIR}/installed/x64-windows/share/SDL2_mixer")
 find_package(SDL2_mixer CONFIG REQUIRED)
 
+# ###################################################################
+# ####################### Add subdirectories ########################
+# ###################################################################
 add_subdirectory(thirdparty/SDL)
 add_subdirectory(thirdparty/SDL_image)
 add_subdirectory(thirdparty/glm)
@@ -28,16 +36,16 @@ add_subdirectory(thirdparty/magic_enum)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/my_common_cpp_utils)
 add_subdirectory(src)
+add_subdirectory(tests)
 
 # TODO5: Disable adding the googletest library. This is workaround to make SDL_image linkable via cmake.
 # SDL_image\external\libjxl\third_party\googletest conflicts with thirdparty/googletest.
 # add_subdirectory(thirdparty/googletest)
 
 # ###################################################################
-# ############ hack to make imgui avalable via cmake ################
+# ################# build imgui from submodules #####################
 # ###################################################################
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui)
-
 add_library(imgui STATIC
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
@@ -47,27 +55,20 @@ add_library(imgui STATIC
     ${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp
     ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer2.cpp
 )
-
 target_include_directories(imgui
     PUBLIC
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
 )
-
 target_link_libraries(imgui
     PRIVATE
     SDL2::SDL2
 )
 
 # ###################################################################
-# ######## end of hack to make imgui avalable via cmake #############
-# ###################################################################
-
-# ###################################################################
-# ############ hack to make box2d avalable via cmake ################
+# ################# build box2d from submodules #####################
 # ###################################################################
 set(BOX2D_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/box2d)
-
 add_library(box2d STATIC
     ${BOX2D_DIR}/src/collision/b2_broad_phase.cpp
     ${BOX2D_DIR}/src/collision/b2_chain_shape.cpp
@@ -124,12 +125,7 @@ add_library(box2d STATIC
     ${BOX2D_DIR}/src/dynamics/b2_world_callbacks.cpp
     ${BOX2D_DIR}/src/rope/b2_rope.cpp
 )
-
 target_include_directories(box2d
     PUBLIC
     ${BOX2D_DIR}/include
 )
-
-# ###################################################################
-# ######## end of hack to make box2d avalable via cmake #############
-# ###################################################################
