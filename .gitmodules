@@ -1,36 +1,12 @@
-[submodule "thirdparty/entt"]
-	path = thirdparty/entt
-	url = https://github.com/skypjack/entt.git
 [submodule "thirdparty/glm"]
 	path = thirdparty/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "thirdparty/googletest"]
-	path = thirdparty/googletest
-	url = https://github.com/google/googletest.git
 [submodule "thirdparty/imgui"]
 	path = thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "thirdparty/json"]
-	path = thirdparty/json
-	url = https://github.com/nlohmann/json.git
-[submodule "thirdparty/magic_enum"]
-	path = thirdparty/magic_enum
-	url = https://github.com/Neargye/magic_enum.git
-[submodule "thirdparty/SDL"]
-	path = thirdparty/SDL
-	url = https://github.com/libsdl-org/SDL.git
-[submodule "thirdparty/spdlog"]
-	path = thirdparty/spdlog
-	url = https://github.com/gabime/spdlog.git
 [submodule "thirdparty/my_common_cpp_utils"]
 	path = thirdparty/my_common_cpp_utils
 	url = git@github.com:marleeeeeey/my_common_cpp_utils.git
-[submodule "thirdparty/SDL_image"]
-	path = thirdparty/SDL_image
-	url = git@github.com:libsdl-org/SDL_image.git
-[submodule "thirdparty/box2d"]
-	path = thirdparty/box2d
-	url = git@github.com:erincatto/box2d.git
 [submodule "thirdparty/game_assets"]
 	path = thirdparty/game_assets
 	url = git@github.com:marleeeeeey/game_assets.git

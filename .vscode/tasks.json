@@ -17,7 +17,7 @@
     {
       "label": "Wofares (Windows) 1. Configure",
       "type": "shell",
-      "command": "cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder} -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "command": "cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder} -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
         "Wofares (Windows) 0. Make build directory"
       ]

@@ -6,3 +6,4 @@ enc_temp_folder/
 imgui.ini
 *.log
 .VSCodeCounter/*
+vcpkg_installed/*

@@ -17,32 +17,69 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 - Clang compiler (other compilers may work, but are not officially supported).
 - Git (to load submodules).
 - Visual Studio Code (recommended for development).
-  - Clangd extension (recommended for code analysis). Project is configured to generate `compile_commands.json` for Clangd.
+  - Clangd extension (recommended for code analysis).
 
-### Build and run from Visual Studio Code
-
-- `git clone --recursive https://github.com/marleeeeeey/wofares-game.git` to clone the repository and its submodules.
-- Open the project folder in VSCode.
-- Press `F5` to build and run the game. This action triggers the CMake configuration, project build, copy assets and game launch.
-
-### Build and run from console
+### Clone the Repository
 
 ```
 git clone --recursive https://github.com/marleeeeeey/wofares-game.git
 cd wofares-game
 git submodule update --init --recursive
-mkdir build
+```
+
+### Build and run (Windows)
+
+To build Wofares on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
+
+This project define it's dependences:
+1. In a `vcpkg.json` file, and you are pulling in vcpkg's cmake toolchain file.
+2. As git submodules in the `thirdparty` directory. Because some of the libraries not available in vcpkg or have an error in the vcpkg port file.
+
+First, we bootstrap a project-specific installation of vcpkg ("manifest mode") in the default location, `<project root>/vcpkg`. From the project root, run these commands:
+
+```
+git clone https://github.com/microsoft/vcpkg
+.\vcpkg\bootstrap-vcpkg.bat
+```
+
+Now we ask vcpkg to install of the dependencies for our project, which are described by the file `<project root>/vcpkg.json`.  Note that this step is optional, as cmake will automatically do this.  But here we are doing it in a separate step so that we can isolate any problems, because if problems happen here don't have anything to do with your cmake files.
+
+```
+.\vcpkg\vcpkg install --triplet=x64-windows
+```
+
+Next build the project files. There are different options for
+1. Telling cmake how to integrate with vcpkg: here we use `CMAKE_TOOLCHAIN_FILE` on the command line.
+2. Select Ninja project generator.
+3. Select Clang compiler.
+4. Enable `CMAKE_EXPORT_COMPILE_COMMANDS` to generate a `compile_commands.json` file for clangd.
+
+```
+cmake -S . -B build -G "Ninja" -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cd build
-cmake -G "Ninja" DCMAKE_CXX_COMPILER=clang++ -B . -S ..
 cmake --build .
+```
+
+Finally, we copy the assets and configuration file to the build directory.
+
+```
 cmake -E copy ../config.json ./src/config.json
 cmake -E copy_directory ../thirdparty/game_assets/wofares/assets ./src/assets
-src/wofares.exe
 ```
+
+### Run the Game
+
+Run `src\wofares.exe`.
+
+### VSCode Development and Debugging
+
+- Open the project folder in VSCode.
+- Press `F5` to build and run the game under the debug. This action triggers the CMake configuration, project build, copy assets and game launch.
 
 ### File Structure
 
 ```
+
 wofares/
 ├── CMakeLists.txt          # Main CMakeLists file for the project. Used to search dependencies and set up the project.
 ├── thirdparty/

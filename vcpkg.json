@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "wofares-vcpkg-json",
+  "version-string": "1.0",
+  "description": "Wowares game uses vcpkg to declare dependencies and fetch them automatically.",
+  "dependencies": [
+    "box2d",
+    "entt",
+    "gamenetworkingsockets",
+    "magic-enum",
+    "nlohmann-json",
+    "sdl2-image",
+    "sdl2-mixer",
+    "sdl2",
+    "sdl2",
+    "spdlog"
+  ]
+}
