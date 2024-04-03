@@ -7,19 +7,11 @@
       "command": "cls",
     },
     {
-      "label": "Wofares (Windows) 0. Make build directory",
-      "type": "shell",
-      "command": "mkdir ${workspaceFolder}\\build 2>nul || (exit 0)",
-      "dependsOn": [
-        "Wofares (Windows) 0. Clean console"
-      ]
-    },
-    {
       "label": "Wofares (Windows) 1. Configure",
       "type": "shell",
-      "command": "cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -B ${workspaceFolder}\\build -S ${workspaceFolder} -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      "command": "cmake -S ${workspaceFolder} -B ${workspaceFolder}\\build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
-        "Wofares (Windows) 0. Make build directory"
+        "Wofares (Windows) 0. Clean console"
       ]
     },
     {

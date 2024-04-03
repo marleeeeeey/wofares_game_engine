@@ -7,6 +7,7 @@
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <iostream>
+#include <magic_enum.hpp>
 #include <my_common_cpp_utils/config.h>
 #include <my_common_cpp_utils/json_utils.h>
 #include <my_common_cpp_utils/logger.h>
@@ -15,6 +16,7 @@
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
+#include <utils/network/steam_networking_init_RAII.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl_primitives_renderer.h>
 #include <utils/systems/audio_system.h>
@@ -42,9 +44,19 @@ int main(int argc, char* args[])
         utils::Logger::Init(logFilePath, spdlog::level::info);
 
         // Log initial information.
-        MY_LOG(info, "Wofares game started");
+        MY_LOG(info, "******************************");
+        MY_LOG(info, "**** Wofares game started ****");
+        MY_LOG(info, "******************************");
         MY_LOG_FMT(info, "Current directory set to: {}", execDir);
         MY_LOG_FMT(info, "Config file loaded: {}", configFilePath.string());
+
+        // Initialize the SteamNetworkingSockets library.
+        SteamNetworkingInitRAII::Options steamNetworkingOptions;
+        steamNetworkingOptions.debugSeverity = k_ESteamNetworkingSocketsDebugOutputType_Everything;
+        SteamNetworkingInitRAII steamNetworkingInitRAII(steamNetworkingOptions);
+        SteamNetworkingInitRAII::SetDebugCallback(
+            []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
+            { MY_LOG_FMT(info, "[SteamNetworking] {}", pszMsg); });
 
         // Create an EnTT registry.
         entt::registry registry;
