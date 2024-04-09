@@ -10,7 +10,7 @@
       "name": "Debug",
       "program": "build/src/wofares.exe",
       "args": [],
-      "preLaunchTask": "(Windows) 40. Copy assets"
+      "preLaunchTask": "(Win) 40. + Copy assets"
     }
   ]
 }

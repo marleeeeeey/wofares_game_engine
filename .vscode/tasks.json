@@ -2,60 +2,75 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "(Windows) 00. Remove build, vcpkg and vcpkg_installed folders",
+      "label": "(Win) 00. Remove vcpkg folders",
       "type": "shell",
-      "command": "rmdir /s /q build vcpkg vcpkg_installed",
+      "command": "rmdir /s /q vcpkg vcpkg_installed",
     },
     {
-      "label": "(Windows) 03. Install vcpkg",
+      "label": "(Win) 01. Remove build folder",
       "type": "shell",
-      "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-windows"
+      "command": "rmdir /s /q build",
     },
     {
-      "label": "(Windows) 05. Clean console",
+      "label": "(Win) 02. Git submodule update",
+      "type": "shell",
+      "command": "git submodule update --init --recursive"
+    },
+    {
+      "label": "(Win) 03. Install vcpkg as subfolder",
+      "type": "shell",
+      "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows"
+    },
+    {
+      "label": "(Win) 05. Clean console",
       "type": "shell",
       "command": "cls",
     },
     {
-      "label": "(Windows) 10. Configure",
+      "label": "(Win) 10. + Configure",
       "type": "shell",
       "command": "cmake -S . -B build -G \"Ninja\" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
-        "(Windows) 05. Clean console"
+        "(Win) 05. Clean console"
       ]
     },
     {
-      "label": "(Windows) 20. Build",
+      "label": "(Win) 20. + Build",
       "type": "shell",
       "command": "cmake --build build -- -k 0", // stop on first error
       // "command": "cmake --build build", // continue on error
       "dependsOn": [
-        "(Windows) 10. Configure"
+        "(Win) 10. + Configure"
       ]
     },
     {
-      "label": "(Windows) 30. Copy config.json",
+      "label": "(Win) 30. + Copy config.json",
       "type": "shell",
       "command": "cmake -E copy config.json build/src/config.json",
       "dependsOn": [
-        "(Windows) 20. Build"
+        "(Win) 20. + Build"
       ]
     },
     {
-      "label": "(Windows) 40. Copy assets",
+      "label": "(Win) 40. + Copy assets",
       "type": "shell",
       "command": "cmake -E copy_directory thirdparty/game_assets/wofares/assets build/src/assets",
       "dependsOn": [
-        "(Windows) 30. Copy config.json"
+        "(Win) 30. + Copy config.json"
       ]
     },
     {
-      "label": "(Windows) 50. Run",
+      "label": "(Win) 50. + Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/src/wofares.exe",
       "dependsOn": [
-        "(Windows) 40. Copy assets"
+        "(Win) 40. + Copy assets"
       ]
+    },
+    {
+      "label": "(Win) 55. Run",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/src/wofares.exe"
     }
   ]
 }

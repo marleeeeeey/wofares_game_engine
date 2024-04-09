@@ -1,3 +1,7 @@
+#if 0
+#include <utils/network/steam_networking_init_RAII.h>
+#endif
+
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/game_objects_render_system.h>
@@ -16,7 +20,6 @@
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
-#include <utils/network/steam_networking_init_RAII.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl_primitives_renderer.h>
 #include <utils/systems/audio_system.h>
@@ -50,6 +53,7 @@ int main(int argc, char* args[])
         MY_LOG_FMT(info, "Current directory set to: {}", execDir);
         MY_LOG_FMT(info, "Config file loaded: {}", configFilePath.string());
 
+#if 0
         // Initialize the SteamNetworkingSockets library.
         SteamNetworkingInitRAII::Options steamNetworkingOptions;
         steamNetworkingOptions.debugSeverity =
@@ -59,6 +63,7 @@ int main(int argc, char* args[])
         SteamNetworkingInitRAII::SetDebugCallback(
             []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
             { MY_LOG_FMT(info, "[SteamNetworking] {}", pszMsg); });
+#endif
 
         // Create an EnTT registry.
         entt::registry registry;
