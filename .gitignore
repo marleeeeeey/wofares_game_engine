@@ -1,10 +1,9 @@
-build/
-out/
-enc_temp_folder/
 .cache
 .vs
+.VSCodeCounter/
+achives/
+build/
 imgui.ini
-*.log
-.VSCodeCounter/*
-vcpkg_installed/*
-vcpkg*
+logs/
+vcpkg_installed/
+vcpkg/

@@ -18,6 +18,7 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 - Git (to load submodules).
 - Visual Studio Code (recommended for development).
   - Clangd extension (recommended for code analysis).
+- Python and 7zip (for packaging game to achive).
 
 ### Clone the Repository
 
@@ -29,7 +30,7 @@ git clone --recursive https://github.com/marleeeeeey/wofares-game.git
 
 - Open the project folder in VSCode.
 - Run task: `(Windows) 03. Install vcpkg`.
-- Run task: `(Windows) 50. Run`.
+- Run task: `(Windows) 50. + Run`.
 - For debugging press `F5`.
 
 ### Build, run and debug manually (Windows)
