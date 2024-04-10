@@ -46,7 +46,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
 
     // AnimationInfo.
     AnimationComponent playerAnimation =
-        CreateAnimationInfo("player_walk", "Run", ResourceManager::TagProps::ExactMatch);
+        CreateAnimationInfo("playerWalk", "Run", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, playerAnimation);
 
     // PlayerInfo.

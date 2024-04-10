@@ -1,4 +1,5 @@
 #include "game_objects_render_system.h"
+#include <SDL_render.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
@@ -47,18 +48,22 @@ void GameObjectsRenderSystem::RenderTiles()
 
 void GameObjectsRenderSystem::RenderPlayerWeaponDirection()
 {
-    auto players = registry.view<PhysicsComponent, RenderingComponent, PlayerComponent>();
+    auto players = registry.view<PhysicsComponent, PlayerComponent, AnimationComponent>();
     for (auto entity : players)
     {
-        auto [physicalBody, renderingInfo, playerInfo] =
-            players.get<PhysicsComponent, RenderingComponent, PlayerComponent>(entity);
+        auto [physicalBody, playerInfo, animationComponent] =
+            players.get<PhysicsComponent, PlayerComponent, AnimationComponent>(entity);
 
         // Draw the weapon.
+        // TODO1: Currently we are always get the animation in initial state. So it always draws the first frame.
+        // We should use AnimationComponent to make weapon animation runnable.
         const glm::vec2 playerPosWorld =
             coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
-        glm::vec2 weaponSizeWorld = renderingInfo.sizeWorld / 2.0f;
-        glm::vec2 weaponPosWorld = playerPosWorld + playerInfo.weaponDirection * renderingInfo.sizeWorld / 2;
-        primitivesRenderer.RenderSquare(weaponPosWorld, weaponSizeWorld, ColorName::Red, 0);
+        float angle = atan2(playerInfo.weaponDirection.y, playerInfo.weaponDirection.x);
+        auto weaponAnimation = resourceManager.GetAnimation("automaticWeapon");
+        SDL_RendererFlip weaponFlip =
+            animationComponent.flip == SDL_FLIP_HORIZONTAL ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
+        primitivesRenderer.RenderAnimationFirstFrame(weaponAnimation, playerPosWorld, angle, weaponFlip);
     }
 }
 

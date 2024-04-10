@@ -14,7 +14,7 @@
 // Example of resource map file `resourceMapFilePath` content:
 // {
 //   "animations": {
-//     "player_walk": "animations/player_walk.json"
+//     "playerWalk": "animations/playerWalk.json"
 //   },
 //   "sounds": {
 //     "background_music": "path/to/sounds/background_music.ogg",
@@ -47,7 +47,7 @@ public: // ************************* Animations *************************
         ExactMatch,
         RandomByRegex
     };
-    // Get animation by name without tag. If there
+    // Get animation by name without tag. Load the first tag found.
     Animation GetAnimation(const std::string& animationName);
     Animation GetAnimation(
         const std::string& animationName, const std::string& tagName, TagProps tagProps = TagProps::ExactMatch);

@@ -1,5 +1,4 @@
 #include "aseprite_data.h"
-#include <cstddef>
 #include <regex>
 
 AsepriteData LoadAsepriteData(const nlohmann::json& asepriteJsonData)
@@ -25,9 +24,16 @@ AsepriteData LoadAsepriteData(const nlohmann::json& asepriteJsonData)
         std::regex re(".* (\\d+)\\.aseprite");
         std::smatch match;
         std::regex_search(frameName, match, re);
-        if (match.size() != 2)
-            throw std::runtime_error("Failed to parse originalIndex from frameName");
-        frame.originalIndex = std::stoul(match[1]);
+
+        // The only one frame in the animation file.
+        if (match.size() == 0)
+            frame.originalIndex = 0;
+        // The frame has an originalIndex.
+        else if (match.size() == 2)
+            frame.originalIndex = std::stoul(match[1]);
+        // Unrecognized frame name format.
+        else
+            throw std::runtime_error("[LoadAsepriteData] Unrecognized frame name format");
 
         auto frameDurationMs = frameData["duration"];
         frame.duration_seconds = static_cast<float>(frameDurationMs) / 1000.0f;

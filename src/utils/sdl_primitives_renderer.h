@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/animation.h"
 #include <SDL.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/rendering_components.h>
@@ -26,5 +27,7 @@ public:
         const SDL_RendererFlip& flip = SDL_FLIP_NONE);
     SDL_Rect GetRectWithCameraTransform(const glm::vec2& posWorld, const glm::vec2& sizeWorld);
     void RenderAnimation(const AnimationComponent& animationInfo, glm::vec2 centerWorld, float angle);
+    void RenderAnimationFirstFrame(
+        const Animation& animation, glm::vec2 centerWorld, float angle, const SDL_RendererFlip& flip = SDL_FLIP_NONE);
     void RenderBackground(const BackgroundInfo& backgroundInfo);
 };

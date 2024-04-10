@@ -81,6 +81,7 @@ void SdlPrimitivesRenderer::RenderAnimation(const AnimationComponent& animationI
         const SDL_Rect& hitboxRect = *animation.hitboxRect;
         auto textureSize = frame.renderingInfo.sizeWorld;
 
+        // Shift the center of the animation to the center of the hitbox.
         auto textureCenter = textureSize / 2.0f;
         auto hitboxCenter = glm::vec2(hitboxRect.x, hitboxRect.y) + glm::vec2(hitboxRect.w, hitboxRect.h) / 2.0f;
         auto shift = hitboxCenter - textureCenter;
@@ -89,6 +90,21 @@ void SdlPrimitivesRenderer::RenderAnimation(const AnimationComponent& animationI
     }
 
     RenderTiledSquare(centerWorld, angle, frame.renderingInfo, animationInfo.flip);
+};
+
+void SdlPrimitivesRenderer::RenderAnimationFirstFrame(
+    const Animation& animation, glm::vec2 centerWorld, float angle, const SDL_RendererFlip& flip)
+{
+    if (animation.frames.empty())
+        return;
+
+    const auto& frame = animation.frames[0];
+
+    MY_LOG_FMT(
+        trace, "textureRect: x: {}, y: {}, w: {}, h: {}", frame.renderingInfo.textureRect.x,
+        frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w, frame.renderingInfo.textureRect.h);
+
+    RenderTiledSquare(centerWorld, angle, frame.renderingInfo, flip);
 };
 
 void SdlPrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)

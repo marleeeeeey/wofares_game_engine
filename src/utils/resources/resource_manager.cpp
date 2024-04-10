@@ -146,7 +146,18 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
     const std::filesystem::path& asepriteAnimationJsonPath)
 {
     auto asepriteJsonData = utils::LoadJsonFromFile(asepriteAnimationJsonPath);
-    AsepriteData asepriteData = LoadAsepriteData(asepriteJsonData);
+
+    AsepriteData asepriteData;
+    try
+    {
+        asepriteData = LoadAsepriteData(asepriteJsonData);
+    }
+    catch (const std::exception& e)
+    {
+        throw std::runtime_error(MY_FMT(
+            "[ReadAsepriteAnimation] Failed to load Aseprite data from '{}': {}", asepriteAnimationJsonPath.string(),
+            e.what()));
+    }
 
     // Load texture.
     auto animationTexturePath = asepriteAnimationJsonPath.parent_path() / asepriteData.texturePath;
