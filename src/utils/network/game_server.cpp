@@ -24,19 +24,19 @@ void GameServer::StartListening(uint16 nPort)
     opt.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)OnConnectionStatusChanged);
     hListenSock = pInterface->CreateListenSocketIP(serverLocalAddr, 1, &opt);
     if (hListenSock == k_HSteamListenSocket_Invalid)
-        MY_LOG_FMT(error, "[GameServer] Failed to listen on port {}", nPort);
+        MY_LOG(error, "[GameServer] Failed to listen on port {}", nPort);
 
     hPollGroup = pInterface->CreatePollGroup();
     if (hPollGroup == k_HSteamNetPollGroup_Invalid)
-        MY_LOG_FMT(error, "[GameServer] Failed to listen on port {}", nPort);
+        MY_LOG(error, "[GameServer] Failed to listen on port {}", nPort);
 
-    MY_LOG_FMT(info, "[GameServer] Server listening on port {}", nPort);
+    MY_LOG(info, "[GameServer] Server listening on port {}", nPort);
 }
 
 void GameServer::StopListening()
 {
     // Close all the connections
-    MY_LOG_FMT(info, "[GameServer] Closing connections...");
+    MY_LOG(info, "[GameServer] Closing connections...");
     for (auto it : mapClients)
     {
         // Send them one more goodbye message.  Note that we also have the
@@ -57,7 +57,7 @@ void GameServer::StopListening()
     pInterface->DestroyPollGroup(hPollGroup);
     hPollGroup = k_HSteamNetPollGroup_Invalid;
 
-    MY_LOG_FMT(info, "[GameServer] Server stopped listening");
+    MY_LOG(info, "[GameServer] Server stopped listening");
 }
 
 void GameServer::Update()
@@ -92,7 +92,7 @@ std::vector<std::string> GameServer::PollIncomingMessages()
         if (numMsgs == 0)
             break;
         if (numMsgs < 0)
-            MY_LOG_FMT(error, "[GameServer] Error checking for messages");
+            MY_LOG(error, "[GameServer] Error checking for messages");
         assert(numMsgs == 1 && pIncomingMsg);
         auto itClient = mapClients.find(pIncomingMsg->m_conn);
         assert(itClient != mapClients.end());
@@ -181,7 +181,7 @@ void GameServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChang
             // This must be a new connection
             assert(mapClients.find(pInfo->m_hConn) == mapClients.end());
 
-            MY_LOG_FMT(info, "[GameServer] Connection request from {}", pInfo->m_info.m_szConnectionDescription);
+            MY_LOG(info, "[GameServer] Connection request from {}", pInfo->m_info.m_szConnectionDescription);
 
             // A client is attempting to connect
             // Try to accept the connection.
@@ -191,7 +191,7 @@ void GameServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChang
                 // disconnected, the connection may already be half closed.  Just
                 // destroy whatever we have on our side.
                 pInterface->CloseConnection(pInfo->m_hConn, 0, nullptr, false);
-                MY_LOG_FMT(
+                MY_LOG(
                     warn, "[GameServer] Failed to accept connection from {}. (It was already closed?)",
                     pInfo->m_info.m_szConnectionDescription);
                 break;
@@ -201,7 +201,7 @@ void GameServer::OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChang
             if (!pInterface->SetConnectionPollGroup(pInfo->m_hConn, hPollGroup))
             {
                 pInterface->CloseConnection(pInfo->m_hConn, 0, nullptr, false);
-                MY_LOG_FMT(warn, "[GameServer] Failed to set poll group?");
+                MY_LOG(warn, "[GameServer] Failed to set poll group?");
                 break;
             }
 

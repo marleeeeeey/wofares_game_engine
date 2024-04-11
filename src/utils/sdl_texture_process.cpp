@@ -137,13 +137,13 @@ std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(
     auto targetFormat = SDL_PIXELFORMAT_ABGR8888;
     if (surface.get()->format->format != targetFormat)
     {
-        MY_LOG_FMT(warn, "Original surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        MY_LOG(warn, "Original surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
         surface = ConvertSurfaceFormat(surface.get(), targetFormat);
-        MY_LOG_FMT(warn, "Converted surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        MY_LOG(warn, "Converted surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
     }
     else
     {
-        MY_LOG_FMT(debug, "Surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        MY_LOG(debug, "Surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
     }
 
     return std::make_shared<SDLSurfaceRAII>(std::move(surface));

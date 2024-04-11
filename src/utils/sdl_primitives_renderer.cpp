@@ -72,7 +72,7 @@ void SdlPrimitivesRenderer::RenderAnimation(const AnimationComponent& animationI
     const auto& animation = animationInfo.animation;
     const auto& frame = animation.frames[safeIndex];
 
-    MY_LOG_FMT(
+    MY_LOG(
         trace, "safeIndex: {}, textureRect: x: {}, y: {}, w: {}, h: {}", safeIndex, frame.renderingInfo.textureRect.x,
         frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w, frame.renderingInfo.textureRect.h);
 
@@ -100,7 +100,7 @@ void SdlPrimitivesRenderer::RenderAnimationFirstFrame(
 
     const auto& frame = animation.frames[0];
 
-    MY_LOG_FMT(
+    MY_LOG(
         trace, "textureRect: x: {}, y: {}, w: {}, h: {}", frame.renderingInfo.textureRect.x,
         frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w, frame.renderingInfo.textureRect.h);
 
@@ -112,7 +112,7 @@ void SdlPrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInf
     auto textureRAII = backgroundInfo.texture;
     if (!textureRAII)
     {
-        MY_LOG_FMT(warn, "No background texture to render");
+        MY_LOG(warn, "No background texture to render");
         return;
     }
     auto backgroundTexture = textureRAII->get();

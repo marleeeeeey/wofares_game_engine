@@ -50,19 +50,19 @@ int main(int argc, char* args[])
         MY_LOG(info, "******************************");
         MY_LOG(info, "**** Wofares game started ****");
         MY_LOG(info, "******************************");
-        MY_LOG_FMT(info, "Current directory set to: {}", execDir);
-        MY_LOG_FMT(info, "Config file loaded: {}", configFilePath.string());
+        MY_LOG(info, "Current directory set to: {}", execDir);
+        MY_LOG(info, "Config file loaded: {}", configFilePath.string());
 
 #if 0
         // Initialize the SteamNetworkingSockets library.
         SteamNetworkingInitRAII::Options steamNetworkingOptions;
         steamNetworkingOptions.debugSeverity =
             utils::GetConfig<ESteamNetworkingSocketsDebugOutputType, "Networking.debugSeverity">();
-        MY_LOG_FMT(info, "[SteamNetworking] debugSeverity: {}", steamNetworkingOptions.debugSeverity);
+        MY_LOG(info, "[SteamNetworking] debugSeverity: {}", steamNetworkingOptions.debugSeverity);
         SteamNetworkingInitRAII steamNetworkingInitRAII(steamNetworkingOptions);
         SteamNetworkingInitRAII::SetDebugCallback(
             []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
-            { MY_LOG_FMT(info, "[SteamNetworking] {}", pszMsg); });
+            { MY_LOG(info, "[SteamNetworking] {}", pszMsg); });
 #endif
 
         // Create an EnTT registry.
@@ -90,7 +90,7 @@ int main(int argc, char* args[])
 
         std::filesystem::path assetsSettingsFilePath = "assets/assets_settings.json";
         auto assetsSettingsJson = utils::LoadJsonFromFile(assetsSettingsFilePath);
-        MY_LOG_FMT(info, "Assets settings loaded: {}", assetsSettingsFilePath.string());
+        MY_LOG(info, "Assets settings loaded: {}", assetsSettingsFilePath.string());
         ResourceManager resourceManager(renderer.get(), assetsSettingsJson);
         AudioSystem audioSystem(resourceManager);
         audioSystem.PlayMusic("background_music");
@@ -179,7 +179,7 @@ int main(int argc, char* args[])
         // This line is needed to log exceptions from the logger. Because the logger is used in the catch block.
         std::cout << "Unhandled exception catched in main: " << e.what() << std::endl;
 
-        MY_LOG_FMT(warn, "Unhandled exception catched in main: {}", e.what());
+        MY_LOG(warn, "Unhandled exception catched in main: {}", e.what());
         return -1;
     }
 

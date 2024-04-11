@@ -33,7 +33,7 @@ Box2dObjectRAII& Box2dObjectRAII::operator=(Box2dObjectRAII&& other) noexcept
         body = std::exchange(other.body, nullptr);
         world = std::exchange(other.world, nullptr);
 
-        MY_LOG_FMT(trace, "b2Body moved: {}", static_cast<void*>(body));
+        MY_LOG(trace, "b2Body moved: {}", static_cast<void*>(body));
     }
     return *this;
 }

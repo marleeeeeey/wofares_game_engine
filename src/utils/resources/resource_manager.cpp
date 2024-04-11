@@ -66,7 +66,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
         musicPaths[musicName] = musicPath;
     }
 
-    MY_LOG_FMT(
+    MY_LOG(
         info, "Game found {} animation(s), {} level(s), {} music(s), {} sound effect(s).", animations.size(),
         tiledLevels.size(), musicPaths.size(), soundEffectPaths.size());
 }
@@ -174,7 +174,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
         {
             const SDL_Rect& rectInSurface = asepriteData.frames[asepriteData.frameTags["Hitbox"].from].rectInTexture;
             hitboxRect = GetVisibleRectInSrcRectCoordinates(surfaceRAII->get(), rectInSurface);
-            MY_LOG_FMT(
+            MY_LOG(
                 info, "Hitbox rect found: x={}, y={}, w={}, h={}", hitboxRect->x, hitboxRect->y, hitboxRect->w,
                 hitboxRect->h);
         }
@@ -190,7 +190,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
             {
                 AnimationFrame animationFrame = GetAnimationFrameFromAsepriteFrame(asepriteData.frames[i], textureRAII);
 
-                MY_LOG_FMT(
+                MY_LOG(
                     debug, "Frame {} has texture rect: x={}, y={}, w={}, h={}", i,
                     animationFrame.renderingInfo.textureRect.x, animationFrame.renderingInfo.textureRect.y,
                     animationFrame.renderingInfo.textureRect.w, animationFrame.renderingInfo.textureRect.h);
@@ -213,12 +213,12 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
     }
 
     // Log names of loaded animations and tags.
-    MY_LOG_FMT(
+    MY_LOG(
         info, "Loaded animation from '{}': {}", asepriteAnimationJsonPath.string(),
         utils::JoinStrings(utils::GetKeys(tagToAnimationDict), ", "));
     for (const auto& [tag, animation] : tagToAnimationDict)
     {
-        MY_LOG_FMT(
+        MY_LOG(
             info, "  Tag '{}' has {} frame(s), hitbox rect found: {}", tag, animation.frames.size(),
             animation.hitboxRect.has_value());
     }

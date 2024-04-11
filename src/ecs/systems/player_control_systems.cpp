@@ -123,7 +123,7 @@ void PlayerControlSystem::HandlePlayerAttackOnReleaseButton(const InputEventMana
         {
             // TODO2: Make in no linear way.
             float throwingForce = std::min(eventInfo.holdDuration * 0.3f, 0.2f);
-            MY_LOG_FMT(debug, "Throwing force: {}", throwingForce);
+            MY_LOG(debug, "Throwing force: {}", throwingForce);
             MakeShotIfPossible(entity, throwingForce);
         }
     }
@@ -198,12 +198,12 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
 
         if (!playerInfo.weapons.contains(newWeapon))
         {
-            MY_LOG_FMT(warn, "Player {} does not have {} weapon", playerInfo.number, newWeapon);
+            MY_LOG(warn, "Player {} does not have {} weapon", playerInfo.number, newWeapon);
             continue;
         }
 
         playerInfo.currentWeapon = weaponEnumRange[weaponIndex];
-        MY_LOG_FMT(trace, "Player {} changed weapon to {}", playerInfo.number, playerInfo.currentWeapon);
+        MY_LOG(trace, "Player {} changed weapon to {}", playerInfo.number, playerInfo.currentWeapon);
     }
 };
 
@@ -225,7 +225,7 @@ void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity enti
     if (playerInfo)
     {
         playerInfo->countOfGroundContacts += value ? 1 : -1;
-        MY_LOG_FMT(debug, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
+        MY_LOG(debug, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
     }
 };
 
@@ -233,7 +233,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
 {
     if (!registry.all_of<PlayerComponent>(playerEntity))
     {
-        MY_LOG_FMT(
+        MY_LOG(
             trace, "[MakeShotIfPossible] entity does not have all of the required components. Entity: {}",
             static_cast<int>(playerEntity));
         return entt::null;
@@ -244,7 +244,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     // Check if the throwing force is zero for the grenade.
     if (throwingForce <= 0 && playerInfo.currentWeapon == WeaponType::Grenade)
     {
-        MY_LOG_FMT(
+        MY_LOG(
             trace, "[MakeShotIfPossible] Throwing force shouldn't be zero for weapon {}. Entity: {}, force: {}",
             playerInfo.currentWeapon, static_cast<int>(playerEntity), throwingForce);
         return entt::null;
@@ -253,7 +253,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     // Check if player has weapon set as current.
     if (!playerInfo.weapons.contains(playerInfo.currentWeapon))
     {
-        MY_LOG_FMT(
+        MY_LOG(
             trace, "[MakeShotIfPossible] Player does not have {} weapon set as current. Entity: {}",
             playerInfo.currentWeapon, static_cast<int>(playerEntity));
         return entt::null;
@@ -263,7 +263,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     // Check if player has ammo for the weapon.
     if (currentWeaponProps.ammoInClip == 0)
     {
-        MY_LOG_FMT(
+        MY_LOG(
             trace, "[MakeShotIfPossible] Player does not have ammo in clip for the {} weapon. Entity: {}",
             playerInfo.currentWeapon, static_cast<int>(playerEntity));
         return entt::null;
@@ -272,7 +272,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     // Check if player is in the reload process.
     if (currentWeaponProps.remainingReloadTime > 0)
     {
-        MY_LOG_FMT(
+        MY_LOG(
             warn, "[MakeShotIfPossible] Player is in the reload process. Entity: {}", static_cast<int>(playerEntity));
         return entt::null;
     }
@@ -280,7 +280,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     // Check if player in the fire rate cooldown.
     if (currentWeaponProps.remainingFireRate > 0)
     {
-        MY_LOG_FMT(
+        MY_LOG(
             trace, "[MakeShotIfPossible] Player is in the fire rate cooldown. Entity: {}",
             static_cast<int>(playerEntity));
         return entt::null;
@@ -325,7 +325,7 @@ void PlayerControlSystem::UpdateFireRateAndReloadTime(entt::entity playerEntity,
                 // TODO2: Stop reloading sound and animation.
                 weaponProps.ammoInClip = std::min(weaponProps.clipSize, weaponProps.ammoInStorage);
                 weaponProps.ammoInStorage -= weaponProps.ammoInClip;
-                MY_LOG_FMT(
+                MY_LOG(
                     trace, "Player {} reloaded weapon {}. Ammo in clip: {}, ammo in storage: {}", playerInfo.number,
                     weaponType, weaponProps.ammoInClip, weaponProps.ammoInStorage);
             }

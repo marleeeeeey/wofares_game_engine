@@ -66,7 +66,7 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
     auto pointerB = bodyB->GetUserData().pointer;
     if (pointerA == 0 || pointerB == 0)
     {
-        MY_LOG_FMT(warn, "One of the bodies has no user data. pointerA: {}, pointerB: {}", pointerA, pointerB);
+        MY_LOG(warn, "One of the bodies has no user data. pointerA: {}, pointerB: {}", pointerA, pointerB);
         return std::nullopt;
     }
 
@@ -75,14 +75,14 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
 
     if (!registry.valid(entityA))
     {
-        MY_LOG_FMT(
+        MY_LOG(
             warn, "EntityA is not valid. entityA: {}, name: {}", static_cast<uint32_t>(entityA),
             registryWrapper.TryGetName(entityA));
     }
 
     if (!registry.valid(entityB))
     {
-        MY_LOG_FMT(
+        MY_LOG(
             warn, "EntityB is not valid. entityB: {}, name: {}", static_cast<uint32_t>(entityB),
             registryWrapper.TryGetName(entityB));
     }

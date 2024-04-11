@@ -68,7 +68,7 @@ void InputEventManager::UpdateСontinuousEvents(float deltaTime)
             if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
             {
                 listener(eventInfo.info);
-                MY_LOG_FMT(debug, "Keyboard button {} is released. Event sent to listener.", scanCode);
+                MY_LOG(debug, "Keyboard button {} is released. Event sent to listener.", scanCode);
             }
         }
         eventInfo.firedToAll = true; // This flag should be set to true after all listeners are notified.
@@ -81,7 +81,7 @@ void InputEventManager::UpdateСontinuousEvents(float deltaTime)
             if (!eventInfo.firedToAll && !eventInfo.info.isPressed)
             {
                 listener(eventInfo.info);
-                MY_LOG_FMT(debug, "Mouse button {} is released. Event sent to listener.", button);
+                MY_LOG(debug, "Mouse button {} is released. Event sent to listener.", button);
             }
         }
         eventInfo.firedToAll = true; // This flag should be set to true after all listeners are notified.
@@ -97,7 +97,7 @@ void InputEventManager::Subscribe(EventType eventType, EventListener listener)
 {
     auto& listeners = continuousListeners[eventType];
     listeners.push_back(listener);
-    MY_LOG_FMT(debug, "InputEventManager: {} listener added. Count={}.", eventType, listeners.size());
+    MY_LOG(debug, "InputEventManager: {} listener added. Count={}.", eventType, listeners.size());
 }
 
 void InputEventManager::UpdateHoldDurations(float deltaTime)
@@ -150,12 +150,12 @@ void InputEventManager::UpdateButtonHoldStaticInfo(const SDL_Event& event)
             mouseButtonHoldInfo[button].info.isPressed = true;
             mouseButtonHoldInfo[button].info.holdDuration = 0.0f;
             mouseButtonHoldInfo[button].info.originalEvent = event;
-            MY_LOG_FMT(debug, "Mouse button {} is pressed. Size of cashe {}", button, mouseButtonHoldInfo.size());
+            MY_LOG(debug, "Mouse button {} is pressed. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
         else if (event.type == SDL_MOUSEBUTTONUP)
         {
             mouseButtonHoldInfo[button].info.isPressed = false;
-            MY_LOG_FMT(debug, "Mouse button {} is released. Size of cashe {}", button, mouseButtonHoldInfo.size());
+            MY_LOG(debug, "Mouse button {} is released. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
     }
 };

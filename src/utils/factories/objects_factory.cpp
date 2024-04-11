@@ -61,7 +61,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
-    MY_LOG_FMT(info, "Create player body with bbox: {}", playerHitboxSizeWorld);
+    MY_LOG(info, "Create player body with bbox: {}", playerHitboxSizeWorld);
 
     return entity;
 }
@@ -118,7 +118,7 @@ entt::entity ObjectsFactory::SpawnBullet(
 {
     if (!registry.all_of<PlayerComponent, PhysicsComponent, AnimationComponent>(playerEntity))
     {
-        MY_LOG_FMT(
+        MY_LOG(
             warn, "[CreateBullet] Player does not have all of the required components. Entity: {}",
             static_cast<int>(playerEntity));
         return entt::null;
@@ -128,7 +128,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     // 1. Check if player has weapon set as current.
     if (!playerInfo.weapons.contains(playerInfo.currentWeapon))
     {
-        MY_LOG_FMT(
+        MY_LOG(
             trace, "[CreateBullet] Player does not have {} weapon set as current. Entity: {}", playerInfo.currentWeapon,
             static_cast<int>(playerEntity));
         return entt::null;

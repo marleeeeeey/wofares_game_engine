@@ -64,10 +64,10 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
 
     // Log warnings.
     if (invisibleTilesNumber > 0)
-        MY_LOG_FMT(info, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
+        MY_LOG(info, "There are {}/{} tiles with invisible pixels", invisibleTilesNumber, createdTiles);
     if (createdTiles == 0)
     {
-        MY_LOG_FMT(warn, "No tiles were created during map loading {}", levelInfo.tiledMapPath.string());
+        MY_LOG(warn, "No tiles were created during map loading {}", levelInfo.tiledMapPath.string());
         if (invisibleTilesNumber > 0)
             MY_LOG(warn, "All tiles are invisible");
     }
@@ -87,7 +87,7 @@ void MapLoaderSystem::UnloadMap()
         registryWrapper.Destroy(entity);
 
     if (Box2dObjectRAII::GetBodyCounter() != 0)
-        MY_LOG_FMT(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
+        MY_LOG(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
     else
         MY_LOG(debug, "All Box2D bodies were destroyed");
 };
@@ -132,10 +132,10 @@ void MapLoaderSystem::CalculateLevelBoundsWithBufferZone()
 {
     auto& lb = gameState.levelOptions.levelBox2dBounds;
     auto& bz = gameState.levelOptions.bufferZone;
-    MY_LOG_FMT(debug, "Level bounds: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
+    MY_LOG(debug, "Level bounds: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
     lb.min -= bz;
     lb.max += bz;
-    MY_LOG_FMT(
+    MY_LOG(
         debug, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
 }
 

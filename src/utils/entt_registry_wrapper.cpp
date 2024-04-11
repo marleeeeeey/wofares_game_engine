@@ -10,7 +10,7 @@ entt::entity EnttRegistryWrapper::Create(const std::string& name)
     auto entity = registry.create();
 #ifdef MY_DEBUG
     entityNamesById[entity] = name;
-    MY_LOG_FMT(debug, "Creating entity id: {:>6} with name: {}", static_cast<uint32_t>(entity), name);
+    MY_LOG(debug, "Creating entity id: {:>6} with name: {}", static_cast<uint32_t>(entity), name);
 #endif // MY_DEBUG
     return entity;
 }
@@ -19,7 +19,7 @@ void EnttRegistryWrapper::Destroy(entt::entity entity)
 {
 #ifdef MY_DEBUG
     auto& name = entityNamesById[entity];
-    MY_LOG_FMT(debug, "Destroying entity id: {:>6} with name: {}", static_cast<uint32_t>(entity), name);
+    MY_LOG(debug, "Destroying entity id: {:>6} with name: {}", static_cast<uint32_t>(entity), name);
     removedEntityNamesById[entity] = name;
     entityNamesById.erase(entity);
 #endif // MY_DEBUG
@@ -46,7 +46,7 @@ void EnttRegistryWrapper::LogAllEntitiesByTheirNames()
             ids += std::to_string(static_cast<uint32_t>(entity)) + ", ";
         ids.pop_back();
         ids.pop_back();
-        MY_LOG_FMT(debug, "Entities with name: {} (count={}) have ids: {}", name, ids.size(), ids);
+        MY_LOG(debug, "Entities with name: {} (count={}) have ids: {}", name, ids.size(), ids);
     }
 #endif // MY_DEBUG
 };
