@@ -2,32 +2,32 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "00. (Win) Remove vcpkg folders",
+      "label": "000. (Win) Remove vcpkg folders",
       "type": "shell",
       "command": "rmdir /s /q vcpkg vcpkg_installed",
     },
     {
-      "label": "01. (Win) Remove build folder",
+      "label": "001. (Win) Remove build folder",
       "type": "shell",
       "command": "rmdir /s /q build",
     },
     {
-      "label": "02. (Win) Git submodule update",
+      "label": "002. (Win) Git submodule update",
       "type": "shell",
       "command": "git submodule update --init --recursive"
     },
     {
-      "label": "03. (Win) Install vcpkg as subfolder",
+      "label": "003. (Win) Install vcpkg as subfolder",
       "type": "shell",
       "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows"
     },
     {
-      "label": "05. ********* Clear console *********",
+      "label": "005. ********* Clear console *********",
       "type": "shell",
       "command": "cls",
     },
     {
-      "label": "10. (WinDebug) + Configure",
+      "label": "010. (WinDebug) + Configure",
       "type": "shell",
       "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
@@ -35,101 +35,101 @@
       ]
     },
     {
-      "label": "20. (WinDebug) + Build",
+      "label": "020. (WinDebug) + Build",
       "type": "shell",
       "command": "cmake --build build/debug -- -k 0", // stop on first error
       // "command": "cmake --build build/debug", // continue on error
       "dependsOn": [
-        "10. (WinDebug) + Configure"
+        "010. (WinDebug) + Configure"
       ]
     },
     {
-      "label": "30. (WinDebug) + Copy config.json",
+      "label": "030. (WinDebug) + Copy config.json",
       "type": "shell",
       "command": "cmake -E copy config.json build/debug/src/config.json",
       "dependsOn": [
-        "20. (WinDebug) + Build"
+        "020. (WinDebug) + Build"
       ]
     },
     {
-      "label": "40. (WinDebug) + Copy assets",
+      "label": "040. (WinDebug) + Copy assets",
       "type": "shell",
       "command": "cmake -E copy_directory thirdparty/game_assets/wofares/assets build/debug/src/assets",
       "dependsOn": [
-        "30. (WinDebug) + Copy config.json"
+        "030. (WinDebug) + Copy config.json"
       ]
     },
     {
-      "label": "50. (WinDebug) + Run",
+      "label": "050. (WinDebug) + Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/debug/src/wofares.exe",
       "dependsOn": [
-        "40. (WinDebug) + Copy assets"
+        "040. (WinDebug) + Copy assets"
       ]
     },
     {
-      "label": "55. (WinDebug) Run",
+      "label": "055. (WinDebug) Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/debug/src/wofares.exe"
     },
     {
-      "label": "57. (WinDebug) Pack",
+      "label": "057. (WinDebug) Pack",
       "type": "shell",
       "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} debug wofares_debug"
     },
     {
-      "label": "60. ********* Clear console *********",
+      "label": "060. ********* Clear console *********",
       "type": "shell",
       "command": "cls",
     },
     {
-      "label": "65. (WinRelease) + Configure",
+      "label": "065. (WinRelease) + Configure",
       "type": "shell",
       "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
-        "60. ********* Clear console *********"
+        "060. ********* Clear console *********"
       ]
     },
     {
-      "label": "70. (WinRelease) + Build",
+      "label": "070. (WinRelease) + Build",
       "type": "shell",
       "command": "cmake --build build/release -- -k 0", // stop on first error
       // "command": "cmake --build build/release", // continue on error
       "dependsOn": [
-        "65. (WinRelease) + Configure"
+        "065. (WinRelease) + Configure"
       ]
     },
     {
-      "label": "75. (WinRelease) + Copy config.json",
+      "label": "075. (WinRelease) + Copy config.json",
       "type": "shell",
       "command": "cmake -E copy config.json build/release/src/config.json",
       "dependsOn": [
-        "70. (WinRelease) + Build"
+        "070. (WinRelease) + Build"
       ]
     },
     {
-      "label": "80. (WinRelease) + Copy assets",
+      "label": "080. (WinRelease) + Copy assets",
       "type": "shell",
       "command": "cmake -E copy_directory thirdparty/game_assets/wofares/assets build/release/src/assets",
       "dependsOn": [
-        "75. (WinRelease) + Copy config.json"
+        "075. (WinRelease) + Copy config.json"
       ]
     },
     {
-      "label": "85. (WinRelease) + Run",
+      "label": "085. (WinRelease) + Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/release/src/wofares.exe",
       "dependsOn": [
-        "80. (WinRelease) + Copy assets"
+        "080. (WinRelease) + Copy assets"
       ]
     },
     {
-      "label": "90. (WinRelease) Run",
+      "label": "090. (WinRelease) Run",
       "type": "shell",
       "command": "${workspaceFolder}/build/release/src/wofares.exe"
     },
     {
-      "label": "95. (WinRelease) Pack",
+      "label": "095. (WinRelease) Pack",
       "type": "shell",
       "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} release wofares_release"
     },
@@ -137,12 +137,12 @@
     // ********* LINUX SPECIFIC TASKS *********
     // ****************************************
     {
-      "label": "97. ************** LINUX SPECIFIC TASKS *******************",
+      "label": "097. ************** LINUX SPECIFIC TASKS *******************",
       "type": "shell",
       "command": "clear",
     },
     {
-      "label": "99. ************** LINUX SPECIFIC TASKS *******************",
+      "label": "099. ************** LINUX SPECIFIC TASKS *******************",
       "type": "shell",
       "command": "clear",
     },
