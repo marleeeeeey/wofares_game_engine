@@ -24,7 +24,6 @@ target_link_libraries(wofares
     # vcpkg build libraries:
     box2d::box2d
     EnTT::EnTT
-    GameNetworkingSockets::shared
     SDL2_image::SDL2_image
     SDL2_mixer::SDL2_mixer
     SDL2::SDL2
@@ -37,7 +36,7 @@ target_link_libraries(wofares
 
 target_include_directories(wofares
     PRIVATE
-    ${PROJECT_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/thirdparty/glob/single_include
 )
 
