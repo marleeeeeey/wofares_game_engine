@@ -8,9 +8,17 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 
 ### Platform Support
 
-- This game has been developed, built, and tested solely on **Windows**. While cross-platform libraries suggest the potential for broader compatibility, official support for platforms other than Windows is not currently offered.
+- This game has been developed, built, and tested solely on **Windows**. Build also works on **Linux(Ubuntu)** but not tested yet.
 
-### Prerequisites for Building the Project
+### Clone the Repository
+
+```
+git clone --recursive https://github.com/marleeeeeey/wofares-game.git
+```
+
+## Windows
+
+### Prerequisites for Building the Project (Windows)
 
 - CMake.
 - Ninja.
@@ -20,17 +28,11 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
   - Clangd extension (recommended for code analysis).
 - Python and 7zip (for packaging game to achive).
 
-### Clone the Repository
-
-```
-git clone --recursive https://github.com/marleeeeeey/wofares-game.git
-```
-
 ### Build, run and debug via VSCode tasks (Windows)
 
 - Open the project folder in VSCode.
-- Run task: `(Windows) 03. Install vcpkg`.
-- Run task: `(Windows) 50. + Run`.
+- Run task: `003. (Win) Install vcpkg as subfolder`.
+- Run task: `050. (WinDebug) + Run`.
 - For debugging press `F5`.
 
 ### Build, run and debug manually (Windows)
@@ -79,6 +81,37 @@ Run the game:
 ```
 src\wofares.exe
 ```
+
+## Linux
+
+### Prerequisites for Building the Project (Linux)
+
+```bash
+sudo apt update
+sudo apt-get install python3 clang ninja-build curl zip unzip tar autoconf automake libtool python3-pip cmake
+pip install jinja2
+```
+
+### Build, run and debug via VSCode tasks (Linux)
+
+- Open the project folder in VSCode.
+- Run task: `103. (Lin) Install vcpkg as subfolder`.
+- Run task: `150. (LinDebug) + Run`.
+- For debugging press `F5`. (TODO3 Implement it later).
+
+### Build, run and debug manually (Linux)
+
+```bash
+cd wofares-game
+git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet=x64-linux
+cmake -S . -B build -G "Ninja" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build build/debug -- -k 0
+cmake -E copy config.json build/debug/src/config.json
+cmake -E copy_directory thirdparty/game_assets/wofares/assets build/debug/src/assets
+./build/debug/src/wofares
+```
+
+## Additional Notes
 
 ### File Structure
 
