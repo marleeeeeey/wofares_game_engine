@@ -232,7 +232,7 @@
       "type": "shell",
       "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
       "dependsOn": [
-        "105. ********* Clear console *********"
+        "160. ********* Clear console *********"
       ]
     },
     {
@@ -241,7 +241,7 @@
       "command": "cmake --build build/release -- -k 0", // stop on first error
       // "command": "cmake --build build/release", // continue on error
       "dependsOn": [
-        "110. (LinRelease) + Configure"
+        "165. (LinRelease) + Configure"
       ]
     },
     {
@@ -249,7 +249,7 @@
       "type": "shell",
       "command": "cmake -E copy config.json build/release/src/config.json",
       "dependsOn": [
-        "120. (LinRelease) + Build"
+        "170. (LinRelease) + Build"
       ]
     },
     {
@@ -257,7 +257,7 @@
       "type": "shell",
       "command": "cmake -E copy_directory thirdparty/game_assets/wofares/assets build/release/src/assets",
       "dependsOn": [
-        "130. (LinRelease) + Copy config.json"
+        "175. (LinRelease) + Copy config.json"
       ]
     },
     {
@@ -265,7 +265,7 @@
       "type": "shell",
       "command": "${workspaceFolder}/build/release/src/wofares",
       "dependsOn": [
-        "140. (LinRelease) + Copy assets"
+        "180. (LinRelease) + Copy assets"
       ]
     },
     {
