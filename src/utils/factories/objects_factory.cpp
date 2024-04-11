@@ -1,4 +1,5 @@
 #include "objects_factory.h"
+#include "ecs/components/animation_components.h"
 #include "utils/box2d_body_options.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
@@ -42,15 +43,15 @@ entt::entity ObjectsFactory::SpawnTile(
 
 entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
 {
-    auto entity = registryWrapper.Create("Player");
+    auto playerEntity = registryWrapper.Create("Player");
 
     // AnimationInfo.
     AnimationComponent playerAnimation =
         CreateAnimationInfo("playerWalk", "Run", ResourceManager::TagProps::ExactMatch);
-    registry.emplace<AnimationComponent>(entity, playerAnimation);
+    registry.emplace<AnimationComponent>(playerEntity, playerAnimation);
 
     // PlayerInfo.
-    auto& playerInfo = registry.emplace<PlayerComponent>(entity);
+    auto& playerInfo = registry.emplace<PlayerComponent>(playerEntity);
     playerInfo.weapons = WeaponPropsFactory::CreateAllWeaponsSet();
 
     // PhysicsInfo.
@@ -60,10 +61,16 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
     options.dynamic = Box2dBodyOptions::DynamicOption::Dynamic;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
+    box2dBodyCreator.CreatePhysicsBody(playerEntity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG_FMT(info, "Create player body with bbox: {}", playerHitboxSizeWorld);
 
-    return entity;
+    // Used for animation of the weapon.
+    auto weaponAnimationEntity = registryWrapper.Create("Weapon");
+    registry.emplace<AnimationComponent>(
+        weaponAnimationEntity, CreateAnimationInfo("automaticWeapon", "Idle", ResourceManager::TagProps::ExactMatch));
+    playerInfo.weaponAnimationEntity = weaponAnimationEntity;
+
+    return playerEntity;
 }
 
 entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& posWorld)

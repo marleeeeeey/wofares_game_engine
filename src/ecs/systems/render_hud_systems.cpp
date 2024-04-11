@@ -10,11 +10,11 @@
 #include <utils/sdl_colors.h>
 #include <utils/sdl_draw.h>
 
-HUDRenderSystem::HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer)
+RenderHUDSystem::RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
-void HUDRenderSystem::Render()
+void RenderHUDSystem::Render()
 {
     if (utils::GetConfig<bool, "HUDRenderSystem.showGrid">())
         RenderGrid();
@@ -23,7 +23,7 @@ void HUDRenderSystem::Render()
     DrawPlayersWindowInfo();
 }
 
-void HUDRenderSystem::RenderDebugMenu()
+void RenderHUDSystem::RenderDebugMenu()
 {
     ImGui::Begin("Debug Menu");
 
@@ -61,7 +61,7 @@ void HUDRenderSystem::RenderDebugMenu()
     ImGui::End();
 }
 
-void HUDRenderSystem::RenderGrid()
+void RenderHUDSystem::RenderGrid()
 {
     auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
 
@@ -106,7 +106,7 @@ void HUDRenderSystem::RenderGrid()
     DrawCross(renderer, gameState.windowOptions.windowSize / 2.0f, 20, screenCenterColor);
 }
 
-void HUDRenderSystem::DrawPlayersWindowInfo()
+void RenderHUDSystem::DrawPlayersWindowInfo()
 {
     for (auto entity : registry.view<PlayerComponent>())
     {

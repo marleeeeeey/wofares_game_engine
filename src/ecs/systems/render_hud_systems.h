@@ -4,13 +4,13 @@
 #include <glm/glm.hpp>
 #include <utils/game_options.h>
 
-class HUDRenderSystem
+class RenderHUDSystem
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
     GameOptions& gameState;
 public:
-    HUDRenderSystem(entt::registry& registry, SDL_Renderer* renderer);
+    RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer);
     void Render();
 private:
     void RenderDebugMenu();

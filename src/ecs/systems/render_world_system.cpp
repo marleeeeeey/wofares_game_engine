@@ -1,4 +1,4 @@
-#include "game_objects_render_system.h"
+#include "render_world_system.h"
 #include <SDL_render.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
@@ -7,7 +7,7 @@
 #include <my_cpp_utils/logger.h>
 #include <utils/glm_box2d_conversions.h>
 
-GameObjectsRenderSystem::GameObjectsRenderSystem(
+RenderWorldSystem::RenderWorldSystem(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager,
     SdlPrimitivesRenderer& primitivesRenderer)
   : registry(registry), renderer(renderer), resourceManager(resourceManager),
@@ -15,7 +15,7 @@ GameObjectsRenderSystem::GameObjectsRenderSystem(
     primitivesRenderer(primitivesRenderer)
 {}
 
-void GameObjectsRenderSystem::Render()
+void RenderWorldSystem::Render()
 {
     // Clear the screen with white color.
     SetRenderDrawColor(renderer, ColorName::Black);
@@ -27,13 +27,13 @@ void GameObjectsRenderSystem::Render()
     RenderPlayerWeaponDirection();
 };
 
-void GameObjectsRenderSystem::RenderBackground()
+void RenderWorldSystem::RenderBackground()
 {
     auto backgroundInfo = gameState.levelOptions.backgroundInfo;
     primitivesRenderer.RenderBackground(backgroundInfo);
 };
 
-void GameObjectsRenderSystem::RenderTiles()
+void RenderWorldSystem::RenderTiles()
 {
     auto tilesView = registry.view<RenderingComponent, PhysicsComponent>();
     for (auto entity : tilesView)
@@ -46,7 +46,7 @@ void GameObjectsRenderSystem::RenderTiles()
     }
 }
 
-void GameObjectsRenderSystem::RenderPlayerWeaponDirection()
+void RenderWorldSystem::RenderPlayerWeaponDirection()
 {
     auto players = registry.view<PhysicsComponent, PlayerComponent, AnimationComponent>();
     for (auto entity : players)
@@ -67,7 +67,7 @@ void GameObjectsRenderSystem::RenderPlayerWeaponDirection()
     }
 }
 
-void GameObjectsRenderSystem::RenderAnimations()
+void RenderWorldSystem::RenderAnimations()
 {
     auto view = registry.view<AnimationComponent, PhysicsComponent>();
 

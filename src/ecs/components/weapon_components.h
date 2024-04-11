@@ -1,6 +1,6 @@
 #pragma once
 
-// ********************************* Weapon components *********************************
+// ********************************* Explosion components *********************************
 
 // Like a grenade. Explodes after a certain time.
 struct TimerExplosionComponent
