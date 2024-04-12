@@ -29,7 +29,8 @@
     {
       "label": "010. (WinDebug) + Configure",
       "type": "shell",
-      "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      // Configure and copy compile_commands.json to build folder. Clangd can't find it otherwise if it's not in the build folder.
+      "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake -E copy build/debug/compile_commands.json build/compile_commands.json",
       "dependsOn": [
         "05. ********* Clear console *********"
       ]
@@ -85,7 +86,8 @@
     {
       "label": "065. (WinRelease) + Configure",
       "type": "shell",
-      "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+      // Configure and copy compile_commands.json to build folder. Clangd can't find it otherwise if it's not in the build folder.
+      "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake -E copy build/release/compile_commands.json build/compile_commands.json",
       "dependsOn": [
         "060. ********* Clear console *********"
       ]
