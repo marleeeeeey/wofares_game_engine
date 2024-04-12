@@ -45,18 +45,20 @@ void HUDRenderSystem::RenderDebugMenu()
     // Print the gravity and camera scale, count of tiles, players and dynamic bodies in one line.
     auto gravity = gameState.physicsWorld->GetGravity().Length();
     auto cameraScale = gameState.windowOptions.cameraScale;
-    ImGui::Text(MY_FMT("{:.2f}/{:.2f} (Gr/Sc)", gravity, cameraScale).c_str());
-    ImGui::Text(MY_FMT("{}/{}/{} (Ts/Ps/DB)", tiles.size(), players.size(), dynamicBodiesCount).c_str());
-    ImGui::Text(MY_FMT("Camera center: {}", gameState.windowOptions.cameraCenterSdl).c_str());
+    ImGui::TextUnformatted(MY_FMT("{:.2f}/{:.2f} (Gr/Sc)", gravity, cameraScale).c_str());
+    ImGui::TextUnformatted(MY_FMT("{}/{}/{} (Ts/Ps/DB)", tiles.size(), players.size(), dynamicBodiesCount).c_str());
+    ImGui::TextUnformatted(MY_FMT("Camera center: {}", gameState.windowOptions.cameraCenterSdl).c_str());
 
     // Print debug info.
-    ImGui::Text(MY_FMT("Space pressed duration: {:.2f}", gameState.debugInfo.spacePressedDuration).c_str());
-    ImGui::Text(MY_FMT("Space pressed duration on up event: {:.2f}", gameState.debugInfo.spacePressedDurationOnUpEvent)
-                    .c_str());
+    ImGui::TextUnformatted(MY_FMT("Space pressed duration: {:.2f}", gameState.debugInfo.spacePressedDuration).c_str());
+    ImGui::TextUnformatted(
+        MY_FMT("Space pressed duration on up event: {:.2f}", gameState.debugInfo.spacePressedDurationOnUpEvent)
+            .c_str());
 
     // Print last mouse position.
     const auto& lastMousePosition = gameState.windowOptions.lastMousePosInWindow;
-    ImGui::Text(MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
+    ImGui::TextUnformatted(
+        MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
 
     ImGui::End();
 }
@@ -122,11 +124,11 @@ void HUDRenderSystem::DrawPlayersWindowInfo()
         else if (playerInfo.weapons.at(playerInfo.currentWeapon).remainingFireRate > 0)
             reloadingStatus = "Fire rate...";
 
-        ImGui::Text(MY_FMT(
-                        "{}, Ammo: {}/{} {}", playerInfo.currentWeapon,
-                        playerInfo.weapons.at(playerInfo.currentWeapon).ammoInClip,
-                        playerInfo.weapons.at(playerInfo.currentWeapon).ammoInStorage, reloadingStatus)
-                        .c_str());
+        ImGui::TextUnformatted(MY_FMT(
+                                   "{}, Ammo: {}/{} {}", playerInfo.currentWeapon,
+                                   playerInfo.weapons.at(playerInfo.currentWeapon).ammoInClip,
+                                   playerInfo.weapons.at(playerInfo.currentWeapon).ammoInStorage, reloadingStatus)
+                                   .c_str());
 
         ImGui::End();
     }

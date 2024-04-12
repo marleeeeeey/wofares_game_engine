@@ -15,7 +15,7 @@ target_compile_options(wofares PRIVATE
     -Wextra
     -Werror
     -Wpedantic
-    $<$<CXX_COMPILER_ID:Clang>:-Wno-format-security> # TODO4. Remove this. MY_LOG warning: format string is not a string literal (potentially insecure) [-Wformat-security]
+
     $<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations> # TODO4. Remove this. glob/glob.hpp:173:28: warning: 'getenv' is deprecated
 )
 
