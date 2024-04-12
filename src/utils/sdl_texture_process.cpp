@@ -125,8 +125,7 @@ SDL_Surface* ConvertSurfaceFormat(SDL_Surface* srcSurface, Uint32 toFormatEnum)
     return convertedSurface;
 }
 
-std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(
-    SDL_Renderer* renderer, const std::filesystem::path& imagePath)
+std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(const std::filesystem::path& imagePath)
 {
     std::string imagePathStr = imagePath.string();
 

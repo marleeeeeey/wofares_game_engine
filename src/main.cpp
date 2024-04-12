@@ -29,7 +29,7 @@
 #include <utils/systems/random_event_system.h>
 #include <utils/systems/screen_mode_control_system.h>
 
-int main(int argc, char* args[])
+int main([[maybe_unused]] int argc, char* args[])
 {
     try
     {

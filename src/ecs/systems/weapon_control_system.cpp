@@ -118,7 +118,8 @@ void WeaponControlSystem::UpdateTimerExplosionComponents(float deltaTime)
     }
 }
 
-void WeaponControlSystem::OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity)
+void WeaponControlSystem::OnBazookaContactWithTile(
+    [[maybe_unused]] entt::entity bazookaEntity, [[maybe_unused]] entt::entity tileEntity)
 {
     MY_LOG(info, "Bazooka contact with tile");
 };

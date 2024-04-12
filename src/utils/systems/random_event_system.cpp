@@ -6,6 +6,7 @@ RandomEventSystem::RandomEventSystem(entt::registry& registry, AudioSystem& audi
     audioSystem(audioSystem)
 {
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    rng.seed(seed);
     nextSoundEventTime = utils::GetConfig<float, "RandomEventSystem.randomSoundEventInterval_sec">();
 }
 

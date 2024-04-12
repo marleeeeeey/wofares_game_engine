@@ -5,7 +5,7 @@
 
 class GameStateControlSystem
 {
-    entt::registry& registry;
+    [[maybe_unused]] entt::registry& registry;
     GameOptions& gameState;
     InputEventManager& inputEventManager;
 public:

@@ -12,7 +12,7 @@
 
 class SdlPrimitivesRenderer
 {
-    entt::registry& registry;
+    [[maybe_unused]] entt::registry& registry;
     SDL_Renderer* renderer;
     ResourceManager& resourceManager;
     GameOptions& gameState;

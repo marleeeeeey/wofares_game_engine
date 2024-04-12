@@ -5,7 +5,7 @@
 EnttRegistryWrapper::EnttRegistryWrapper(entt::registry& registry) : registry(registry)
 {}
 
-entt::entity EnttRegistryWrapper::Create(const std::string& name)
+entt::entity EnttRegistryWrapper::Create([[maybe_unused]] const std::string& name)
 {
     auto entity = registry.create();
 #ifdef MY_DEBUG
@@ -51,7 +51,7 @@ void EnttRegistryWrapper::LogAllEntitiesByTheirNames()
 #endif // MY_DEBUG
 };
 
-std::string EnttRegistryWrapper::TryGetName(entt::entity entity)
+std::string EnttRegistryWrapper::TryGetName([[maybe_unused]] entt::entity entity)
 {
 #ifdef MY_DEBUG
     if (auto it = entityNamesById.find(entity); it != entityNamesById.end())

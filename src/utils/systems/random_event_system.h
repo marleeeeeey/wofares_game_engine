@@ -6,7 +6,7 @@
 
 class RandomEventSystem
 {
-    entt::registry& registry;
+    [[maybe_unused]] entt::registry& registry;
     GameOptions& gameState;
     AudioSystem& audioSystem;
     std::default_random_engine rng;

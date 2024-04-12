@@ -141,7 +141,7 @@ SDLSurfaceRAII& SDLSurfaceRAII::operator=(SDLSurfaceRAII&& other) noexcept
     std::swap(surface, other.surface);
     return *this;
 }
-SDLPixelFormatRAII::SDLPixelFormatRAII(SDL_PixelFormat* format)
+SDLPixelFormatRAII::SDLPixelFormatRAII(SDL_PixelFormat* format) : pixelFormat(format)
 {
     if (!pixelFormat)
         throw std::runtime_error("[SDLPixelFormatRAII] format is nullptr");

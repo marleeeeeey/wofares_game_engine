@@ -26,7 +26,6 @@ namespace details
 std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::filesystem::path& imagePath);
 
 // Loads a surface with streaming access. This can be useful to determine if a tile is invisible.
-std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(
-    SDL_Renderer* renderer, const std::filesystem::path& imagePath);
+std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(const std::filesystem::path& imagePath);
 
 } // namespace details

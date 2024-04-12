@@ -93,7 +93,7 @@ std::shared_ptr<SDLSurfaceRAII> ResourceCache::LoadSurface(const std::filesystem
         return surfaces[absolutePath];
 
     // Load the surface and cache it.
-    std::shared_ptr<SDLSurfaceRAII> surfaceRAII = details::LoadSurfaceWithStreamingAccess(renderer, absolutePath);
+    std::shared_ptr<SDLSurfaceRAII> surfaceRAII = details::LoadSurfaceWithStreamingAccess(absolutePath);
     surfaces[absolutePath] = surfaceRAII;
     return surfaceRAII;
 };
