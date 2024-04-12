@@ -6,7 +6,7 @@ ScreenModeControlSystem::ScreenModeControlSystem(InputEventManager& inputEventMa
   : inputEventManager(inputEventManager), window(window)
 {
     SubscribeToInputEvents();
-};
+}
 
 void ScreenModeControlSystem::SubscribeToInputEvents()
 {
@@ -29,4 +29,4 @@ void ScreenModeControlSystem::SubscribeToInputEvents()
                 }
             }
         });
-};
+}

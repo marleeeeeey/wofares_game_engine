@@ -32,7 +32,7 @@ void PlayerControlSystem::Update(float deltaTime)
     {
         UpdateFireRateAndReloadTime(entity, deltaTime);
     }
-};
+}
 
 void PlayerControlSystem::SubscribeToInputEvents()
 {
@@ -59,7 +59,7 @@ void PlayerControlSystem::SubscribeToInputEvents()
     inputEventManager.Subscribe(
         InputEventManager::EventType::RawSdlEvent,
         [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerWeaponDirection(eventInfo); });
-};
+}
 
 void PlayerControlSystem::SubscribeToContactListener()
 {
@@ -71,7 +71,7 @@ void PlayerControlSystem::SubscribeToContactListener()
         Box2dEnttContactListener::ContactType::EndSensor,
         [this](const Box2dEnttContactListener::ContactInfo& contactInfo)
         { HandlePlayerEndPlayerContact(contactInfo); });
-};
+}
 
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
 {
@@ -152,7 +152,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const InputEventManager::Ev
         glm::vec2 posWorld = coordinatesTransformer.ScreenToWorld(posWindow);
         objectsFactory.SpawnBuildingBlock(posWorld);
     }
-};
+}
 
 void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo)
 {
@@ -172,7 +172,7 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
             playerInfo.weaponDirection = glm::normalize(directionVec);
         }
     }
-};
+}
 
 void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::EventInfo& eventInfo)
 {
@@ -205,19 +205,19 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
         playerInfo.currentWeapon = weaponEnumRange[weaponIndex];
         MY_LOG(trace, "Player {} changed weapon to {}", playerInfo.number, playerInfo.currentWeapon);
     }
-};
+}
 
 void PlayerControlSystem::HandlePlayerEndPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo)
 {
     SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityA, false);
     SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityB, false);
-};
+}
 
 void PlayerControlSystem::HandlePlayerBeginPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo)
 {
     SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityA, true);
     SetGroundContactFlagIfEntityIsPlayer(contactInfo.entityB, true);
-};
+}
 
 void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value)
 {
@@ -227,7 +227,7 @@ void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity enti
         playerInfo->countOfGroundContacts += value ? 1 : -1;
         MY_LOG(debug, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
     }
-};
+}
 
 entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, float throwingForce)
 {
@@ -304,7 +304,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     auto bulletEntity =
         objectsFactory.SpawnBullet(playerEntity, initialBulletSpeed, currentWeaponProps.bulletAnglePolicy);
     return bulletEntity;
-};
+}
 
 void PlayerControlSystem::UpdateFireRateAndReloadTime(entt::entity playerEntity, float deltaTime)
 {
@@ -331,4 +331,4 @@ void PlayerControlSystem::UpdateFireRateAndReloadTime(entt::entity playerEntity,
             }
         }
     }
-};
+}

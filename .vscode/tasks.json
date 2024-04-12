@@ -42,7 +42,13 @@
       // "command": "cmake --build build/debug", // continue on error
       "dependsOn": [
         "010. (WinDebug) + Configure"
-      ]
+      ],
+      "options": {
+        "statusbar": {
+          "hide" : false,
+          "label": "BuildDebug"
+        }
+      }
     },
     {
       "label": "030. (WinDebug) + Copy config.json",
@@ -66,7 +72,13 @@
       "command": "${workspaceFolder}/build/debug/src/wofares.exe",
       "dependsOn": [
         "040. (WinDebug) + Copy assets"
-      ]
+      ],
+      "options": {
+        "statusbar": {
+          "hide" : false,
+          "label": "RunDebug"
+        }
+      }
     },
     {
       "label": "055. (WinDebug) Run",

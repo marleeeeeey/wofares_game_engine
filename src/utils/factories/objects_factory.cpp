@@ -38,7 +38,7 @@ entt::entity ObjectsFactory::SpawnTile(
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld, options);
 
     return entity;
-};
+}
 
 entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
 {
@@ -78,7 +78,7 @@ entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& posWor
     registry.emplace<CollisionDisableHitCountComponent>(
         entity, utils::GetConfig<size_t, "ObjectsFactory.numberOfHitsToDisableCollisionsForFragments">());
     return entity;
-};
+}
 
 AnimationComponent ObjectsFactory::CreateAnimationInfo(
     const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps)
@@ -87,7 +87,7 @@ AnimationComponent ObjectsFactory::CreateAnimationInfo(
     animationInfo.animation = resourceManager.GetAnimation(animationName, tagName, tagProps);
     animationInfo.isPlaying = true;
     return animationInfo;
-};
+}
 
 entt::entity ObjectsFactory::SpawnFlyingEntity(
     const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float initialSpeed,
@@ -111,7 +111,7 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     physicsBody.bodyRAII->GetBody()->SetLinearVelocity(speedVec);
 
     return flyingEntity;
-};
+}
 
 entt::entity ObjectsFactory::SpawnBullet(
     entt::entity playerEntity, float initialBulletSpeed, Box2dBodyOptions::AnglePolicy anglePolicy)
@@ -169,7 +169,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     }
 
     return bulletEntity;
-};
+}
 
 entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
 {
@@ -178,7 +178,7 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld);
     registry.emplace<RenderingComponent>(entity, sizeWorld, nullptr, SDL_Rect{}, ColorName::Green);
     return entity;
-};
+}
 
 std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld)
 {
@@ -194,7 +194,7 @@ std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2
     physicsMethods.ApplyForceToPhysicalBodies(fragments, centerWorld, 500.0f);
 
     return fragments;
-};
+}
 
 std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
     const std::vector<entt::entity>& physicalEntities, SDL_Point cellSizeWorld)
@@ -233,4 +233,4 @@ std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
     }
 
     return splittedEntities;
-};
+}

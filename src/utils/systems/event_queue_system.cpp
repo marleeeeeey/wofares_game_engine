@@ -22,4 +22,4 @@ void EventQueueSystem::Update(float deltaTime)
         inputEventManager.UpdateRawEvent(event);
     }
     inputEventManager.UpdateСontinuousEvents(deltaTime);
-};
+}

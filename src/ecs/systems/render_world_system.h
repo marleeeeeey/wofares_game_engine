@@ -6,7 +6,7 @@
 #include <utils/sdl_colors.h>
 #include <utils/sdl_primitives_renderer.h>
 
-class GameObjectsRenderSystem
+class RenderWorldSystem
 {
     entt::registry& registry;
     SDL_Renderer* renderer;
@@ -15,7 +15,7 @@ class GameObjectsRenderSystem
     CoordinatesTransformer coordinatesTransformer;
     SdlPrimitivesRenderer& primitivesRenderer;
 public:
-    GameObjectsRenderSystem(
+    RenderWorldSystem(
         entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager,
         SdlPrimitivesRenderer& primitivesRenderer);
     void Render();

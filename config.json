@@ -31,7 +31,7 @@
     "positionIterations": 2
   },
   "MapLoaderSystem": {
-    "tileSplitFactor": 2
+    "tileSplitFactor": 4
   },
   "ObjectsFactory": {
     // Gap between physical and visual objects. Used to prevent dragging of physical objects.
@@ -43,10 +43,10 @@
   "CoordinatesTransformer": {
     "box2DtoWorld": 48
   },
-  "HUDRenderSystem": {
+  "RenderHUDSystem": {
     "showGrid": false
   },
-  "GameObjectsRenderSystem": {
+  "RenderWorldSystem": {
     "renderPlayerHitbox": false
   }
 }

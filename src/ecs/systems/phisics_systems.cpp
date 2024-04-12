@@ -24,7 +24,7 @@ void PhysicsSystem::Update(float deltaTime)
     UpdateAngleRegardingWithAnglePolicy();
     UpdatePlayersWeaponDirection();
     RemoveDistantObjects();
-};
+}
 
 void PhysicsSystem::RemoveDistantObjects()
 {
@@ -84,4 +84,4 @@ void PhysicsSystem::UpdateAngleRegardingWithAnglePolicy()
             body->SetFixedRotation(false);
         }
     }
-};
+}

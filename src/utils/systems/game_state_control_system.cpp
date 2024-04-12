@@ -16,7 +16,7 @@ void GameStateControlSystem::HandleGameStateChange(const SDL_Event& event)
     {
         gameState.controlOptions.quit = true;
     }
-};
+}
 
 void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
 {
@@ -26,7 +26,7 @@ void GameStateControlSystem::HandleSpaceHoldButtonToDebugInfo(const InputEventMa
     {
         gameState.debugInfo.spacePressedDuration = eventInfo.holdDuration;
     }
-};
+}
 
 void GameStateControlSystem::HandleSpaceReleaseAfterHoldButtonToDebugInfo(const InputEventManager::EventInfo& eventInfo)
 {
@@ -36,7 +36,7 @@ void GameStateControlSystem::HandleSpaceReleaseAfterHoldButtonToDebugInfo(const 
     {
         gameState.debugInfo.spacePressedDurationOnUpEvent = eventInfo.holdDuration;
     }
-};
+}
 
 void GameStateControlSystem::SubscribeToInputEvents()
 {
@@ -51,4 +51,4 @@ void GameStateControlSystem::SubscribeToInputEvents()
         InputEventManager::EventType::ButtonReleaseAfterHold,
         [this](const InputEventManager::EventInfo& eventInfo)
         { HandleSpaceReleaseAfterHoldButtonToDebugInfo(eventInfo); });
-};
+}

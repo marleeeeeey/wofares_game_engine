@@ -43,7 +43,7 @@ void AnimationUpdateSystem::UpdateAnimationProgressForAllEntities(float deltaTim
             }
         }
     }
-};
+}
 
 void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
 {
@@ -79,4 +79,4 @@ void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
         else if (playerInfo.weaponDirection.x > 0)
             animationInfo.flip = SDL_FLIP_NONE;
     }
-};
+}

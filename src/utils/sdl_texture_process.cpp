@@ -95,7 +95,7 @@ SDL_Rect GetVisibleRectInSrcRectCoordinates(SDL_Surface* surface, const SDL_Rect
     visibleRect.x -= textureSrcRect.x;
     visibleRect.y -= textureSrcRect.y;
     return visibleRect;
-};
+}
 
 namespace details
 {

@@ -35,7 +35,7 @@ std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
     }
 
     return result;
-};
+}
 
 std::vector<entt::entity> EnttCollectObjects::ExcludePlayersFromList(const std::vector<entt::entity>& entities)
 {
@@ -46,4 +46,4 @@ std::vector<entt::entity> EnttCollectObjects::ExcludePlayersFromList(const std::
             result.push_back(entity);
     }
     return result;
-};
+}

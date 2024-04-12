@@ -24,7 +24,7 @@ void EnttRegistryWrapper::Destroy(entt::entity entity)
     entityNamesById.erase(entity);
 #endif // MY_DEBUG
     registry.destroy(entity);
-};
+}
 
 entt::registry& EnttRegistryWrapper::GetRegistry()
 {
@@ -49,7 +49,7 @@ void EnttRegistryWrapper::LogAllEntitiesByTheirNames()
         MY_LOG(debug, "Entities with name: {} (count={}) have ids: {}", name, ids.size(), ids);
     }
 #endif // MY_DEBUG
-};
+}
 
 std::string EnttRegistryWrapper::TryGetName([[maybe_unused]] entt::entity entity)
 {
@@ -63,4 +63,4 @@ std::string EnttRegistryWrapper::TryGetName([[maybe_unused]] entt::entity entity
 #else
     return "";
 #endif // MY_DEBUG
-};
+}

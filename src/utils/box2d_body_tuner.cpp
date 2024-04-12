@@ -28,7 +28,7 @@ PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
 PhysicsComponent& Box2dBodyTuner::GetPhysicsComponent(entt::entity entity)
 {
     return registry.get<PhysicsComponent>(entity);
-};
+}
 
 // ************************************* Options setters. *************************************
 
@@ -46,7 +46,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Fi
         fixture->SetRestitution(fixtureOptions.restitution);
         fixture = fixture->GetNext();
     }
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Shape& option)
 {
@@ -66,7 +66,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Sh
         AddVerticalCapsuleFixtureToBody(body, fixtureDef, physicsComponent.options.hitbox.sizeWorld);
     else
         throw std::runtime_error("[ApplyOption] Unknown shape type");
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Sensor& option)
 {
@@ -82,7 +82,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Se
         return;
     else
         throw std::runtime_error("[ApplyOption] Unknown sensor type");
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::DynamicOption& option)
 {
@@ -90,7 +90,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Dy
     auto body = physicsComponent.bodyRAII->GetBody();
     physicsComponent.options.dynamic = option;
     body->SetType(option == Box2dBodyOptions::DynamicOption::Dynamic ? b2_dynamicBody : b2_staticBody);
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::AnglePolicy& option)
 {
@@ -107,7 +107,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::An
         return;
     else
         throw std::runtime_error("[ApplyOption] Unknown angle policy");
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::CollisionPolicy& option)
 {
@@ -136,7 +136,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Co
         fixture->SetFilterData(filter);
         fixture = fixture->GetNext();
     }
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::BulletPolicy& option)
 {
@@ -145,7 +145,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Bu
     physicsComponent.options.bulletPolicy = option;
 
     body->SetBullet(option == Box2dBodyOptions::BulletPolicy::Bullet);
-};
+}
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hitbox& hitbox)
 {
@@ -158,7 +158,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hi
     objectHitbox = hitbox;
 
     ApplyOption(entity, physicsComponent.options.shape);
-};
+}
 
 // ************************************* Create empty physics body. *************************************
 
@@ -183,7 +183,7 @@ void Box2dBodyTuner::AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef,
     shape.SetAsBox(sizePhysics.x / 2.0, sizePhysics.y / 2.0);
     fixtureDef.shape = &shape;
     body->CreateFixture(&fixtureDef);
-};
+}
 
 void Box2dBodyTuner::AddCircleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld)
 {
@@ -192,7 +192,7 @@ void Box2dBodyTuner::AddCircleFixtureToBody(b2Body* body, b2FixtureDef& fixtureD
     shape.m_radius = sizePhysics.x / 2.0;
     fixtureDef.shape = &shape;
     body->CreateFixture(&fixtureDef);
-};
+}
 
 void Box2dBodyTuner::AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld)
 {
@@ -243,7 +243,7 @@ void Box2dBodyTuner::AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& si
 
     // Add a sensor to the body below the body.
     body->CreateFixture(&sensorDef);
-};
+}
 
 // ************************************* Remove fixtures from the body. *************************************
 
@@ -262,7 +262,7 @@ void Box2dBodyTuner::RemoveAllFixturesExceptSensorsFromTheBody(b2Body* body)
         body->DestroyFixture(fixture);
         fixture = nextFixture;
     }
-};
+}
 
 void Box2dBodyTuner::RemoveAllSensorsFromTheBody(b2Body* body)
 {
@@ -279,7 +279,7 @@ void Box2dBodyTuner::RemoveAllSensorsFromTheBody(b2Body* body)
         body->DestroyFixture(fixture);
         fixture = nextFixture;
     }
-};
+}
 
 // ************************************* Get fixture def. *************************************
 
@@ -290,4 +290,4 @@ b2FixtureDef Box2dBodyTuner::CalcFixtureDefFromOptions(const Box2dBodyOptions::F
     fixtureDef.friction = options.friction;
     fixtureDef.restitution = options.restitution;
     return fixtureDef;
-};
+}

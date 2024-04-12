@@ -21,7 +21,7 @@ glm::vec2 CoordinatesTransformer::WorldToScreen(const glm::vec2& posWorld, Type 
 float CoordinatesTransformer::WorldToScreen(float valueWorld) const
 {
     return valueWorld * gameState.windowOptions.cameraScale;
-};
+}
 
 glm::vec2 CoordinatesTransformer::ScreenToWorld(const glm::vec2& posScreen, Type type) const
 {
@@ -38,7 +38,7 @@ glm::vec2 CoordinatesTransformer::ScreenToWorld(const glm::vec2& posScreen, Type
 float CoordinatesTransformer::ScreenToWorld(float valueScreen) const
 {
     return valueScreen / gameState.windowOptions.cameraScale;
-};
+}
 
 b2Vec2 CoordinatesTransformer::WorldToPhysics(const glm::vec2& posWorld, [[maybe_unused]] Type type) const
 {
@@ -48,7 +48,7 @@ b2Vec2 CoordinatesTransformer::WorldToPhysics(const glm::vec2& posWorld, [[maybe
 float CoordinatesTransformer::WorldToPhysics(float worldValue) const
 {
     return worldValue * worldToBox2D;
-};
+}
 
 glm::vec2 CoordinatesTransformer::PhysicsToWorld(const b2Vec2& posPhysics, [[maybe_unused]] Type type) const
 {
@@ -58,7 +58,7 @@ glm::vec2 CoordinatesTransformer::PhysicsToWorld(const b2Vec2& posPhysics, [[may
 float CoordinatesTransformer::PhysicsToWorld(float physicsValue) const
 {
     return physicsValue * box2DtoWorld;
-};
+}
 
 b2Vec2 CoordinatesTransformer::ScreenToPhysics(const glm::vec2& posSreen, Type type) const
 {
@@ -68,7 +68,7 @@ b2Vec2 CoordinatesTransformer::ScreenToPhysics(const glm::vec2& posSreen, Type t
 float CoordinatesTransformer::ScreenToPhysics(float valueScreen) const
 {
     return WorldToPhysics(ScreenToWorld(valueScreen));
-};
+}
 
 glm::vec2 CoordinatesTransformer::PhysicsToScreen(const b2Vec2& posPhysics, Type type) const
 {
@@ -78,4 +78,4 @@ glm::vec2 CoordinatesTransformer::PhysicsToScreen(const b2Vec2& posPhysics, Type
 float CoordinatesTransformer::PhysicsToScreen(float valuePhysics) const
 {
     return WorldToScreen(PhysicsToWorld(valuePhysics));
-};
+}

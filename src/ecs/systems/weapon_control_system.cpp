@@ -86,7 +86,7 @@ void WeaponControlSystem::OnContactWithExplosionComponent(
     {
         explosionEntities.push(explosionEntityWithContactPoint);
     }
-};
+}
 
 void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity)
 {
@@ -101,7 +101,7 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
         registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
         physicsBodyTuner.ApplyOption(hitCountEntity, Box2dBodyOptions::CollisionPolicy::NoCollision);
     }
-};
+}
 
 void WeaponControlSystem::UpdateTimerExplosionComponents(float deltaTime)
 {
@@ -122,7 +122,7 @@ void WeaponControlSystem::OnBazookaContactWithTile(
     [[maybe_unused]] entt::entity bazookaEntity, [[maybe_unused]] entt::entity tileEntity)
 {
     MY_LOG(info, "Bazooka contact with tile");
-};
+}
 
 void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
@@ -172,7 +172,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     // Play explosion sound.
     audioSystem.PlaySoundEffect("explosion");
-};
+}
 
 void WeaponControlSystem::ProcessExplosionEntitiesQueue()
 {
@@ -182,7 +182,7 @@ void WeaponControlSystem::ProcessExplosionEntitiesQueue()
         DoExplosion(entity);
         explosionEntities.pop();
     }
-};
+}
 
 void WeaponControlSystem::UpdateContactExplosionComponentTimer(float deltaTime)
 {
@@ -192,7 +192,7 @@ void WeaponControlSystem::UpdateContactExplosionComponentTimer(float deltaTime)
         auto& contactExplosion = contactExplosionsView.get<ContactExplosionComponent>(entity);
         contactExplosion.spawnSafeTime -= deltaTime;
     }
-};
+}
 
 void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
 {
@@ -208,4 +208,4 @@ void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
             physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::CollisionPolicy::NoCollision);
         }
     }
-};
+}

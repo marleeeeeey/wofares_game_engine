@@ -37,4 +37,4 @@ void SetRenderDrawColor(SDL_Renderer* renderer, ColorName colorName)
 ColorName GetRandomColorName()
 {
     return static_cast<ColorName>(utils::Random<size_t>(0, magic_enum::enum_count<ColorName>() - 1));
-};
+}

@@ -71,7 +71,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
         if (invisibleTilesNumber > 0)
             MY_LOG(warn, "All tiles are invisible");
     }
-};
+}
 
 void MapLoaderSystem::UnloadMap()
 {
@@ -90,7 +90,7 @@ void MapLoaderSystem::UnloadMap()
         MY_LOG(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
     else
         MY_LOG(debug, "All Box2D bodies were destroyed");
-};
+}
 
 void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
 {
@@ -226,4 +226,4 @@ std::filesystem::path MapLoaderSystem::ReadPathToTileset(const nlohmann::json& m
     }
 
     return tilesetPath;
-};
+}

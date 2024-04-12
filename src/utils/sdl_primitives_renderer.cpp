@@ -90,7 +90,7 @@ void SdlPrimitivesRenderer::RenderAnimation(const AnimationComponent& animationI
     }
 
     RenderTiledSquare(centerWorld, angle, frame.renderingInfo, animationInfo.flip);
-};
+}
 
 void SdlPrimitivesRenderer::RenderAnimationFirstFrame(
     const Animation& animation, glm::vec2 centerWorld, float angle, const SDL_RendererFlip& flip)
@@ -105,7 +105,7 @@ void SdlPrimitivesRenderer::RenderAnimationFirstFrame(
         frame.renderingInfo.textureRect.y, frame.renderingInfo.textureRect.w, frame.renderingInfo.textureRect.h);
 
     RenderTiledSquare(centerWorld, angle, frame.renderingInfo, flip);
-};
+}
 
 void SdlPrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInfo)
 {
@@ -139,4 +139,4 @@ void SdlPrimitivesRenderer::RenderBackground(const BackgroundInfo& backgroundInf
 
     // Render the background texture.
     SDL_RenderCopy(renderer, backgroundTexture, nullptr, &dstRect);
-};
+}

@@ -4,11 +4,11 @@
 
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
-#include <ecs/systems/game_objects_render_system.h>
 #include <ecs/systems/map_loader_system.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
+#include <ecs/systems/render_world_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <iostream>
 #include <magic_enum.hpp>
@@ -28,6 +28,7 @@
 #include <utils/systems/input_event_manager.h>
 #include <utils/systems/random_event_system.h>
 #include <utils/systems/screen_mode_control_system.h>
+
 
 int main([[maybe_unused]] int argc, char* args[])
 {
@@ -113,9 +114,9 @@ int main([[maybe_unused]] int argc, char* args[])
         SdlPrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
         PhysicsSystem physicsSystem(registryWrapper);
         RandomEventSystem randomEventSystem(registryWrapper.GetRegistry(), audioSystem);
-        GameObjectsRenderSystem gameObjectsRenderSystem(
+        RenderWorldSystem RenderWorldSystem(
             registryWrapper.GetRegistry(), renderer.get(), resourceManager, primitivesRenderer);
-        HUDRenderSystem hudRenderSystem(registryWrapper.GetRegistry(), renderer.get());
+        RenderHUDSystem RenderHUDSystem(registryWrapper.GetRegistry(), renderer.get());
         MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager);
 
         // Auxiliary systems.
@@ -159,8 +160,8 @@ int main([[maybe_unused]] int argc, char* args[])
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();
-            gameObjectsRenderSystem.Render();
-            hudRenderSystem.Render();
+            RenderWorldSystem.Render();
+            RenderHUDSystem.Render();
             imguiSDL.finishFrame();
 
             // Cap the frame rate.

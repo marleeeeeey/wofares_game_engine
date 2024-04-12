@@ -124,7 +124,7 @@ Animation ResourceManager::GetAnimationByRegexRandomly(
 
     auto randomTag = utils::Random<size_t>(0, foundTags.size() - 1);
     return animations[animationName][foundTags[randomTag]];
-};
+}
 
 namespace
 {
@@ -224,7 +224,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
     }
 
     return tagToAnimationDict;
-};
+}
 
 LevelInfo ResourceManager::GetTiledLevel(const std::string& name)
 {
@@ -236,14 +236,14 @@ LevelInfo ResourceManager::GetTiledLevel(const std::string& name)
 std::shared_ptr<SDLTextureRAII> ResourceManager::GetTexture(const std::filesystem::path& path)
 {
     return resourceCashe.LoadTexture(path);
-};
+}
 
 std::shared_ptr<MusicRAII> ResourceManager::GetMusic(const std::string& name)
 {
     if (!musicPaths.contains(name))
         throw std::runtime_error(MY_FMT("Music with name '{}' does not found", name));
     return resourceCashe.LoadMusic(musicPaths[name]);
-};
+}
 
 std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::string& name)
 {
@@ -254,14 +254,14 @@ std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::stri
     const auto& sounds = soundEffectPaths[name];
     auto number = utils::Random<size_t>(0, soundEffectPaths[name].size() - 1);
     return resourceCashe.LoadSoundEffect(sounds[number]);
-};
+}
 
 std::shared_ptr<SDLSurfaceRAII> ResourceManager::GetSurface(const std::filesystem::path& path)
 {
     return resourceCashe.LoadSurface(path);
-};
+}
 
 std::shared_ptr<SDLTextureRAII> ResourceManager::GetColoredPixelTexture(ColorName color)
 {
     return resourceCashe.GetColoredPixelTexture(color);
-};
+}

@@ -66,7 +66,7 @@ std::shared_ptr<MusicRAII> ResourceCache::LoadMusic(const std::filesystem::path&
     std::shared_ptr<MusicRAII> musicRAII = std::make_shared<MusicRAII>(absolutePath.string());
     musics[absolutePath] = musicRAII;
     return musicRAII;
-};
+}
 
 std::shared_ptr<SoundEffectRAII> ResourceCache::LoadSoundEffect(const std::filesystem::path& filePath)
 {
@@ -81,7 +81,7 @@ std::shared_ptr<SoundEffectRAII> ResourceCache::LoadSoundEffect(const std::files
     std::shared_ptr<SoundEffectRAII> soundEffectRAII = std::make_shared<SoundEffectRAII>(absolutePath.string());
     soundEffects[absolutePath] = soundEffectRAII;
     return soundEffectRAII;
-};
+}
 
 std::shared_ptr<SDLSurfaceRAII> ResourceCache::LoadSurface(const std::filesystem::path& filePath)
 {
@@ -96,7 +96,7 @@ std::shared_ptr<SDLSurfaceRAII> ResourceCache::LoadSurface(const std::filesystem
     std::shared_ptr<SDLSurfaceRAII> surfaceRAII = details::LoadSurfaceWithStreamingAccess(absolutePath);
     surfaces[absolutePath] = surfaceRAII;
     return surfaceRAII;
-};
+}
 
 std::shared_ptr<SDLTextureRAII> ResourceCache::GetColoredPixelTexture(const ColorName& color)
 {
@@ -109,6 +109,6 @@ std::shared_ptr<SDLTextureRAII> ResourceCache::GetColoredPixelTexture(const Colo
         std::make_shared<SDLTextureRAII>(details::GetColoredPixelTexture(renderer, color));
     coloredTextures[color] = textureRAII;
     return textureRAII;
-};
+}
 
 } // namespace details

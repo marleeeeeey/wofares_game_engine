@@ -18,4 +18,4 @@ PhysicsComponent& Box2dBodyCreator::CreatePhysicsBody(
 {
     options.hitbox.sizeWorld = sizeWorld;
     return bodyTuner.CreatePhysicsComponent(entity, posWorld, options);
-};
+}

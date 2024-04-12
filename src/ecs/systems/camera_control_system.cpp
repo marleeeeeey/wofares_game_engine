@@ -59,7 +59,7 @@ void CameraControlSystem::HandleCameraMovementAndScale(const SDL_Event& event)
         gameState.windowOptions.cameraCenterSdl.x -= deltaX;
         gameState.windowOptions.cameraCenterSdl.y -= deltaY;
     }
-};
+}
 
 void CameraControlSystem::HandleMouseScreenPosition(const SDL_Event& event)
 {
@@ -68,13 +68,13 @@ void CameraControlSystem::HandleMouseScreenPosition(const SDL_Event& event)
     {
         gameState.windowOptions.lastMousePosInWindow = glm::vec2(event.motion.x, event.motion.y);
     }
-};
+}
 
 void CameraControlSystem::Update(float deltaTime)
 {
     if (!gameState.controlOptions.isSceneCaptured)
         PositioningCameraToPlayer(deltaTime);
-};
+}
 
 void CameraControlSystem::PositioningCameraToPlayer(float deltaTime)
 {
@@ -122,4 +122,4 @@ void CameraControlSystem::PositioningCameraToPlayer(float deltaTime)
             cameraCenterPosWorld += diffSdl * factor;
         }
     }
-};
+}

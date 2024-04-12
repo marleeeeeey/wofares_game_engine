@@ -20,12 +20,12 @@ void RandomEventSystem::Update(float deltaTime)
         auto& randomSoundEventInterval = utils::GetConfig<float, "RandomEventSystem.randomSoundEventInterval_sec">();
         nextSoundEventTime = elapsedTime + GenerateNextEventTime(randomSoundEventInterval);
     }
-};
+}
 
 void RandomEventSystem::ProduceEvilLaugh()
 {
     audioSystem.PlaySoundEffect("evil_laugh");
-};
+}
 
 float RandomEventSystem::GenerateNextEventTime(float averageInterval)
 {

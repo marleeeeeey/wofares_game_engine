@@ -91,7 +91,7 @@ void InputEventManager::UpdateСontinuousEvents(float deltaTime)
 void InputEventManager::Subscribe(EventListener listener)
 {
     Subscribe(EventType::RawSdlEvent, listener);
-};
+}
 
 void InputEventManager::Subscribe(EventType eventType, EventListener listener)
 {
@@ -158,4 +158,4 @@ void InputEventManager::UpdateButtonHoldStaticInfo(const SDL_Event& event)
             MY_LOG(debug, "Mouse button {} is released. Size of cashe {}", button, mouseButtonHoldInfo.size());
         }
     }
-};
+}
