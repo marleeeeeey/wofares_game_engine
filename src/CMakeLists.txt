@@ -7,6 +7,8 @@ add_executable(wofares ${WOFARES_SOURCES})
 target_compile_definitions(wofares
     PRIVATE
 
+    DisableSteamNetworkingSockets # TODO2: Temporary disable SteamNetworkingSockets for LD55.
+
     # MY_DEBUG # TODO5: Uncomment this to enable extra debug mode.
 )
 
@@ -37,7 +39,7 @@ target_link_libraries(wofares
     # vcpkg build libraries:
     box2d::box2d
     EnTT::EnTT
-    GameNetworkingSockets::shared
+    GameNetworkingSockets::static
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>

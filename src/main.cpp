@@ -1,7 +1,3 @@
-#if 0
-#include <utils/network/steam_networking_init_RAII.h>
-#endif
-
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/map_loader_system.h>
@@ -20,6 +16,7 @@
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
+#include <utils/network/steam_networking_init_RAII.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl_primitives_renderer.h>
 #include <utils/systems/audio_system.h>
@@ -28,7 +25,6 @@
 #include <utils/systems/input_event_manager.h>
 #include <utils/systems/random_event_system.h>
 #include <utils/systems/screen_mode_control_system.h>
-
 
 int main([[maybe_unused]] int argc, char* args[])
 {
@@ -54,7 +50,7 @@ int main([[maybe_unused]] int argc, char* args[])
         MY_LOG(info, "Current directory set to: {}", execDir);
         MY_LOG(info, "Config file loaded: {}", configFilePath.string());
 
-#if 0
+#ifndef DisableSteamNetworkingSockets
         // Initialize the SteamNetworkingSockets library.
         SteamNetworkingInitRAII::Options steamNetworkingOptions;
         steamNetworkingOptions.debugSeverity =
@@ -64,7 +60,7 @@ int main([[maybe_unused]] int argc, char* args[])
         SteamNetworkingInitRAII::SetDebugCallback(
             []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
             { MY_LOG(info, "[SteamNetworking] {}", pszMsg); });
-#endif
+#endif // DisableSteamNetworkingSockets
 
         // Create an EnTT registry.
         entt::registry registry;

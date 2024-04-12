@@ -10,6 +10,12 @@
       "label": "001. (Win) Remove build folder",
       "type": "shell",
       "command": "rmdir /s /q build",
+      "options": {
+        "statusbar": {
+          "hide" : false,
+          "label": "RemoveBuild"
+        }
+      }
     },
     {
       "label": "002. (Win) Git submodule update",
