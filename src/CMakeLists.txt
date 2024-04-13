@@ -1,10 +1,10 @@
 # Recursively collect all .cpp files from the current source directory and subdirectories.
-file(GLOB_RECURSE WOFARES_SOURCES "*.cpp")
+file(GLOB_RECURSE LD55_SOURCES "*.cpp")
 
 # Create an executable with the collected source files.
-add_executable(wofares ${WOFARES_SOURCES})
+add_executable(LD55 ${LD55_SOURCES})
 
-target_compile_definitions(wofares
+target_compile_definitions(LD55
     PRIVATE
 
     DisableSteamNetworkingSockets # TODO2: Temporary disable SteamNetworkingSockets for LD55.
@@ -12,7 +12,7 @@ target_compile_definitions(wofares
     # MY_DEBUG # TODO5: Uncomment this to enable extra debug mode.
 )
 
-target_compile_options(wofares PRIVATE
+target_compile_options(LD55 PRIVATE
     -Wall
     -Wextra
     -Werror
@@ -33,7 +33,7 @@ target_compile_options(wofares PRIVATE
     $<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations> # TODO4. Remove this. glob/glob.hpp:173:28: warning: 'getenv' is deprecated
 )
 
-target_link_libraries(wofares
+target_link_libraries(LD55
     PRIVATE
 
     # vcpkg build libraries:
@@ -49,20 +49,20 @@ target_link_libraries(wofares
     my_cpp_utils
 )
 
-target_include_directories(wofares
+target_include_directories(LD55
     PRIVATE
     ${PROJECT_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/thirdparty/glob/single_include
 )
 
 # copy assets
-add_custom_command(TARGET wofares POST_BUILD
+add_custom_command(TARGET LD55 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/thirdparty/game_assets/wofares/assets"
-    "$<TARGET_FILE_DIR:wofares>/assets")
+    "${CMAKE_SOURCE_DIR}/assets"
+    "$<TARGET_FILE_DIR:LD55>/assets")
 
 # copy config.json
-add_custom_command(TARGET wofares POST_BUILD
+add_custom_command(TARGET LD55 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_SOURCE_DIR}/config.json"
-    "$<TARGET_FILE_DIR:wofares>/config.json")
+    "$<TARGET_FILE_DIR:LD55>/config.json")

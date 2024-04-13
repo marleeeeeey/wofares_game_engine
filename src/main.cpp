@@ -37,7 +37,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Set the paths to the configuration and log files.
         std::filesystem::path configFilePath = "config.json";
-        std::filesystem::path logFilePath = "logs/wofares.log";
+        std::filesystem::path logFilePath = "logs/LD55.log";
 
         // Initialize the logger and the configuration.
         utils::Config::InitInstanceFromFile(configFilePath);
@@ -45,7 +45,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Log initial information.
         MY_LOG(info, "******************************");
-        MY_LOG(info, "**** Wofares game started ****");
+        MY_LOG(info, "****** LD55 game started *****");
         MY_LOG(info, "******************************");
         MY_LOG(info, "Current directory set to: {}", execDir);
         MY_LOG(info, "Config file loaded: {}", configFilePath.string());
@@ -81,7 +81,7 @@ int main([[maybe_unused]] int argc, char* args[])
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         SDLAudioInitializerRAII sdlAudioInitializer;
-        SDLWindowRAII window("WOFARES with SDL, ImGui, EnTT, Box2D & GLM", gameOptions.windowOptions.windowSize);
+        SDLWindowRAII window("LD55 game by marleeeeeey and jsCommander", gameOptions.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 

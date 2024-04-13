@@ -1,10 +1,13 @@
-# WOFARES (C++ Game Project)
+# LD55 (C++ Game Project)
 
-**WOFARES** - **W**orld **OF** squ**ARES** is a platformer game innovatively designed around the concept of level destruction. It features a unique mechanism where tiles shatter into pieces, with fragments dispersing realistically thanks to the integration of the Box2D physics engine. This game is envisioned to support cooperative multiplayer gameplay and single-player mode.
+**LD55** - is a platformer game developed for the Ludum Dare 55 game jam.
 
-At the core of WOFARES's engine lies a robust foundation constructed using C++ and leveraging libraries such as SDL, EnTT, gml, imgui, and Box2D. A pivotal aspect of the game's design is the extensive application of the Entity Component System (ECS) pattern. This architectural approach significantly reduces component coupling and simplifies engine maintenance, ensuring a seamless and immersive gaming experience.
+## Team
 
-![alt text](docs/wofares_screenshot.png)
+- [marleeeeeey](https://github.com/marleeeeeey) - C++ programming, game desing, sound.
+- [jsCommander](https://github.com/jsCommander) - game desing, art.
+
+![alt text](docs/LD55_screenshot.png)
 
 ### Platform Support
 
@@ -13,7 +16,7 @@ At the core of WOFARES's engine lies a robust foundation constructed using C++ a
 ### Clone the Repository
 
 ```
-git clone --recursive https://github.com/marleeeeeey/wofares-game.git
+git clone --recursive https://github.com/marleeeeeey/LD55-game.git
 ```
 
 ## Windows
@@ -37,7 +40,7 @@ git clone --recursive https://github.com/marleeeeeey/wofares-game.git
 
 ### Build, run and debug manually (Windows)
 
-To build Wofares on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
+To build LD55 on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
 
 This project define it's dependences:
 1. In a `vcpkg.json` file, and you are pulling in vcpkg's cmake toolchain file.
@@ -46,7 +49,7 @@ This project define it's dependences:
 First, we bootstrap a project-specific installation of vcpkg ("manifest mode") in the default location, `<project root>/vcpkg`. From the project root, run these commands:
 
 ```
-cd wofares-game
+cd LD55-game
 git clone https://github.com/microsoft/vcpkg
 .\vcpkg\bootstrap-vcpkg.bat
 ```
@@ -73,13 +76,13 @@ Finally, we copy the assets and configuration file to the build directory.
 
 ```
 cmake -E copy ../config.json ./src/config.json
-cmake -E copy_directory ../thirdparty/game_assets/wofares/assets ./src/assets
+cmake -E copy_directory ../assets ./src/assets
 ```
 
 Run the game:
 
 ```
-src\wofares.exe
+src\LD55.exe
 ```
 
 ## Linux
@@ -102,13 +105,13 @@ pip install jinja2
 ### Build, run and debug manually (Linux)
 
 ```bash
-cd wofares-game
+cd LD55-game
 git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet=x64-linux
 cmake -S . -B build -G "Ninja" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cmake --build build/debug -- -k 0
 cmake -E copy config.json build/debug/src/config.json
-cmake -E copy_directory thirdparty/game_assets/wofares/assets build/debug/src/assets
-./build/debug/src/wofares
+cmake -E copy_directory assets build/debug/src/assets
+./build/debug/src/LD55
 ```
 
 ## Additional Notes
@@ -117,7 +120,7 @@ cmake -E copy_directory thirdparty/game_assets/wofares/assets build/debug/src/as
 
 ```
 
-wofares/
+LD55/
 ├── CMakeLists.txt          # Main CMakeLists file for the project. Used to search dependencies and set up the project.
 ├── thirdparty/
 │   ├── SDL/
@@ -139,6 +142,8 @@ wofares/
     └── *.*
 ```
 
-### Video log
+### Log
 
-2024-02-26 https://youtu.be/8OZJOwcWsZs
+2024-04-13 0500 Start the jam.
+2024-04-13 1200 Start thinking about the game idea.
+2024-04-13 1353 Complete repository setup.

@@ -1,9 +1,6 @@
 [submodule "thirdparty/imgui"]
 	path = thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "thirdparty/game_assets"]
-	path = thirdparty/game_assets
-	url = git@github.com:marleeeeeey/game_assets.git
 [submodule "thirdparty/glob"]
 	path = thirdparty/glob
 	url = git@github.com:p-ranav/glob.git

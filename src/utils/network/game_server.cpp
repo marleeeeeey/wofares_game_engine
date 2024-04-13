@@ -94,7 +94,7 @@ std::vector<std::string> GameServer::PollIncomingMessages()
         if (numMsgs < 0)
             MY_LOG(error, "[GameServer] Error checking for messages");
         assert(numMsgs == 1 && pIncomingMsg);
-        auto itClient = mapClients.find(pIncomingMsg->m_conn);
+        [[maybe_unused]] auto itClient = mapClients.find(pIncomingMsg->m_conn);
         assert(itClient != mapClients.end());
 
         std::string message;

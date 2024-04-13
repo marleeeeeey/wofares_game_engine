@@ -8,7 +8,7 @@
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      "program": "build/debug/src/wofares.exe",
+      "program": "build/debug/src/LD55.exe",
       "args": [],
       "preLaunchTask": "040. (WinDebug) + Copy assets"
     }
