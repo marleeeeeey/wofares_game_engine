@@ -56,6 +56,10 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
                 ParseTileLayer(
                     layer,
                     {ObjectsFactory::SpawnTileOption::DesctructibleOption::NoDestructible, ZOrderingType::Background});
+            if (layer["name"] == "interiors")
+                ParseTileLayer(
+                    layer,
+                    {ObjectsFactory::SpawnTileOption::DesctructibleOption::NoDestructible, ZOrderingType::Interiors});
             if (layer["name"] == "terrain")
                 ParseTileLayer(
                     layer,

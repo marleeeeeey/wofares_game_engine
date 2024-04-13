@@ -209,7 +209,6 @@ void WeaponControlSystem::ProcessEntitiesQueues()
 {
     for (auto entity : becomeStaticEntitiesQueue)
     {
-        MY_LOG(info, "Entity become static: {0}", entity);
         physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::DynamicOption::Static);
     }
 

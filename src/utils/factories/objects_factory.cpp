@@ -74,7 +74,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
-    MY_LOG(info, "Create player body with bbox: {}", playerHitboxSizeWorld);
+    MY_LOG(debug, "Create player body with bbox: {}", playerHitboxSizeWorld);
 
     return entity;
 }
@@ -217,7 +217,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
-    MY_LOG(info, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
+    MY_LOG(debug, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
 
     return entity;
 }

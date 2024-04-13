@@ -15,7 +15,6 @@
 #include <utils/resources/resource_cache.h>
 #include <utils/sdl_texture_process.h>
 
-
 ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson)
   : resourceCashe(renderer)
 {
@@ -176,7 +175,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
             const SDL_Rect& rectInSurface = asepriteData.frames[asepriteData.frameTags["Hitbox"].from].rectInTexture;
             hitboxRect = GetVisibleRectInSrcRectCoordinates(surfaceRAII->get(), rectInSurface);
             MY_LOG(
-                info, "Hitbox rect found: x={}, y={}, w={}, h={}", hitboxRect->x, hitboxRect->y, hitboxRect->w,
+                debug, "Hitbox rect found: x={}, y={}, w={}, h={}", hitboxRect->x, hitboxRect->y, hitboxRect->w,
                 hitboxRect->h);
         }
 
@@ -220,7 +219,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
     for (const auto& [tag, animation] : tagToAnimationDict)
     {
         MY_LOG(
-            info, "  Tag '{}' has {} frame(s), hitbox rect found: {}", tag, animation.frames.size(),
+            debug, "  Tag '{}' has {} frame(s), hitbox rect found: {}", tag, animation.frames.size(),
             animation.hitboxRect.has_value());
     }
 

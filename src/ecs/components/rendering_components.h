@@ -8,7 +8,7 @@
 enum class ZOrderingType
 {
     Background,
-    Interior,
+    Interiors,
     Terrain
 };
 
