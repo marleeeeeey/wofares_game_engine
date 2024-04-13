@@ -1,0 +1,99 @@
+{ "frames": {
+   "explosionFragments 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 1.aseprite": {
+    "frame": { "x": 8, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 2.aseprite": {
+    "frame": { "x": 16, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 3.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 4.aseprite": {
+    "frame": { "x": 32, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 5.aseprite": {
+    "frame": { "x": 40, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 6.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 7.aseprite": {
+    "frame": { "x": 56, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   },
+   "explosionFragments 8.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 8, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.4-x64",
+  "image": "explosionFragments.png",
+  "format": "RGBA8888",
+  "size": { "w": 72, "h": 8 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "Fragment1", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment2", "from": 1, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment3", "from": 2, "to": 2, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment4", "from": 3, "to": 3, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment5", "from": 4, "to": 4, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment6", "from": 5, "to": 5, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment7", "from": 6, "to": 6, "direction": "forward", "color": "#000000ff" },
+   { "name": "Fragment8", "from": 7, "to": 7, "direction": "forward", "color": "#000000ff" },
+   { "name": "Hitbox", "from": 8, "to": 8, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}

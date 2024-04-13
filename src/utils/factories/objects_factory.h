@@ -41,6 +41,7 @@ public: // Explosions.
 private: // Helpers
     AnimationComponent CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
+    // TODO0 entt::entity ConvertWeaponPropsToWeaponEntity(entt::entity playerEntity, const WeaponProps& weaponProps);
     entt::entity SpawnFlyingEntity(
         const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force,
         Box2dBodyOptions::AnglePolicy anglePolicy);

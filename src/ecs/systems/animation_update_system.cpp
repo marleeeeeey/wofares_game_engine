@@ -61,12 +61,12 @@ void AnimationUpdateSystem::UpdatePlayerAnimationDirectionAndSpeed()
 
         if (speed > 0.1f)
         {
-            animationInfo.animation = resourceManager.GetAnimation("playerWalk", "Run");
+            animationInfo.animation = resourceManager.GetAnimation("player", "Run");
             animationInfo.speedFactor = std::min(speed, 2.5f); // Limit max speed.
         }
         else
         {
-            animationInfo.animation = resourceManager.GetAnimation("playerWalk", "Idle");
+            animationInfo.animation = resourceManager.GetAnimation("player", "Idle");
             animationInfo.speedFactor = 1.0f;
         }
 

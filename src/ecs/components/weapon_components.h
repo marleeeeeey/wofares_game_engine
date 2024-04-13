@@ -1,6 +1,17 @@
 #pragma once
 
-// ********************************* Weapon components *********************************
+// TODO0
+// ********************************* Munitions components *********************************
+// Bullet, Bomb, Mine, Grenade, Missile, Shell, Torpedo, Flashbang, Smoke grenade, Fragmentation grenade, Incendiary
+// bomb, Chemical bomb, Nuclear bomb, Cluster bomb, High explosive
+
+struct BulletComponent
+{};
+
+struct GrenadeComponent
+{};
+
+// ********************************* Explosion components *********************************
 
 // Like a grenade. Explodes after a certain time.
 struct TimerExplosionComponent

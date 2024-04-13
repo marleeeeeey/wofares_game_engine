@@ -46,8 +46,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
     auto entity = registryWrapper.Create(debugName);
 
     // AnimationInfo.
-    AnimationComponent playerAnimation =
-        CreateAnimationInfo("playerWalk", "Run", ResourceManager::TagProps::ExactMatch);
+    AnimationComponent playerAnimation = CreateAnimationInfo("player", "Run", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, playerAnimation);
 
     // PlayerInfo.
@@ -162,10 +161,12 @@ entt::entity ObjectsFactory::SpawnBullet(
     // Apply the specific explosion component to the bullet entity.
     if (playerInfo.currentWeapon == WeaponType::Grenade)
     {
+        registry.emplace<GrenadeComponent>(bulletEntity);
         registry.emplace<TimerExplosionComponent>(bulletEntity);
     }
     else
     {
+        registry.emplace<BulletComponent>(bulletEntity);
         registry.emplace<ContactExplosionComponent>(bulletEntity);
     }
 
@@ -187,7 +188,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
 
     // AnimationInfo.
     AnimationComponent playerAnimation =
-        CreateAnimationInfo("playerWalk", "Run", ResourceManager::TagProps::ExactMatch);
+        CreateAnimationInfo("portal", "Suction", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, playerAnimation);
 
     // PortalComponent.

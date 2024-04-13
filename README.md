@@ -148,3 +148,13 @@ Start the jam : 0500 2024-04-13
 Start thinking about the game idea : 1200 2024-04-13
 Complete repository setup : 1353 2024-04-13
 Implement dummy portal catching the player : 1513 2024-04-13
+Intergrate evil and portal animations : 1826 2024-04-13
+
+## Assets
+
+- Animation (Aseprite)
+  - All frames should have tags. Tags are used in the code.
+  - Aseprite should contrain frame with name `Hitbox`.
+- Tiled
+  - Should contain layers: `terrain`, `objects`.
+  - Use flat filesytem structure for tilesets and layers.

@@ -76,7 +76,7 @@ void PlayerControlSystem::SubscribeToContactListener()
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
 {
     float movingForce = 10.0f;
-    float jumpForce = 50.0f;
+    float jumpForce = 80.0f;
 
     auto& originalEvent = eventInfo.originalEvent;
 

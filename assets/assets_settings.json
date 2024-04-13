@@ -1,0 +1,26 @@
+{
+  "animations": {
+    "player": "assets/player.json",
+    "portal": "assets/portal.json",
+    "explosionFragments": "assets/explosionFragments.json",
+    "automaticWeapon": "assets/automatic_weapon.json"
+  },
+  "sound_effects": {
+    "explosion": [
+      "assets/sound_effects/explosion*.wav"
+    ],
+    "evil_laugh": [
+      "assets/sound_effects/evil_laugh*.wav"
+    ]
+  },
+  "music": {
+    "background_music": "assets/music/drums-and-bass-disco.wav"
+  },
+  "maps": [
+    {
+      "name": "level1",
+      "tiledMapPath": "assets/map.tmj",
+      "backgroundPath": "assets/backgrounds/dark_background.png"
+    }
+  ]
+}
