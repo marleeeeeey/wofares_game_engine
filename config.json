@@ -1,6 +1,7 @@
 {
   "main": {
-    "fps": 60
+    "fps": 60,
+    "logLevel": "info"
   },
   "GameOptions": {
     // TODO2: Reorder the windowOptions to specific system

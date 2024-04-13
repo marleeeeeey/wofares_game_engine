@@ -7,7 +7,6 @@
 #include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
 #include <my_cpp_utils/config.h>
-#include <my_cpp_utils/logger.h>
 #include <my_cpp_utils/math_utils.h>
 #include <unordered_map>
 #include <utils/box2d_utils.h>
@@ -15,6 +14,7 @@
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/factories/weapon_props_factory.h>
+#include <utils/logger.h>
 #include <utils/sdl_texture_process.h>
 #include <utils/sdl_utils.h>
 
@@ -119,9 +119,7 @@ entt::entity ObjectsFactory::SpawnBullet(
 {
     if (!registry.all_of<PlayerComponent, PhysicsComponent, AnimationComponent>(playerEntity))
     {
-        MY_LOG(
-            warn, "[CreateBullet] Player does not have all of the required components. Entity: {}",
-            static_cast<int>(playerEntity));
+        MY_LOG(warn, "[CreateBullet] Player does not have all of the required components. Entity: {}", playerEntity);
         return entt::null;
     }
     const auto& playerInfo = registry.get<PlayerComponent>(playerEntity);
@@ -131,7 +129,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     {
         MY_LOG(
             trace, "[CreateBullet] Player does not have {} weapon set as current. Entity: {}", playerInfo.currentWeapon,
-            static_cast<int>(playerEntity));
+            playerEntity);
         return entt::null;
     }
     const WeaponProps& currentWeaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
@@ -162,10 +160,10 @@ entt::entity ObjectsFactory::SpawnBullet(
         registry.emplace<TimerComponent>(bulletEntity, 3.0f);
         registry.emplace<ExplosionOnTimerComponent>(bulletEntity);
     }
-    else if (playerInfo.currentWeapon == WeaponType::StickGrenade)
+    else if (playerInfo.currentWeapon == WeaponType::StickTrap)
     {
         registry.emplace<DamageComponent>(bulletEntity, damageComponent);
-        registry.emplace<StickFlagComponent>(bulletEntity);
+        registry.emplace<StickyComponent>(bulletEntity);
         registry.emplace<ExplosionOnContactComponent>(bulletEntity);
     }
     else

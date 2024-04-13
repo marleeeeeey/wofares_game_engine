@@ -7,11 +7,11 @@
 #include <glm/fwd.hpp>
 #include <imgui_impl_sdl2.h>
 #include <my_cpp_utils/config.h>
-#include <my_cpp_utils/logger.h>
 #include <unordered_map>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
+#include <utils/logger.h>
 #include <utils/systems/input_event_manager.h>
 
 PlayerControlSystem::PlayerControlSystem(
@@ -235,18 +235,19 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     {
         MY_LOG(
             trace, "[MakeShotIfPossible] entity does not have all of the required components. Entity: {}",
-            static_cast<int>(playerEntity));
+            playerEntity);
         return entt::null;
     }
 
     auto& playerInfo = registry.get<PlayerComponent>(playerEntity);
 
     // Check if the throwing force is zero for the grenade.
-    if (throwingForce <= 0 && playerInfo.currentWeapon == WeaponType::Grenade)
+    if (throwingForce <= 0 &&
+        (playerInfo.currentWeapon == WeaponType::Grenade || playerInfo.currentWeapon == WeaponType::StickTrap))
     {
         MY_LOG(
             trace, "[MakeShotIfPossible] Throwing force shouldn't be zero for weapon {}. Entity: {}, force: {}",
-            playerInfo.currentWeapon, static_cast<int>(playerEntity), throwingForce);
+            playerInfo.currentWeapon, playerEntity, throwingForce);
         return entt::null;
     }
 

@@ -9,7 +9,7 @@ WeaponProps WeaponPropsFactory::CreateWeaponType(WeaponType type)
     case WeaponType::Bazooka:
         return CreateBazooka();
     case WeaponType::Grenade:
-    case WeaponType::StickGrenade:
+    case WeaponType::StickTrap:
         return CreateGrenade();
     case WeaponType::Uzi:
         return CreateUzi();

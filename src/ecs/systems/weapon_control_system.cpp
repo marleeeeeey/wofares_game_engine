@@ -1,4 +1,5 @@
 #include "weapon_control_system.h"
+#include "my_cpp_utils/logger.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
@@ -7,7 +8,6 @@
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
-#include <my_cpp_utils/logger.h>
 #include <my_cpp_utils/math_utils.h>
 #include <utils/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
@@ -15,6 +15,7 @@
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/logger.h>
 #include <utils/sdl_colors.h>
 #include <utils/sdl_texture_process.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
@@ -34,7 +35,7 @@ void WeaponControlSystem::Update(float deltaTime)
 {
     CheckTimerExplosionEntities();
     UpdateCollisionDisableTimerComponent(deltaTime);
-    ProcessExplosionEntitiesQueue();
+    ProcessEntitiesQueues();
 }
 
 void WeaponControlSystem::SubscribeToContactEvents()
@@ -49,16 +50,40 @@ void WeaponControlSystem::SubscribeToContactEvents()
                 if (!registry.all_of<ExplosionOnContactComponent, PhysicsComponent>(explosionEntity))
                     continue;
 
-                auto physicsComponent = registry.get<PhysicsComponent>(explosionEntity);
-
-                std::optional<b2Vec2> contactPointPhysics;
-                if (contactInfo.contact->GetManifold()->pointCount > 0)
+                // If the entity contains the StickyComponent, check if it is sticked.
+                bool shouldExplode = true;
+                if (registry.all_of<StickyComponent>(explosionEntity))
                 {
-                    auto localPoint = contactInfo.contact->GetManifold()->points[0].localPoint;
-                    contactPointPhysics = physicsComponent.bodyRAII->GetBody()->GetWorldPoint(localPoint);
+                    auto& stickFlagComponent = registry.get<StickyComponent>(explosionEntity);
+
+                    if (!stickFlagComponent.isSticked)
+                    {
+                        // If it is in flight, then the explosion should not be triggered.
+                        // Body should become static and explosion should be triggered on the next contact.
+                        becomeStaticEntitiesQueue.insert(explosionEntity);
+                        stickFlagComponent.isSticked = true;
+                        shouldExplode = false;
+                    }
+                    else
+                    {
+                        // If it is sticked (installed), then the explosion should be triggered.
+                        shouldExplode = true;
+                    }
                 }
 
-                OnContactWithExplosionComponent({explosionEntity, contactPointPhysics});
+                if (shouldExplode)
+                {
+                    // Calculate the contact point in the physics world.
+                    auto physicsComponent = registry.get<PhysicsComponent>(explosionEntity);
+                    std::optional<b2Vec2> contactPointPhysics;
+                    if (contactInfo.contact->GetManifold()->pointCount > 0)
+                    {
+                        auto localPoint = contactInfo.contact->GetManifold()->points[0].localPoint;
+                        contactPointPhysics = physicsComponent.bodyRAII->GetBody()->GetWorldPoint(localPoint);
+                    }
+
+                    OnContactWithExplosionComponent({explosionEntity, contactPointPhysics});
+                }
             }
         });
 
@@ -81,7 +106,7 @@ void WeaponControlSystem::SubscribeToContactEvents()
 void WeaponControlSystem::OnContactWithExplosionComponent(
     const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
-    explosionEntities.push(explosionEntityWithContactPoint);
+    explosionEntitiesQueue[explosionEntityWithContactPoint.explosionEntity] = explosionEntityWithContactPoint;
 }
 
 void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity)
@@ -168,14 +193,27 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     audioSystem.PlaySoundEffect("explosion");
 }
 
-void WeaponControlSystem::ProcessExplosionEntitiesQueue()
+void WeaponControlSystem::ProcessEntitiesQueues()
 {
-    while (!explosionEntities.empty())
+    for (auto entity : becomeStaticEntitiesQueue)
     {
-        auto entity = explosionEntities.front();
-        DoExplosion(entity);
-        explosionEntities.pop();
+        MY_LOG(info, "Entity become static: {0}", entity);
+        physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::DynamicOption::Static);
     }
+
+    for (const auto& [entity, entotyWithCollisionPoint] : explosionEntitiesQueue)
+    {
+        // Here was a bug. If the entity is already in the becomeStaticEntitiesQueue, then the explosion should not be
+        // triggered. This means that the entity just hit the wall and should become static. Explosion should be on the
+        // next contact.
+        if (!becomeStaticEntitiesQueue.contains(entotyWithCollisionPoint.explosionEntity))
+        {
+            DoExplosion(entotyWithCollisionPoint);
+        }
+    }
+
+    explosionEntitiesQueue.clear();
+    becomeStaticEntitiesQueue.clear();
 }
 
 void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)

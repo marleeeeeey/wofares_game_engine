@@ -19,8 +19,8 @@ struct CollisionDisableHitCountComponent
     size_t hitCount = 0; // Number of hits before the collision is disabled.
 };
 
-// May stick to the surface. // TODO0
-struct StickFlagComponent
+// May attach to the another entity.
+struct StickyComponent
 {
-    bool isStuck = false;
+    bool isSticked = false; // Is the entity sticked.
 };

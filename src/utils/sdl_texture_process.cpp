@@ -2,8 +2,9 @@
 #include <SDL_image.h>
 #include <SDL_pixels.h>
 #include <SDL_surface.h>
-#include <my_cpp_utils/logger.h>
 #include <utils/RAII/sdl_RAII.h>
+#include <utils/logger.h>
+
 
 bool IsTileInvisible(SDL_Surface* surface, const SDL_Rect& miniTextureSrcRect)
 {

@@ -1,6 +1,5 @@
 #pragma once
 #include <entt/entt.hpp>
-#include <queue>
 #include <utils/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt_collect_objects.h>
@@ -24,10 +23,12 @@ class WeaponControlSystem
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
     ObjectsFactory& objectsFactory;
-    std::queue<ExplosionEntityWithContactPoint> explosionEntities;
     CoordinatesTransformer coordinatesTransformer;
     EnttCollectObjects collectObjects;
     Box2dBodyTuner physicsBodyTuner;
+private: // Queues for entities that should be processed when contact event completed.
+    std::map<entt::entity, ExplosionEntityWithContactPoint> explosionEntitiesQueue;
+    std::set<entt::entity> becomeStaticEntitiesQueue;
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
@@ -40,7 +41,7 @@ private:
     void CheckTimerExplosionEntities();
     void UpdateCollisionDisableTimerComponent(float deltaTime);
     void UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity);
-    void ProcessExplosionEntitiesQueue();
+    void ProcessEntitiesQueues();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
     void DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
 };

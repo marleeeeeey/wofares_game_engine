@@ -6,14 +6,15 @@
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/dict_utils.h>
 #include <my_cpp_utils/json_utils.h>
-#include <my_cpp_utils/logger.h>
 #include <my_cpp_utils/math_utils.h>
 #include <my_cpp_utils/string_utils.h>
 #include <nlohmann/detail/macro_scope.hpp>
 #include <nlohmann/json.hpp>
+#include <utils/logger.h>
 #include <utils/resources/aseprite_data.h>
 #include <utils/resources/resource_cache.h>
 #include <utils/sdl_texture_process.h>
+
 
 ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson)
   : resourceCashe(renderer)

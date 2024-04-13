@@ -11,12 +11,12 @@
 #include <magic_enum.hpp>
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/json_utils.h>
-#include <my_cpp_utils/logger.h>
 #include <utils/RAII/imgui_sdl_RAII.h>
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
+#include <utils/logger.h>
 #include <utils/network/steam_networking_init_RAII.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl_primitives_renderer.h>
@@ -42,7 +42,12 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Initialize the logger and the configuration.
         utils::Config::InitInstanceFromFile(configFilePath);
-        utils::Logger::Init(logFilePath, spdlog::level::info);
+
+        spdlog::level::level_enum logLevel = utils::GetConfig<spdlog::level::level_enum, "main.logLevel">();
+#ifdef MY_DEBUG
+        logLevel = spdlog::level::debug;
+#endif // MY_DEBUG
+        utils::Logger::Init(logFilePath, logLevel);
 
         // Log initial information.
         MY_LOG(info, "******************************");

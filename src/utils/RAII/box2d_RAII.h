@@ -1,6 +1,6 @@
 #pragma once
 #include <box2d/box2d.h>
-#include <my_cpp_utils/logger.h>
+#include <utils/logger.h>
 
 class Box2dObjectRAII
 {

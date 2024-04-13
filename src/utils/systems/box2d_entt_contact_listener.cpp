@@ -1,5 +1,5 @@
 #include "box2d_entt_contact_listener.h"
-#include <my_cpp_utils/logger.h>
+#include <utils/logger.h>
 
 Box2dEnttContactListener::Box2dEnttContactListener(EnttRegistryWrapper& registryWrapper)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry())
@@ -75,16 +75,12 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
 
     if (!registry.valid(entityA))
     {
-        MY_LOG(
-            warn, "EntityA is not valid. entityA: {}, name: {}", static_cast<uint32_t>(entityA),
-            registryWrapper.TryGetName(entityA));
+        MY_LOG(warn, "EntityA is not valid. entityA: {}, name: {}", entityA, registryWrapper.TryGetName(entityA));
     }
 
     if (!registry.valid(entityB))
     {
-        MY_LOG(
-            warn, "EntityB is not valid. entityB: {}, name: {}", static_cast<uint32_t>(entityB),
-            registryWrapper.TryGetName(entityB));
+        MY_LOG(warn, "EntityB is not valid. entityB: {}, name: {}", entityB, registryWrapper.TryGetName(entityB));
     }
 
     if (registry.valid(entityA) && registry.valid(entityB))
