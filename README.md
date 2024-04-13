@@ -149,6 +149,8 @@ Start thinking about the game idea : 1200 2024-04-13
 Complete repository setup : 1353 2024-04-13
 Implement dummy portal catching the player : 1513 2024-04-13
 Intergrate evil and portal animations : 1826 2024-04-13
+Implement StickyTrap : 0159 2024-04-14
+Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain : 0309 2024-04-14
 
 ## Assets
 
@@ -156,5 +158,4 @@ Intergrate evil and portal animations : 1826 2024-04-13
   - All frames should have tags. Tags are used in the code.
   - Aseprite should contrain frame with name `Hitbox`.
 - Tiled
-  - Should contain layers: `terrain`, `objects`.
-  - Use flat filesytem structure for tilesets and layers.
+  - Map should contain layers: `terrain`, `objects`.

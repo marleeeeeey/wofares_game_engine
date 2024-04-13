@@ -1,4 +1,5 @@
 #pragma once
+#include "ecs/components/rendering_components.h"
 #include <ecs/components/animation_components.h>
 #include <entt/entt.hpp>
 #include <utils/box2d_body_tuner.h>
@@ -25,8 +26,19 @@ class ObjectsFactory
 public:
     ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
 public: // Main game objects.
+    struct SpawnTileOption
+    {
+        enum class DesctructibleOption
+        {
+            Destructible,
+            NoDestructible,
+        } destructibleOption = DesctructibleOption::Destructible;
+
+        ZOrderingType zOrderingType = ZOrderingType::Terrain;
+    };
     entt::entity SpawnTile(
-        glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
+        glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, SpawnTileOption tileOptions,
+        const std::string& name = "Tile");
     entt::entity SpawnPlayer(const glm::vec2& posWorld, const std::string& debugName);
     entt::entity SpawnBullet(
         entt::entity playerEntity, float initialBulletSpeed, Box2dBodyOptions::AnglePolicy anglePolicy);

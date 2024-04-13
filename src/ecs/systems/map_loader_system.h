@@ -9,7 +9,6 @@
 #include <utils/level_info.h>
 #include <utils/resources/resource_manager.h>
 
-
 class MapLoaderSystem
 {
     EnttRegistryWrapper& registryWrapper;
@@ -33,10 +32,10 @@ public:
     void LoadMap(const LevelInfo& levelInfo);
     void UnloadMap();
 private:
-    void ParseTileLayer(const nlohmann::json& layer);
+    void ParseTileLayer(const nlohmann::json& layer, ObjectsFactory::SpawnTileOption tileOptions);
     void ParseObjectLayer(const nlohmann::json& layer);
     void CalculateLevelBoundsWithBufferZone();
-    void ParseTile(int tileId, int layerCol, int layerRow);
+    void ParseTile(int tileId, int layerCol, int layerRow, ObjectsFactory::SpawnTileOption tileOptions);
 private: // Low level functions.
     std::filesystem::path ReadPathToTileset(const nlohmann::json& mapJson);
 };

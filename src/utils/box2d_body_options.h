@@ -52,4 +52,10 @@ struct Box2dBodyOptions
     {
         glm::vec2 sizeWorld; // Size of the hitbox in the world coordinates.
     } hitbox;
+
+    enum class DestructionPolicy
+    {
+        Descructible, // The object may be destroyed.
+        Indestructible, // The object may not be destroyed.
+    } destructionPolicy;
 };

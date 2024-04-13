@@ -3,6 +3,7 @@
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
+#include <ecs/components/rendering_components.h>
 #include <my_cpp_utils/config.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/logger.h>
@@ -36,14 +37,20 @@ void RenderWorldSystem::RenderBackground()
 
 void RenderWorldSystem::RenderTiles()
 {
-    auto tilesView = registry.view<RenderingComponent, PhysicsComponent>();
-    for (auto entity : tilesView)
+    for (const auto zOrderingType : magic_enum::enum_values<ZOrderingType>())
     {
-        const auto& [tileInfo, physicalBody] = tilesView.get<RenderingComponent, PhysicsComponent>(entity);
-        const glm::vec2 posWorld =
-            coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
-        const float angle = physicalBody.bodyRAII->GetBody()->GetAngle();
-        primitivesRenderer.RenderTiledSquare(posWorld, angle, tileInfo);
+        auto tilesView = registry.view<RenderingComponent, PhysicsComponent>();
+        for (auto entity : tilesView)
+        {
+            const auto& [tileInfo, physicalBody] = tilesView.get<RenderingComponent, PhysicsComponent>(entity);
+            if (tileInfo.zOrderingType != zOrderingType)
+                continue;
+
+            const glm::vec2 posWorld =
+                coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
+            const float angle = physicalBody.bodyRAII->GetBody()->GetAngle();
+            primitivesRenderer.RenderTiledSquare(posWorld, angle, tileInfo);
+        }
     }
 }
 

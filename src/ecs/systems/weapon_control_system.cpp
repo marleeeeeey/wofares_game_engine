@@ -159,8 +159,20 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
-    auto staticOriginalBodies = collectObjects.GetPhysicalBodiesInRaduis(
+    std::vector<entt::entity> staticOriginalBodies = collectObjects.GetPhysicalBodiesInRaduis(
         grenadePosPhysics, damageComponent->radius * radiusCoef, b2_staticBody);
+
+    // Remove bodies with flag Box2dBodyOptions::DestructionPolicy::Indestructible
+    staticOriginalBodies.erase(
+        std::remove_if(
+            staticOriginalBodies.begin(), staticOriginalBodies.end(),
+            [this](entt::entity entity)
+            {
+                auto& physicsComponent = registry.get<PhysicsComponent>(entity);
+                return physicsComponent.options.destructionPolicy ==
+                    Box2dBodyOptions::DestructionPolicy::Indestructible;
+            }),
+        staticOriginalBodies.end());
 
     // Split original objects to micro objects.
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();

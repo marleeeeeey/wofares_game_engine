@@ -12,7 +12,6 @@
 #include <utils/math_utils.h>
 #include <utils/sdl_texture_process.h>
 
-
 MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
@@ -51,9 +50,16 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
     // Iterate over each tile layer.
     for (const auto& layer : mapJson["layers"])
     {
-        if (layer["type"] == "tilelayer" && layer["name"] == "terrain")
+        if (layer["type"] == "tilelayer")
         {
-            ParseTileLayer(layer);
+            if (layer["name"] == "background")
+                ParseTileLayer(
+                    layer,
+                    {ObjectsFactory::SpawnTileOption::DesctructibleOption::NoDestructible, ZOrderingType::Background});
+            if (layer["name"] == "terrain")
+                ParseTileLayer(
+                    layer,
+                    {ObjectsFactory::SpawnTileOption::DesctructibleOption::Destructible, ZOrderingType::Terrain});
         }
         else if (layer["type"] == "objectgroup")
         {
@@ -93,7 +99,7 @@ void MapLoaderSystem::UnloadMap()
         MY_LOG(debug, "All Box2D bodies were destroyed");
 }
 
-void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
+void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer, ObjectsFactory::SpawnTileOption tileOptions)
 {
     auto physicsWorld = gameState.physicsWorld;
 
@@ -112,7 +118,7 @@ void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer)
             if (tileId <= 0)
                 continue;
 
-            ParseTile(tileId, layerCol, layerRow);
+            ParseTile(tileId, layerCol, layerRow, tileOptions);
         }
     }
 }
@@ -148,7 +154,7 @@ void MapLoaderSystem::CalculateLevelBoundsWithBufferZone()
         debug, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
 }
 
-void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
+void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow, ObjectsFactory::SpawnTileOption tileOptions)
 {
     auto physicsWorld = gameState.physicsWorld;
 
@@ -181,7 +187,7 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow)
             float miniTileWorldPositionY = layerRow * tileHeight + miniRow * miniHeight;
             glm::vec2 miniTileWorldPosition{miniTileWorldPositionX, miniTileWorldPositionY};
             auto textureRect = TextureRect{tilesetTexture, miniTextureSrcRect};
-            auto tileEntity = objectsFactory.SpawnTile(miniTileWorldPosition, miniWidth, textureRect);
+            auto tileEntity = objectsFactory.SpawnTile(miniTileWorldPosition, miniWidth, textureRect, tileOptions);
 
             // Update level bounds.
             auto bodyRAII = registry.get<PhysicsComponent>(tileEntity).bodyRAII;

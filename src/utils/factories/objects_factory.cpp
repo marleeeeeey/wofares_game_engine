@@ -1,6 +1,7 @@
 #include "objects_factory.h"
 #include "ecs/components/portal_components.h"
 #include "utils/box2d_body_options.h"
+#include "utils/box2d_body_tuner.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
@@ -25,18 +26,29 @@ ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceMan
 {}
 
 entt::entity ObjectsFactory::SpawnTile(
-    glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name)
+    glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, SpawnTileOption tileOptions,
+    const std::string& name)
 {
     auto& gap = utils::GetConfig<float, "ObjectsFactory.gapBetweenPhysicalAndVisual">();
     glm::vec2 bodySizeWorld(sizeWorld - gap, sizeWorld - gap);
 
     auto entity = registryWrapper.Create(name);
     registry.emplace<RenderingComponent>(
-        entity, glm::vec2(sizeWorld, sizeWorld), textureRect.texture, textureRect.rect);
+        entity, glm::vec2(sizeWorld, sizeWorld), textureRect.texture, textureRect.rect, tileOptions.zOrderingType);
 
-    // Create a Box2D body for the tile.
     Box2dBodyOptions options;
-    options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
+    switch (tileOptions.destructibleOption)
+    {
+    case SpawnTileOption::DesctructibleOption::Destructible:
+        options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
+        break;
+    case SpawnTileOption::DesctructibleOption::NoDestructible:
+        options.dynamic = Box2dBodyOptions::DynamicOption::Static;
+        options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
+        options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
+        options.destructionPolicy = Box2dBodyOptions::DestructionPolicy::Indestructible;
+        break;
+    }
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld, options);
 
     return entity;
@@ -180,7 +192,8 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
     auto entity = registryWrapper.Create("BuildingBlock");
     glm::vec2 sizeWorld(10.0f, 10.0f);
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld);
-    registry.emplace<RenderingComponent>(entity, sizeWorld, nullptr, SDL_Rect{}, ColorName::Green);
+    registry.emplace<RenderingComponent>(
+        entity, sizeWorld, nullptr, SDL_Rect{}, ZOrderingType::Terrain, ColorName::Green);
     return entity;
 }
 
@@ -253,9 +266,13 @@ std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
             auto pixelCenterShift = pixelRectCenterInTexture - originalRectCenterInTexture;
             glm::vec2 pixelCenterWorld = originalObjCenterWorld + pixelCenterShift;
 
+            ObjectsFactory::SpawnTileOption spawnTileOptions;
+            spawnTileOptions.destructibleOption = ObjectsFactory::SpawnTileOption::DesctructibleOption::Destructible;
+            spawnTileOptions.zOrderingType = ZOrderingType::Terrain;
+
             auto pixelEntity = SpawnTile(
                 pixelCenterWorld, cellSizeWorld.x, TextureRect{originalObjRenderingInfo.texturePtr, pixelTextureRect},
-                "PixeledTile");
+                spawnTileOptions, "PixeledTile");
 
             splittedEntities.push_back(pixelEntity);
         }

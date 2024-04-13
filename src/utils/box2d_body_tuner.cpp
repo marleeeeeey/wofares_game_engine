@@ -1,4 +1,5 @@
 #include "box2d_body_tuner.h"
+#include "utils/box2d_body_options.h"
 #include <ecs/components/physics_components.h>
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
@@ -21,6 +22,7 @@ PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
     ApplyOption(entity, options.collisionPolicy);
     ApplyOption(entity, options.bulletPolicy);
     ApplyOption(entity, options.hitbox);
+    ApplyOption(entity, options.destructionPolicy);
 
     return physicsComponent;
 }
@@ -158,6 +160,12 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hi
     objectHitbox = hitbox;
 
     ApplyOption(entity, physicsComponent.options.shape);
+}
+
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::DestructionPolicy& option)
+{
+    auto& physicsComponent = GetPhysicsComponent(entity);
+    physicsComponent.options.destructionPolicy = option;
 }
 
 // ************************************* Create empty physics body. *************************************
