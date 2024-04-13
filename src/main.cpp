@@ -161,11 +161,11 @@ int main([[maybe_unused]] int argc, char* args[])
             imguiSDL.finishFrame();
 
             // Cap the frame rate.
-            Uint32 frameTime = SDL_GetTicks() - frameStart;
-            const Uint32 frameDelay = 1000 / gameOptions.windowOptions.fps;
-            if (frameDelay > frameTime)
+            Uint32 frameTimeMs = SDL_GetTicks() - frameStart;
+            const Uint32 frameDelayMs = 1000 / utils::GetConfig<unsigned, "main.fps">();
+            if (frameDelayMs > frameTimeMs)
             {
-                SDL_Delay(frameDelay - frameTime);
+                SDL_Delay(frameDelayMs - frameTimeMs);
             }
         }
 

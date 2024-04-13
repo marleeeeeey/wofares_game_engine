@@ -1,13 +1,14 @@
 {
+  "main": {
+    "fps": 60
+  },
   "GameOptions": {
     // TODO2: Reorder the windowOptions to specific system
     "windowOptions": {
-      "fps": 60,
       "cameraScale": 2
     }
   },
-  "Networking":
-  {
+  "Networking": {
     "debugSeverity": "k_ESteamNetworkingSocketsDebugOutputType_Everything"
   },
   "WeaponControlSystem": {

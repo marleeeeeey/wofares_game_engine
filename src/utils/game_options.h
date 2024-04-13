@@ -27,12 +27,11 @@ struct LevelOptions
 
 struct WindowOptions
 {
-    unsigned fps{60};
     glm::vec2 windowSize{1600, 900}; // TODO4: support for json serialization.
     float cameraScale{1.0f};
     glm::vec2 cameraCenterSdl{};
     glm::vec2 lastMousePosInWindow{};
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(WindowOptions, fps, cameraScale)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(WindowOptions, cameraScale)
 };
 
 struct ControlOptions
