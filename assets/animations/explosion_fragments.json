@@ -1,5 +1,5 @@
 { "frames": {
-   "explosionFragments 0.aseprite": {
+   "explosion_fragments 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 1.aseprite": {
+   "explosion_fragments 1.aseprite": {
     "frame": { "x": 8, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 2.aseprite": {
+   "explosion_fragments 2.aseprite": {
     "frame": { "x": 16, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 3.aseprite": {
+   "explosion_fragments 3.aseprite": {
     "frame": { "x": 24, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 4.aseprite": {
+   "explosion_fragments 4.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 5.aseprite": {
+   "explosion_fragments 5.aseprite": {
     "frame": { "x": 40, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -47,7 +47,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 6.aseprite": {
+   "explosion_fragments 6.aseprite": {
     "frame": { "x": 48, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -55,7 +55,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 7.aseprite": {
+   "explosion_fragments 7.aseprite": {
     "frame": { "x": 56, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -63,7 +63,7 @@
     "sourceSize": { "w": 8, "h": 8 },
     "duration": 100
    },
-   "explosionFragments 8.aseprite": {
+   "explosion_fragments 8.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
@@ -75,7 +75,7 @@
  "meta": {
   "app": "https://www.aseprite.org/",
   "version": "1.3.4-x64",
-  "image": "explosionFragments.png",
+  "image": "explosion_fragments.png",
   "format": "RGBA8888",
   "size": { "w": 72, "h": 8 },
   "scale": "1",

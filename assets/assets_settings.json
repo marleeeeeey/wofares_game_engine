@@ -1,9 +1,9 @@
 {
   "animations": {
-    "player": "assets/player.json",
-    "portal": "assets/portal.json",
-    "explosionFragments": "assets/explosionFragments.json",
-    "automaticWeapon": "assets/automatic_weapon.json"
+    "player": "assets/animations/player.json",
+    "portal": "assets/animations/portal.json",
+    "explosionFragments": "assets/animations/explosion_fragments.json",
+    "automaticWeapon": "assets/animations/automatic_weapon.json"
   },
   "sound_effects": {
     "explosion": [
@@ -19,7 +19,7 @@
   "maps": [
     {
       "name": "level1",
-      "tiledMapPath": "assets/map.tmj",
+      "tiledMapPath": "assets/maps/map.tmj",
       "backgroundPath": "assets/backgrounds/dark_background.png"
     }
   ]

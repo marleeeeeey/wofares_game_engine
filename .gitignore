@@ -1,6 +1,7 @@
-.cache
-.vs
+.cache/
+.vs/
 .VSCodeCounter/
+*.tiled-session
 achives/
 build/
 imgui.ini
