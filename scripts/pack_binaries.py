@@ -12,6 +12,11 @@ def pack_binaries(path_to_7z, root_folder, build_type, achive_name):
         f"{root_folder}/build/{build_type}/src/CMakeFiles",
         f"{root_folder}/build/{build_type}/src/cmake_install.cmake",
         f"{root_folder}/build/{build_type}/src/logs",
+        f"*.lib",
+        f"*.pdb",
+        f"*.aseprite",
+        f"*.tiled-project",
+        f"*.tiled-session",
         # Add other paths to exclude here
     ]
 
