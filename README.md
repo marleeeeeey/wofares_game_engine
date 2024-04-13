@@ -2,12 +2,32 @@
 
 **LD55** - is a platformer game developed for the Ludum Dare 55 game jam.
 
-## Team
+### Team
 
 - [marleeeeeey](https://github.com/marleeeeeey) - C++ programming, game desing, sound.
 - [jsCommander](https://github.com/jsCommander) - game desing, art.
 
 ![alt text](docs/LD55_screenshot.png)
+
+### Log
+
+```
+Start the jam (I overslept) : 0500 2024-04-13
+Start thinking about the game idea : 1200 2024-04-13
+Complete repository setup : 1353 2024-04-13
+Implement dummy portal catching the player : 1513 2024-04-13
+Intergrate evil and portal animations : 1826 2024-04-13
+Implement StickyTrap : 0159 2024-04-14
+Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain : 0309 2024-04-14
+```
+
+### Assets editing
+
+- Aseprite
+  - All frames must have tags. Tags are used in the C++ code.
+  - Aseprite must contrain frame with name `Hitbox`.
+- Tiled
+  - Map may contains layers: `backgound`, `interiors`, `terrain`, `objects` (from bottom to top).
 
 ### Platform Support
 
@@ -141,21 +161,3 @@ LD55/
 └── docs/                   # Include media files for general documentation.
     └── *.*
 ```
-
-### Log
-
-Start the jam : 0500 2024-04-13
-Start thinking about the game idea : 1200 2024-04-13
-Complete repository setup : 1353 2024-04-13
-Implement dummy portal catching the player : 1513 2024-04-13
-Intergrate evil and portal animations : 1826 2024-04-13
-Implement StickyTrap : 0159 2024-04-14
-Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain : 0309 2024-04-14
-
-## Assets
-
-- Animation (Aseprite)
-  - All frames should have tags. Tags are used in the code.
-  - Aseprite should contrain frame with name `Hitbox`.
-- Tiled
-  - Map should contain layers: `terrain`, `objects`.
