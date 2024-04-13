@@ -37,8 +37,7 @@ private:
     void SubscribeToContactEvents();
     void OnContactWithExplosionComponent(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
 private:
-    void UpdateTimerExplosionComponents(float deltaTime);
-    void UpdateContactExplosionComponentTimer(float deltaTime);
+    void CheckTimerExplosionEntities();
     void UpdateCollisionDisableTimerComponent(float deltaTime);
     void UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity);
     void ProcessExplosionEntitiesQueue();

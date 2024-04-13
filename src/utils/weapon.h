@@ -8,6 +8,7 @@ enum class WeaponType
     Shotgun,
     Bazooka,
     Grenade,
+    StickGrenade
 };
 
 struct WeaponProps

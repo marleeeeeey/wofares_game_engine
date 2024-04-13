@@ -4,6 +4,7 @@
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
+#include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/logger.h>
@@ -135,11 +136,6 @@ entt::entity ObjectsFactory::SpawnBullet(
     }
     const WeaponProps& currentWeaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
 
-    // 4. Create bullet entity.
-    ExplosionImpactComponent explosionImpact;
-    explosionImpact.force = currentWeaponProps.damageForce;
-    explosionImpact.radius = coordinatesTransformer.WorldToPhysics(currentWeaponProps.damageRadiusWorld);
-
     // Spawn flying entity.
     const auto& playerBody = registry.get<PhysicsComponent>(playerEntity).bodyRAII->GetBody();
     const auto& animationInfo = registry.get<AnimationComponent>(playerEntity);
@@ -154,20 +150,28 @@ entt::entity ObjectsFactory::SpawnBullet(
         anglePolicy);
     bodyTuner.ApplyOption(bulletEntity, Box2dBodyOptions::BulletPolicy::Bullet);
 
-    // TODO1: Think about merging all explosion components into one.
-    // All weapons setting should be in one place - WeaponProps.
-    registry.emplace<ExplosionImpactComponent>(bulletEntity, explosionImpact);
+    // Create damage component.
+    DamageComponent damageComponent;
+    damageComponent.force = currentWeaponProps.damageForce;
+    damageComponent.radius = coordinatesTransformer.WorldToPhysics(currentWeaponProps.damageRadiusWorld);
 
     // Apply the specific explosion component to the bullet entity.
     if (playerInfo.currentWeapon == WeaponType::Grenade)
     {
-        registry.emplace<GrenadeComponent>(bulletEntity);
-        registry.emplace<TimerExplosionComponent>(bulletEntity);
+        registry.emplace<DamageComponent>(bulletEntity, damageComponent);
+        registry.emplace<TimerComponent>(bulletEntity, 3.0f);
+        registry.emplace<ExplosionOnTimerComponent>(bulletEntity);
+    }
+    else if (playerInfo.currentWeapon == WeaponType::StickGrenade)
+    {
+        registry.emplace<DamageComponent>(bulletEntity, damageComponent);
+        registry.emplace<StickFlagComponent>(bulletEntity);
+        registry.emplace<ExplosionOnContactComponent>(bulletEntity);
     }
     else
     {
-        registry.emplace<BulletComponent>(bulletEntity);
-        registry.emplace<ContactExplosionComponent>(bulletEntity);
+        registry.emplace<DamageComponent>(bulletEntity, damageComponent);
+        registry.emplace<ExplosionOnContactComponent>(bulletEntity);
     }
 
     return bulletEntity;

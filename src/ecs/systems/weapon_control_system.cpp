@@ -3,6 +3,7 @@
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
 #include <ecs/components/physics_components.h>
+#include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
@@ -31,8 +32,7 @@ WeaponControlSystem::WeaponControlSystem(
 
 void WeaponControlSystem::Update(float deltaTime)
 {
-    UpdateTimerExplosionComponents(deltaTime);
-    UpdateContactExplosionComponentTimer(deltaTime);
+    CheckTimerExplosionEntities();
     UpdateCollisionDisableTimerComponent(deltaTime);
     ProcessExplosionEntitiesQueue();
 }
@@ -45,8 +45,8 @@ void WeaponControlSystem::SubscribeToContactEvents()
         {
             for (const auto& explosionEntity : {contactInfo.entityA, contactInfo.entityB})
             {
-                // If the entity contains the ContactExplosionComponent.
-                if (!registry.all_of<ContactExplosionComponent, PhysicsComponent>(explosionEntity))
+                // If the entity contains the ExplosionOnContactComponent.
+                if (!registry.all_of<ExplosionOnContactComponent, PhysicsComponent>(explosionEntity))
                     continue;
 
                 auto physicsComponent = registry.get<PhysicsComponent>(explosionEntity);
@@ -81,11 +81,7 @@ void WeaponControlSystem::SubscribeToContactEvents()
 void WeaponControlSystem::OnContactWithExplosionComponent(
     const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
-    auto& contactExplosion = registry.get<ContactExplosionComponent>(explosionEntityWithContactPoint.explosionEntity);
-    if (contactExplosion.spawnSafeTime <= 0.0f)
-    {
-        explosionEntities.push(explosionEntityWithContactPoint);
-    }
+    explosionEntities.push(explosionEntityWithContactPoint);
 }
 
 void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity)
@@ -103,18 +99,16 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
     }
 }
 
-void WeaponControlSystem::UpdateTimerExplosionComponents(float deltaTime)
+void WeaponControlSystem::CheckTimerExplosionEntities()
 {
-    auto timersView = registry.view<TimerExplosionComponent>();
-    for (auto& timerEntity : timersView)
+    auto entityWithTimers = registry.view<TimerComponent, ExplosionOnTimerComponent>();
+    for (auto& timerExplosionEntity : entityWithTimers)
     {
-        auto& timerExplosion = timersView.get<TimerExplosionComponent>(timerEntity);
-        timerExplosion.timeToExplode -= deltaTime;
+        auto timerComponent = entityWithTimers.get<TimerComponent>(timerExplosionEntity);
+        if (!timerComponent.isActivated)
+            continue;
 
-        if (timerExplosion.timeToExplode <= 0.0f)
-        {
-            DoExplosion({timerEntity, std::nullopt});
-        }
+        DoExplosion({timerExplosionEntity, std::nullopt});
     }
 }
 
@@ -128,10 +122,10 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 {
     auto& explosionEntity = explosionEntityWithContactPoint.explosionEntity;
 
-    auto explosionImpact = registry.try_get<ExplosionImpactComponent>(explosionEntity);
+    auto damageComponent = registry.try_get<DamageComponent>(explosionEntity);
     auto physicsInfo = registry.try_get<PhysicsComponent>(explosionEntity);
 
-    if (!explosionImpact || !physicsInfo)
+    if (!damageComponent || !physicsInfo)
         return;
 
     // Get all physical bodies in the explosion radius.
@@ -141,7 +135,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
     auto staticOriginalBodies = collectObjects.GetPhysicalBodiesInRaduis(
-        grenadePosPhysics, explosionImpact->radius * radiusCoef, b2_staticBody);
+        grenadePosPhysics, damageComponent->radius * radiusCoef, b2_staticBody);
 
     // Split original objects to micro objects.
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();
@@ -150,7 +144,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     // Destroy micro objects in the explosion radius.
     auto staticMicroBodiesToDestroy = collectObjects.GetPhysicalBodiesInRaduis(
-        splittedEntities, grenadePosPhysics, explosionImpact->radius, b2_staticBody);
+        splittedEntities, grenadePosPhysics, damageComponent->radius, b2_staticBody);
     for (auto& entity : staticMicroBodiesToDestroy)
         registryWrapper.Destroy(entity);
 
@@ -163,7 +157,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     if (utils::GetConfig<bool, "WeaponControlSystem.createExplosionFragments">())
     {
         glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePosPhysics);
-        float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(explosionImpact->radius);
+        float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(damageComponent->radius);
         objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
     }
 
@@ -181,16 +175,6 @@ void WeaponControlSystem::ProcessExplosionEntitiesQueue()
         auto entity = explosionEntities.front();
         DoExplosion(entity);
         explosionEntities.pop();
-    }
-}
-
-void WeaponControlSystem::UpdateContactExplosionComponentTimer(float deltaTime)
-{
-    auto contactExplosionsView = registry.view<ContactExplosionComponent>();
-    for (auto& entity : contactExplosionsView)
-    {
-        auto& contactExplosion = contactExplosionsView.get<ContactExplosionComponent>(entity);
-        contactExplosion.spawnSafeTime -= deltaTime;
     }
 }
 

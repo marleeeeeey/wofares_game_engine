@@ -1,4 +1,5 @@
 #include "weapon_props_factory.h"
+#include <magic_enum.hpp>
 #include <stdexcept>
 
 WeaponProps WeaponPropsFactory::CreateWeaponType(WeaponType type)
@@ -8,6 +9,7 @@ WeaponProps WeaponPropsFactory::CreateWeaponType(WeaponType type)
     case WeaponType::Bazooka:
         return CreateBazooka();
     case WeaponType::Grenade:
+    case WeaponType::StickGrenade:
         return CreateGrenade();
     case WeaponType::Uzi:
         return CreateUzi();
@@ -21,10 +23,10 @@ WeaponProps WeaponPropsFactory::CreateWeaponType(WeaponType type)
 std::unordered_map<WeaponType, WeaponProps> WeaponPropsFactory::CreateAllWeaponsSet()
 {
     std::unordered_map<WeaponType, WeaponProps> weapons;
-    weapons[WeaponType::Bazooka] = CreateBazooka();
-    weapons[WeaponType::Grenade] = CreateGrenade();
-    weapons[WeaponType::Uzi] = CreateUzi();
-    weapons[WeaponType::Shotgun] = CreateShotgun();
+
+    for (WeaponType type : magic_enum::enum_values<WeaponType>())
+        weapons[type] = CreateWeaponType(type);
+
     return weapons;
 }
 

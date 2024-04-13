@@ -5,6 +5,7 @@
 #include <ecs/systems/player_control_systems.h>
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/render_world_system.h>
+#include <ecs/systems/timers_control_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <iostream>
 #include <magic_enum.hpp>
@@ -117,6 +118,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Auxiliary systems.
         ScreenModeControlSystem screenModeControlSystem(inputEventManager, window);
+        TimersControlSystem timersControlSystem(registryWrapper.GetRegistry());
 
         // Load the map.
         auto level1 = resourceManager.GetTiledLevel("level1");
@@ -142,6 +144,8 @@ int main([[maybe_unused]] int argc, char* args[])
 
             // Handle input events.
             eventQueueSystem.Update(deltaTime);
+
+            timersControlSystem.Update(deltaTime);
 
             randomEventSystem.Update(deltaTime);
 

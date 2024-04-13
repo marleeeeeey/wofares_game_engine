@@ -18,3 +18,9 @@ struct CollisionDisableHitCountComponent
 {
     size_t hitCount = 0; // Number of hits before the collision is disabled.
 };
+
+// May stick to the surface. // TODO0
+struct StickFlagComponent
+{
+    bool isStuck = false;
+};
