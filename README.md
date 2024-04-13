@@ -144,6 +144,7 @@ LD55/
 
 ### Log
 
-2024-04-13 0500 Start the jam.
-2024-04-13 1200 Start thinking about the game idea.
-2024-04-13 1353 Complete repository setup.
+Start the jam : 0500 2024-04-13
+Start thinking about the game idea : 1200 2024-04-13
+Complete repository setup : 1353 2024-04-13
+Implement dummy portal catching the player : 1513 2024-04-13

@@ -28,6 +28,11 @@
       "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows"
     },
     {
+      "label": "004. (Win) + Copy map from Tiled",
+      "type": "shell",
+      "command": "python scripts/copy_map_from_tiled.py"
+    },
+    {
       "label": "005. ********* Clear console *********",
       "type": "shell",
       "command": "cls",
@@ -69,6 +74,7 @@
       "type": "shell",
       "command": "cmake -E copy_directory assets build/debug/src/assets",
       "dependsOn": [
+        "004. (Win) + Copy map from Tiled",
         "030. (WinDebug) + Copy config.json"
       ]
     },
@@ -132,6 +138,7 @@
       "type": "shell",
       "command": "cmake -E copy_directory assets build/release/src/assets",
       "dependsOn": [
+        "004. (Win) + Copy map from Tiled",
         "075. (WinRelease) + Copy config.json"
       ]
     },

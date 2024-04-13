@@ -1,4 +1,5 @@
 #include "objects_factory.h"
+#include "ecs/components/portal_components.h"
 #include "utils/box2d_body_options.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
@@ -40,9 +41,9 @@ entt::entity ObjectsFactory::SpawnTile(
     return entity;
 }
 
-entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld)
+entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::string& debugName)
 {
-    auto entity = registryWrapper.Create("Player");
+    auto entity = registryWrapper.Create(debugName);
 
     // AnimationInfo.
     AnimationComponent playerAnimation =
@@ -177,6 +178,31 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
     glm::vec2 sizeWorld(10.0f, 10.0f);
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld);
     registry.emplace<RenderingComponent>(entity, sizeWorld, nullptr, SDL_Rect{}, ColorName::Green);
+    return entity;
+}
+
+entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::string& debugName)
+{
+    auto entity = registryWrapper.Create(debugName);
+
+    // AnimationInfo.
+    AnimationComponent playerAnimation =
+        CreateAnimationInfo("playerWalk", "Run", ResourceManager::TagProps::ExactMatch);
+    registry.emplace<AnimationComponent>(entity, playerAnimation);
+
+    // PortalComponent.
+    registry.emplace<PortalComponent>(entity);
+
+    // PhysicsInfo.
+    Box2dBodyOptions options;
+    options.shape = Box2dBodyOptions::Shape::Capsule;
+    options.dynamic = Box2dBodyOptions::DynamicOption::Static;
+    options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
+    options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
+    glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
+    MY_LOG(info, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
+
     return entity;
 }
 

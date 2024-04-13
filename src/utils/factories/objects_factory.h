@@ -27,10 +27,11 @@ public:
 public: // Main game objects.
     entt::entity SpawnTile(
         glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, const std::string& name = "Tile");
-    entt::entity SpawnPlayer(const glm::vec2& posWorld);
+    entt::entity SpawnPlayer(const glm::vec2& posWorld, const std::string& debugName);
     entt::entity SpawnBullet(
         entt::entity playerEntity, float initialBulletSpeed, Box2dBodyOptions::AnglePolicy anglePolicy);
     entt::entity SpawnBuildingBlock(glm::vec2 posWorld);
+    entt::entity SpawnPortal(const glm::vec2& posWorld, const std::string& debugName);
 public: // Explosions.
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
     std::vector<entt::entity> SpawnSplittedPhysicalEnteties(

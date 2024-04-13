@@ -120,10 +120,18 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
 {
     for (const auto& object : layer["objects"])
     {
-        if (object["type"] == "PlayerPosition")
+        if (object["type"] == "Player")
         {
+            std::string objectName = object["name"];
             auto posWorld = glm::vec2(object["x"], object["y"]);
-            objectsFactory.SpawnPlayer(posWorld);
+            objectsFactory.SpawnPlayer(posWorld, objectName);
+        }
+
+        if (object["type"] == "Portal")
+        {
+            std::string objectName = object["name"];
+            auto posWorld = glm::vec2(object["x"], object["y"]);
+            objectsFactory.SpawnPortal(posWorld, objectName);
         }
     }
 }
