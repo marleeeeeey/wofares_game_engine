@@ -19,9 +19,6 @@ std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
 std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
     const std::vector<entt::entity>& entities, const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType)
 {
-    MY_LOG(
-        info, "GetPhysicalBodiesInRaduis: center: {}, radius: {}, entitiesCount {}", center, radius, entities.size());
-
     std::vector<entt::entity> result;
 
     for (auto& entity : entities)
@@ -38,7 +35,9 @@ std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
             result.push_back(entity);
     }
 
-    MY_LOG(info, "GetPhysicalBodiesInRaduis: resultCount {}", result.size());
+    MY_LOG(
+        debug, "GetPhysicalBodiesInRaduis: center: {}, radius: {}, entitiesCount {}, resultCount {}", center, radius,
+        entities.size(), result.size());
 
     return result;
 }

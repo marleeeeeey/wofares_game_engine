@@ -1,5 +1,6 @@
 #include "box2d_body_tuner.h"
 #include "utils/box2d/box2d_body_options.h"
+#include <box2d/b2_types.h>
 #include <ecs/components/physics_components.h>
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
@@ -22,7 +23,6 @@ PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
     ApplyOption(entity, options.collisionPolicy);
     ApplyOption(entity, options.bulletPolicy);
     ApplyOption(entity, options.hitbox);
-    ApplyOption(entity, options.destructionPolicy);
 
     return physicsComponent;
 }
@@ -121,20 +121,8 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Co
     while (fixture != nullptr)
     {
         b2Filter filter = fixture->GetFilterData();
-
-        if (option == Box2dBodyOptions::CollisionPolicy::NoCollision)
-        {
-            filter.categoryBits = 0x0000; // Mask to ignore all collisions.
-        }
-        else if (option == Box2dBodyOptions::CollisionPolicy::CollideWithAll)
-        {
-            filter.categoryBits = 0x0001; // Mask to collide with all.
-        }
-        else
-        {
-            throw std::runtime_error("[ApplyOption] Unknown collision policy");
-        }
-
+        filter.categoryBits = static_cast<uint16>(option.ownCategoryOfCollision);
+        filter.maskBits = static_cast<uint16>(option.collideWith);
         fixture->SetFilterData(filter);
         fixture = fixture->GetNext();
     }
@@ -160,12 +148,6 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hi
     objectHitbox = hitbox;
 
     ApplyOption(entity, physicsComponent.options.shape);
-}
-
-void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::DestructionPolicy& option)
-{
-    auto& physicsComponent = GetPhysicsComponent(entity);
-    physicsComponent.options.destructionPolicy = option;
 }
 
 // ************************************* Create empty physics body. *************************************

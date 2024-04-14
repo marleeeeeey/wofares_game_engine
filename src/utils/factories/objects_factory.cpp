@@ -1,5 +1,6 @@
 #include "objects_factory.h"
 #include "ecs/components/portal_components.h"
+#include "my_cpp_utils/logger.h"
 #include "utils/box2d/box2d_body_options.h"
 #include "utils/box2d/box2d_body_tuner.h"
 #include <ecs/components/physics_components.h>
@@ -42,12 +43,12 @@ entt::entity ObjectsFactory::SpawnTile(
     {
     case SpawnTileOption::DesctructibleOption::Destructible:
         options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
+        registry.emplace<DestructibleByPlayerComponent>(entity);
         break;
     case SpawnTileOption::DesctructibleOption::NoDestructible:
         options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
         options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
-        options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
-        options.destructionPolicy = Box2dBodyOptions::DestructionPolicy::Indestructible;
+        options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
         break;
     }
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld, options);
@@ -160,6 +161,8 @@ entt::entity ObjectsFactory::SpawnBullet(
         positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed,
         anglePolicy);
     bodyTuner.ApplyOption(bulletEntity, Box2dBodyOptions::BulletPolicy::Bullet);
+    bodyTuner.ApplyOption(
+        bulletEntity, Box2dBodyOptions::CollisionPolicy{CollisionFlags::Bullet, CollisionFlags::Default});
 
     // Create damage component.
     DamageComponent damageComponent;
@@ -215,7 +218,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     options.shape = Box2dBodyOptions::Shape::Capsule;
     options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
-    options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
+    options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
     glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG(debug, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
@@ -226,12 +229,14 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
         {
             // Update the speed of the portal object randomly.
             auto& portalComponent = registry.get<PortalComponent>(timedPortal);
-            portalComponent.speed = utils::Random<float>(0.5, 2.5);
+            portalComponent.speed = utils::Random<float>(0.5, 1.5);
 
             // Reset the timer.
             auto& timerComponent = registry.get<TimerComponent>(timedPortal);
             timerComponent.timeToActivation = utils::Random<float>(10, 20);
             timerComponent.isActivated = false;
+
+            MY_LOG(debug, "Portal {} changing speed to {}", timedPortal, portalComponent.speed);
         });
 
     return entity;

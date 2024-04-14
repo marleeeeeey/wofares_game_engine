@@ -30,3 +30,6 @@ struct ExplostionParticlesComponent
 
 struct PixeledTileComponent
 {};
+
+struct DestructibleByPlayerComponent
+{};

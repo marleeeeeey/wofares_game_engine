@@ -12,20 +12,26 @@
 ### Log
 
 ```
-Start the jam (I overslept) : 0500 2024-04-13
-Start thinking about the game idea : 1200 2024-04-13
-Complete repository setup : 1353 2024-04-13
-Implement dummy portal catching the player : 1513 2024-04-13
-Intergrate evil and portal animations : 1826 2024-04-13
-Implement StickyTrap : 0159 2024-04-14
-Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain : 0309 2024-04-14
-Portal sticky to trap : 0414 2024-04-14
-Me sleeping from 0414 to 0930 : 0930 2024-04-14
-Create fast hybrid explosion fragments : 1108 2024-04-14
-Implement portal absorbing fragments : 1308 2024-04-14
-Randomize portal speed in time : 1407 2024-04-14
-Found a bug with release build during the beta testing : 1449 2024-04-14
-Simplify physic to improve CPU time : 2238 2024-04-14
+2024-04-13 0500 Start the jam (I overslept).
+2024-04-13 1200 Start thinking about the game idea.
+2024-04-13 1353 Complete repository setup.
+2024-04-13 1513 Implement dummy portal catching the player.
+2024-04-13 1826 Intergrate evil and portal animations.
+2024-04-14 0159 Implement StickyTrap.
+2024-04-14 0309 Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain.
+2024-04-14 0414 Portal sticky to trap.
+2024-04-14 0930 Me sleeping from 0414 to 0930.
+2024-04-14 1108 Create fast hybrid explosion fragments.
+2024-04-14 1308 Implement portal absorbing fragments.
+2024-04-14 1407 Randomize portal speed in time.
+2024-04-14 1449 Found a bug with release build during the beta testing (SdCorpse).
+2024-04-14 1500 Sleep. Play with my kids. Relaxing.
+2024-04-14 2000 Back to development.
+2024-04-14 2238 Simplify physic to improve CPU time.
+2024-04-14 2316 Fix bug in release with undestructible objects.
+2024-04-15 0103 Update collision system. Bullet doesn't collide with Particles.
+TODO
+- if portal bump each other, they should scatter.
 ```
 
 ### Assets editing

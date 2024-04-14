@@ -39,3 +39,58 @@ std::vector<entt::entity> FindEntitiesInRadius(
     }
     return entitiesInRadius;
 }
+
+inline std::vector<entt::entity> FindEntitiesInRadius(
+    entt::registry& registry, const b2Vec2& centerPosPhysics, float radiusPhysics)
+{
+    std::vector<entt::entity> entitiesInRadius;
+    auto entities = registry.view<PhysicsComponent>();
+    for (auto entity : entities)
+    {
+        auto& physicsComponent = entities.template get<PhysicsComponent>(entity);
+        auto entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
+        if (b2Distance(centerPosPhysics, entityPos) < radiusPhysics)
+            entitiesInRadius.push_back(entity);
+    }
+    return entitiesInRadius;
+}
+
+inline std::vector<entt::entity> FindEntitiesInRadius(
+    entt::registry& registry, const std::vector<entt::entity>& entities, const b2Vec2& centerPosPhysics,
+    float radiusPhysics)
+{
+    std::vector<entt::entity> entitiesInRadius;
+    for (auto entity : entities)
+    {
+        auto& physicsComponent = registry.get<PhysicsComponent>(entity);
+        auto entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
+        if (b2Distance(centerPosPhysics, entityPos) < radiusPhysics)
+            entitiesInRadius.push_back(entity);
+    }
+    return entitiesInRadius;
+}
+
+template <typename T>
+std::vector<entt::entity> RemoveEntitiesWithComponent(
+    entt::registry& registry, const std::vector<entt::entity>& entities)
+{
+    std::vector<entt::entity> result;
+    for (auto& entity : entities)
+    {
+        if (!registry.any_of<T>(entity))
+            result.push_back(entity);
+    }
+    return result;
+}
+
+template <typename T>
+std::vector<entt::entity> GetEntitiesWithComponent(entt::registry& registry, const std::vector<entt::entity>& entities)
+{
+    std::vector<entt::entity> result;
+    for (auto& entity : entities)
+    {
+        if (registry.any_of<T>(entity))
+            result.push_back(entity);
+    }
+    return result;
+}

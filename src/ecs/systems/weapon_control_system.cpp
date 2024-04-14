@@ -51,6 +51,11 @@ void WeaponControlSystem::SubscribeToContactEvents()
                 if (!registry.all_of<ExplosionOnContactComponent, PhysicsComponent>(explosionEntity))
                     continue;
 
+                // Check if any entity is ExplostionParticlesComponent. If so, then do not trigger the explosion.
+                if (registry.any_of<ExplostionParticlesComponent>(contactInfo.entityA) ||
+                    registry.any_of<ExplostionParticlesComponent>(contactInfo.entityB))
+                    return;
+
                 // If the entity contains the StickyComponent, check if it is sticked.
                 bool shouldExplode = true;
                 if (registry.all_of<StickyComponent>(explosionEntity))
@@ -83,7 +88,7 @@ void WeaponControlSystem::SubscribeToContactEvents()
                         contactPointPhysics = physicsComponent.bodyRAII->GetBody()->GetWorldPoint(localPoint);
                     }
 
-                    OnContactWithExplosionComponent({explosionEntity, contactPointPhysics});
+                    AppendToExplosionQueue({explosionEntity, contactPointPhysics});
                 }
             }
         });
@@ -104,8 +109,7 @@ void WeaponControlSystem::SubscribeToContactEvents()
 }
 
 // Not allowed to update Box2D object in the contact listener. Because Box2D is in simulation step.
-void WeaponControlSystem::OnContactWithExplosionComponent(
-    const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
+void WeaponControlSystem::AppendToExplosionQueue(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
     explosionEntitiesQueue[explosionEntityWithContactPoint.explosionEntity] = explosionEntityWithContactPoint;
 }
@@ -121,7 +125,7 @@ void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity h
     if (hitCount->hitCount <= 0)
     {
         registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
-        physicsBodyTuner.ApplyOption(hitCountEntity, Box2dBodyOptions::CollisionPolicy::NoCollision);
+        physicsBodyTuner.ApplyOption(hitCountEntity, {CollisionFlags::None, CollisionFlags::None});
     }
 }
 
@@ -146,8 +150,6 @@ void WeaponControlSystem::OnBazookaContactWithTile(
 
 void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
-    MY_LOG(info, "Do explosion");
-
     auto& explosionEntity = explosionEntityWithContactPoint.explosionEntity;
 
     auto damageComponent = registry.try_get<DamageComponent>(explosionEntity);
@@ -163,42 +165,35 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
 
-    std::vector<entt::entity> staticOriginalBodies =
-        FindEntitiesInRadius<RenderingComponent>(registry, grenadePosPhysics, damageComponent->radius * radiusCoef);
+    std::vector<entt::entity> allOriginalBodiesInRadius =
+        FindEntitiesInRadius(registry, grenadePosPhysics, damageComponent->radius * radiusCoef);
+    MY_LOG(debug, "[DoExplosion] FindEntitiesInRadius count {}", allOriginalBodiesInRadius.size());
 
-    MY_LOG(info, "Original bodies count {} before filtering", staticOriginalBodies.size());
-
-    // Remove bodies with flag Box2dBodyOptions::DestructionPolicy::Indestructible
-    staticOriginalBodies.erase(
-        std::remove_if(
-            staticOriginalBodies.begin(), staticOriginalBodies.end(),
-            [this](entt::entity entity)
-            {
-                auto& physicsComponent = registry.get<PhysicsComponent>(entity);
-                return physicsComponent.options.destructionPolicy ==
-                    Box2dBodyOptions::DestructionPolicy::Indestructible;
-            }),
-        staticOriginalBodies.end());
+    auto destructibleOriginalBodies =
+        GetEntitiesWithComponent<DestructibleByPlayerComponent>(registry, allOriginalBodiesInRadius);
+    destructibleOriginalBodies =
+        RemoveEntitiesWithComponent<ExplostionParticlesComponent>(registry, destructibleOriginalBodies);
+    MY_LOG(debug, "[DoExplosion] Getting destructible objects. Count {}", destructibleOriginalBodies.size());
 
     // Split original objects to micro objects.
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();
     SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
-    auto splittedEntities = objectsFactory.SpawnSplittedPhysicalEnteties(staticOriginalBodies, cellSize);
-    MY_LOG(info, "Original bodies: {}, splitted bodies: {}", staticOriginalBodies.size(), splittedEntities.size());
+    auto newMicroBodies = objectsFactory.SpawnSplittedPhysicalEnteties(destructibleOriginalBodies, cellSize);
+    MY_LOG(debug, "[DoExplosion] Spawn micro splittedEntities count {}", newMicroBodies.size());
 
     // Get micro objects in the explosion radius.
-    auto staticMicroBodiesToDestroy = collectObjects.GetPhysicalBodiesInRaduis(
-        splittedEntities, grenadePosPhysics, damageComponent->radius, b2_staticBody);
+    auto newMicroBodiesToDestroy =
+        FindEntitiesInRadius(registry, newMicroBodies, grenadePosPhysics, damageComponent->radius);
 
-    // Destroy micro objects.
-    MY_LOG(info, "Destroy {} micro objects", staticMicroBodiesToDestroy.size());
-    for (auto& entity : staticMicroBodiesToDestroy)
+    // Destroy micro objects in the explosion radius.
+    MY_LOG(debug, "[DoExplosion] Destroing {} micro objects", newMicroBodiesToDestroy.size());
+    for (auto& entity : newMicroBodiesToDestroy)
         registryWrapper.Destroy(entity);
 
     if (utils::GetConfig<bool, "WeaponControlSystem.keepTilesAliveOnExplosion">())
     {
         // Apply force to micro objects from the explosion center.
-        for (auto& entity : staticOriginalBodies)
+        for (auto& entity : destructibleOriginalBodies)
         {
             // If entity contains PixeledTileComponent, then remove it.
             // Need to prevent dust particles from the tile. Save CPU time.
@@ -209,6 +204,8 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
             }
 
             physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::MovementPolicy::Box2dPhysics);
+            // How to read: "I have own collision category Default and I want collide with Default".
+            physicsBodyTuner.ApplyOption(entity, {CollisionFlags::Default, CollisionFlags::Default});
             registry.emplace_or_replace<ExplostionParticlesComponent>(entity);
 
             auto& physicsComponent = registry.get<PhysicsComponent>(entity);
@@ -225,7 +222,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     else
     {
         // Destroy original objects.
-        for (auto& entity : staticOriginalBodies)
+        for (auto& entity : destructibleOriginalBodies)
         {
             registryWrapper.Destroy(entity);
         }
@@ -278,7 +275,7 @@ void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
         if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
         {
             registry.remove<CollisionDisableTimerComponent>(entity);
-            physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::CollisionPolicy::NoCollision);
+            physicsBodyTuner.ApplyOption(entity, {CollisionFlags::None, CollisionFlags::None});
         }
     }
 }

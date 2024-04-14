@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <utils/collision_flags.h>
 
 struct Box2dBodyOptions
 {
@@ -36,11 +37,11 @@ struct Box2dBodyOptions
         VelocityDirection // The object has the direction of the velocity vector.
     } anglePolicy = AnglePolicy::Dynamic;
 
-    enum class CollisionPolicy
+    struct CollisionPolicy
     {
-        CollideWithAll, // The object collides with all other objects.
-        NoCollision, // The object does not collide with other objects.
-    } collisionPolicy = CollisionPolicy::CollideWithAll;
+        CollisionFlags ownCategoryOfCollision = CollisionFlags::Default; // Collision flags to recieve.
+        CollisionFlags collideWith = CollisionFlags::Default | CollisionFlags::Bullet; // Collision flags to accept.
+    } collisionPolicy;
 
     enum class BulletPolicy
     {
@@ -52,10 +53,4 @@ struct Box2dBodyOptions
     {
         glm::vec2 sizeWorld; // Size of the hitbox in the world coordinates.
     } hitbox;
-
-    enum class DestructionPolicy
-    {
-        Descructible, // The object may be destroyed.
-        Indestructible, // The object may not be destroyed.
-    } destructionPolicy;
 };
