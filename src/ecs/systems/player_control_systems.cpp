@@ -9,7 +9,7 @@
 #include <my_cpp_utils/config.h>
 #include <unordered_map>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/logger.h>
 #include <utils/systems/input_event_manager.h>

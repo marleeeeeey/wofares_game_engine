@@ -2,9 +2,8 @@
 #include <filesystem>
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/logger.h>
-#include <utils/sdl_colors.h>
-#include <utils/sdl_texture_process.h>
-
+#include <utils/sdl/sdl_colors.h>
+#include <utils/sdl/sdl_texture_process.h>
 
 namespace details
 {

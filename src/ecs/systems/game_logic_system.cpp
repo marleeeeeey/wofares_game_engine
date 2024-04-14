@@ -2,8 +2,8 @@
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
+#include <utils/entt/entt_registry_requests.h>
 #include <utils/glm_box2d_conversions.h>
-#include <utils/registry_requests.h>
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry) : registry(registry)
 {}

@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/RAII/sdl_audio_RAII.h>
-#include <utils/sdl_colors.h>
+#include <utils/sdl/sdl_colors.h>
 
 namespace details
 {

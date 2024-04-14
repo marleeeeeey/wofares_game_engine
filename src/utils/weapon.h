@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/box2d_body_options.h"
+#include "utils/box2d/box2d_body_options.h"
 #include <glm/glm.hpp>
 
 enum class WeaponType

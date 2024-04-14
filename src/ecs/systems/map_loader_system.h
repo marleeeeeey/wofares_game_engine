@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <utils/RAII/sdl_RAII.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/level_info.h>
 #include <utils/resources/resource_manager.h>

@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <utils/RAII/sdl_RAII.h>
-#include <utils/sdl_colors.h>
+#include <utils/sdl/sdl_colors.h>
 
 enum class ZOrderingType
 {

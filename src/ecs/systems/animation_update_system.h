@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/box2d_body_tuner.h"
+#include "utils/box2d/box2d_body_tuner.h"
 #include <entt/entt.hpp>
 #include <utils/game_options.h>
 #include <utils/resources/resource_manager.h>

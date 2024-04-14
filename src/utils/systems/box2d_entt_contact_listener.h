@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/entt_registry_wrapper.h"
+#include "utils/entt/entt_registry_wrapper.h"
 #include <box2d/box2d.h>
 #include <entt/entt.hpp>
 #include <optional>

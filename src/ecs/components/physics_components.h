@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include <utils/RAII/box2d_RAII.h>
-#include <utils/box2d_body_options.h>
+#include <utils/box2d/box2d_body_options.h>
 
 struct PhysicsComponent
 {

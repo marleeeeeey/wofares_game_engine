@@ -9,15 +9,15 @@
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/math_utils.h>
-#include <utils/box2d_body_tuner.h>
+#include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_collect_objects.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_collect_objects.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/logger.h>
-#include <utils/sdl_colors.h>
-#include <utils/sdl_texture_process.h>
+#include <utils/sdl/sdl_colors.h>
+#include <utils/sdl/sdl_texture_process.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
 
 WeaponControlSystem::WeaponControlSystem(

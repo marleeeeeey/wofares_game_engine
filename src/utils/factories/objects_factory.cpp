@@ -1,7 +1,7 @@
 #include "objects_factory.h"
 #include "ecs/components/portal_components.h"
-#include "utils/box2d_body_options.h"
-#include "utils/box2d_body_tuner.h"
+#include "utils/box2d/box2d_body_options.h"
+#include "utils/box2d/box2d_body_tuner.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
@@ -10,14 +10,14 @@
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/math_utils.h>
 #include <unordered_map>
-#include <utils/box2d_utils.h>
+#include <utils/box2d/box2d_utils.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/factories/weapon_props_factory.h>
 #include <utils/logger.h>
-#include <utils/sdl_texture_process.h>
-#include <utils/sdl_utils.h>
+#include <utils/sdl/sdl_texture_process.h>
+#include <utils/sdl/sdl_utils.h>
 
 ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),

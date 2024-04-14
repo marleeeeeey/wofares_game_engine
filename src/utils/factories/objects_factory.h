@@ -2,13 +2,13 @@
 #include "ecs/components/rendering_components.h"
 #include <ecs/components/animation_components.h>
 #include <entt/entt.hpp>
-#include <utils/box2d_body_tuner.h>
+#include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/game_options.h>
 #include <utils/resources/resource_manager.h>
-#include <utils/sdl_texture_process.h>
+#include <utils/sdl/sdl_texture_process.h>
 
 // This class is responsible for creating objects in the registry.
 // There shouldn't be any place in the code where we create objects directly in the registry.

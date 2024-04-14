@@ -1,5 +1,5 @@
 #include "box2d_body_tuner.h"
-#include "utils/box2d_body_options.h"
+#include "utils/box2d/box2d_body_options.h"
 #include <ecs/components/physics_components.h>
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)

@@ -14,13 +14,13 @@
 #include <my_cpp_utils/json_utils.h>
 #include <utils/RAII/imgui_sdl_RAII.h>
 #include <utils/RAII/sdl_RAII.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
 #include <utils/logger.h>
 #include <utils/network/steam_networking_init_RAII.h>
 #include <utils/resources/resource_manager.h>
-#include <utils/sdl_primitives_renderer.h>
+#include <utils/sdl/sdl_primitives_renderer.h>
 #include <utils/systems/audio_system.h>
 #include <utils/systems/event_queue_system.h>
 #include <utils/systems/game_state_control_system.h>

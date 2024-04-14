@@ -2,7 +2,7 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/game_options.h>
 
 class PhysicsSystem

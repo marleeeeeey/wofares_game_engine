@@ -1,6 +1,6 @@
 #include "box2d_body_creator.h"
 #include "ecs/components/physics_components.h"
-#include "utils/box2d_body_options.h"
+#include "utils/box2d/box2d_body_options.h"
 #include <box2d/b2_polygon_shape.h>
 
 Box2dBodyCreator::Box2dBodyCreator(entt::registry& registry)

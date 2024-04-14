@@ -8,7 +8,7 @@
 #include <utils/coordinates_transformer.h>
 #include <utils/game_options.h>
 #include <utils/resources/resource_manager.h>
-#include <utils/sdl_colors.h>
+#include <utils/sdl/sdl_colors.h>
 
 class SdlPrimitivesRenderer
 {

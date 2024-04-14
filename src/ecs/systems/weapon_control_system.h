@@ -1,9 +1,9 @@
 #pragma once
 #include <entt/entt.hpp>
-#include <utils/box2d_body_tuner.h>
+#include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt_collect_objects.h>
-#include <utils/entt_registry_wrapper.h>
+#include <utils/entt/entt_collect_objects.h>
+#include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/game_options.h>
 #include <utils/systems/audio_system.h>
