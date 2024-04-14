@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 300
+    "duration": 200
    },
    "player 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 300
+    "duration": 200
    },
    "player 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 300
+    "duration": 200
    },
    "player 3.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 32, "h": 32 },
@@ -29,7 +29,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 300
+    "duration": 200
    },
    "player 4.aseprite": {
     "frame": { "x": 128, "y": 0, "w": 32, "h": 32 },
