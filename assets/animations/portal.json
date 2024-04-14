@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 150
+    "duration": 200
    },
    "portal 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 150
+    "duration": 200
    },
    "portal 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
-    "duration": 150
+    "duration": 200
    },
    "portal 3.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 32, "h": 32 },
@@ -45,7 +45,7 @@
   ],
   "layers": [
    { "name": "base", "opacity": 255, "blendMode": "normal" },
-   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
+   { "name": "vortex", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
   ]
