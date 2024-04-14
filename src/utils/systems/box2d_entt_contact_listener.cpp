@@ -75,7 +75,7 @@ Box2dEnttContactListener::GetValidEntities(b2Contact* contact)
 
     if (!registry.valid(entityA))
     {
-        MY_LOG(warn, "EntityA is not valid. entityA: {}, name: {}", entityA, registryWrapper.TryGetName(entityA));
+        MY_LOG(debug, "EntityA is not valid. entityA: {}, name: {}", entityA, registryWrapper.TryGetName(entityA));
     }
 
     if (!registry.valid(entityB))

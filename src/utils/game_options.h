@@ -22,7 +22,7 @@ struct LevelOptions
 {
     BackgroundInfo backgroundInfo;
     LevelPhysicsBounds levelBox2dBounds;
-    b2Vec2 bufferZone{10.0f, 10.0f};
+    b2Vec2 bufferZone{3.0f, 3.0f};
 };
 
 struct WindowOptions

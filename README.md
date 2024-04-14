@@ -22,6 +22,8 @@ Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interior
 Portal sticky to trap : 0414 2024-04-14
 Me sleeping from 0414 to 0930 : 0930 2024-04-14
 Create fast hybrid explosion fragments : 1108 2024-04-14
+Implement portal absorbing fragments : 1308 2024-04-14
+Randomize portal speed in time : 1407 2024-04-14
 ```
 
 ### Assets editing

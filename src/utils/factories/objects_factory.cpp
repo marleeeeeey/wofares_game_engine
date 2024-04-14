@@ -7,6 +7,7 @@
 #include <ecs/components/rendering_components.h>
 #include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
+#include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/math_utils.h>
 #include <unordered_map>
@@ -218,6 +219,20 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG(debug, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
+
+    registry.emplace<TimerComponent>(
+        entity, 0,
+        [this](entt::entity timedPortal)
+        {
+            // Update the speed of the portal object randomly.
+            auto& portalComponent = registry.get<PortalComponent>(timedPortal);
+            portalComponent.speed = utils::Random<float>(0.5, 3.0);
+
+            // Reset the timer.
+            auto& timerComponent = registry.get<TimerComponent>(timedPortal);
+            timerComponent.timeToActivation = utils::Random<float>(10, 20);
+            timerComponent.isActivated = false;
+        });
 
     return entity;
 }

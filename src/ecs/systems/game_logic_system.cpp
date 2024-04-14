@@ -77,9 +77,9 @@ void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)
             auto bodyPos = bodyToMagnet->GetPosition();
             b2Vec2 direction = portalPos - bodyPos;
             direction.Normalize();
-            // use delta time to make the speed independent of the frame rate.
-            // portalComponent.magnetForce is the force of the magnet.
-            bodyToMagnet->ApplyForceToCenter(portalComponent.magnetForce * direction * deltaTime, true);
+            float distance = b2Distance(portalPos, bodyPos);
+            float force = portalComponent.magnetForce * (1.0f / sqrt(distance));
+            bodyToMagnet->ApplyForceToCenter(force * direction * deltaTime, true);
         }
     }
 }
