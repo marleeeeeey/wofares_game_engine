@@ -179,19 +179,42 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
     auto splittedEntities = objectsFactory.SpawnSplittedPhysicalEnteties(staticOriginalBodies, cellSize);
 
-    // Destroy micro objects in the explosion radius.
+    // Get micro objects in the explosion radius.
     auto staticMicroBodiesToDestroy = collectObjects.GetPhysicalBodiesInRaduis(
         splittedEntities, grenadePosPhysics, damageComponent->radius, b2_staticBody);
+
+    // Destroy micro objects.
     for (auto& entity : staticMicroBodiesToDestroy)
         registryWrapper.Destroy(entity);
 
-    // Destroy original objects.
-    for (auto& entity : staticOriginalBodies)
+    if (utils::GetConfig<bool, "WeaponControlSystem.keepTilesAliveOnExplosion">())
     {
-        registryWrapper.Destroy(entity);
+        // Apply force to micro objects from the explosion center.
+        for (auto& entity : staticOriginalBodies)
+        {
+            physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::DynamicOption::Dynamic);
+
+            auto& physicsComponent = registry.get<PhysicsComponent>(entity);
+            auto body = physicsComponent.bodyRAII->GetBody();
+            auto bodyPos = body->GetPosition();
+
+            // Apply force to the body.
+            auto vec = bodyPos - grenadePosPhysics;
+            vec.Normalize();
+            float force = damageComponent->force;
+            body->ApplyLinearImpulseToCenter(force * vec, true);
+        }
+    }
+    else
+    {
+        // Destroy original objects.
+        for (auto& entity : staticOriginalBodies)
+        {
+            registryWrapper.Destroy(entity);
+        }
     }
 
-    if (utils::GetConfig<bool, "WeaponControlSystem.createExplosionFragments">())
+    if (utils::GetConfig<bool, "WeaponControlSystem.createSyntheticExplosionFragments">())
     {
         glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePosPhysics);
         float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(damageComponent->radius);

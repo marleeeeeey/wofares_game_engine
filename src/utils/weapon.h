@@ -21,7 +21,7 @@ public: // Bullet.
 public: // Damage.
     glm::vec2 projectileSizeWorld = {10, 5}; // Size of the projectile in pixels.
     size_t damageRadiusWorld = 10; // Radius of the damage in pixels.
-    float damageForce = 10; // Force of the damage.
+    float damageForce = 0.5; // Force of the damage.
 public: // Ammo.
     size_t ammoInStorage = 100; // Current number of bullets except in the clip.
     size_t ammoInClip = 10; // Current number of bullets in the clip.

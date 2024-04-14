@@ -14,7 +14,8 @@
   },
   "WeaponControlSystem": {
     "cellSizeForMicroDistruction": 2,
-    "createExplosionFragments": false
+    "createSyntheticExplosionFragments": false,
+    "keepTilesAliveOnExplosion": true
   },
   "CameraControlSystem": {
     "mousePosImpactOnCameraAnchor": false

@@ -4,7 +4,7 @@
 struct DamageComponent
 {
     float radius = 0.5f; // Radius of the explosion in meters.
-    float force = 1000.0f; // Force of the explosion in newtons.
+    float force = 0.50f; // Force of the explosion in newtons.
 };
 
 // Like a bazooka projectile. Explodes when it touches a tile.

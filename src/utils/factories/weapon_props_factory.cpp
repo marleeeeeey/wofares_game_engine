@@ -38,7 +38,7 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::VelocityDirection;
     props.projectileSizeWorld = {16, 8};
     props.damageRadiusWorld = 25;
-    props.damageForce = 10;
+    props.damageForce = 0.5;
     props.ammoInStorage = 100;
     props.ammoInClip = 1;
     props.clipSize = 1;
@@ -70,7 +70,7 @@ WeaponProps WeaponPropsFactory::CreateUzi()
     props.bulletEjectionForce = 0.05;
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::VelocityDirection;
     props.damageRadiusWorld = 10;
-    props.damageForce = 5;
+    props.damageForce = 0.25;
     props.ammoInStorage = 120;
     props.ammoInClip = 30;
     props.clipSize = 30;

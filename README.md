@@ -20,6 +20,8 @@ Intergrate evil and portal animations : 1826 2024-04-13
 Implement StickyTrap : 0159 2024-04-14
 Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain : 0309 2024-04-14
 Portal sticky to trap : 0414 2024-04-14
+Me sleeping from 0414 to 0930 : 0930 2024-04-14
+Create fast hybrid explosion fragments : 1108 2024-04-14
 ```
 
 ### Assets editing
