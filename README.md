@@ -30,8 +30,7 @@
 2024-04-14 2238 Simplify physic to improve CPU time.
 2024-04-14 2316 Fix bug in release with undestructible objects.
 2024-04-15 0103 Update collision system. Bullet doesn't collide with Particles.
-TODO
-- if portal bump each other, they should scatter.
+2024-04-15 0212 Scatter portals if they bump each other.
 ```
 
 ### Assets editing

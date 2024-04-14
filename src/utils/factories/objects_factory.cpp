@@ -216,7 +216,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     // PhysicsInfo.
     Box2dBodyOptions options;
     options.shape = Box2dBodyOptions::Shape::Capsule;
-    options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
+    options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysicsNoGravity;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
     glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();

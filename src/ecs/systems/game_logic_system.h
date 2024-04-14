@@ -16,4 +16,5 @@ private:
     std::optional<b2Vec2> FindPortalTargetPos(b2Vec2 portalPos);
     void MagnetDesctructibleParticlesToPortal(float deltaTime);
     void DestroyClosestDestructibleParticlesInPortal();
+    void IfPortalsTooCloseToEachOtherScatterThem();
 };

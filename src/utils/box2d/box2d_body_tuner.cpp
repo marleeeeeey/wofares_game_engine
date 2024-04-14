@@ -91,7 +91,21 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Mo
     auto& physicsComponent = GetPhysicsComponent(entity);
     auto body = physicsComponent.bodyRAII->GetBody();
     physicsComponent.options.dynamic = option;
-    body->SetType(option == Box2dBodyOptions::MovementPolicy::Box2dPhysics ? b2_dynamicBody : b2_staticBody);
+
+    switch (option)
+    {
+    case Box2dBodyOptions::MovementPolicy::Box2dPhysicsNoGravity:
+        body->SetGravityScale(0.0f);
+        body->SetType(b2_dynamicBody);
+        break;
+    case Box2dBodyOptions::MovementPolicy::Manual:
+        body->SetType(b2_staticBody);
+        break;
+    case Box2dBodyOptions::MovementPolicy::Box2dPhysics:
+        body->SetGravityScale(1.0f);
+        body->SetType(b2_dynamicBody);
+        break;
+    }
 }
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::AnglePolicy& option)

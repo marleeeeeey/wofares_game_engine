@@ -1,9 +1,12 @@
 #include "game_logic_system.h"
+#include "my_cpp_utils/math_utils.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
+#include <ecs/components/timer_components.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/glm_box2d_conversions.h>
+#include <utils/logger.h>
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry) : registry(registry), registryWrapper(registry)
 {}
@@ -13,14 +16,21 @@ void GameLogicSystem::Update(float deltaTime)
     UpdatePortalObjectsPosition(deltaTime);
     MagnetDesctructibleParticlesToPortal(deltaTime);
     DestroyClosestDestructibleParticlesInPortal();
+    IfPortalsTooCloseToEachOtherScatterThem();
 }
 
 void GameLogicSystem::UpdatePortalObjectsPosition(float deltaTime)
 {
+    if (deltaTime == 0.0f)
+        return;
+
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
     for (auto entity : portalEntities)
     {
         auto& portalComponent = portalEntities.get<PortalComponent>(entity);
+        if (portalComponent.isSleeping)
+            continue;
+
         auto& physicsComponent = portalEntities.get<PhysicsComponent>(entity);
         auto portalBody = physicsComponent.bodyRAII->GetBody();
         auto portalPos = portalBody->GetPosition();
@@ -29,11 +39,15 @@ void GameLogicSystem::UpdatePortalObjectsPosition(float deltaTime)
         if (!closestTargetPosOpt.has_value())
             continue;
 
-        // Update the position of the portal object.
+        // Apply the force to phiysics body to move it to the closest target
         b2Vec2 direction = closestTargetPosOpt.value() - portalPos;
         direction.Normalize();
-        b2Vec2 newPos = portalPos + direction * portalComponent.speed * deltaTime;
-        portalBody->SetTransform(newPos, portalBody->GetAngle());
+        // change object speed to the target speed
+        b2Vec2 speed = portalBody->GetLinearVelocity();
+        b2Vec2 targetSpeed = direction * portalComponent.speed;
+        b2Vec2 speedDiff = targetSpeed - speed;
+        b2Vec2 force = speedDiff * portalBody->GetMass() / deltaTime;
+        portalBody->ApplyForceToCenter(force, true);
     }
 }
 
@@ -64,6 +78,9 @@ void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)
     for (auto entity : portalEntities)
     {
         auto& portalComponent = portalEntities.get<PortalComponent>(entity);
+        if (portalComponent.isSleeping)
+            continue;
+
         auto& physicsComponent = portalEntities.get<PhysicsComponent>(entity);
         auto portalBody = physicsComponent.bodyRAII->GetBody();
         auto portalPos = portalBody->GetPosition();
@@ -100,6 +117,52 @@ void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
         for (auto entityInPortal : entitiesInPortal)
         {
             registryWrapper.Destroy(entityInPortal);
+        }
+    }
+}
+
+void GameLogicSystem::IfPortalsTooCloseToEachOtherScatterThem()
+{
+    auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
+    for (auto entity : portalEntities)
+    {
+        auto& physicsComponent = portalEntities.get<PhysicsComponent>(entity);
+        auto portalBody = physicsComponent.bodyRAII->GetBody();
+        auto portalPos = portalBody->GetPosition();
+
+        auto mergedPortals = FindEntitiesInRadius<PortalComponent>(registry, portalPos, 0.5f);
+        // If there are more than one portal in the same position, scatter them.
+        if (mergedPortals.size() > 1)
+        {
+            // Caclulate the center of the merged portals.
+            b2Vec2 mergePortalCenterPos = b2Vec2_zero;
+            for (auto mergedPortal : mergedPortals)
+            {
+                auto& mergedPortalPhysicsComponent = registry.get<PhysicsComponent>(mergedPortal);
+                mergePortalCenterPos += mergedPortalPhysicsComponent.bodyRAII->GetBody()->GetPosition();
+            }
+            mergePortalCenterPos *= 1.0f / mergedPortals.size();
+
+            // Apply the force to phiysics bodies to scatter them.
+            for (auto portal : mergedPortals)
+            {
+                auto& mergedPortalPhysicsComponent = registry.get<PhysicsComponent>(portal);
+                auto mergedPortalBody = mergedPortalPhysicsComponent.bodyRAII->GetBody();
+                b2Vec2 direction = mergedPortalBody->GetPosition() - mergePortalCenterPos;
+                direction.Normalize();
+                mergedPortalBody->ApplyForceToCenter(500.0f * direction, true);
+
+                // Sleep the portal for a while.
+                auto& portalComponent = registry.get<PortalComponent>(portal);
+                portalComponent.isSleeping = true;
+                registry.emplace_or_replace<TimerComponent>(
+                    portal, utils::Random<float>(0.5f, 1.0f),
+                    [this](entt::entity portalEntity)
+                    {
+                        auto& portalComponent = registry.get<PortalComponent>(portalEntity);
+                        portalComponent.isSleeping = false;
+                    });
+            }
         }
     }
 }

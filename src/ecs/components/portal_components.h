@@ -2,7 +2,7 @@
 
 struct PortalComponent
 {
-    size_t number = 0;
-    float speed = 1.0f;
-    float magnetForce = 100.0f;
+    float speed = 10.0f;
+    float magnetForce = 150.0f;
+    bool isSleeping = false;
 };

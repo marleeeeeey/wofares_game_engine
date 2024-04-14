@@ -28,6 +28,7 @@ struct Box2dBodyOptions
     {
         Manual, // The object does not move.
         Box2dPhysics, // The object moves according to the Box2D physics. Behavior may be changed by AnglePolicy.
+        Box2dPhysicsNoGravity, // The object moves according to the Box2D physics without gravity.
     } dynamic = MovementPolicy::Manual;
 
     enum class AnglePolicy
