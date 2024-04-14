@@ -23,11 +23,11 @@ struct Box2dBodyOptions
         ThinSensorBelow, // Thin sensor below the body. Wight slightly less than the body.
     } sensor = Sensor::NoSensor;
 
-    enum class DynamicOption
+    enum class MovementPolicy
     {
-        Static, // The object does not move.
-        Dynamic, // The object moves according to the Box2D physics. Behavior may be changed by AnglePolicy.
-    } dynamic = DynamicOption::Static;
+        Manual, // The object does not move.
+        Box2dPhysics, // The object moves according to the Box2D physics. Behavior may be changed by AnglePolicy.
+    } dynamic = MovementPolicy::Manual;
 
     enum class AnglePolicy
     {

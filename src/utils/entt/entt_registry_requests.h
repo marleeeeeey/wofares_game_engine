@@ -23,3 +23,19 @@ std::optional<b2Vec2> FindClosestTargetPos(entt::registry& registry, const b2Vec
     }
     return closestTargetPos;
 }
+
+template <typename T>
+std::vector<entt::entity> FindEntitiesInRadius(
+    entt::registry& registry, const b2Vec2& centerPosPhysics, float radiusPhysics)
+{
+    std::vector<entt::entity> entitiesInRadius;
+    auto entities = registry.view<PhysicsComponent, T>();
+    for (auto entity : entities)
+    {
+        auto& physicsComponent = entities.template get<PhysicsComponent>(entity);
+        auto entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
+        if (b2Distance(centerPosPhysics, entityPos) < radiusPhysics)
+            entitiesInRadius.push_back(entity);
+    }
+    return entitiesInRadius;
+}

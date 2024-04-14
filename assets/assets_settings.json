@@ -3,7 +3,8 @@
     "player": "assets/animations/player.json",
     "portal": "assets/animations/portal.json",
     "explosionFragments": "assets/animations/explosion_fragments.json",
-    "automaticWeapon": "assets/animations/automatic_weapon.json"
+    "automaticWeapon": "assets/animations/automatic_weapon.json",
+    "scepter": "assets/animations/scepter.json"
   },
   "sound_effects": {
     "explosion": [

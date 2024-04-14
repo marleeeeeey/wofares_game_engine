@@ -86,12 +86,12 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Se
         throw std::runtime_error("[ApplyOption] Unknown sensor type");
 }
 
-void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::DynamicOption& option)
+void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::MovementPolicy& option)
 {
     auto& physicsComponent = GetPhysicsComponent(entity);
     auto body = physicsComponent.bodyRAII->GetBody();
     physicsComponent.options.dynamic = option;
-    body->SetType(option == Box2dBodyOptions::DynamicOption::Dynamic ? b2_dynamicBody : b2_staticBody);
+    body->SetType(option == Box2dBodyOptions::MovementPolicy::Box2dPhysics ? b2_dynamicBody : b2_staticBody);
 }
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::AnglePolicy& option)

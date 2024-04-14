@@ -8,7 +8,6 @@
 #include <utils/glm_box2d_conversions.h>
 #include <utils/logger.h>
 
-
 RenderWorldSystem::RenderWorldSystem(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager,
     SdlPrimitivesRenderer& primitivesRenderer)
@@ -68,7 +67,7 @@ void RenderWorldSystem::RenderPlayerWeaponDirection()
         const glm::vec2 playerPosWorld =
             coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
         float angle = atan2(playerInfo.weaponDirection.y, playerInfo.weaponDirection.x);
-        auto weaponAnimation = resourceManager.GetAnimation("automaticWeapon");
+        auto weaponAnimation = resourceManager.GetAnimation("scepter");
         SDL_RendererFlip weaponFlip =
             animationComponent.flip == SDL_FLIP_HORIZONTAL ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
         primitivesRenderer.RenderAnimationFirstFrame(weaponAnimation, playerPosWorld, angle, weaponFlip);

@@ -24,3 +24,6 @@ struct StickyComponent
 {
     bool isSticked = false; // Is the entity sticked.
 };
+
+struct ExplostionParticlesComponent
+{};

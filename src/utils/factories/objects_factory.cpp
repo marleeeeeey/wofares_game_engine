@@ -43,7 +43,7 @@ entt::entity ObjectsFactory::SpawnTile(
         options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
         break;
     case SpawnTileOption::DesctructibleOption::NoDestructible:
-        options.dynamic = Box2dBodyOptions::DynamicOption::Static;
+        options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
         options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
         options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
         options.destructionPolicy = Box2dBodyOptions::DestructionPolicy::Indestructible;
@@ -70,7 +70,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
     Box2dBodyOptions options;
     options.shape = Box2dBodyOptions::Shape::Capsule;
     options.sensor = Box2dBodyOptions::Sensor::ThinSensorBelow;
-    options.dynamic = Box2dBodyOptions::DynamicOption::Dynamic;
+    options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
@@ -111,7 +111,7 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
 
     // Create a Box2D body for the flying entity.
     Box2dBodyOptions options;
-    options.dynamic = Box2dBodyOptions::DynamicOption::Dynamic;
+    options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
     options.shape = Box2dBodyOptions::Shape::Box;
     options.anglePolicy = anglePolicy;
     auto& physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
@@ -212,7 +212,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     // PhysicsInfo.
     Box2dBodyOptions options;
     options.shape = Box2dBodyOptions::Shape::Capsule;
-    options.dynamic = Box2dBodyOptions::DynamicOption::Static;
+    options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
     glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();

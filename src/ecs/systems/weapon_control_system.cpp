@@ -192,7 +192,8 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
         // Apply force to micro objects from the explosion center.
         for (auto& entity : staticOriginalBodies)
         {
-            physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::DynamicOption::Dynamic);
+            physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::MovementPolicy::Box2dPhysics);
+            registry.emplace_or_replace<ExplostionParticlesComponent>(entity);
 
             auto& physicsComponent = registry.get<PhysicsComponent>(entity);
             auto body = physicsComponent.bodyRAII->GetBody();
@@ -232,7 +233,7 @@ void WeaponControlSystem::ProcessEntitiesQueues()
 {
     for (auto entity : becomeStaticEntitiesQueue)
     {
-        physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::DynamicOption::Static);
+        physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::MovementPolicy::Manual);
     }
 
     for (const auto& [entity, entotyWithCollisionPoint] : explosionEntitiesQueue)

@@ -23,7 +23,7 @@ public: // Options setters.
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::Fixture& fixture);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::Shape& option);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::Sensor& option);
-    void ApplyOption(entt::entity entity, const Box2dBodyOptions::DynamicOption& option);
+    void ApplyOption(entt::entity entity, const Box2dBodyOptions::MovementPolicy& option);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::AnglePolicy& option);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::CollisionPolicy& option);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::BulletPolicy& option);

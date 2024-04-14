@@ -46,7 +46,8 @@ int main([[maybe_unused]] int argc, char* args[])
 
         spdlog::level::level_enum logLevel = utils::GetConfig<spdlog::level::level_enum, "main.logLevel">();
 #ifdef MY_DEBUG
-        logLevel = spdlog::level::debug;
+        if (logLevel > spdlog::level::debug)
+            logLevel = spdlog::level::debug;
 #endif // MY_DEBUG
         utils::Logger::Init(logFilePath, logLevel);
 
