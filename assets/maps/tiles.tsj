@@ -10,5 +10,53 @@
  "tileheight":16,
  "tilewidth":16,
  "type":"tileset",
- "version":"1.10"
+ "version":"1.10",
+ "wangsets":[
+        {
+         "colors":[
+                {
+                 "color":"#ff0000",
+                 "name":"background wall",
+                 "probability":1,
+                 "tile":-1
+                }, 
+                {
+                 "color":"#00ff00",
+                 "name":"background gate",
+                 "probability":1,
+                 "tile":-1
+                }],
+         "name":"gate",
+         "tile":-1,
+         "type":"mixed",
+         "wangtiles":[
+                {
+                 "tileid":74,
+                 "wangid":[1, 1, 2, 2, 2, 1, 1, 1]
+                }, 
+                {
+                 "tileid":75,
+                 "wangid":[1, 1, 2, 2, 2, 2, 2, 1]
+                }, 
+                {
+                 "tileid":76,
+                 "wangid":[1, 1, 1, 1, 2, 2, 2, 1]
+                }, 
+                {
+                 "tileid":88,
+                 "wangid":[1, 1, 1, 1, 1, 1, 1, 1]
+                }, 
+                {
+                 "tileid":90,
+                 "wangid":[2, 2, 2, 2, 2, 1, 1, 1]
+                }, 
+                {
+                 "tileid":91,
+                 "wangid":[2, 2, 2, 2, 2, 2, 2, 2]
+                }, 
+                {
+                 "tileid":92,
+                 "wangid":[2, 1, 1, 1, 2, 2, 2, 2]
+                }]
+        }]
 }
