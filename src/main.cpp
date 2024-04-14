@@ -1,5 +1,6 @@
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
+#include <ecs/systems/game_logic_system.h>
 #include <ecs/systems/map_loader_system.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
@@ -130,6 +131,7 @@ int main([[maybe_unused]] int argc, char* args[])
         mapLoaderSystem.LoadMap(level1);
 
         AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry(), resourceManager);
+        GameLogicSystem gameLogicSystem(registryWrapper.GetRegistry());
 
         // Start the game loop.
         Uint32 lastTick = SDL_GetTicks();
@@ -150,13 +152,14 @@ int main([[maybe_unused]] int argc, char* args[])
             // Handle input events.
             eventQueueSystem.Update(deltaTime);
 
+            // Auxiliary systems.
             timersControlSystem.Update(deltaTime);
-
             randomEventSystem.Update(deltaTime);
 
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);
             playerControlSystem.Update(deltaTime);
+            gameLogicSystem.Update(deltaTime);
             weaponControlSystem.Update(deltaTime);
             cameraControlSystem.Update(deltaTime);
 

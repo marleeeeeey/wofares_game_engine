@@ -202,9 +202,9 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     auto entity = registryWrapper.Create(debugName);
 
     // AnimationInfo.
-    AnimationComponent playerAnimation =
+    AnimationComponent portalAnimation =
         CreateAnimationInfo("portal", "Suction", ResourceManager::TagProps::ExactMatch);
-    registry.emplace<AnimationComponent>(entity, playerAnimation);
+    registry.emplace<AnimationComponent>(entity, portalAnimation);
 
     // PortalComponent.
     registry.emplace<PortalComponent>(entity);
@@ -215,7 +215,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     options.dynamic = Box2dBodyOptions::DynamicOption::Static;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
     options.collisionPolicy = Box2dBodyOptions::CollisionPolicy::NoCollision;
-    glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
+    glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG(debug, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
 

@@ -1,10 +1,10 @@
 #include "phisics_systems.h"
-#include "ecs/components/portal_components.h"
-#include "utils/box2d_body_options.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
+#include <ecs/components/portal_components.h>
 #include <glm/glm.hpp>
 #include <my_cpp_utils/config.h>
+#include <utils/box2d_body_options.h>
 #include <utils/entt_registry_wrapper.h>
 #include <utils/glm_box2d_conversions.h>
 #include <utils/math_utils.h>
@@ -25,7 +25,6 @@ void PhysicsSystem::Update(float deltaTime)
     UpdateAngleRegardingWithAnglePolicy();
     UpdatePlayersWeaponDirection();
     RemoveDistantObjects();
-    UpdatePortalObjectsPosition(deltaTime);
 }
 
 void PhysicsSystem::RemoveDistantObjects()
@@ -85,39 +84,5 @@ void PhysicsSystem::UpdateAngleRegardingWithAnglePolicy()
         {
             body->SetFixedRotation(false);
         }
-    }
-}
-
-void PhysicsSystem::UpdatePortalObjectsPosition(float deltaTime)
-{
-    auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
-    auto playerEntities = registry.view<PhysicsComponent, PlayerComponent>();
-    for (auto entity : portalEntities)
-    {
-        auto& portalComponent = portalEntities.get<PortalComponent>(entity);
-        auto& physicsComponent = portalEntities.get<PhysicsComponent>(entity);
-        auto portalBody = physicsComponent.bodyRAII->GetBody();
-
-        // Find the closest player position.
-        float minDistance = std::numeric_limits<float>::max();
-        b2Vec2 closestPlayerPos;
-        for (auto playerEntity : playerEntities)
-        {
-            auto& playerPhysicsComponent = playerEntities.get<PhysicsComponent>(playerEntity);
-            auto playerPos = playerPhysicsComponent.bodyRAII->GetBody()->GetPosition();
-            float distance = b2Distance(playerPos, portalBody->GetPosition());
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                closestPlayerPos = playerPos;
-            }
-        }
-
-        // Update the position of the portal object.
-        // Move it closer to the player.
-        b2Vec2 direction = closestPlayerPos - portalBody->GetPosition();
-        direction.Normalize();
-        b2Vec2 newPos = portalBody->GetPosition() + direction * portalComponent.speed * deltaTime;
-        portalBody->SetTransform(newPos, portalBody->GetAngle());
     }
 }

@@ -19,5 +19,4 @@ private:
     void RemoveDistantObjects();
     void UpdatePlayersWeaponDirection();
     void UpdateAngleRegardingWithAnglePolicy();
-    void UpdatePortalObjectsPosition(float deltaTime);
 };
