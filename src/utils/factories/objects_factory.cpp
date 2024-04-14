@@ -247,6 +247,9 @@ std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
 
     for (auto& entity : physicalEntities)
     {
+        if (!registry.all_of<PhysicsComponent, RenderingComponent>(entity))
+            continue;
+
         auto originalObjPhysicsInfo = registry.get<PhysicsComponent>(entity).bodyRAII->GetBody();
         auto& originalObjRenderingInfo = registry.get<RenderingComponent>(entity);
         const b2Vec2& posPhysics = originalObjPhysicsInfo->GetPosition();
