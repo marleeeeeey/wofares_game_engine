@@ -1,9 +1,9 @@
 #include "weapon_control_system.h"
-#include "my_cpp_utils/logger.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
 #include <ecs/components/physics_components.h>
+#include <ecs/components/rendering_components.h>
 #include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
@@ -12,6 +12,7 @@
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt/entt_collect_objects.h>
+#include <utils/entt/entt_registry_requests.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
 #include <utils/glm_box2d_conversions.h>
@@ -145,6 +146,8 @@ void WeaponControlSystem::OnBazookaContactWithTile(
 
 void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
+    MY_LOG(info, "Do explosion");
+
     auto& explosionEntity = explosionEntityWithContactPoint.explosionEntity;
 
     auto damageComponent = registry.try_get<DamageComponent>(explosionEntity);
@@ -159,8 +162,11 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
-    std::vector<entt::entity> staticOriginalBodies = collectObjects.GetPhysicalBodiesInRaduis(
-        grenadePosPhysics, damageComponent->radius * radiusCoef, b2_staticBody);
+
+    std::vector<entt::entity> staticOriginalBodies =
+        FindEntitiesInRadius<RenderingComponent>(registry, grenadePosPhysics, damageComponent->radius * radiusCoef);
+
+    MY_LOG(info, "Original bodies count {} before filtering", staticOriginalBodies.size());
 
     // Remove bodies with flag Box2dBodyOptions::DestructionPolicy::Indestructible
     staticOriginalBodies.erase(
@@ -178,12 +184,14 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();
     SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
     auto splittedEntities = objectsFactory.SpawnSplittedPhysicalEnteties(staticOriginalBodies, cellSize);
+    MY_LOG(info, "Original bodies: {}, splitted bodies: {}", staticOriginalBodies.size(), splittedEntities.size());
 
     // Get micro objects in the explosion radius.
     auto staticMicroBodiesToDestroy = collectObjects.GetPhysicalBodiesInRaduis(
         splittedEntities, grenadePosPhysics, damageComponent->radius, b2_staticBody);
 
     // Destroy micro objects.
+    MY_LOG(info, "Destroy {} micro objects", staticMicroBodiesToDestroy.size());
     for (auto& entity : staticMicroBodiesToDestroy)
         registryWrapper.Destroy(entity);
 
@@ -192,6 +200,14 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
         // Apply force to micro objects from the explosion center.
         for (auto& entity : staticOriginalBodies)
         {
+            // If entity contains PixeledTileComponent, then remove it.
+            // Need to prevent dust particles from the tile. Save CPU time.
+            if (registry.all_of<PixeledTileComponent>(entity))
+            {
+                registryWrapper.Destroy(entity);
+                continue;
+            }
+
             physicsBodyTuner.ApplyOption(entity, Box2dBodyOptions::MovementPolicy::Box2dPhysics);
             registry.emplace_or_replace<ExplostionParticlesComponent>(entity);
 

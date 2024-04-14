@@ -1,6 +1,7 @@
 #include "entt_collect_objects.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
+#include <utils/logger.h>
 #include <utils/math_utils.h>
 
 EnttCollectObjects::EnttCollectObjects(entt::registry& registry)
@@ -18,6 +19,9 @@ std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
 std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
     const std::vector<entt::entity>& entities, const b2Vec2& center, float radius, std::optional<b2BodyType> bodyType)
 {
+    MY_LOG(
+        info, "GetPhysicalBodiesInRaduis: center: {}, radius: {}, entitiesCount {}", center, radius, entities.size());
+
     std::vector<entt::entity> result;
 
     for (auto& entity : entities)
@@ -33,6 +37,8 @@ std::vector<entt::entity> EnttCollectObjects::GetPhysicalBodiesInRaduis(
         if (distance <= radius)
             result.push_back(entity);
     }
+
+    MY_LOG(info, "GetPhysicalBodiesInRaduis: resultCount {}", result.size());
 
     return result;
 }

@@ -30,11 +30,11 @@
     "randomSoundEventInterval_sec": 10
   },
   "PhysicsSystem": {
-    "velocityIterations": 6,
-    "positionIterations": 2
+    "velocityIterations": 1,
+    "positionIterations": 1
   },
   "MapLoaderSystem": {
-    "tileSplitFactor": 4
+    "tileSplitFactor": 2
   },
   "ObjectsFactory": {
     // Gap between physical and visual objects. Used to prevent dragging of physical objects.

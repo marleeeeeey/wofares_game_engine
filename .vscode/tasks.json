@@ -94,7 +94,16 @@
     {
       "label": "057. (WinDebug) Pack",
       "type": "shell",
-      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} debug LD55_debug"
+      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} debug LD55_debug",
+      "dependsOn": [
+        "040. (WinDebug) + Copy assets"
+      ],
+      "options": {
+        "statusbar": {
+          "hide" : false,
+          "label": "PackDebug"
+        }
+      }
     },
     {
       "label": "060. ********* Clear console *********",
@@ -141,7 +150,13 @@
       "command": "${workspaceFolder}/build/release/src/LD55.exe",
       "dependsOn": [
         "080. (WinRelease) + Copy assets"
-      ]
+      ],
+      "options": {
+        "statusbar": {
+          "hide" : false,
+          "label": "RunRelease"
+        }
+      }
     },
     {
       "label": "090. (WinRelease) Run",
@@ -151,7 +166,16 @@
     {
       "label": "095. (WinRelease) Pack",
       "type": "shell",
-      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} release LD55_release"
+      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} release LD55_release",
+      "dependsOn": [
+        "080. (WinRelease) + Copy assets"
+      ],
+      "options": {
+        "statusbar": {
+          "hide" : false,
+          "label": "PackRelease"
+        }
+      }
     },
     // ****************************************
     // ********* LINUX SPECIFIC TASKS *********

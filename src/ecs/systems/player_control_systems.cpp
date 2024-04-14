@@ -225,7 +225,7 @@ void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity enti
     if (playerInfo)
     {
         playerInfo->countOfGroundContacts += value ? 1 : -1;
-        MY_LOG(debug, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
+        MY_LOG(trace, "Player {} countOfGroundContacts: {}", playerInfo->number, playerInfo->countOfGroundContacts);
     }
 }
 

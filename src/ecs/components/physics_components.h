@@ -27,3 +27,6 @@ struct StickyComponent
 
 struct ExplostionParticlesComponent
 {};
+
+struct PixeledTileComponent
+{};

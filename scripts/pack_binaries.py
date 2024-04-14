@@ -14,9 +14,9 @@ def pack_binaries(path_to_7z, root_folder, build_type, achive_name):
         f"{root_folder}/build/{build_type}/src/logs",
         f"*.lib",
         f"*.pdb",
-        f"*.aseprite",
-        f"*.tiled-project",
         f"*.tiled-session",
+        # f"*.aseprite",
+        # f"*.tiled-project",
         # Add other paths to exclude here
     ]
 

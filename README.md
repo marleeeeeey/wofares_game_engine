@@ -24,6 +24,8 @@ Me sleeping from 0414 to 0930 : 0930 2024-04-14
 Create fast hybrid explosion fragments : 1108 2024-04-14
 Implement portal absorbing fragments : 1308 2024-04-14
 Randomize portal speed in time : 1407 2024-04-14
+Found a bug with release build during the beta testing : 1449 2024-04-14
+Simplify physic to improve CPU time : 2238 2024-04-14
 ```
 
 ### Assets editing

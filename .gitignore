@@ -1,6 +1,7 @@
 .cache/
 .vs/
 .VSCodeCounter/
+*.profraw
 *.tiled-session
 achives/
 build/

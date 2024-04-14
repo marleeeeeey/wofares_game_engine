@@ -226,7 +226,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
         {
             // Update the speed of the portal object randomly.
             auto& portalComponent = registry.get<PortalComponent>(timedPortal);
-            portalComponent.speed = utils::Random<float>(0.5, 3.0);
+            portalComponent.speed = utils::Random<float>(0.5, 2.5);
 
             // Reset the timer.
             auto& timerComponent = registry.get<TimerComponent>(timedPortal);
@@ -291,6 +291,8 @@ std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
             auto pixelEntity = SpawnTile(
                 pixelCenterWorld, cellSizeWorld.x, TextureRect{originalObjRenderingInfo.texturePtr, pixelTextureRect},
                 spawnTileOptions, "PixeledTile");
+
+            registry.emplace<PixeledTileComponent>(pixelEntity);
 
             splittedEntities.push_back(pixelEntity);
         }

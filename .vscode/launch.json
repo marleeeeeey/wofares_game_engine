@@ -11,6 +11,14 @@
       "program": "build/debug/src/LD55.exe",
       "args": [],
       "preLaunchTask": "040. (WinDebug) + Copy assets"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Release",
+      "program": "build/release/src/LD55.exe",
+      "args": [],
+      "preLaunchTask": "080. (WinRelease) + Copy assets"
     }
   ]
 }
