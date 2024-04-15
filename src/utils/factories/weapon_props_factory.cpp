@@ -39,7 +39,7 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
     props.ammoInClip = 1;
     props.clipSize = 1;
     props.reloadTime = utils::GetConfig<float, "WeaponPropsFactory.bazookaReloadTimeSeconds">();
-    props.fireRate = 1.0f;
+    props.fireRate = 0.0f;
     return props;
 }
 
@@ -56,7 +56,7 @@ WeaponProps WeaponPropsFactory::CreateGrenade()
     props.ammoInClip = 1;
     props.clipSize = 1;
     props.reloadTime = utils::GetConfig<float, "WeaponPropsFactory.grenadeReloadTimeSeconds">();
-    props.fireRate = 1.0f;
+    props.fireRate = 0.0f;
     return props;
 }
 

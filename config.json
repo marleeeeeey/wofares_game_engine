@@ -61,7 +61,7 @@
   {
     "grenadeExplosionRadiusPixels": 30,
     "grenadeReloadTimeSeconds": 1,
-    "bazookaExplosionRadiusPixels": 25,
-    "bazookaReloadTimeSeconds": 1
+    "bazookaExplosionRadiusPixels": 15,
+    "bazookaReloadTimeSeconds": 0.1
   }
 }

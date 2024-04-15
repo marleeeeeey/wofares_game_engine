@@ -29,6 +29,6 @@ public: // Reload.
     float reloadTime = 5.0f; // Time in seconds to reload the weapon.
     float remainingReloadTime = 0.0f; // Remaining time in seconds to reload the weapon.
 public: // Fire rate.
-    float fireRate = 0.5f; // Time in seconds between shots.
+    float fireRate = 0.0f; // Time in seconds between shots.
     float remainingFireRate = 0.0f; // Remaining time in seconds to fire the next shot.
 };
