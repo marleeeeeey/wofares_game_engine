@@ -1,5 +1,6 @@
 #include "game_logic_system.h"
 #include "my_cpp_utils/config.h"
+#include "my_cpp_utils/logger.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
@@ -15,14 +16,14 @@ GameLogicSystem::GameLogicSystem(entt::registry& registry)
 
 void GameLogicSystem::Update(float deltaTime)
 {
-    UpdatePortalObjectsPosition(deltaTime);
+    UpdatePortalsPosition(deltaTime);
     MagnetDesctructibleParticlesToPortal(deltaTime);
     DestroyClosestDestructibleParticlesInPortal();
-    IfPortalsTooCloseToEachOtherScatterThem();
+    ScatterPortalsIsTheyCloseToEachOther();
     EatThePlayerByPortalIfCloser();
 }
 
-void GameLogicSystem::UpdatePortalObjectsPosition(float deltaTime)
+void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
 {
     if (deltaTime == 0.0f)
         return;
@@ -69,15 +70,17 @@ std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
     if (closestStickyPos.has_value())
         return closestStickyPos;
 
-    auto closestPlayer = request::FindClosestEntityWithAllComponents<PlayerComponent>(registry, portalPos);
+    auto closestPlayer = request::FindClosestEntityWithAllComponents<PlayerComponent>(
+        registry, portalPos,
+        [this](auto entity)
+        {
+            // Check if the player is enabled.
+            auto& physicsComponent = registry.get<PhysicsComponent>(entity);
+            auto body = physicsComponent.bodyRAII->GetBody();
+            return body->IsEnabled();
+        });
     if (closestPlayer.has_value())
-    {
-        // Check if the player body is enabled.
-        auto& playerPhysicsComponent = registry.get<PhysicsComponent>(closestPlayer.value());
-        auto playerBody = playerPhysicsComponent.bodyRAII->GetBody();
-        if (playerBody->IsEnabled())
-            return playerBody->GetPosition();
-    }
+        return registry.get<PhysicsComponent>(closestPlayer.value()).bodyRAII->GetBody()->GetPosition();
 
     return std::nullopt;
 }
@@ -133,7 +136,7 @@ void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
     }
 }
 
-void GameLogicSystem::IfPortalsTooCloseToEachOtherScatterThem()
+void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
     for (auto entity : portalEntities)
@@ -191,7 +194,15 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
             auto portalBody = physicsComponent.bodyRAII->GetBody();
             auto portalPos = portalBody->GetPosition();
 
-            auto playerEntityOpt = request::FindClosestEntityWithAllComponents<PlayerComponent>(registry, portalPos);
+            auto playerEntityOpt = request::FindClosestEntityWithAllComponents<PlayerComponent>(
+                registry, portalPos,
+                [this]([[maybe_unused]] auto entity)
+                {
+                    auto& physicsComponent = registry.get<PhysicsComponent>(entity);
+                    auto body = physicsComponent.bodyRAII->GetBody();
+                    return body->IsEnabled();
+                });
+
             if (!playerEntityOpt.has_value())
                 return;
 

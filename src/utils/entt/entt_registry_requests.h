@@ -1,6 +1,7 @@
 #pragma once
 #include <Box2D/Box2D.h>
 #include <ecs/components/physics_components.h>
+#include <entt/entity/fwd.hpp>
 #include <entt/entt.hpp>
 #include <optional>
 
@@ -8,13 +9,18 @@ namespace request
 {
 
 template <typename... ComponentTypes>
-std::optional<entt::entity> FindClosestEntityWithAllComponents(entt::registry& registry, const b2Vec2& anchorPosWorld)
+std::optional<entt::entity> FindClosestEntityWithAllComponents(
+    entt::registry& registry, const b2Vec2& anchorPosWorld,
+    std::function<bool(entt::entity)> optTruePredicate = nullptr)
 {
     auto targetEntities = registry.view<PhysicsComponent, ComponentTypes...>();
     float minDistance = std::numeric_limits<float>::max();
     std::optional<entt::entity> closestTargetEntity;
     for (auto targetEntity : targetEntities)
     {
+        if (optTruePredicate && !optTruePredicate(targetEntity))
+            continue;
+
         auto& targetPhysicsComponent = targetEntities.template get<PhysicsComponent>(targetEntity);
         auto targetPos = targetPhysicsComponent.bodyRAII->GetBody()->GetPosition();
         float distance = b2Distance(targetPos, anchorPosWorld);

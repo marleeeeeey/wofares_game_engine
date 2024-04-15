@@ -20,7 +20,7 @@
   "maps": [
     {
       "name": "level1",
-      "tiledMapPath": "assets/maps/map.tmj",
+      "tiledMapPath": "assets/maps/map2.tmj",
       "backgroundPath": "assets/backgrounds/dark_background.png"
     }
   ]

@@ -43,6 +43,11 @@
 2024-04-15 1500 Start working on new features.
 2024-04-15 1616 Refactor the code. Update documentation with important notes. Start working on new features.
 2024-04-15 1751 Portal eats player emmediately if it's close enough.
+2024-04-15 1815 Spend time since 1815 to 2300 with my family.
+2024-04-15 2300 Back to development.
+2024-04-15 2338 Fix bug with different speed for players.
+2024-04-15 2353 Fix bug when portal searching players incorrectly.
+
 TODO
 
 - Portal burst when eats enought. Family member summoing from the portal.
