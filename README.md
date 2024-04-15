@@ -47,10 +47,10 @@
 2024-04-15 2300 Back to development.
 2024-04-15 2338 Fix bug with different speed for players.
 2024-04-15 2353 Fix bug when portal searching players incorrectly.
+2024-04-16 0105 Portal burst when eats enought. Family member summoing from the portal. All players moving sinchronized.
 
 TODO
 
-- Portal burst when eats enought. Family member summoing from the portal.
 - Level begin when portals eats all family except one player.
 - All players moving sinchronized (by WASD) but active one may attack.
 - Every player has a unique attack.

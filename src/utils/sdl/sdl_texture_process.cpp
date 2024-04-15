@@ -105,7 +105,7 @@ std::shared_ptr<SDLTextureRAII> LoadTexture(SDL_Renderer* renderer, const std::f
     SDL_Texture* texture = IMG_LoadTexture(renderer, imagePath.string().c_str());
 
     if (texture == nullptr)
-        throw std::runtime_error(MY_FMT("Failed to load texture: {}", imagePath.string()));
+        throw std::runtime_error(MY_FMT("Failed to load texture: {}", imagePath));
 
     return std::make_shared<SDLTextureRAII>(texture);
 }

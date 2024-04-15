@@ -31,7 +31,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
     {
         LevelInfo levelInfo = tiledLevelPair.value().get<LevelInfo>();
         if (!std::filesystem::exists(levelInfo.tiledMapPath))
-            throw std::runtime_error(MY_FMT("Tiled level file does not found: {}", levelInfo.tiledMapPath.string()));
+            throw std::runtime_error(MY_FMT("Tiled level file does not found: {}", levelInfo.tiledMapPath));
         tiledLevels[levelInfo.name] = levelInfo;
     }
 
@@ -155,8 +155,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
     catch (const std::exception& e)
     {
         throw std::runtime_error(MY_FMT(
-            "[ReadAsepriteAnimation] Failed to load Aseprite data from '{}': {}", asepriteAnimationJsonPath.string(),
-            e.what()));
+            "[ReadAsepriteAnimation] Failed to load Aseprite data from '{}': {}", asepriteAnimationJsonPath, e.what()));
     }
 
     // Load texture.

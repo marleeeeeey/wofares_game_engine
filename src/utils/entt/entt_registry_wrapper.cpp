@@ -61,9 +61,7 @@ std::string EnttRegistryWrapper::TryGetName([[maybe_unused]] entt::entity entity
     if (auto it = entityNamesById.find(entity); it != entityNamesById.end())
         return it->second;
 
-    return MY_FMT(
-        "Entity id: {:>6} REMOVED FROM REGISTRY. Last name was: {}.", static_cast<uint32_t>(entity),
-        removedEntityNamesById[entity]);
+    return MY_FMT("Entity id: {:>6} REMOVED FROM REGISTRY. Last name was: {}.", entity, removedEntityNamesById[entity]);
 #else
     return "";
 #endif // MY_DEBUG

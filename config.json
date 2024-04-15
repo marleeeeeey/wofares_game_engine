@@ -54,6 +54,7 @@
   },
   "GameLogicSystem":
   {
-    "eatDistance": 0.4
+    "portalEatPlayerWithDistance": 0.4,
+    "portalMaxFoodCounter": 100
   }
 }

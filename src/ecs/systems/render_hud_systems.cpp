@@ -10,7 +10,6 @@
 #include <utils/sdl/sdl_colors.h>
 #include <utils/sdl/sdl_draw.h>
 
-
 RenderHUDSystem::RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
   : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
@@ -58,8 +57,7 @@ void RenderHUDSystem::RenderDebugMenu()
 
     // Print last mouse position.
     const auto& lastMousePosition = gameState.windowOptions.lastMousePosInWindow;
-    ImGui::TextUnformatted(
-        MY_FMT("Last mouse position: ({:.2f}, {:.2f})", lastMousePosition.x, lastMousePosition.y).c_str());
+    ImGui::TextUnformatted(MY_FMT("Last mouse position: {}", lastMousePosition).c_str());
 
     ImGui::End();
 }

@@ -22,3 +22,23 @@ struct fmt::formatter<b2Vec2> : fmt::formatter<std::string>
         return fmt::format_to(ctx.out(), "({}, {})", vec.x, vec.y);
     }
 };
+
+template <>
+struct fmt::formatter<glm::vec2> : fmt::formatter<std::string>
+{
+    template <typename FormatContext>
+    auto format(const glm::vec2& vec, FormatContext& ctx)
+    {
+        return fmt::format_to(ctx.out(), "({}, {})", vec.x, vec.y);
+    }
+};
+
+template <>
+struct fmt::formatter<std::filesystem::path> : fmt::formatter<std::string>
+{
+    template <typename FormatContext>
+    auto format(const std::filesystem::path& path, FormatContext& ctx)
+    {
+        return fmt::format_to(ctx.out(), "{}", path.string());
+    }
+};

@@ -190,18 +190,6 @@
                  "width":0,
                  "x":343.188880040542,
                  "y":-30.7478462318107
-                }, 
-                {
-                 "height":0,
-                 "id":10,
-                 "name":"Player1",
-                 "point":true,
-                 "rotation":0,
-                 "type":"Player",
-                 "visible":true,
-                 "width":0,
-                 "x":783.615943624752,
-                 "y":417.176833296631
                 }],
          "opacity":1,
          "type":"objectgroup",

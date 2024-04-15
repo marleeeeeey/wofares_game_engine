@@ -151,18 +151,6 @@
          "objects":[
                 {
                  "height":0,
-                 "id":1,
-                 "name":"Player1",
-                 "point":true,
-                 "rotation":0,
-                 "type":"Player",
-                 "visible":true,
-                 "width":0,
-                 "x":392.692073810023,
-                 "y":505.492556091424
-                }, 
-                {
-                 "height":0,
                  "id":4,
                  "name":"Portal1",
                  "point":true,
@@ -194,8 +182,8 @@
                  "type":"Portal",
                  "visible":true,
                  "width":0,
-                 "x":445,
-                 "y":43
+                 "x":444.5,
+                 "y":127
                 }, 
                 {
                  "height":0,
@@ -206,8 +194,8 @@
                  "type":"Portal",
                  "visible":true,
                  "width":0,
-                 "x":36.5,
-                 "y":38
+                 "x":34,
+                 "y":128.5
                 }, 
                 {
                  "height":0,
@@ -218,8 +206,8 @@
                  "type":"Player",
                  "visible":true,
                  "width":0,
-                 "x":91,
-                 "y":508
+                 "x":248,
+                 "y":507
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -228,7 +216,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":17,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

@@ -1,17 +1,18 @@
 #include "game_logic_system.h"
-#include "my_cpp_utils/config.h"
-#include "my_cpp_utils/logger.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
 #include <ecs/components/timer_components.h>
+#include <entt/entity/fwd.hpp>
+#include <my_cpp_utils/config.h>
 #include <my_cpp_utils/math_utils.h>
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
 
-GameLogicSystem::GameLogicSystem(entt::registry& registry)
-  : registry(registry), registryWrapper(registry), bodyTuner(registry)
+GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory)
+  : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
+    coordinatesTransformer(registry)
 {}
 
 void GameLogicSystem::Update(float deltaTime)
@@ -118,22 +119,40 @@ void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)
 void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
-    for (auto entity : portalEntities)
-    {
-        auto& physicsComponent = portalEntities.get<PhysicsComponent>(entity);
-        auto portalBody = physicsComponent.bodyRAII->GetBody();
-        auto portalPos = portalBody->GetPosition();
 
-        auto entitiesInPortal =
-            request::FindEntitiesWithAllComponentsInRadius<ExplostionParticlesComponent>(registry, portalPos, 0.1f);
-        if (entitiesInPortal.empty())
-            continue;
-
-        for (auto entityInPortal : entitiesInPortal)
+    portalEntities.each(
+        [this](
+            [[maybe_unused]] entt::entity portalEntity, PhysicsComponent& portalPhysics,
+            PortalComponent& portalComponent)
         {
-            registryWrapper.Destroy(entityInPortal);
-        }
-    }
+            if (portalComponent.isSleeping)
+                return;
+
+            auto portalBody = portalPhysics.bodyRAII->GetBody();
+            auto portalPos = portalBody->GetPosition();
+
+            auto entitiesInPortal =
+                request::FindEntitiesWithAllComponentsInRadius<ExplostionParticlesComponent>(registry, portalPos, 0.1f);
+            if (entitiesInPortal.empty())
+                return;
+
+            for (auto entityInPortal : entitiesInPortal)
+            {
+                portalComponent.foodCounter++;
+
+                const auto& portalMaxFoodCounter = utils::GetConfig<size_t, "GameLogicSystem.portalMaxFoodCounter">();
+                if (portalComponent.foodCounter >= portalMaxFoodCounter)
+                {
+                    MY_LOG(info, "Portal {} is full! Destroying the portal!", portalEntity, entityInPortal);
+                    registryWrapper.Destroy(portalEntity);
+                    auto portalPosWorld = coordinatesTransformer.PhysicsToWorld(portalPos);
+                    objectsFactory.SpawnPlayer(portalPosWorld, "Rescued player");
+                    return;
+                }
+
+                registryWrapper.Destroy(entityInPortal);
+            }
+        });
 }
 
 void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
@@ -214,11 +233,11 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
                 return;
             auto playerBodyPos = playerBody->GetPosition();
 
-            auto eatDistance = utils::GetConfig<float, "GameLogicSystem.eatDistance">();
-            if (b2Distance(portalPos, playerBodyPos) < eatDistance)
+            auto portalEatPlayerWithDistance = utils::GetConfig<float, "GameLogicSystem.portalEatPlayerWithDistance">();
+            if (b2Distance(portalPos, playerBodyPos) < portalEatPlayerWithDistance)
             {
                 MY_LOG(info, "Player {} is eaten by the portal {}!", playerEntity, portalEntity);
-                bodyTuner.ApplyOption(playerEntity, Box2dBodyOptions::EnabledPolicy::Disable);
+                registryWrapper.Destroy(playerEntity);
             }
         });
 }
