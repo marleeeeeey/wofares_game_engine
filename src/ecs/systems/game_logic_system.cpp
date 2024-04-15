@@ -1,4 +1,5 @@
 #include "game_logic_system.h"
+#include "my_cpp_utils/config.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
@@ -202,7 +203,8 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
                 return;
             auto playerBodyPos = playerBody->GetPosition();
 
-            if (b2Distance(portalPos, playerBodyPos) < 0.2f)
+            auto eatDistance = utils::GetConfig<float, "GameLogicSystem.eatDistance">();
+            if (b2Distance(portalPos, playerBodyPos) < eatDistance)
             {
                 MY_LOG(info, "Player {} is eaten by the portal {}!", playerEntity, portalEntity);
                 bodyTuner.ApplyOption(playerEntity, Box2dBodyOptions::EnabledPolicy::Disable);

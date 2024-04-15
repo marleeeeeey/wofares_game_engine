@@ -175,18 +175,6 @@
                 }, 
                 {
                  "height":0,
-                 "id":7,
-                 "name":"Portal1",
-                 "point":true,
-                 "rotation":0,
-                 "type":"Portal",
-                 "visible":true,
-                 "width":0,
-                 "x":247.5,
-                 "y":297
-                }, 
-                {
-                 "height":0,
                  "id":6,
                  "name":"Portal1",
                  "point":true,
