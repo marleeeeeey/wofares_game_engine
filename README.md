@@ -50,6 +50,7 @@
 2024-04-16 0105 Portal burst when eats enought. Family member summoing from the portal. All players moving sinchronized.
 2024-04-16 0217 Integrate fire animation for bullet and grenade. Remove other weapons. Jump - Space.
 2024-04-16 0245 Draw animation for building block.
+2024-04-16 0324 One eating counter for all portals. Decrease portal sleep time.
 
 TODO
 - Write target for the game at the beginning of game.

@@ -55,7 +55,7 @@
   "GameLogicSystem":
   {
     "portalEatPlayerWithDistance": 0.4,
-    "portalMaxFoodCounter": 100
+    "portalMaxFoodCounter": 70
   },
   "WeaponPropsFactory":
   {

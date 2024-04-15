@@ -35,7 +35,7 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::VelocityDirection;
     props.damageRadiusWorld = utils::GetConfig<size_t, "WeaponPropsFactory.bazookaExplosionRadiusPixels">();
     props.damageForce = 0.5;
-    props.ammoInStorage = 100;
+    props.ammoInStorage = 5000;
     props.ammoInClip = 1;
     props.clipSize = 1;
     props.reloadTime = utils::GetConfig<float, "WeaponPropsFactory.bazookaReloadTimeSeconds">();
@@ -52,7 +52,7 @@ WeaponProps WeaponPropsFactory::CreateGrenade()
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
     props.damageRadiusWorld = utils::GetConfig<size_t, "WeaponPropsFactory.grenadeExplosionRadiusPixels">();
     props.damageForce *= 0.7;
-    props.ammoInStorage = 5;
+    props.ammoInStorage = 5000;
     props.ammoInClip = 1;
     props.clipSize = 1;
     props.reloadTime = utils::GetConfig<float, "WeaponPropsFactory.grenadeReloadTimeSeconds">();

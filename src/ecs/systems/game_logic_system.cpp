@@ -120,8 +120,10 @@ void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
 
+    std::optional<entt::entity> portalToDestroyOpt;
+
     portalEntities.each(
-        [this](
+        [this, &portalToDestroyOpt](
             [[maybe_unused]] entt::entity portalEntity, PhysicsComponent& portalPhysics,
             PortalComponent& portalComponent)
         {
@@ -143,16 +145,24 @@ void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
                 const auto& portalMaxFoodCounter = utils::GetConfig<size_t, "GameLogicSystem.portalMaxFoodCounter">();
                 if (portalComponent.foodCounter >= portalMaxFoodCounter)
                 {
-                    MY_LOG(info, "Portal {} is full! Destroying the portal!", portalEntity, entityInPortal);
-                    registryWrapper.Destroy(portalEntity);
                     auto portalPosWorld = coordinatesTransformer.PhysicsToWorld(portalPos);
                     objectsFactory.SpawnPlayer(portalPosWorld, "Rescued player");
+                    portalToDestroyOpt = portalEntity;
                     return;
                 }
 
                 registryWrapper.Destroy(entityInPortal);
             }
         });
+
+    if (portalToDestroyOpt.has_value())
+    {
+        // Reset the food counter for all portals.
+        portalEntities.each([](entt::entity, PhysicsComponent&, PortalComponent& portalComponent)
+                            { portalComponent.foodCounter = 0; });
+        // Destroy one portal.
+        registryWrapper.Destroy(portalToDestroyOpt.value());
+    }
 }
 
 void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
@@ -190,7 +200,7 @@ void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
                 auto& portalComponent = registry.get<PortalComponent>(portal);
                 portalComponent.isSleeping = true;
                 registry.emplace_or_replace<TimerComponent>(
-                    portal, utils::Random<float>(0.5f, 1.0f),
+                    portal, utils::Random<float>(0.2f, 0.5f),
                     [this](entt::entity portalEntity)
                     {
                         auto& portalComponent = registry.get<PortalComponent>(portalEntity);
@@ -236,8 +246,12 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
             auto portalEatPlayerWithDistance = utils::GetConfig<float, "GameLogicSystem.portalEatPlayerWithDistance">();
             if (b2Distance(portalPos, playerBodyPos) < portalEatPlayerWithDistance)
             {
-                MY_LOG(info, "Player {} is eaten by the portal {}!", playerEntity, portalEntity);
+                MY_LOG(debug, "Player {} is eaten by the portal {}!", playerEntity, portalEntity);
                 registryWrapper.Destroy(playerEntity);
+
+                // Spawn a new portal near thisw place.
+                auto portalPosWorld = coordinatesTransformer.PhysicsToWorld(portalPos);
+                objectsFactory.SpawnPortal(portalPosWorld, "Respawned portal");
             }
         });
 }
