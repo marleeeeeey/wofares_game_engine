@@ -86,6 +86,9 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
         const auto& [playerInfo, physicalBody] = players.get<PlayerComponent, PhysicsComponent>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
 
+        if (!body->IsEnabled())
+            continue;
+
         // If the player is not on the ground, then don't allow to move or jump.
         bool playerControlsWorksOnGroundOnly =
             utils::GetConfig<bool, "PlayerControlSystem.playerControlsWorksOnGroundOnly">();
@@ -121,6 +124,9 @@ void PlayerControlSystem::HandlePlayerAttackOnReleaseButton(const InputEventMana
         const auto& players = registry.view<PlayerComponent, PhysicsComponent, AnimationComponent>();
         for (auto entity : players)
         {
+            if (!IsEnabled(entity))
+                continue;
+
             // TODO2: Make in no linear way.
             float throwingForce = std::min(eventInfo.holdDuration * 0.3f, 0.2f);
             MY_LOG(debug, "Throwing force: {}", throwingForce);
@@ -136,6 +142,9 @@ void PlayerControlSystem::HandlePlayerAttackOnHoldButton(const InputEventManager
         const auto& players = registry.view<PlayerComponent, PhysicsComponent, AnimationComponent>();
         for (auto entity : players)
         {
+            if (!IsEnabled(entity))
+                continue;
+
             float throwingForce = 0.0f;
             MakeShotIfPossible(entity, throwingForce);
         }
@@ -163,6 +172,9 @@ void PlayerControlSystem::HandlePlayerWeaponDirection(const InputEventManager::E
         const auto& players = registry.view<PlayerComponent, PhysicsComponent>();
         for (auto entity : players)
         {
+            if (!IsEnabled(entity))
+                continue;
+
             const auto& [playerInfo, physicalBody] = players.get<PlayerComponent, PhysicsComponent>(entity);
             auto playerBody = physicalBody.bodyRAII->GetBody();
 
@@ -187,9 +199,17 @@ void PlayerControlSystem::HandlePlayerChangeWeapon(const InputEventManager::Even
     if (weaponIndex < 0 || weaponIndex >= static_cast<int>(weaponEnumRange.size()))
         return;
 
-    const auto& players = registry.view<PlayerComponent>();
+    const auto& players = registry.view<PlayerComponent, PhysicsComponent>();
     for (auto entity : players)
     {
+        if (!IsEnabled(entity))
+            continue;
+
+        // Check if body in physics component is enabled.
+        auto physicsComponent = registry.try_get<PhysicsComponent>(entity);
+        if (!physicsComponent || !physicsComponent->bodyRAII->GetBody()->IsEnabled())
+            continue;
+
         auto& playerInfo = players.get<PlayerComponent>(entity);
         auto newWeapon = weaponEnumRange[weaponIndex];
 
@@ -332,4 +352,13 @@ void PlayerControlSystem::UpdateFireRateAndReloadTime(entt::entity playerEntity,
             }
         }
     }
+}
+
+bool PlayerControlSystem::IsEnabled(entt::entity playerEntity) const
+{
+    auto physicsComponent = registry.try_get<PhysicsComponent>(playerEntity);
+    if (!physicsComponent)
+        return false;
+
+    return physicsComponent->bodyRAII->GetBody()->IsEnabled();
 }

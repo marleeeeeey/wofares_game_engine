@@ -41,4 +41,6 @@ private: // Callback for contact listener. Uses to set the ground contact flag.
 private: // Shooting.
     entt::entity MakeShotIfPossible(entt::entity playerEntity, float throwingForce);
     void UpdateFireRateAndReloadTime(entt::entity playerEntity, float deltaTime);
+private: // Helpers.
+    bool IsEnabled(entt::entity playerEntity) const;
 };

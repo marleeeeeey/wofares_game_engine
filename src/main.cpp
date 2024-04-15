@@ -89,7 +89,8 @@ int main([[maybe_unused]] int argc, char* args[])
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         SDLAudioInitializerRAII sdlAudioInitializer;
-        SDLWindowRAII window("LD55 game by marleeeeeey and jsCommander", gameOptions.windowOptions.windowSize);
+        SDLWindowRAII window(
+            "LD55 game by marleeeeeey, jsCommander and SdCorpse", gameOptions.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 

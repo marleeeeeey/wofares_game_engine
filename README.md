@@ -40,15 +40,21 @@
 2024-04-15 0212 Scatter portals if they bump each other.
 2024-04-15 0230 I was sleeping since 0230 to 0830.
 2024-04-15 1142 Inspired with new ideas from SdCorpse.
-2024-04-15 1308 Start working on new features.
+2024-04-15 1500 Start working on new features.
+2024-04-15 1616 Refactor the code. Update documentation with important notes. Start working on new features.
+2024-04-15 1751 Portal eats player emmediately if it's close enough.
 TODO
-- Portal eats player emmediately.
+
 - Portal burst when eats enought. Family member summoing from the portal.
 - Level begin when portals eats all family except one player.
 - All players moving sinchronized (by WASD) but active one may attack.
 - Every player has a unique attack.
 - If family member move out of the screen new portal with him will be created.
 - Purpose of the game is to save all family members.
+- Integrate fire animation for bullet.
+- Intergrate animation for grenade like bullet.
+- Magnet objects one-by-one but not all at once.
+- Intergrate (if created) animation of appearance and disappearance of the player.
 - Implement sound effects.
 ```
 

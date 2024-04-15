@@ -1,14 +1,15 @@
 #include "game_logic_system.h"
-#include "my_cpp_utils/math_utils.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
 #include <ecs/components/timer_components.h>
+#include <my_cpp_utils/math_utils.h>
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
 
-GameLogicSystem::GameLogicSystem(entt::registry& registry) : registry(registry), registryWrapper(registry)
+GameLogicSystem::GameLogicSystem(entt::registry& registry)
+  : registry(registry), registryWrapper(registry), bodyTuner(registry)
 {}
 
 void GameLogicSystem::Update(float deltaTime)
@@ -17,6 +18,7 @@ void GameLogicSystem::Update(float deltaTime)
     MagnetDesctructibleParticlesToPortal(deltaTime);
     DestroyClosestDestructibleParticlesInPortal();
     IfPortalsTooCloseToEachOtherScatterThem();
+    EatThePlayerByPortalIfCloser();
 }
 
 void GameLogicSystem::UpdatePortalObjectsPosition(float deltaTime)
@@ -66,9 +68,15 @@ std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
     if (closestStickyPos.has_value())
         return closestStickyPos;
 
-    auto closestPlayerPos = request::FindClosestEntityPosWithAllComponents<PlayerComponent>(registry, portalPos);
-    if (closestPlayerPos.has_value())
-        return closestPlayerPos;
+    auto closestPlayer = request::FindClosestEntityWithAllComponents<PlayerComponent>(registry, portalPos);
+    if (closestPlayer.has_value())
+    {
+        // Check if the player body is enabled.
+        auto& playerPhysicsComponent = registry.get<PhysicsComponent>(closestPlayer.value());
+        auto playerBody = playerPhysicsComponent.bodyRAII->GetBody();
+        if (playerBody->IsEnabled())
+            return playerBody->GetPosition();
+    }
 
     return std::nullopt;
 }
@@ -168,4 +176,36 @@ void GameLogicSystem::IfPortalsTooCloseToEachOtherScatterThem()
             }
         }
     }
+}
+
+void GameLogicSystem::EatThePlayerByPortalIfCloser()
+{
+    auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
+    portalEntities.each(
+        [this](auto portalEntity, auto& physicsComponent, auto& portalComponent)
+        {
+            if (portalComponent.isSleeping)
+                return;
+
+            auto portalBody = physicsComponent.bodyRAII->GetBody();
+            auto portalPos = portalBody->GetPosition();
+
+            auto playerEntityOpt = request::FindClosestEntityWithAllComponents<PlayerComponent>(registry, portalPos);
+            if (!playerEntityOpt.has_value())
+                return;
+
+            auto playerEntity = playerEntityOpt.value();
+
+            auto& playerPhysicsComponent = registry.get<PhysicsComponent>(playerEntity);
+            auto playerBody = playerPhysicsComponent.bodyRAII->GetBody();
+            if (!playerBody->IsEnabled())
+                return;
+            auto playerBodyPos = playerBody->GetPosition();
+
+            if (b2Distance(portalPos, playerBodyPos) < 0.2f)
+            {
+                MY_LOG(info, "Player {} is eaten by the portal {}!", playerEntity, portalEntity);
+                bodyTuner.ApplyOption(playerEntity, Box2dBodyOptions::EnabledPolicy::Disable);
+            }
+        });
 }

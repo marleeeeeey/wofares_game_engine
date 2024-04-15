@@ -1,10 +1,7 @@
 #include "objects_factory.h"
-#include "ecs/components/portal_components.h"
-#include "my_cpp_utils/logger.h"
-#include "utils/box2d/box2d_body_options.h"
-#include "utils/box2d/box2d_body_tuner.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
+#include <ecs/components/portal_components.h>
 #include <ecs/components/rendering_components.h>
 #include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
@@ -12,6 +9,8 @@
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/math_utils.h>
 #include <unordered_map>
+#include <utils/box2d/box2d_body_options.h>
+#include <utils/box2d/box2d_body_tuner.h>
 #include <utils/box2d/box2d_utils.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt/entt_registry_wrapper.h>
