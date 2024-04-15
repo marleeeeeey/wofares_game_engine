@@ -11,8 +11,7 @@
 
 PhysicsSystem::PhysicsSystem(EnttRegistryWrapper& registryWrapper)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
-    coordinatesTransformer(registry)
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
 {}
 
 void PhysicsSystem::Update(float deltaTime)
@@ -20,7 +19,7 @@ void PhysicsSystem::Update(float deltaTime)
     // Update the physics world with Box2D engine.
     auto& velocityIterations = utils::GetConfig<int, "PhysicsSystem.velocityIterations">();
     auto& positionIterations = utils::GetConfig<int, "PhysicsSystem.positionIterations">();
-    physicsWorld->Step(deltaTime, velocityIterations, positionIterations);
+    gameState.physicsWorld->Step(deltaTime, velocityIterations, positionIterations);
 
     UpdateAngleRegardingWithAnglePolicy();
     UpdatePlayersWeaponDirection();

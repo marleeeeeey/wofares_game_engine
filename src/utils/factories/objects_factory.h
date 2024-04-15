@@ -19,7 +19,6 @@ class ObjectsFactory
     entt::registry& registry;
     ResourceManager& resourceManager;
     GameOptions& gameState;
-    std::shared_ptr<b2World> physicsWorld;
     Box2dBodyCreator box2dBodyCreator;
     CoordinatesTransformer coordinatesTransformer;
     Box2dBodyTuner bodyTuner;

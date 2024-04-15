@@ -9,7 +9,6 @@
 
 class Box2dBodyCreator
 {
-    const std::shared_ptr<b2World> physicsWorld;
     Box2dBodyTuner bodyTuner;
 public:
     Box2dBodyCreator(entt::registry& registry);

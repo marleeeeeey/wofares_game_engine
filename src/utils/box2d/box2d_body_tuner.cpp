@@ -5,14 +5,14 @@
 
 Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
   : registry(registry), coordinatesTransformer(registry),
-    physicsWorld(registry.get<GameOptions>(registry.view<GameOptions>().front()).physicsWorld)
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
 PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
     entt::entity entity, const glm::vec2& posWorld, const Box2dBodyOptions& options)
 {
     b2Body* body = CreatePhysicsBodyWithNoShape(entity, posWorld);
-    auto box2dObjectRAII = std::make_shared<Box2dObjectRAII>(body, physicsWorld);
+    auto box2dObjectRAII = std::make_shared<Box2dObjectRAII>(body, gameState.physicsWorld);
     PhysicsComponent& physicsComponent = registry.emplace<PhysicsComponent>(entity, box2dObjectRAII, options);
 
     ApplyOption(entity, options.fixture);
@@ -186,7 +186,7 @@ b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(entt::entity entity, const 
     b2BodyDef bodyDef;
     b2Vec2 posPhysics = coordinatesTransformer.WorldToPhysics(posWorld);
     bodyDef.position.Set(posPhysics.x, posPhysics.y);
-    b2Body* body = physicsWorld->CreateBody(&bodyDef);
+    b2Body* body = gameState.physicsWorld->CreateBody(&bodyDef);
 
     // Set the entity to the Box2D body user data. It will be used to get the entity from the Box2D body.
     body->GetUserData().pointer = static_cast<uintptr_t>(entity);

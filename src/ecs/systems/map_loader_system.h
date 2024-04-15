@@ -8,13 +8,14 @@
 #include <utils/level_info.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl/sdl_RAII.h>
-
+#include <utils/systems/box2d_entt_contact_listener.h>
 
 class MapLoaderSystem
 {
     EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     ResourceManager& resourceManager;
+    Box2dEnttContactListener& contactListener;
     GameOptions& gameState;
     ObjectsFactory objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
@@ -29,9 +30,10 @@ class MapLoaderSystem
     std::shared_ptr<SDLSurfaceRAII> tilesetSurface; // Optional. Used when Streaming access is needed.
     LevelInfo currentLevelInfo;
 public:
-    MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager);
+    MapLoaderSystem(
+        EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager,
+        Box2dEnttContactListener& contactListener);
     void LoadMap(const LevelInfo& levelInfo);
-    void UnloadMap();
 private:
     void ParseTileLayer(const nlohmann::json& layer, ObjectsFactory::SpawnTileOption tileOptions);
     void ParseObjectLayer(const nlohmann::json& layer);
@@ -39,4 +41,5 @@ private:
     void ParseTile(int tileId, int layerCol, int layerRow, ObjectsFactory::SpawnTileOption tileOptions);
 private: // Low level functions.
     std::filesystem::path ReadPathToTileset(const nlohmann::json& mapJson);
+    void RecreateBox2dWorld();
 };

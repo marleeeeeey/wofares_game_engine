@@ -54,5 +54,6 @@ struct GameOptions
     WindowOptions windowOptions;
     ControlOptions controlOptions;
     DebugInfo debugInfo;
+    b2Vec2 gravity{0.0f, +9.8f};
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameOptions, windowOptions)
 };

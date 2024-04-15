@@ -22,8 +22,8 @@
 
 ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), physicsWorld(gameState.physicsWorld),
-    box2dBodyCreator(registry), coordinatesTransformer(registry), bodyTuner(registry)
+    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), box2dBodyCreator(registry),
+    coordinatesTransformer(registry), bodyTuner(registry)
 {}
 
 entt::entity ObjectsFactory::SpawnTile(

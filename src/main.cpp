@@ -78,13 +78,8 @@ int main([[maybe_unused]] int argc, char* args[])
         auto& gameOptions = registry.emplace<GameOptions>(
             registryWrapper.Create("GameOptions"), utils::GetConfig<GameOptions, "GameOptions">());
 
-        // Create a physics world with gravity and store it in the registry.
-        b2Vec2 gravity(0.0f, +9.8f);
-        gameOptions.physicsWorld = std::make_shared<b2World>(gravity);
-
         // Create a contact listener and subscribe it to the physics world.
         Box2dEnttContactListener contactListener(registryWrapper);
-        gameOptions.physicsWorld->SetContactListener(&contactListener);
 
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
@@ -122,13 +117,13 @@ int main([[maybe_unused]] int argc, char* args[])
         RenderWorldSystem RenderWorldSystem(
             registryWrapper.GetRegistry(), renderer.get(), resourceManager, primitivesRenderer);
         RenderHUDSystem RenderHUDSystem(registryWrapper.GetRegistry(), renderer.get());
-        MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager);
 
         // Auxiliary systems.
         ScreenModeControlSystem screenModeControlSystem(inputEventManager, window);
         TimersControlSystem timersControlSystem(registryWrapper.GetRegistry());
 
         // Load the map.
+        MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager, contactListener);
         auto level1 = resourceManager.GetTiledLevel("level1");
         mapLoaderSystem.LoadMap(level1);
 
@@ -146,7 +141,6 @@ int main([[maybe_unused]] int argc, char* args[])
 
             if (utils::FileChangedSinceLastCheck(level1.tiledMapPath) || gameOptions.controlOptions.reloadMap)
             {
-                mapLoaderSystem.UnloadMap();
                 mapLoaderSystem.LoadMap(level1);
                 gameOptions.controlOptions.reloadMap = false;
             }

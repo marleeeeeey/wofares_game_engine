@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/game_options.h"
 #include <box2d/box2d.h>
 #include <ecs/components/physics_components.h>
 #include <entt/entt.hpp>
@@ -11,7 +12,7 @@ class Box2dBodyTuner
 {
     entt::registry& registry;
     CoordinatesTransformer coordinatesTransformer;
-    const std::shared_ptr<b2World> physicsWorld;
+    GameOptions& gameState;
 public: // Constructor.
     Box2dBodyTuner(entt::registry& registry);
 public: // Create physics component.

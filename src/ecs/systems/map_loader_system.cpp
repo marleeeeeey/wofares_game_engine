@@ -12,14 +12,17 @@
 #include <utils/math_utils.h>
 #include <utils/sdl/sdl_texture_process.h>
 
-MapLoaderSystem::MapLoaderSystem(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
+MapLoaderSystem::MapLoaderSystem(
+    EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager, Box2dEnttContactListener& contactListener)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
-    gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    contactListener(contactListener), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     objectsFactory(registryWrapper, resourceManager), coordinatesTransformer(registry)
 {}
 
 void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
 {
+    RecreateBox2dWorld();
+
     currentLevelInfo = levelInfo;
 
     // Save map file path and load it as json.
@@ -82,25 +85,6 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
         if (invisibleTilesNumber > 0)
             MY_LOG(warn, "All tiles are invisible");
     }
-}
-
-void MapLoaderSystem::UnloadMap()
-{
-    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
-    gameState.levelOptions.levelBox2dBounds = {};
-
-    // Remove all entities that have a RenderingInfo component.
-    for (auto entity : registry.view<RenderingComponent>())
-        registryWrapper.Destroy(entity);
-
-    // Remove all entities that have a PhysicalBody component.
-    for (auto entity : registry.view<PhysicsComponent>())
-        registryWrapper.Destroy(entity);
-
-    if (Box2dObjectRAII::GetBodyCounter() != 0)
-        MY_LOG(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
-    else
-        MY_LOG(debug, "All Box2D bodies were destroyed");
 }
 
 void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer, ObjectsFactory::SpawnTileOption tileOptions)
@@ -245,4 +229,23 @@ std::filesystem::path MapLoaderSystem::ReadPathToTileset(const nlohmann::json& m
     }
 
     return tilesetPath;
+}
+
+void MapLoaderSystem::RecreateBox2dWorld()
+{
+    auto& gameState = registry.get<GameOptions>(registry.view<GameOptions>().front());
+    gameState.levelOptions.levelBox2dBounds = {};
+
+    // Remove all entities except the GameOptions entity.
+    for (auto entity : registry.view<PhysicsComponent>())
+        registryWrapper.Destroy(entity);
+
+    // Create a physics world with gravity and store it in the registry.
+    gameState.physicsWorld = std::make_shared<b2World>(gameState.gravity);
+    gameState.physicsWorld->SetContactListener(&contactListener);
+
+    if (Box2dObjectRAII::GetBodyCounter() != 0)
+        MY_LOG(warn, "There are still {} Box2D bodies in the memory", Box2dObjectRAII::GetBodyCounter());
+    else
+        MY_LOG(debug, "All Box2D bodies were destroyed");
 }
