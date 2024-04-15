@@ -1,4 +1,6 @@
 #include "weapon_props_factory.h"
+#include "my_cpp_utils/config.h"
+#include <cstddef>
 #include <magic_enum.hpp>
 #include <stdexcept>
 
@@ -9,12 +11,7 @@ WeaponProps WeaponPropsFactory::CreateWeaponType(WeaponType type)
     case WeaponType::Bazooka:
         return CreateBazooka();
     case WeaponType::Grenade:
-    case WeaponType::StickTrap:
         return CreateGrenade();
-    case WeaponType::Uzi:
-        return CreateUzi();
-    case WeaponType::Shotgun:
-        return CreateShotgun();
     default:
         throw std::runtime_error("Unknown weapon type.");
     }
@@ -33,16 +30,15 @@ std::unordered_map<WeaponType, WeaponProps> WeaponPropsFactory::CreateAllWeapons
 WeaponProps WeaponPropsFactory::CreateBazooka()
 {
     WeaponProps props;
-    props.bulletMass = 0.5;
-    props.bulletEjectionForce = 0.1;
+    props.bulletMass = 0.3;
+    props.bulletEjectionForce = 0.05;
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::VelocityDirection;
-    props.projectileSizeWorld = {16, 8};
-    props.damageRadiusWorld = 25;
+    props.damageRadiusWorld = utils::GetConfig<size_t, "WeaponPropsFactory.bazookaExplosionRadiusPixels">();
     props.damageForce = 0.5;
     props.ammoInStorage = 100;
     props.ammoInClip = 1;
     props.clipSize = 1;
-    props.reloadTime = 2.0f;
+    props.reloadTime = utils::GetConfig<float, "WeaponPropsFactory.bazookaReloadTimeSeconds">();
     props.fireRate = 1.0f;
     return props;
 }
@@ -50,15 +46,16 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
 WeaponProps WeaponPropsFactory::CreateGrenade()
 {
     WeaponProps props = CreateBazooka();
+    props.animationName = "fire-bomb";
     props.bulletMass = 0.3;
     props.bulletEjectionForce = 0.0;
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
-    props.damageRadiusWorld = 20;
+    props.damageRadiusWorld = utils::GetConfig<size_t, "WeaponPropsFactory.grenadeExplosionRadiusPixels">();
     props.damageForce *= 0.7;
     props.ammoInStorage = 5;
     props.ammoInClip = 1;
     props.clipSize = 1;
-    props.reloadTime = 1.0f;
+    props.reloadTime = utils::GetConfig<float, "WeaponPropsFactory.grenadeReloadTimeSeconds">();
     props.fireRate = 1.0f;
     return props;
 }

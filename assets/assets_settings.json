@@ -4,7 +4,9 @@
     "portal": "assets/animations/portal.json",
     "explosionFragments": "assets/animations/explosion_fragments.json",
     "automaticWeapon": "assets/animations/automatic_weapon.json",
-    "scepter": "assets/animations/scepter.json"
+    "scepter": "assets/animations/scepter.json",
+    "fireball": "assets/animations/fireball.json",
+    "fire-bomb": "assets/animations/fire-bomb.json"
   },
   "sound_effects": {
     "explosion": [

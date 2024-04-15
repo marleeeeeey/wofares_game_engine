@@ -48,15 +48,19 @@
 2024-04-15 2338 Fix bug with different speed for players.
 2024-04-15 2353 Fix bug when portal searching players incorrectly.
 2024-04-16 0105 Portal burst when eats enought. Family member summoing from the portal. All players moving sinchronized.
+2024-04-16 0217 Integrate fire animation for bullet and grenade. Remove other weapons. Jump - Space.
 
 TODO
 
+- [REJECTED] RightMouse - grenade.
+- [REJECTED] Build - middle mouse button.
+- Write target for the game at the beginning of game.
+- One eating counter for all portals.
 - Level begin when portals eats all family except one player.
 - All players moving sinchronized (by WASD) but active one may attack.
 - Every player has a unique attack.
 - If family member move out of the screen new portal with him will be created.
 - Purpose of the game is to save all family members.
-- Integrate fire animation for bullet.
 - Intergrate animation for grenade like bullet.
 - Magnet objects one-by-one but not all at once.
 - Intergrate (if created) animation of appearance and disappearance of the player.

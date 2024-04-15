@@ -96,7 +96,8 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
         float movingForce = 10.0f * mass;
         float jumpForce = 80.0f * mass;
 
-        if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W)
+        if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W ||
+            originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
         {
             if (playerInfo.countOfGroundContacts > 0)
                 body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
@@ -260,7 +261,7 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
 
     // Check if the throwing force is zero for the grenade.
     if (throwingForce <= 0 &&
-        (playerInfo.currentWeapon == WeaponType::Grenade || playerInfo.currentWeapon == WeaponType::StickTrap))
+        (playerInfo.currentWeapon == WeaponType::Grenade || playerInfo.currentWeapon == WeaponType::Bazooka))
     {
         MY_LOG(
             trace, "[MakeShotIfPossible] Throwing force shouldn't be zero for weapon {}. Entity: {}, force: {}",

@@ -117,8 +117,6 @@ entt::entity ObjectsFactory::SpawnFlyingEntity(
     options.anglePolicy = anglePolicy;
     auto& physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, options);
 
-    registry.emplace<RenderingComponent>(flyingEntity, sizeWorld);
-
     // Apply the force to the flying entity.
     b2Vec2 speedVec = b2Vec2(initialSpeed, 0);
     speedVec = b2Mul(b2Rot(atan2(forceDirection.y, forceDirection.x)), speedVec);
@@ -145,46 +143,46 @@ entt::entity ObjectsFactory::SpawnBullet(
             playerEntity);
         return entt::null;
     }
-    const WeaponProps& currentWeaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
+    const WeaponProps& weaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
+
+    // Prepare the bullet animation.
+    AnimationComponent fireballAnimation =
+        CreateAnimationInfo(weaponProps.animationName, weaponProps.animationTag, ResourceManager::TagProps::ExactMatch);
+    glm::vec2 fireballHitboxSizeWorld = fireballAnimation.GetHitboxSize();
 
     // Spawn flying entity.
     const auto& playerBody = registry.get<PhysicsComponent>(playerEntity).bodyRAII->GetBody();
-    const auto& animationInfo = registry.get<AnimationComponent>(playerEntity);
-    glm::vec2 playerSizeWorld = animationInfo.GetHitboxSize();
+    const auto& playerAnimationComponent = registry.get<AnimationComponent>(playerEntity);
+    glm::vec2 playerSizeWorld = playerAnimationComponent.GetHitboxSize();
     const auto& weaponDirection = playerInfo.weaponDirection;
     glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
-    auto weaponInitialPointShift =
-        weaponDirection * (playerSizeWorld.x / 2.0f + currentWeaponProps.projectileSizeWorld.x);
+    auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x / 2.0f + fireballHitboxSizeWorld.x);
     glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponInitialPointShift;
     entt::entity bulletEntity = SpawnFlyingEntity(
-        positionInFrontOfPlayer, currentWeaponProps.projectileSizeWorld, weaponDirection, initialBulletSpeed,
-        anglePolicy);
+        positionInFrontOfPlayer, fireballHitboxSizeWorld, weaponDirection, initialBulletSpeed, anglePolicy);
     bodyTuner.ApplyOption(bulletEntity, Box2dBodyOptions::BulletPolicy::Bullet);
     bodyTuner.ApplyOption(
         bulletEntity, Box2dBodyOptions::CollisionPolicy{CollisionFlags::Bullet, CollisionFlags::Default});
 
+    // Add the bullet animation to the bullet entity.
+    registry.emplace<AnimationComponent>(bulletEntity, fireballAnimation);
+
     // Create damage component.
     DamageComponent damageComponent;
-    damageComponent.force = currentWeaponProps.damageForce;
-    damageComponent.radius = coordinatesTransformer.WorldToPhysics(currentWeaponProps.damageRadiusWorld);
+    damageComponent.force = weaponProps.damageForce;
+    damageComponent.radius = coordinatesTransformer.WorldToPhysics(weaponProps.damageRadiusWorld);
 
-    // Apply the specific explosion component to the bullet entity.
-    if (playerInfo.currentWeapon == WeaponType::Grenade)
+    switch (playerInfo.currentWeapon)
     {
+    case WeaponType::Bazooka:
+        registry.emplace<DamageComponent>(bulletEntity, damageComponent);
+        registry.emplace<ExplosionOnContactComponent>(bulletEntity);
+        break;
+    case WeaponType::Grenade:
         registry.emplace<DamageComponent>(bulletEntity, damageComponent);
         registry.emplace<TimerComponent>(bulletEntity, 3.0f);
         registry.emplace<ExplosionOnTimerComponent>(bulletEntity);
-    }
-    else if (playerInfo.currentWeapon == WeaponType::StickTrap)
-    {
-        registry.emplace<DamageComponent>(bulletEntity, damageComponent);
-        registry.emplace<StickyComponent>(bulletEntity);
-        registry.emplace<ExplosionOnContactComponent>(bulletEntity);
-    }
-    else
-    {
-        registry.emplace<DamageComponent>(bulletEntity, damageComponent);
-        registry.emplace<ExplosionOnContactComponent>(bulletEntity);
+        break;
     }
 
     return bulletEntity;
