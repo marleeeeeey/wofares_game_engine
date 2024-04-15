@@ -1,4 +1,5 @@
 #include "objects_factory.h"
+#include "ecs/components/animation_components.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
@@ -193,8 +194,13 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
     auto entity = registryWrapper.Create("BuildingBlock");
     glm::vec2 sizeWorld(10.0f, 10.0f);
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld);
-    registry.emplace<RenderingComponent>(
-        entity, sizeWorld, nullptr, SDL_Rect{}, ZOrderingType::Terrain, ColorName::Green);
+
+    AnimationComponent buildingBlockAnimation =
+        CreateAnimationInfo("buildingBlock", "block", ResourceManager::TagProps::ExactMatch);
+    registry.emplace<AnimationComponent>(entity, buildingBlockAnimation);
+
+    registry.emplace<DestructibleByPlayerComponent>(entity);
+
     return entity;
 }
 

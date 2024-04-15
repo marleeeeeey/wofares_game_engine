@@ -6,7 +6,8 @@
     "automaticWeapon": "assets/animations/automatic_weapon.json",
     "scepter": "assets/animations/scepter.json",
     "fireball": "assets/animations/fireball.json",
-    "fire-bomb": "assets/animations/fire-bomb.json"
+    "fire-bomb": "assets/animations/fire-bomb.json",
+    "buildingBlock": "assets/animations/building_block.json"
   },
   "sound_effects": {
     "explosion": [

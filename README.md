@@ -49,11 +49,9 @@
 2024-04-15 2353 Fix bug when portal searching players incorrectly.
 2024-04-16 0105 Portal burst when eats enought. Family member summoing from the portal. All players moving sinchronized.
 2024-04-16 0217 Integrate fire animation for bullet and grenade. Remove other weapons. Jump - Space.
+2024-04-16 0245 Draw animation for building block.
 
 TODO
-
-- [REJECTED] RightMouse - grenade.
-- [REJECTED] Build - middle mouse button.
 - Write target for the game at the beginning of game.
 - One eating counter for all portals.
 - Level begin when portals eats all family except one player.
@@ -65,6 +63,8 @@ TODO
 - Magnet objects one-by-one but not all at once.
 - Intergrate (if created) animation of appearance and disappearance of the player.
 - Implement sound effects.
+- [REJECTED] RightMouse - grenade.
+- [REJECTED] Build - middle mouse button.
 ```
 
 ### Development Guidelines
