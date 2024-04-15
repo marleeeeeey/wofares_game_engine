@@ -165,14 +165,14 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
 
-    std::vector<entt::entity> allOriginalBodiesInRadius =
-        FindEntitiesInRadius(registry, grenadePosPhysics, damageComponent->radius * radiusCoef);
+    std::vector<entt::entity> allOriginalBodiesInRadius = request::FindEntitiesWithAllComponentsInRadius(
+        registry, grenadePosPhysics, damageComponent->radius * radiusCoef);
     MY_LOG(debug, "[DoExplosion] FindEntitiesInRadius count {}", allOriginalBodiesInRadius.size());
 
     auto destructibleOriginalBodies =
-        GetEntitiesWithComponent<DestructibleByPlayerComponent>(registry, allOriginalBodiesInRadius);
+        request::GetEntitiesWithAllComponents<DestructibleByPlayerComponent>(registry, allOriginalBodiesInRadius);
     destructibleOriginalBodies =
-        RemoveEntitiesWithComponent<ExplostionParticlesComponent>(registry, destructibleOriginalBodies);
+        request::RemoveEntitiesWithAllComponents<ExplostionParticlesComponent>(registry, destructibleOriginalBodies);
     MY_LOG(debug, "[DoExplosion] Getting destructible objects. Count {}", destructibleOriginalBodies.size());
 
     // Split original objects to micro objects.
@@ -182,8 +182,8 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     MY_LOG(debug, "[DoExplosion] Spawn micro splittedEntities count {}", newMicroBodies.size());
 
     // Get micro objects in the explosion radius.
-    auto newMicroBodiesToDestroy =
-        FindEntitiesInRadius(registry, newMicroBodies, grenadePosPhysics, damageComponent->radius);
+    auto newMicroBodiesToDestroy = request::FilterEntitiesWithAllComponentsInRadius(
+        registry, newMicroBodies, grenadePosPhysics, damageComponent->radius);
 
     // Destroy micro objects in the explosion radius.
     MY_LOG(debug, "[DoExplosion] Destroing {} micro objects", newMicroBodiesToDestroy.size());

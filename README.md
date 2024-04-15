@@ -42,16 +42,42 @@
 2024-04-15 1142 Inspired with new ideas from SdCorpse.
 2024-04-15 1308 Start working on new features.
 TODO
-- implement portal health.
-- implement player health.
-- portal eats particles.
-- portal eats player (health is empty and game over).
-- implement sumonning from portal when portal eats enought.
-- implement HUD.
-- implement sound effects.
+- Portal eats player emmediately.
+- Portal burst when eats enought. Family member summoing from the portal.
+- Level begin when portals eats all family except one player.
+- All players moving sinchronized (by WASD) but active one may attack.
+- Every player has a unique attack.
+- If family member move out of the screen new portal with him will be created.
+- Purpose of the game is to save all family members.
+- Implement sound effects.
 ```
 
 ### Development Guidelines
+
+#### Efficient Component Access (Entt)
+
+- **Use of Views**: When you need to iterate over entities that share a common set of components, prefer using `view` over `all_of` or `any_of` checks within loop iterations. Views are optimized for fast access and iteration, as they precompute and cache the entities that match the specified component criteria. This approach significantly reduces overhead and improves performance, especially with large entity sets.
+
+```cpp
+  // Recommended
+  auto view = registry.view<ComponentA, ComponentB>();
+  for (auto entity : view) {
+      // Process entities that have both ComponentA and ComponentB
+  }
+  ```
+
+- **Avoid Frequent Component Checks**: Using `registry.all_of` or `registry.any_of` in tight loops for large numbers of entities can be inefficient. These functions check each entity's component makeup at runtime, which can lead to performance degradation if used improperly. (TODO2: check the game code for this).
+
+```cpp
+  // Not recommended for large sets or frequent updates
+  for (auto entity : registry) {
+      if (registry.all_of<ComponentA, ComponentB>(entity)) {
+          // Process entity
+      }
+  }
+  ```
+
+- **Entity Processing Recommendations**: If specific conditional checks on entity components are necessary outside of views, consider structuring your logic to minimize the frequency and scope of these checks, or use architectural patterns that naturally segregate entities into manageable sets. (TODO2: thinking about splitting entities into more specific components).
 
 #### Object Factory
 

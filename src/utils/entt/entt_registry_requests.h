@@ -4,12 +4,15 @@
 #include <entt/entt.hpp>
 #include <optional>
 
-template <typename T>
-std::optional<b2Vec2> FindClosestTargetPos(entt::registry& registry, const b2Vec2& anchorPosWorld)
+namespace request
 {
-    auto targetEntities = registry.view<PhysicsComponent, T>();
+
+template <typename... ComponentTypes>
+std::optional<entt::entity> FindClosestEntityWithAllComponents(entt::registry& registry, const b2Vec2& anchorPosWorld)
+{
+    auto targetEntities = registry.view<PhysicsComponent, ComponentTypes...>();
     float minDistance = std::numeric_limits<float>::max();
-    std::optional<b2Vec2> closestTargetPos;
+    std::optional<entt::entity> closestTargetEntity;
     for (auto targetEntity : targetEntities)
     {
         auto& targetPhysicsComponent = targetEntities.template get<PhysicsComponent>(targetEntity);
@@ -18,50 +21,56 @@ std::optional<b2Vec2> FindClosestTargetPos(entt::registry& registry, const b2Vec
         if (distance < minDistance)
         {
             minDistance = distance;
-            closestTargetPos = targetPos;
+            closestTargetEntity = targetEntity;
         }
     }
-    return closestTargetPos;
+    return closestTargetEntity;
 }
 
-template <typename T>
-std::vector<entt::entity> FindEntitiesInRadius(
+template <typename... ComponentTypes>
+std::optional<b2Vec2> FindClosestEntityPosWithAllComponents(entt::registry& registry, const b2Vec2& anchorPosWorld)
+{
+    auto entityOpt = FindClosestEntityWithAllComponents<ComponentTypes...>(registry, anchorPosWorld);
+
+    if (!entityOpt.has_value())
+        return std::nullopt;
+
+    auto& physicsComponent = registry.get<PhysicsComponent>(entityOpt.value());
+    return physicsComponent.bodyRAII->GetBody()->GetPosition();
+}
+
+template <typename... ComponentTypes>
+std::vector<entt::entity> FindEntitiesWithAllComponentsInRadius(
     entt::registry& registry, const b2Vec2& centerPosPhysics, float radiusPhysics)
 {
     std::vector<entt::entity> entitiesInRadius;
-    auto entities = registry.view<PhysicsComponent, T>();
-    for (auto entity : entities)
+    auto view = registry.view<PhysicsComponent, ComponentTypes...>();
+
+    for (auto entity : view)
     {
-        auto& physicsComponent = entities.template get<PhysicsComponent>(entity);
-        auto entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
+        const auto& physicsComponent = view.template get<PhysicsComponent>(entity);
+        const auto& entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
+
         if (b2Distance(centerPosPhysics, entityPos) < radiusPhysics)
+        {
             entitiesInRadius.push_back(entity);
+        }
     }
     return entitiesInRadius;
 }
 
-inline std::vector<entt::entity> FindEntitiesInRadius(
-    entt::registry& registry, const b2Vec2& centerPosPhysics, float radiusPhysics)
-{
-    std::vector<entt::entity> entitiesInRadius;
-    auto entities = registry.view<PhysicsComponent>();
-    for (auto entity : entities)
-    {
-        auto& physicsComponent = entities.template get<PhysicsComponent>(entity);
-        auto entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
-        if (b2Distance(centerPosPhysics, entityPos) < radiusPhysics)
-            entitiesInRadius.push_back(entity);
-    }
-    return entitiesInRadius;
-}
-
-inline std::vector<entt::entity> FindEntitiesInRadius(
+template <typename... ComponentTypes>
+std::vector<entt::entity> FilterEntitiesWithAllComponentsInRadius(
     entt::registry& registry, const std::vector<entt::entity>& entities, const b2Vec2& centerPosPhysics,
     float radiusPhysics)
 {
     std::vector<entt::entity> entitiesInRadius;
     for (auto entity : entities)
     {
+        // Check if the entity has all the required components.
+        if (!registry.all_of<PhysicsComponent, ComponentTypes...>(entity))
+            continue;
+
         auto& physicsComponent = registry.get<PhysicsComponent>(entity);
         auto entityPos = physicsComponent.bodyRAII->GetBody()->GetPosition();
         if (b2Distance(centerPosPhysics, entityPos) < radiusPhysics)
@@ -70,27 +79,29 @@ inline std::vector<entt::entity> FindEntitiesInRadius(
     return entitiesInRadius;
 }
 
-template <typename T>
-std::vector<entt::entity> RemoveEntitiesWithComponent(
+template <typename... ComponentTypes>
+std::vector<entt::entity> RemoveEntitiesWithAllComponents(
     entt::registry& registry, const std::vector<entt::entity>& entities)
 {
     std::vector<entt::entity> result;
     for (auto& entity : entities)
     {
-        if (!registry.any_of<T>(entity))
+        if (!registry.all_of<ComponentTypes...>(entity))
             result.push_back(entity);
     }
     return result;
 }
 
-template <typename T>
-std::vector<entt::entity> GetEntitiesWithComponent(entt::registry& registry, const std::vector<entt::entity>& entities)
+template <typename... ComponentTypes>
+std::vector<entt::entity> GetEntitiesWithAllComponents(
+    entt::registry& registry, const std::vector<entt::entity>& entities)
 {
     std::vector<entt::entity> result;
     for (auto& entity : entities)
     {
-        if (registry.any_of<T>(entity))
+        if (registry.all_of<ComponentTypes...>(entity))
             result.push_back(entity);
     }
     return result;
 }
+} // namespace request

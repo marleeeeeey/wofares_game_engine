@@ -233,7 +233,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
 
             // Reset the timer.
             auto& timerComponent = registry.get<TimerComponent>(timedPortal);
-            timerComponent.timeToActivation = utils::Random<float>(10, 20);
+            timerComponent.timeToActivation = utils::Random<float>(4, 20);
             timerComponent.isActivated = false;
 
             MY_LOG(debug, "Portal {} changing speed to {}", timedPortal, portalComponent.speed);

@@ -53,7 +53,8 @@ void GameLogicSystem::UpdatePortalObjectsPosition(float deltaTime)
 
 std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
 {
-    auto closestExplosionParticlesPos = FindClosestTargetPos<ExplostionParticlesComponent>(registry, portalPos);
+    auto closestExplosionParticlesPos =
+        request::FindClosestEntityPosWithAllComponents<ExplostionParticlesComponent>(registry, portalPos);
     if (closestExplosionParticlesPos.has_value())
     {
         // If the closest explosion particles are too close to the portal, return this position.
@@ -61,11 +62,11 @@ std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
             return closestExplosionParticlesPos;
     }
 
-    auto closestStickyPos = FindClosestTargetPos<StickyComponent>(registry, portalPos);
+    auto closestStickyPos = request::FindClosestEntityPosWithAllComponents<StickyComponent>(registry, portalPos);
     if (closestStickyPos.has_value())
         return closestStickyPos;
 
-    auto closestPlayerPos = FindClosestTargetPos<PlayerComponent>(registry, portalPos);
+    auto closestPlayerPos = request::FindClosestEntityPosWithAllComponents<PlayerComponent>(registry, portalPos);
     if (closestPlayerPos.has_value())
         return closestPlayerPos;
 
@@ -85,7 +86,8 @@ void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)
         auto portalBody = physicsComponent.bodyRAII->GetBody();
         auto portalPos = portalBody->GetPosition();
 
-        auto entitiesToMagnet = FindEntitiesInRadius<ExplostionParticlesComponent>(registry, portalPos, 6.0f);
+        auto entitiesToMagnet =
+            request::FindEntitiesWithAllComponentsInRadius<ExplostionParticlesComponent>(registry, portalPos, 6.0f);
 
         for (auto entityToMagnet : entitiesToMagnet)
         {
@@ -110,7 +112,8 @@ void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
         auto portalBody = physicsComponent.bodyRAII->GetBody();
         auto portalPos = portalBody->GetPosition();
 
-        auto entitiesInPortal = FindEntitiesInRadius<ExplostionParticlesComponent>(registry, portalPos, 0.1f);
+        auto entitiesInPortal =
+            request::FindEntitiesWithAllComponentsInRadius<ExplostionParticlesComponent>(registry, portalPos, 0.1f);
         if (entitiesInPortal.empty())
             continue;
 
@@ -130,7 +133,7 @@ void GameLogicSystem::IfPortalsTooCloseToEachOtherScatterThem()
         auto portalBody = physicsComponent.bodyRAII->GetBody();
         auto portalPos = portalBody->GetPosition();
 
-        auto mergedPortals = FindEntitiesInRadius<PortalComponent>(registry, portalPos, 0.5f);
+        auto mergedPortals = request::FindEntitiesWithAllComponentsInRadius<PortalComponent>(registry, portalPos, 0.5f);
         // If there are more than one portal in the same position, scatter them.
         if (mergedPortals.size() > 1)
         {
