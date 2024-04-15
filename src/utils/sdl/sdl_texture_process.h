@@ -2,7 +2,7 @@
 #include <SDL.h>
 #include <filesystem>
 #include <memory>
-#include <utils/RAII/sdl_RAII.h>
+#include <utils/sdl/sdl_RAII.h>
 
 struct TextureRect
 {

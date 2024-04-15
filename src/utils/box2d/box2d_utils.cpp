@@ -1,6 +1,6 @@
 #include "box2d_utils.h"
 #include <ecs/components/physics_components.h>
-#include <utils/glm_box2d_conversions.h>
+#include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/math_utils.h>
 
 Box2dUtils::Box2dUtils(entt::registry& registry)

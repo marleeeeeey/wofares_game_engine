@@ -5,7 +5,7 @@
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
 #include <my_cpp_utils/config.h>
-#include <utils/glm_box2d_conversions.h>
+#include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/logger.h>
 
 RenderWorldSystem::RenderWorldSystem(

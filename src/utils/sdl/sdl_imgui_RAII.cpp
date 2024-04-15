@@ -1,4 +1,4 @@
-#include "imgui_sdl_RAII.h"
+#include "sdl_imgui_RAII.h"
 #include <stdexcept>
 
 ImGuiSDLRAII::ImGuiSDLRAII(SDL_Window* window, SDL_Renderer* renderer) : renderer(renderer)

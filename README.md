@@ -1,15 +1,22 @@
 # LD55 (C++ Game Project)
 
-**LD55** - is a platformer game developed for the Ludum Dare 55 game jam.
+**LD55** - is a platformer game developed for the [Ludum Dare 55 game jam](https://ldjam.com/events/ludum-dare/55).
 
-### Team
+### Team Members
 
-- [marleeeeeey](https://github.com/marleeeeeey) - C++ programming, game desing, sound.
-- [jsCommander](https://github.com/jsCommander) - game desing, art.
+- [marleeeeeey](https://github.com/marleeeeeey) - programming, game design, and sound.
+- [jsCommander](https://github.com/jsCommander) - game design and art.
+- [SdCorpse](https://www.artstation.com/secondcorpse) - game design and testing.
+
+### Screenshot
 
 ![alt text](docs/LD55_screenshot.png)
 
-### Log
+### Platform Support
+
+- This game has been developed, built, and tested solely on **Windows**. Build also works on **Linux(Ubuntu)** but not tested yet.
+
+### LD55 game depeloping Log
 
 ```
 2024-04-13 0500 Start the jam (I overslept).
@@ -18,9 +25,9 @@
 2024-04-13 1513 Implement dummy portal catching the player.
 2024-04-13 1826 Intergrate evil and portal animations.
 2024-04-14 0159 Implement StickyTrap.
-2024-04-14 0309 Add Box2dBodyOptions::DestructionPolicy. Support ZOrdering: Background, Interiors, Terrain.
+2024-04-14 0309 Support DestructionPolicy and ZOrdering: Background, Interiors, Terrain.
 2024-04-14 0414 Portal sticky to trap.
-2024-04-14 0930 Me sleeping from 0414 to 0930.
+2024-04-14 0930 I was sleeping since 0414 to 0930.
 2024-04-14 1108 Create fast hybrid explosion fragments.
 2024-04-14 1308 Implement portal absorbing fragments.
 2024-04-14 1407 Randomize portal speed in time.
@@ -31,27 +38,74 @@
 2024-04-14 2316 Fix bug in release with undestructible objects.
 2024-04-15 0103 Update collision system. Bullet doesn't collide with Particles.
 2024-04-15 0212 Scatter portals if they bump each other.
+2024-04-15 0230 I was sleeping since 0230 to 0830.
+2024-04-15 1142 Inspired with new ideas from SdCorpse.
+2024-04-15 1308 Start working on new features.
+TODO
+- implement portal health.
+- implement player health.
+- portal eats particles.
+- portal eats player (health is empty and game over).
+- implement sumonning from portal when portal eats enought.
+- implement HUD.
+- implement sound effects.
 ```
 
-### Assets editing
+### Development Guidelines
 
-- Aseprite
-  - All frames must have tags. Tags are used in the C++ code.
-  - Aseprite must contrain frame with name `Hitbox`.
-- Tiled
-  - Map may contains layers: `backgound`, `interiors`, `terrain`, `objects` (from bottom to top).
+#### Object Factory
 
-### Platform Support
+- **ObjectsFactory** is the only object that should add new components to the `entt::registry`.
+  - Any method that creates a new object must start with `Spawn`.
 
-- This game has been developed, built, and tested solely on **Windows**. Build also works on **Linux(Ubuntu)** but not tested yet.
+#### Component Naming Conventions
+
+- Class names for components must end with `Component`.
+  - Header files containing components should end with `_components.h`.
+
+#### Coordinate Systems and Object Sizing
+
+- Texture sizes are measured in pixels, while the sizes of objects in the physical world are measured in meters.
+- There are three coordinate systems: screen, pixel world, and physical world. Variable names should end with `Screen`, `World` (TODO3: rename to `Pixels`), or `Physics`.
+
+#### C++ Style Guide
+
+- Prefer using `enum class` over boolean variables.
+- Favor composition over inheritance.
+- Use descriptive and clear naming conventions that reflect the purpose and usage of the variable or function.
+
+#### Configuration Style Guide
+
+- In `config.json`, section names should correspond to the class names that use them.
+- Variable naming in `config.json` should be a direct copy of the variable names in the code.
+
+#### Animation Editor and Engine Integration
+
+- The player animation stores the BBox (bounding box) of the object used for collision detection.
+- Bullet animations should not consider the dimensions of the BBox for speed calculations.
+
+### Assets Editing Guidelines
+
+#### Aseprite Guidelines
+
+- **Tagging**: Ensure that all frames are tagged, as these tags are referenced in the C++ code for animation handling.
+- **Hitbox Frame**: Include a specifically named frame `Hitbox` within your Aseprite files, which will be used to define interaction boundaries in the game.
+
+#### Tiled Map Editor Guidelines
+
+- **Layer Structure**: Your maps should be organized with the following layers from bottom to top:
+  - `background`: For non-interactive scenery that appears behind all game entities.
+  - `interiors`: For elements like indoor furnishings that players can potentially interact with but are not part of the terrain.
+  - `terrain`: For the main walkable and interactive layer of the game environment.
+  - `objects`: For movable or interactive objects that players can interact with during the game.
+
+## Windows build
 
 ### Clone the Repository
 
 ```
 git clone --recursive https://github.com/marleeeeeey/LD55-game.git
 ```
-
-## Windows
 
 ### Prerequisites for Building the Project (Windows)
 
@@ -117,7 +171,13 @@ Run the game:
 src\LD55.exe
 ```
 
-## Linux
+## Linux build
+
+### Clone the Repository
+
+```
+git clone --recursive https://github.com/marleeeeeey/LD55-game.git
+```
 
 ### Prerequisites for Building the Project (Linux)
 

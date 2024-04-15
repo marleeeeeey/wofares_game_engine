@@ -1,9 +1,10 @@
 #include "resource_cache.h"
 #include <filesystem>
-#include <utils/RAII/sdl_RAII.h>
 #include <utils/logger.h>
+#include <utils/sdl/sdl_RAII.h>
 #include <utils/sdl/sdl_colors.h>
 #include <utils/sdl/sdl_texture_process.h>
+
 
 namespace details
 {

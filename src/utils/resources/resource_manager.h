@@ -3,11 +3,12 @@
 #include <filesystem>
 #include <memory>
 #include <unordered_map>
-#include <utils/RAII/sdl_RAII.h>
 #include <utils/animation.h>
 #include <utils/level_info.h>
 #include <utils/resources/resource_cache.h>
+#include <utils/sdl/sdl_RAII.h>
 #include <utils/sdl/sdl_colors.h>
+
 
 // High-level resource management. Get resources by friendly names in game like terminolgy.
 // Every Get* method define specific resource type and return it by friendly name.

@@ -1,4 +1,4 @@
-#include "glm_box2d_conversions.h"
+#include "box2d_glm_conversions.h"
 
 glm::vec2 operator+(const b2Vec2& lhs, const glm::vec2& rhs)
 {

@@ -4,8 +4,8 @@
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
 #include <ecs/components/timer_components.h>
+#include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/entt/entt_registry_requests.h>
-#include <utils/glm_box2d_conversions.h>
 #include <utils/logger.h>
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry) : registry(registry), registryWrapper(registry)

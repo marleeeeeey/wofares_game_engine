@@ -3,7 +3,7 @@
 #include <ecs/components/physics_components.h>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
-#include <utils/RAII/box2d_RAII.h>
+#include <utils/box2d/box2d_RAII.h>
 #include <utils/box2d/box2d_body_options.h>
 #include <utils/coordinates_transformer.h>
 

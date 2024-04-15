@@ -2,7 +2,7 @@
 #include <SDL.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <utils/RAII/sdl_RAII.h>
+#include <utils/sdl/sdl_RAII.h>
 #include <utils/sdl/sdl_colors.h>
 
 enum class ZOrderingType

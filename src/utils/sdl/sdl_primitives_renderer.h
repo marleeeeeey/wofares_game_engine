@@ -4,7 +4,7 @@
 #include <ecs/components/animation_components.h>
 #include <ecs/components/rendering_components.h>
 #include <entt/entt.hpp>
-#include <utils/RAII/box2d_RAII.h>
+#include <utils/box2d/box2d_RAII.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/game_options.h>
 #include <utils/resources/resource_manager.h>

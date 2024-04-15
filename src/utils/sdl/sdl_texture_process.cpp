@@ -2,9 +2,8 @@
 #include <SDL_image.h>
 #include <SDL_pixels.h>
 #include <SDL_surface.h>
-#include <utils/RAII/sdl_RAII.h>
 #include <utils/logger.h>
-
+#include <utils/sdl/sdl_RAII.h>
 
 bool IsTileInvisible(SDL_Surface* surface, const SDL_Rect& miniTextureSrcRect)
 {
@@ -137,9 +136,9 @@ std::shared_ptr<SDLSurfaceRAII> LoadSurfaceWithStreamingAccess(const std::filesy
     auto targetFormat = SDL_PIXELFORMAT_ABGR8888;
     if (surface.get()->format->format != targetFormat)
     {
-        MY_LOG(warn, "Original surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        MY_LOG(debug, "Original surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
         surface = ConvertSurfaceFormat(surface.get(), targetFormat);
-        MY_LOG(warn, "Converted surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
+        MY_LOG(debug, "Converted surface format: {}", SDL_GetPixelFormatName(surface.get()->format->format));
     }
     else
     {
