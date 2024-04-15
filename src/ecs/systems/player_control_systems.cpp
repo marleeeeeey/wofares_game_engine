@@ -75,9 +75,6 @@ void PlayerControlSystem::SubscribeToContactListener()
 
 void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
 {
-    float movingForce = 10.0f;
-    float jumpForce = 80.0f;
-
     auto& originalEvent = eventInfo.originalEvent;
 
     const auto& players = registry.view<PlayerComponent, PhysicsComponent>();
@@ -96,8 +93,8 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
             continue;
 
         auto mass = body->GetMass();
-        movingForce *= mass;
-        jumpForce *= mass;
+        float movingForce = 10.0f * mass;
+        float jumpForce = 80.0f * mass;
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W)
         {
