@@ -1,6 +1,8 @@
-# LD55 (C++ Game Project)
+# Hungry Portals (LD55 Game)
 
-**LD55** - is a platformer game developed for the [Ludum Dare 55 game jam](https://ldjam.com/events/ludum-dare/55).
+**Hungry Portals** - is a platformer game developed for the [Ludum Dare 55 game jam](https://ldjam.com/events/ludum-dare/55/ld55-hungry-portals).
+
+Hungry Portals from the dark realm are out for blood, and they’ve turned their attention to your home, trapping your demonic family within their shadowy depths. You start as a lone survivor with a chance to save your kin and reclaim your home. [More details...](docs/GAME_DESCRIPTION.md)
 
 ### Team Members
 
@@ -10,7 +12,7 @@
 
 ### Screenshot
 
-![alt text](docs/LD55_screenshot.png)
+![game screenshot](docs/LD55_screenshot.png)
 
 ### Platform Support
 
@@ -19,7 +21,7 @@
 ### LD55 game depeloping Log
 
 ```
-2024-04-13 0500 Start the jam (I overslept).
+2024-04-13 0500 Start the jam (I overslept 7 hours since the start of the jam).
 2024-04-13 1200 Start thinking about the game idea.
 2024-04-13 1353 Complete repository setup.
 2024-04-13 1513 Implement dummy portal catching the player.
@@ -53,8 +55,9 @@
 2024-04-16 0324 One eating counter for all portals. Decrease portal sleep time.
 2024-10-16 0411 Create game intruction on start.
 
+*** Next items will be implemented after the jam ***
+
 TODO
-- Write target for the game at the beginning of game.
 - Implement sound effects.
 - [POSTONE] Intergrate (if created) animation of appearance and disappearance of the player.
 - [POSTONE] Magnet objects one-by-one but not all at once.
