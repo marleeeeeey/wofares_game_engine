@@ -15,8 +15,8 @@ def pack_binaries(path_to_7z, root_folder, build_type, achive_name):
         f"*.lib",
         f"*.pdb",
         f"*.tiled-session",
-        # f"*.aseprite",
-        # f"*.tiled-project",
+        f"*.aseprite",
+        f"*.tiled-project",
         # Add other paths to exclude here
     ]
 
