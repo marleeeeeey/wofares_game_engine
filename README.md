@@ -18,7 +18,7 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 
 - This game has been developed, built, and tested solely on **Windows**. Build also works on **Linux(Ubuntu)** but not tested yet.
 
-### LD55 game depeloping Log
+### Change Log
 
 ```
 2024-04-13 0500 Start the jam (I overslept 7 hours since the start of the jam).
@@ -58,6 +58,7 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 *** Next items will be implemented after the jam ***
 
 2024-10-16 1250 Fix start menu bug.
+2024-10-16 1317 Remove background from the game.
 
 TODO
 - Implement sound effects.
