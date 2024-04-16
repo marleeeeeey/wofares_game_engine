@@ -9,12 +9,14 @@ class RenderHUDSystem
     entt::registry& registry;
     SDL_Renderer* renderer;
     GameOptions& gameState;
+    nlohmann::json assetsSettingsJson;
 public:
-    RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer);
+    RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer, nlohmann::json assetsSettingsJson);
     void Render();
 private:
     void RenderDebugMenu();
     void RenderGrid();
     void DrawPlayersWindowInfo();
     void ShowGameInstructions();
+    void ShowLevelCompleteScreen(bool isWin);
 };

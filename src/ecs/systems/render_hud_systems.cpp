@@ -10,8 +10,9 @@
 #include <utils/sdl/sdl_colors.h>
 #include <utils/sdl/sdl_draw.h>
 
-RenderHUDSystem::RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer)
-  : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
+RenderHUDSystem::RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer, nlohmann::json assetsSettingsJson)
+  : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    assetsSettingsJson(assetsSettingsJson)
 {}
 
 void RenderHUDSystem::Render()
@@ -19,11 +20,24 @@ void RenderHUDSystem::Render()
     if (utils::GetConfig<bool, "RenderHUDSystem.showGrid">())
         RenderGrid();
 
-    RenderDebugMenu();
-    DrawPlayersWindowInfo();
+    if (utils::GetConfig<bool, "RenderHUDSystem.showDebugMenus">())
+    {
+        RenderDebugMenu();
+        DrawPlayersWindowInfo();
+    }
 
     if (gameState.showGameInstructions)
+    {
         ShowGameInstructions();
+    }
+    else
+    {
+        if (gameState.controlOptions.showLevelCompleteScreen)
+            ShowLevelCompleteScreen(true);
+
+        if (gameState.controlOptions.showGameOverScreen)
+            ShowLevelCompleteScreen(false);
+    }
 }
 
 void RenderHUDSystem::RenderDebugMenu()
@@ -147,7 +161,7 @@ void RenderHUDSystem::ShowGameInstructions()
             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoSavedSettings);
 
-    ImGui::SetWindowFontScale(3);
+    ImGui::SetWindowFontScale(2.5);
 
     ImGui::TextWrapped(
         "Welcome to the HUNGRY PORTALS Game created by marleeeeeey, jsCommander and SdCorpse for Ludum Dare 55! "
@@ -170,6 +184,7 @@ void RenderHUDSystem::ShowGameInstructions()
     ImGui::BulletText("Scale: Mouse Wheel");
     ImGui::BulletText("Toggle Fullscreen: F11");
     ImGui::BulletText("Drag the screen: Hold Mouse Middle Button");
+    ImGui::BulletText("Quit game: ESC");
 
     ImGui::Separator();
     ImGui::TextWrapped("Enjoy the game and make sure to complete all the missions!");
@@ -185,6 +200,75 @@ void RenderHUDSystem::ShowGameInstructions()
     {
         gameState.showGameInstructions = false;
         gameState.controlOptions.reloadMap = true;
+    }
+
+    ImGui::End();
+}
+
+void RenderHUDSystem::ShowLevelCompleteScreen(bool isWin)
+{
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(gameState.windowOptions.windowSize.x, gameState.windowOptions.windowSize.y));
+
+    bool open = true;
+    ImGui::Begin(
+        "Level Complete", &open,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoSavedSettings);
+
+    ImGui::SetWindowFontScale(3);
+
+    if (isWin)
+    {
+        ImGui::TextWrapped("Congratulations! You have completed the level!");
+    }
+    else
+    {
+        ImGui::TextWrapped("Game Over! You have lost!");
+    }
+
+    ImGui::Separator();
+
+    // Draw buttons "Restart" and "Next Level".
+    const char* restartText = "Restart";
+    ImVec2 textSize = ImGui::CalcTextSize(restartText);
+    float buttonWidth = textSize.x + ImGui::GetStyle().FramePadding.x * 2; // Add some padding
+    float windowWidth = ImGui::GetWindowSize().x;
+    float positionX = (windowWidth - buttonWidth) * 0.5f;
+    ImGui::SetCursorPosX(positionX);
+    if (ImGui::Button(restartText, ImVec2(buttonWidth, textSize.y)))
+    {
+        gameState.controlOptions.reloadMap = true;
+        gameState.controlOptions.showLevelCompleteScreen = false;
+        gameState.controlOptions.showGameOverScreen = false;
+    }
+
+    const char* nextLevelText = "Next Level";
+    textSize = ImGui::CalcTextSize(nextLevelText);
+    buttonWidth = textSize.x + ImGui::GetStyle().FramePadding.x * 2; // Add some padding
+    positionX = (windowWidth - buttonWidth) * 0.5f;
+    ImGui::SetCursorPosX(positionX);
+    if (ImGui::Button(nextLevelText, ImVec2(buttonWidth, textSize.y)))
+    {
+        auto maps = assetsSettingsJson["maps"];
+
+        // Find the current map in the list of maps.
+        auto currentMapName = gameState.levelOptions.mapName;
+        auto currentMapIt = std::find_if(
+            maps.begin(), maps.end(), [&currentMapName](const auto& map) { return map["name"] == currentMapName; });
+
+        // Find the next map in the list of maps.
+        auto nextMapIt = currentMapIt + 1;
+        if (nextMapIt == maps.end())
+            nextMapIt = maps.begin();
+
+        // Load the next map.
+        gameState.levelOptions.mapName = nextMapIt->at("name").get<std::string>();
+
+        gameState.controlOptions.reloadMap = true;
+        gameState.controlOptions.showLevelCompleteScreen = false;
+        gameState.controlOptions.showGameOverScreen = false;
     }
 
     ImGui::End();

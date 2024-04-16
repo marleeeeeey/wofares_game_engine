@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/game_options.h"
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <utils/box2d/box2d_body_tuner.h>
@@ -13,6 +14,7 @@ class GameLogicSystem
     Box2dBodyTuner bodyTuner;
     ObjectsFactory& objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
+    GameOptions& gameState;
 public:
     GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory);
     void Update(float deltaTime);
@@ -23,4 +25,5 @@ private: // Portal logic
     void DestroyClosestDestructibleParticlesInPortal();
     void ScatterPortalsIsTheyCloseToEachOther();
     void EatThePlayerByPortalIfCloser();
+    void CheckGameCompletness();
 };

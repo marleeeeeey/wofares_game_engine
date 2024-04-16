@@ -12,7 +12,7 @@
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
-    coordinatesTransformer(registry)
+    coordinatesTransformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
 {}
 
 void GameLogicSystem::Update(float deltaTime)
@@ -22,6 +22,7 @@ void GameLogicSystem::Update(float deltaTime)
     DestroyClosestDestructibleParticlesInPortal();
     ScatterPortalsIsTheyCloseToEachOther();
     EatThePlayerByPortalIfCloser();
+    CheckGameCompletness();
 }
 
 void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
@@ -254,4 +255,19 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
                 objectsFactory.SpawnPortal(portalPosWorld, "Respawned portal");
             }
         });
+}
+
+void GameLogicSystem::CheckGameCompletness()
+{
+    auto playerEntities = registry.view<PlayerComponent>();
+    if (playerEntities.size() == 0)
+    {
+        gameState.controlOptions.showGameOverScreen = true;
+    }
+
+    auto portalEntities = registry.view<PortalComponent>();
+    if (portalEntities.size() == 0)
+    {
+        gameState.controlOptions.showLevelCompleteScreen = true;
+    }
 }

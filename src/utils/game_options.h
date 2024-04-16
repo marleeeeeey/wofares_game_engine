@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <string>
 #include <utils/sdl/sdl_RAII.h>
 
 struct LevelPhysicsBounds
@@ -14,12 +15,13 @@ struct LevelPhysicsBounds
 struct BackgroundInfo
 {
     std::shared_ptr<SDLTextureRAII> texture{}; // Pointer to the texture.
-    float textureScale{1.0f}; // Scale of the texture. 1.0f means that the texture is not scaled.
+    float textureScale{3.0f}; // Scale of the texture. 1.0f means that the texture is not scaled.
     float speedFactor{0.1f}; // Speed factor of the background. 1.0f means that the background moves with the camera.
 };
 
 struct LevelOptions
 {
+    std::string mapName{"level1"};
     BackgroundInfo backgroundInfo;
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};
@@ -37,8 +39,10 @@ struct WindowOptions
 struct ControlOptions
 {
     bool quit{false}; // Flag to control game loop exit
-    bool reloadMap{false};
+    bool reloadMap{true};
     bool isSceneCaptured{false};
+    bool showLevelCompleteScreen{false};
+    bool showGameOverScreen{false};
 };
 
 struct DebugInfo

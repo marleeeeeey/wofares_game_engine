@@ -47,7 +47,8 @@
     "box2DtoWorld": 48
   },
   "RenderHUDSystem": {
-    "showGrid": false
+    "showGrid": false,
+    "showDebugMenus": false
   },
   "RenderWorldSystem": {
     "renderPlayerHitbox": false

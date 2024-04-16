@@ -25,6 +25,11 @@
       "name": "level1",
       "tiledMapPath": "assets/maps/map.tmj",
       "backgroundPath": "assets/backgrounds/dark_background.png"
+    },
+    {
+      "name": "level2",
+      "tiledMapPath": "assets/maps/map2.tmj",
+      "backgroundPath": "assets/backgrounds/dark_background.png"
     }
   ]
 }

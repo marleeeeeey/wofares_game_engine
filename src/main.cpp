@@ -117,7 +117,7 @@ int main([[maybe_unused]] int argc, char* args[])
         RandomEventSystem randomEventSystem(registryWrapper.GetRegistry(), audioSystem);
         RenderWorldSystem RenderWorldSystem(
             registryWrapper.GetRegistry(), renderer.get(), resourceManager, primitivesRenderer);
-        RenderHUDSystem RenderHUDSystem(registryWrapper.GetRegistry(), renderer.get());
+        RenderHUDSystem RenderHUDSystem(registryWrapper.GetRegistry(), renderer.get(), assetsSettingsJson);
 
         // Auxiliary systems.
         ScreenModeControlSystem screenModeControlSystem(inputEventManager, window);
@@ -125,8 +125,6 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Load the map.
         MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager, contactListener);
-        auto level1 = resourceManager.GetTiledLevel("level1");
-        mapLoaderSystem.LoadMap(level1);
 
         AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry(), resourceManager);
         GameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory);
@@ -142,9 +140,10 @@ int main([[maybe_unused]] int argc, char* args[])
             float deltaTime = static_cast<float>(frameStart - lastTick) / 1000.0f;
             lastTick = frameStart;
 
-            if (utils::FileChangedSinceLastCheck(level1.tiledMapPath) || gameOptions.controlOptions.reloadMap)
+            if (gameOptions.controlOptions.reloadMap)
             {
-                mapLoaderSystem.LoadMap(level1);
+                auto level = resourceManager.GetTiledLevel(gameOptions.levelOptions.mapName);
+                mapLoaderSystem.LoadMap(level);
                 gameOptions.controlOptions.reloadMap = false;
             }
 
