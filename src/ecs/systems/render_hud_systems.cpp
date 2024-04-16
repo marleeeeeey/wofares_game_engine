@@ -199,6 +199,8 @@ void RenderHUDSystem::ShowGameInstructions()
     if (ImGui::Button(buttonText, ImVec2(buttonWidth, textSize.y)))
     {
         gameState.showGameInstructions = false;
+        gameState.controlOptions.showLevelCompleteScreen = false;
+        gameState.controlOptions.showGameOverScreen = false;
         gameState.controlOptions.reloadMap = true;
     }
 

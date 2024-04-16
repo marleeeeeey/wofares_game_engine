@@ -57,6 +57,8 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 
 *** Next items will be implemented after the jam ***
 
+2024-10-16 1250 Fix start menu bug.
+
 TODO
 - Implement sound effects.
 - [POSTONE] Intergrate (if created) animation of appearance and disappearance of the player.
