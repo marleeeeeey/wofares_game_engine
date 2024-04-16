@@ -55,5 +55,6 @@ struct GameOptions
     ControlOptions controlOptions;
     DebugInfo debugInfo;
     b2Vec2 gravity{0.0f, +9.8f};
+    bool showGameInstructions{true};
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(GameOptions, windowOptions)
 };

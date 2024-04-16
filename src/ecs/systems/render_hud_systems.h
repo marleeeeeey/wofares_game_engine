@@ -16,4 +16,5 @@ private:
     void RenderDebugMenu();
     void RenderGrid();
     void DrawPlayersWindowInfo();
+    void ShowGameInstructions();
 };

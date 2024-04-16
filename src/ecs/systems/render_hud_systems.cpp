@@ -21,6 +21,9 @@ void RenderHUDSystem::Render()
 
     RenderDebugMenu();
     DrawPlayersWindowInfo();
+
+    if (gameState.showGameInstructions)
+        ShowGameInstructions();
 }
 
 void RenderHUDSystem::RenderDebugMenu()
@@ -131,4 +134,58 @@ void RenderHUDSystem::DrawPlayersWindowInfo()
 
         ImGui::End();
     }
+}
+void RenderHUDSystem::ShowGameInstructions()
+{
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(gameState.windowOptions.windowSize.x, gameState.windowOptions.windowSize.y));
+
+    bool open = true;
+    ImGui::Begin(
+        "Game Instructions", &open,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoSavedSettings);
+
+    ImGui::SetWindowFontScale(3);
+
+    ImGui::TextWrapped(
+        "Welcome to the HUNGRY PORTALS Game created by marleeeeeey, jsCommander and SdCorpse for Ludum Dare 55! "
+        "Visit the game repository on GitHub:\nhttps://github.com/marleeeeeey/LD55-game");
+    ImGui::Separator();
+
+    ImGui::TextWrapped(
+        "Hungry portals to the dark realm are desperate for fresh blood. They've reached your home and swallowed your family. "
+        "You stand alone. Yet, there is a chance to save them. These portals consume everything they can lift, so destroy everything around you. "
+        "Let them choke and burst, and then your family will return. Good luck!");
+    ImGui::Separator();
+
+    ImGui::Text("Controls");
+    ImGui::BulletText("Move: WASD");
+    ImGui::BulletText("Jump: Spacebar");
+    ImGui::BulletText("Shoot: Mouse Left Button");
+    ImGui::BulletText("Build: Mouse Right Button");
+    ImGui::BulletText("Switch to Bazooka: Key 1");
+    ImGui::BulletText("Switch to Grenade: Key 2");
+    ImGui::BulletText("Scale: Mouse Wheel");
+    ImGui::BulletText("Toggle Fullscreen: F11");
+    ImGui::BulletText("Drag the screen: Hold Mouse Middle Button");
+
+    ImGui::Separator();
+    ImGui::TextWrapped("Enjoy the game and make sure to complete all the missions!");
+
+    ImGui::Separator();
+    const char* buttonText = "Start Game";
+    ImVec2 textSize = ImGui::CalcTextSize(buttonText);
+    float buttonWidth = textSize.x + ImGui::GetStyle().FramePadding.x * 2; // Add some padding
+    float windowWidth = ImGui::GetWindowSize().x;
+    float positionX = (windowWidth - buttonWidth) * 0.5f;
+    ImGui::SetCursorPosX(positionX);
+    if (ImGui::Button(buttonText, ImVec2(buttonWidth, textSize.y)))
+    {
+        gameState.showGameInstructions = false;
+        gameState.controlOptions.reloadMap = true;
+    }
+
+    ImGui::End();
 }

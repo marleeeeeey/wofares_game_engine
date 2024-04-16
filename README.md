@@ -51,21 +51,13 @@
 2024-04-16 0217 Integrate fire animation for bullet and grenade. Remove other weapons. Jump - Space.
 2024-04-16 0245 Draw animation for building block.
 2024-04-16 0324 One eating counter for all portals. Decrease portal sleep time.
+2024-10-16 0411 Create game intruction on start.
 
 TODO
 - Write target for the game at the beginning of game.
-- One eating counter for all portals.
-- Level begin when portals eats all family except one player.
-- All players moving sinchronized (by WASD) but active one may attack.
-- Every player has a unique attack.
-- If family member move out of the screen new portal with him will be created.
-- Purpose of the game is to save all family members.
-- Intergrate animation for grenade like bullet.
-- Magnet objects one-by-one but not all at once.
-- Intergrate (if created) animation of appearance and disappearance of the player.
 - Implement sound effects.
-- [REJECTED] RightMouse - grenade.
-- [REJECTED] Build - middle mouse button.
+- [POSTONE] Intergrate (if created) animation of appearance and disappearance of the player.
+- [POSTONE] Magnet objects one-by-one but not all at once.
 ```
 
 ### Development Guidelines
