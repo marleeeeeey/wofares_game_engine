@@ -40,7 +40,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Set the paths to the configuration and log files.
         std::filesystem::path configFilePath = "config.json";
-        std::filesystem::path logFilePath = "logs/LD55.log";
+        std::filesystem::path logFilePath = "logs/LD55_Hungry_Portals.log";
 
         // Initialize the logger and the configuration.
         utils::Config::InitInstanceFromFile(configFilePath);
@@ -53,9 +53,9 @@ int main([[maybe_unused]] int argc, char* args[])
         utils::Logger::Init(logFilePath, logLevel);
 
         // Log initial information.
-        MY_LOG(info, "******************************");
-        MY_LOG(info, "****** LD55 game started *****");
-        MY_LOG(info, "******************************");
+        MY_LOG(info, "*********************************************");
+        MY_LOG(info, "****** LD55 Hungry Portals game started *****");
+        MY_LOG(info, "*********************************************");
         MY_LOG(info, "Current directory set to: {}", execDir);
         MY_LOG(info, "Config file loaded: {}", configFilePath.string());
 
@@ -86,7 +86,8 @@ int main([[maybe_unused]] int argc, char* args[])
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         SDLAudioInitializerRAII sdlAudioInitializer;
         SDLWindowRAII window(
-            "LD55 game by marleeeeeey, jsCommander and SdCorpse", gameOptions.windowOptions.windowSize);
+            "`LD55 Hungry Portals` game by marleeeeeey, jsCommander and SdCorpse",
+            gameOptions.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get());
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 

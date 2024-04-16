@@ -1,6 +1,6 @@
-# Hungry Portals (LD55 Game)
+# LD55 Hungry Portals
 
-**Hungry Portals** - is a platformer game developed for the [Ludum Dare 55 game jam](https://ldjam.com/events/ludum-dare/55/ld55-hungry-portals).
+**LD55 Hungry Portals** - is a platformer game developed for the [Ludum Dare 55 game jam](https://ldjam.com/events/ludum-dare/55/ld55-hungry-portals).
 
 Hungry Portals from the dark realm are out for blood, and they’ve turned their attention to your home, trapping your demonic family within their shadowy depths. You start as a lone survivor with a chance to save your kin and reclaim your home. [More details...](docs/GAME_DESCRIPTION.md)
 
@@ -12,7 +12,7 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 
 ### Screenshot
 
-![game screenshot](docs/LD55_screenshot.png)
+![game screenshot](docs/LD55_Hungry_Portals_screenshot.png)
 
 ### Platform Support
 
@@ -144,7 +144,7 @@ TODO
 ### Clone the Repository
 
 ```
-git clone --recursive https://github.com/marleeeeeey/LD55-game.git
+git clone --recursive https://github.com/marleeeeeey/LD55_Hungry_Portals.git
 ```
 
 ### Prerequisites for Building the Project (Windows)
@@ -166,7 +166,7 @@ git clone --recursive https://github.com/marleeeeeey/LD55-game.git
 
 ### Build, run and debug manually (Windows)
 
-To build LD55 on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
+To build LD55 Hungry Portals on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
 
 This project define it's dependences:
 1. In a `vcpkg.json` file, and you are pulling in vcpkg's cmake toolchain file.
@@ -175,7 +175,7 @@ This project define it's dependences:
 First, we bootstrap a project-specific installation of vcpkg ("manifest mode") in the default location, `<project root>/vcpkg`. From the project root, run these commands:
 
 ```
-cd LD55-game
+cd LD55_Hungry_Portals
 git clone https://github.com/microsoft/vcpkg
 .\vcpkg\bootstrap-vcpkg.bat
 ```
@@ -208,7 +208,7 @@ cmake -E copy_directory ../assets ./src/assets
 Run the game:
 
 ```
-src\LD55.exe
+src\LD55_Hungry_Portals.exe
 ```
 
 ## Linux build
@@ -216,7 +216,7 @@ src\LD55.exe
 ### Clone the Repository
 
 ```
-git clone --recursive https://github.com/marleeeeeey/LD55-game.git
+git clone --recursive https://github.com/marleeeeeey/LD55_Hungry_Portals.git
 ```
 
 ### Prerequisites for Building the Project (Linux)
@@ -237,13 +237,13 @@ pip install jinja2
 ### Build, run and debug manually (Linux)
 
 ```bash
-cd LD55-game
+cd LD55_Hungry_Portals
 git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet=x64-linux
 cmake -S . -B build -G "Ninja" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cmake --build build/debug -- -k 0
 cmake -E copy config.json build/debug/src/config.json
 cmake -E copy_directory assets build/debug/src/assets
-./build/debug/src/LD55
+./build/debug/src/LD55_Hungry_Portals
 ```
 
 ## Additional Notes
@@ -252,7 +252,7 @@ cmake -E copy_directory assets build/debug/src/assets
 
 ```
 
-LD55/
+LD55_Hungry_Portals/
 ├── CMakeLists.txt          # Main CMakeLists file for the project. Used to search dependencies and set up the project.
 ├── thirdparty/
 │   ├── SDL/

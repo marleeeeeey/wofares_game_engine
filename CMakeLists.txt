@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(LD55 VERSION 1.0)
+project(LD55_Hungry_Portals VERSION 1.0)
 
 # ###################################################################
 # #################### Setup compiler options #######################

@@ -75,7 +75,7 @@
     {
       "label": "050. (WinDebug) + Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55.exe",
+      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe",
       "dependsOn": [
         "040. (WinDebug) + Copy assets"
       ],
@@ -89,12 +89,12 @@
     {
       "label": "055. (WinDebug) Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55.exe"
+      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe"
     },
     {
       "label": "057. (WinDebug) Pack",
       "type": "shell",
-      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} debug LD55_debug",
+      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} debug LD55_Hungry_Portals_debug",
       "dependsOn": [
         "040. (WinDebug) + Copy assets"
       ],
@@ -147,7 +147,7 @@
     {
       "label": "085. (WinRelease) + Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55.exe",
+      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals.exe",
       "dependsOn": [
         "080. (WinRelease) + Copy assets"
       ],
@@ -161,12 +161,12 @@
     {
       "label": "090. (WinRelease) Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55.exe"
+      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals.exe"
     },
     {
       "label": "095. (WinRelease) Pack",
       "type": "shell",
-      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} release LD55_release",
+      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} release LD55_Hungry_Portals_release",
       "dependsOn": [
         "080. (WinRelease) + Copy assets"
       ],
@@ -251,7 +251,7 @@
     {
       "label": "150. (LinDebug) + Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55",
+      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals",
       "dependsOn": [
         "140. (LinDebug) + Copy assets"
       ]
@@ -259,12 +259,12 @@
     {
       "label": "155. (LinDebug) Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55"
+      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals"
     },
     {
       "label": "157. (LinDebug) Pack",
       "type": "shell",
-      "command": "python3 scripts/pack_binaries.py 7z ${workspaceFolder} debug LD55_debug"
+      "command": "python3 scripts/pack_binaries.py 7z ${workspaceFolder} debug LD55_Hungry_Portals_debug"
     },
     {
       "label": "160. ********* Clear console *********",
@@ -307,7 +307,7 @@
     {
       "label": "185. (LinRelease) + Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55",
+      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals",
       "dependsOn": [
         "180. (LinRelease) + Copy assets"
       ]
@@ -315,12 +315,12 @@
     {
       "label": "190. (LinRelease) Run",
       "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55"
+      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals"
     },
     {
       "label": "195. (LinRelease) Pack",
       "type": "shell",
-      "command": "python3 scripts/pack_binaries.py 7z ${workspaceFolder} release LD55_release"
+      "command": "python3 scripts/pack_binaries.py 7z ${workspaceFolder} release LD55_Hungry_Portals_release"
     },
   ]
 }

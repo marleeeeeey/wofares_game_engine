@@ -15,7 +15,7 @@ def copy_files(source_dir, destination_dir, file_list):
 
 if __name__ == "__main__":
     source_dir = R"C:\Users\styulenev\OneDrive\gamedev\assets-projects\2024-03-06 1147 Automap with quarter tiles"
-    destination_dir = R"c:\dev\LD55\assets\maps"
+    destination_dir = R"c:\dev\LD55_Hungry_Portals\assets\maps"
     file_list = ["map.json", "tileset.json", "tileset_blocks.png", "tileset_grass.png"]
 
     copy_files(source_dir, destination_dir, file_list)

@@ -1,14 +1,14 @@
-### HUNGRY PORTALS
+### LD55 Hungry Portals
 
-**Welcome to the HUNGRY PORTALS Game**, a creation by marleeeeeey, jsCommander, and SdCorpse for Ludum Dare 55. Dive into our action-packed, fully destructible world on GitHub: [HUNGRY PORTALS on GitHub](https://github.com/marleeeeeey/LD55-game)
+**Welcome to the LD55 Hungry Portals Game**, a creation by marleeeeeey, jsCommander, and SdCorpse for Ludum Dare 55. Dive into our action-packed, fully destructible world on GitHub: [LD55 Hungry Portals on GitHub](https://github.com/marleeeeeey/LD55_Hungry_Portals)
 
-![game screenshot](LD55_screenshot.png)
+![game screenshot](LD55_Hungry_Portals_screenshot.png)
 
 ---
 
 ### Gameplay Overview
 
-**Hungry portals** from the dark realm are out for blood, and they've turned their attention to your home, trapping your demonic family within their shadowy depths. You start as a lone survivor with a chance to save your kin and reclaim your home.
+**Hungry Portals** from the dark realm are out for blood, and they've turned their attention to your home, trapping your demonic family within their shadowy depths. You start as a lone survivor with a chance to save your kin and reclaim your home.
 
 #### Objective:
 
