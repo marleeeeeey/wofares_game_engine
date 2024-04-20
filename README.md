@@ -55,13 +55,14 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 2024-04-16 0324 One eating counter for all portals. Decrease portal sleep time.
 2024-10-16 0411 Create game intruction on start.
 
-*** Next items will be implemented after the jam ***
+*** Items implemented after the jam ***
 
 2024-10-16 1250 Fix start menu bug.
 2024-10-16 1317 Remove background from the game.
 
 TODO
 - Implement sound effects.
+- Add short rocket flight for the player on press W button in the air.
 - [POSTONE] Intergrate (if created) animation of appearance and disappearance of the player.
 - [POSTONE] Magnet objects one-by-one but not all at once.
 ```
