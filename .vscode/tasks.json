@@ -1,326 +1,100 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "000. (Win) Remove vcpkg folders",
-      "type": "shell",
-      "command": "rmdir /s /q vcpkg vcpkg_installed",
-    },
-    {
-      "label": "001. (Win) Remove build folder",
-      "type": "shell",
-      "command": "rmdir /s /q build",
-      "options": {
-        "statusbar": {
-          "hide" : false,
-          "label": "RemoveBuild"
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "000. Remove vcpkg folders",
+            "command": "rmdir /s /q vcpkg vcpkg_installed",
+            "type": "shell"
+        },
+        {
+            "label": "001. Remove build folder",
+            "command": "rmdir /s /q build",
+            "type": "shell"
+        },
+        {
+            "label": "002. Git submodule update",
+            "command": "git submodule update --init --recursive",
+            "type": "shell"
+        },
+        {
+            "label": "003. Install vcpkg as subfolder",
+            "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows",
+            "type": "shell"
+        },
+        {
+            "label": "005. Clear console",
+            "command": "cls",
+            "type": "shell"
+        },
+        {
+            "label": "010. Configure",
+            "command": [
+                "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+            ],
+            "type": "shell"
+        },
+        {
+            "label": "020. + Build",
+            "command": "cmake --build build/debug -- -k 0",
+            "dependsOn": [
+                "010. Configure"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "label": "Build"
+                }
+            },
+            "type": "shell"
+        },
+        {
+            "label": "030. + Copy config.json",
+            "command": "cmake -E copy config.json build/debug/src/config.json",
+            "dependsOn": [
+                "020. + Build"
+            ],
+            "type": "shell"
+        },
+        {
+            "label": "040. + Copy assets",
+            "command": "cmake -E copy_directory assets build/debug/src/assets",
+            "dependsOn": [
+                "030. + Copy config.json"
+            ],
+            "type": "shell"
+        },
+        {
+            "label": "050. + Run",
+            "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe",
+            "dependsOn": [
+                "040. + Copy assets"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "label": "Run"
+                }
+            },
+            "type": "shell"
+        },
+        {
+            "label": "060. + Pack",
+            "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} Debug LD55_Hungry_Portals_Debug",
+            "dependsOn": [
+                "040. + Copy assets"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "label": "Pack"
+                }
+            },
+            "type": "shell"
+        },
+        {
+            "label": "070. Run",
+            "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe",
+            "type": "shell"
         }
-      }
-    },
-    {
-      "label": "002. (Win) Git submodule update",
-      "type": "shell",
-      "command": "git submodule update --init --recursive"
-    },
-    {
-      "label": "003. (Win) Install vcpkg as subfolder",
-      "type": "shell",
-      "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows"
-    },
-    {
-      "label": "005. ********* Clear console *********",
-      "type": "shell",
-      "command": "cls",
-    },
-    {
-      "label": "010. (WinDebug) + Configure",
-      "type": "shell",
-      // Configure and copy compile_commands.json to build folder. Clangd can't find it otherwise if it's not in the build folder.
-      "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake -E copy build/debug/compile_commands.json build/compile_commands.json",
-      "dependsOn": [
-        "05. ********* Clear console *********"
-      ]
-    },
-    {
-      "label": "020. (WinDebug) + Build",
-      "type": "shell",
-      "command": "cmake --build build/debug -- -k 0", // stop on first error
-      // "command": "cmake --build build/debug", // continue on error
-      "dependsOn": [
-        "010. (WinDebug) + Configure"
-      ],
-      "options": {
-        "statusbar": {
-          "hide" : false,
-          "label": "BuildDebug"
-        }
-      }
-    },
-    {
-      "label": "030. (WinDebug) + Copy config.json",
-      "type": "shell",
-      "command": "cmake -E copy config.json build/debug/src/config.json",
-      "dependsOn": [
-        "020. (WinDebug) + Build"
-      ]
-    },
-    {
-      "label": "040. (WinDebug) + Copy assets",
-      "type": "shell",
-      "command": "cmake -E copy_directory assets build/debug/src/assets",
-      "dependsOn": [
-        "030. (WinDebug) + Copy config.json"
-      ]
-    },
-    {
-      "label": "050. (WinDebug) + Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe",
-      "dependsOn": [
-        "040. (WinDebug) + Copy assets"
-      ],
-      "options": {
-        "statusbar": {
-          "hide" : false,
-          "label": "RunDebug"
-        }
-      }
-    },
-    {
-      "label": "055. (WinDebug) Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe"
-    },
-    {
-      "label": "057. (WinDebug) Pack",
-      "type": "shell",
-      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} debug LD55_Hungry_Portals_debug",
-      "dependsOn": [
-        "040. (WinDebug) + Copy assets"
-      ],
-      "options": {
-        "statusbar": {
-          "hide" : false,
-          "label": "PackDebug"
-        }
-      }
-    },
-    {
-      "label": "060. ********* Clear console *********",
-      "type": "shell",
-      "command": "cls",
-    },
-    {
-      "label": "065. (WinRelease) + Configure",
-      "type": "shell",
-      // Configure and copy compile_commands.json to build folder. Clangd can't find it otherwise if it's not in the build folder.
-      "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake -E copy build/release/compile_commands.json build/compile_commands.json",
-      "dependsOn": [
-        "060. ********* Clear console *********"
-      ]
-    },
-    {
-      "label": "070. (WinRelease) + Build",
-      "type": "shell",
-      "command": "cmake --build build/release -- -k 0", // stop on first error
-      // "command": "cmake --build build/release", // continue on error
-      "dependsOn": [
-        "065. (WinRelease) + Configure"
-      ]
-    },
-    {
-      "label": "075. (WinRelease) + Copy config.json",
-      "type": "shell",
-      "command": "cmake -E copy config.json build/release/src/config.json",
-      "dependsOn": [
-        "070. (WinRelease) + Build"
-      ]
-    },
-    {
-      "label": "080. (WinRelease) + Copy assets",
-      "type": "shell",
-      "command": "cmake -E copy_directory assets build/release/src/assets",
-      "dependsOn": [
-        "075. (WinRelease) + Copy config.json"
-      ]
-    },
-    {
-      "label": "085. (WinRelease) + Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals.exe",
-      "dependsOn": [
-        "080. (WinRelease) + Copy assets"
-      ],
-      "options": {
-        "statusbar": {
-          "hide" : false,
-          "label": "RunRelease"
-        }
-      }
-    },
-    {
-      "label": "090. (WinRelease) Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals.exe"
-    },
-    {
-      "label": "095. (WinRelease) Pack",
-      "type": "shell",
-      "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} release LD55_Hungry_Portals_release",
-      "dependsOn": [
-        "080. (WinRelease) + Copy assets"
-      ],
-      "options": {
-        "statusbar": {
-          "hide" : false,
-          "label": "PackRelease"
-        }
-      }
-    },
-    // ****************************************
-    // ********* LINUX SPECIFIC TASKS *********
-    // ****************************************
-    {
-      "label": "097. ************** LINUX SPECIFIC TASKS *******************",
-      "type": "shell",
-      "command": "clear",
-    },
-    {
-      "label": "099. ************** LINUX SPECIFIC TASKS *******************",
-      "type": "shell",
-      "command": "clear",
-    },
-    {
-      "label": "100. (Lin) Remove vcpkg folders",
-      "type": "shell",
-      "command": "rm -rf vcpkg vcpkg_installed",
-    },
-    {
-      "label": "101. (Lin) Remove build folder",
-      "type": "shell",
-      "command": "rm -rf build",
-    },
-    {
-      "label": "102. (Lin) Git submodule update",
-      "type": "shell",
-      "command": "git submodule update --init --recursive"
-    },
-    {
-      "label": "103. (Lin) Install vcpkg as subfolder",
-      "type": "shell",
-      "command": "git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet=x64-linux"
-    },
-    {
-      "label": "105. ********* Clear console *********",
-      "type": "shell",
-      "command": "clear",
-    },
-    {
-      "label": "110. (LinDebug) + Configure",
-      "type": "shell",
-      "command": "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-      "dependsOn": [
-        "105. ********* Clear console *********"
-      ]
-    },
-    {
-      "label": "120. (LinDebug) + Build",
-      "type": "shell",
-      "command": "cmake --build build/debug -- -k 0", // stop on first error
-      // "command": "cmake --build build/debug", // continue on error
-      "dependsOn": [
-        "110. (LinDebug) + Configure"
-      ]
-    },
-    {
-      "label": "130. (LinDebug) + Copy config.json",
-      "type": "shell",
-      "command": "cmake -E copy config.json build/debug/src/config.json",
-      "dependsOn": [
-        "120. (LinDebug) + Build"
-      ]
-    },
-    {
-      "label": "140. (LinDebug) + Copy assets",
-      "type": "shell",
-      "command": "cmake -E copy_directory assets build/debug/src/assets",
-      "dependsOn": [
-        "130. (LinDebug) + Copy config.json"
-      ]
-    },
-    {
-      "label": "150. (LinDebug) + Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals",
-      "dependsOn": [
-        "140. (LinDebug) + Copy assets"
-      ]
-    },
-    {
-      "label": "155. (LinDebug) Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals"
-    },
-    {
-      "label": "157. (LinDebug) Pack",
-      "type": "shell",
-      "command": "python3 scripts/pack_binaries.py 7z ${workspaceFolder} debug LD55_Hungry_Portals_debug"
-    },
-    {
-      "label": "160. ********* Clear console *********",
-      "type": "shell",
-      "command": "clear",
-    },
-    {
-      "label": "165. (LinRelease) + Configure",
-      "type": "shell",
-      "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-      "dependsOn": [
-        "160. ********* Clear console *********"
-      ]
-    },
-    {
-      "label": "170. (LinRelease) + Build",
-      "type": "shell",
-      "command": "cmake --build build/release -- -k 0", // stop on first error
-      // "command": "cmake --build build/release", // continue on error
-      "dependsOn": [
-        "165. (LinRelease) + Configure"
-      ]
-    },
-    {
-      "label": "175. (LinRelease) + Copy config.json",
-      "type": "shell",
-      "command": "cmake -E copy config.json build/release/src/config.json",
-      "dependsOn": [
-        "170. (LinRelease) + Build"
-      ]
-    },
-    {
-      "label": "180. (LinRelease) + Copy assets",
-      "type": "shell",
-      "command": "cmake -E copy_directory assets build/release/src/assets",
-      "dependsOn": [
-        "175. (LinRelease) + Copy config.json"
-      ]
-    },
-    {
-      "label": "185. (LinRelease) + Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals",
-      "dependsOn": [
-        "180. (LinRelease) + Copy assets"
-      ]
-    },
-    {
-      "label": "190. (LinRelease) Run",
-      "type": "shell",
-      "command": "${workspaceFolder}/build/release/src/LD55_Hungry_Portals"
-    },
-    {
-      "label": "195. (LinRelease) Pack",
-      "type": "shell",
-      "command": "python3 scripts/pack_binaries.py 7z ${workspaceFolder} release LD55_Hungry_Portals_release"
-    },
-  ]
+    ]
 }

@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
@@ -10,7 +7,7 @@
       "name": "Debug",
       "program": "build/debug/src/LD55_Hungry_Portals.exe",
       "args": [],
-      "preLaunchTask": "040. (WinDebug) + Copy assets"
+      "preLaunchTask": "040. + Copy assets"
     },
     {
       "type": "lldb",
@@ -18,7 +15,7 @@
       "name": "Release",
       "program": "build/release/src/LD55_Hungry_Portals.exe",
       "args": [],
-      "preLaunchTask": "080. (WinRelease) + Copy assets"
+      "preLaunchTask": "040. + Copy assets"
     }
   ]
 }

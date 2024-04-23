@@ -160,9 +160,11 @@ git clone --recursive https://github.com/marleeeeeey/LD55_Hungry_Portals.git
 
 ### Build, run and debug via VSCode tasks (Windows)
 
+- Setup user friendly options via editing file [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py).
+- Run the script [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py) to generate VSCode tasks with your options.
 - Open the project folder in VSCode.
-- Run task: `003. (Win) Install vcpkg as subfolder`.
-- Run task: `050. (WinDebug) + Run`.
+- Run task: `003. Install vcpkg as subfolder`.
+- Run task: `050. + Run`.
 - For debugging press `F5`.
 
 ### Build, run and debug manually (Windows)
@@ -230,10 +232,12 @@ pip install jinja2
 
 ### Build, run and debug via VSCode tasks (Linux)
 
+- Setup user friendly options via editing file [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py).
+- Run the script [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py) to generate VSCode tasks with your options.
 - Open the project folder in VSCode.
-- Run task: `103. (Lin) Install vcpkg as subfolder`.
-- Run task: `150. (LinDebug) + Run`.
-- For debugging press `F5`. (TODO3 Implement it later).
+- Run task: `003. Install vcpkg as subfolder`.
+- Run task: `050. + Run`.
+- For debugging press `F5`.
 
 ### Build, run and debug manually (Linux)
 
