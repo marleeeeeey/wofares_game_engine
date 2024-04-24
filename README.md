@@ -259,7 +259,7 @@ cmake -E copy_directory assets build/debug/src/assets
 
 ### Build, run and debug via VSCode tasks (Web)
 
-- Setup BuildForWeb.YES and other WebRelated options in [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py). Example below:
+- Set `self.build_for_web = BuildForWeb.YES` and other WebRelated options in [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py). Example below:
 
 ```python
 
@@ -287,7 +287,7 @@ git submodule update --init --recursive
 
 C:/dev/emsdk/emsdk_env.bat &&  git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=wasm32-emscripten
 
-C:/dev/emsdk/emsdk_env.bat &&  cmake -S . -B build/debug_web -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=C:/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_MAKE_PROGRAM=C:/dev/in_system_path/ninja.exe -DEMSCRIPTEN_HTML=ON  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+C:/dev/emsdk/emsdk_env.bat &&  cmake -S . -B build/debug_web -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=C:/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_MAKE_PROGRAM=C:/dev/in_system_path/ninja.exe -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 C:/dev/emsdk/emsdk_env.bat &&  cmake --build build/debug_web -- -k 0
 ```

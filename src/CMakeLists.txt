@@ -4,7 +4,20 @@ file(GLOB_RECURSE LD55_Hungry_Portals_SOURCES "*.cpp")
 # Create an executable with the collected source files.
 add_executable(LD55_Hungry_Portals ${LD55_Hungry_Portals_SOURCES})
 
-if(DEFINED EMSCRIPTEN_HTML AND EMSCRIPTEN_HTML)
+if(EMSCRIPTEN)
+    # To copy the assets and config.json to the WASM's virtual filesystem.
+    set(EM_LINK_FLAGS "--preload-file \"${CMAKE_SOURCE_DIR}/assets\"@/assets")
+    set(EM_LINK_FLAGS "${EM_LINK_FLAGS} --preload-file \"${CMAKE_SOURCE_DIR}/config.json\"@/config.json")
+
+    # To increase memory limit for the game.
+    set(EM_LINK_FLAGS "${EM_LINK_FLAGS} -s INITIAL_MEMORY=33554432")
+    set(EM_LINK_FLAGS "${EM_LINK_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
+    set(EM_LINK_FLAGS "${EM_LINK_FLAGS} -s ABORTING_MALLOC=0")
+
+    # Set the flags.
+    set_target_properties(LD55_Hungry_Portals PROPERTIES LINK_FLAGS "${EM_LINK_FLAGS}")
+
+    # Enable the HTML output.
     set_target_properties(LD55_Hungry_Portals PROPERTIES SUFFIX ".html")
 endif()
 

@@ -87,7 +87,7 @@ class Settings:
 
     def vcpkg_extra_args(self):
         if self.web.build_for_web == BuildForWeb.YES:
-            return f"-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE={self.web.emsdk_path}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_MAKE_PROGRAM={self.web.path_to_ninja} -DEMSCRIPTEN_HTML=ON"
+            return f"-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE={self.web.emsdk_path}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_MAKE_PROGRAM={self.web.path_to_ninja}"
         return ""
 
     def triplet(self):
@@ -117,11 +117,8 @@ def common_append_vscode_statusbar_label(task, statusbar_label: str = None):
     if statusbar_label == None:
         return task
 
-    print(f"task: {task}, statusbar_label: {statusbar_label}")
-
     if statusbar_label == "":
         statusbar_label = task["label"]
-        print(f"statusbar_label: {statusbar_label}")
 
     task["options"] = {
         "statusbar": {
@@ -171,7 +168,7 @@ def generate_001_task_with_config_name(s: Settings):
 
 def generate_002_remove_vcpkg_folders_task(s: Settings):
     command = {
-        Platform.WINDOWS: "rmdir /s /q vcpkg vcpkg_installed",
+        Platform.WINDOWS: "rmdir /s /q vcpkg vcpkg_installed 2>nul & exit 0",
         Platform.LINUX: "rm -rf vcpkg vcpkg_installed",
     }
     return {
@@ -182,7 +179,7 @@ def generate_002_remove_vcpkg_folders_task(s: Settings):
 
 def generate_003_remove_build_folder_task(s: Settings):
     command = {
-        Platform.WINDOWS: "rmdir /s /q build",
+        Platform.WINDOWS: "rmdir /s /q build 2>nul & exit 0",
         Platform.LINUX: "rm -rf build",
     }
     return {
@@ -220,6 +217,7 @@ def generate_010_cmake_configure_task(s: Settings):
     )
 
     if s.web.build_for_web == BuildForWeb.YES:
+        # For emscripten build double configure leads to error. That's why we add dependecy to remove build folder before configure.
         return {
             "label": "010. (+) Configure",
             "command": command,
@@ -292,6 +290,13 @@ def generate_070_just_run_task(s: Settings):
     }
 
 
+def generate_080_web_run_server_task(s: Settings):
+    return {
+        "label": "080. Run web server",
+        "command": f"{s.path_to_python()} -m http.server 8000 --directory {s.build_folder()}/src",
+    }
+
+
 ##################################### MAIN FUNCTION #####################################
 
 
@@ -305,14 +310,23 @@ def generate_tasks():
         (generate_003_remove_build_folder_task, None),
         (generate_005_git_submodule_update_task, None),
         (generate_007_install_vcpkg_as_subfolder_task, None),
-        (generate_010_cmake_configure_task, None),
+        (generate_010_cmake_configure_task, "Configure"),
         (generate_020_cmake_build_task, "Build"),
-        (generate_030_copy_config_json_task, None),
-        (generate_040_copy_assets_task, None),
-        (generate_050_run_task, "Run"),
-        (generate_060_pack_task, "Pack"),
-        (generate_070_just_run_task, None),
     ]
+
+    if settings.web.build_for_web == BuildForWeb.NO:
+        functions_and_statusbar_name += [
+            (generate_030_copy_config_json_task, None),
+            (generate_040_copy_assets_task, None),
+            (generate_050_run_task, "Run"),
+            (generate_060_pack_task, "Pack"),
+            (generate_070_just_run_task, None),
+        ]
+
+    if settings.web.build_for_web == BuildForWeb.YES:
+        functions_and_statusbar_name += [
+            (generate_080_web_run_server_task, "RunWebServer"),
+        ]
 
     for function, statusbar_name in functions_and_statusbar_name:
         task = function(settings)

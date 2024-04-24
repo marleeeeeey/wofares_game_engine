@@ -1,6 +1,7 @@
 {
   "main": {
     "fps": 60,
+    "webFps": 20,
     "logLevel": "info"
   },
   "GameOptions": {

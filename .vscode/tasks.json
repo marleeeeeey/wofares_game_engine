@@ -14,12 +14,12 @@
         },
         {
             "label": "002. Remove vcpkg folders",
-            "command": "rmdir /s /q vcpkg vcpkg_installed",
+            "command": "rmdir /s /q vcpkg vcpkg_installed 2>nul & exit 0",
             "type": "shell"
         },
         {
             "label": "003. Remove build folder",
-            "command": "rmdir /s /q build",
+            "command": "rmdir /s /q build 2>nul & exit 0",
             "type": "shell"
         },
         {
@@ -37,6 +37,12 @@
             "command": [
                 " cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
             ],
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "label": "Configure"
+                }
+            },
             "type": "shell"
         },
         {

@@ -28,6 +28,16 @@
 #include <utils/systems/input_event_manager.h>
 #include <utils/systems/random_event_system.h>
 #include <utils/systems/screen_mode_control_system.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif // __EMSCRIPTEN__
+
+// This stuff is needed to support the main loop in Emscripten.
+std::function<void()> globalMainLoopLambda;
+void mainLoopForEmscripten()
+{
+    globalMainLoopLambda();
+}
 
 int main([[maybe_unused]] int argc, char* args[])
 {
@@ -59,17 +69,17 @@ int main([[maybe_unused]] int argc, char* args[])
         MY_LOG(info, "Current directory set to: {}", execDir);
         MY_LOG(info, "Config file loaded: {}", configFilePath.string());
 
-// #ifndef DisableSteamNetworkingSockets
-//         // Initialize the SteamNetworkingSockets library.
-//         SteamNetworkingInitRAII::Options steamNetworkingOptions;
-//         steamNetworkingOptions.debugSeverity =
-//             utils::GetConfig<ESteamNetworkingSocketsDebugOutputType, "Networking.debugSeverity">();
-//         MY_LOG(info, "[SteamNetworking] debugSeverity: {}", steamNetworkingOptions.debugSeverity);
-//         SteamNetworkingInitRAII steamNetworkingInitRAII(steamNetworkingOptions);
-//         SteamNetworkingInitRAII::SetDebugCallback(
-//             []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
-//             { MY_LOG(info, "[SteamNetworking] {}", pszMsg); });
-// #endif // DisableSteamNetworkingSockets
+        // #ifndef DisableSteamNetworkingSockets
+        //         // Initialize the SteamNetworkingSockets library.
+        //         SteamNetworkingInitRAII::Options steamNetworkingOptions;
+        //         steamNetworkingOptions.debugSeverity =
+        //             utils::GetConfig<ESteamNetworkingSocketsDebugOutputType, "Networking.debugSeverity">();
+        //         MY_LOG(info, "[SteamNetworking] debugSeverity: {}", steamNetworkingOptions.debugSeverity);
+        //         SteamNetworkingInitRAII steamNetworkingInitRAII(steamNetworkingOptions);
+        //         SteamNetworkingInitRAII::SetDebugCallback(
+        //             []([[maybe_unused]] ESteamNetworkingSocketsDebugOutputType eType, const char* pszMsg)
+        //             { MY_LOG(info, "[SteamNetworking] {}", pszMsg); });
+        // #endif // DisableSteamNetworkingSockets
 
         // Create an EnTT registry.
         entt::registry registry;
@@ -132,9 +142,9 @@ int main([[maybe_unused]] int argc, char* args[])
 
         EventsControlSystem eventsControlSystem(registryWrapper.GetRegistry());
 
-        // Start the game loop.
+        // Set the main loop lambda.
         Uint32 lastTick = SDL_GetTicks();
-        while (!gameOptions.controlOptions.quit)
+        globalMainLoopLambda = [&]()
         {
             // Calculate delta time.
             Uint32 frameStart = SDL_GetTicks();
@@ -172,6 +182,7 @@ int main([[maybe_unused]] int argc, char* args[])
             RenderHUDSystem.Render();
             imguiSDL.finishFrame();
 
+#ifndef __EMSCRIPTEN__
             // Cap the frame rate.
             Uint32 frameTimeMs = SDL_GetTicks() - frameStart;
             const Uint32 frameDelayMs = 1000 / utils::GetConfig<unsigned, "main.fps">();
@@ -179,7 +190,20 @@ int main([[maybe_unused]] int argc, char* args[])
             {
                 SDL_Delay(frameDelayMs - frameTimeMs);
             }
+#endif // __EMSCRIPTEN__
+        };
+
+        // Run the main loop.
+#ifdef __EMSCRIPTEN__
+        emscripten_set_main_loop(mainLoopForEmscripten, 0, 1);
+        const Uint32 frameDelayMs = 1000 / utils::GetConfig<unsigned, "main.webFps">();
+        emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, frameDelayMs);
+#else
+        while (!gameOptions.controlOptions.quit)
+        {
+            globalMainLoopLambda();
         }
+#endif // __EMSCRIPTEN__
 
         registryWrapper.LogAllEntitiesByTheirNames();
     }
