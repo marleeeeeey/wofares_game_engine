@@ -42,7 +42,7 @@ class WebBuildSettings:
 class Settings:
     def __init__(self):
         self.platform = Platform.WINDOWS
-        self.build_type = BuildType.DEBUG
+        self.build_type = BuildType.RELEASE
         self.compiler = "clang++"
         self.make_tool = "Ninja"
         self.toolchain_file = "vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -63,8 +63,8 @@ class Settings:
         }[self.web.build_for_web]
 
         return {
-            BuildType.DEBUG: f"build/debug{suffix}",
-            BuildType.RELEASE: f"build/release{suffix}",
+            BuildType.DEBUG: f"build/Debug{suffix}",
+            BuildType.RELEASE: f"build/Release{suffix}",
         }[self.build_type]
 
     def build_type_name(self):
@@ -276,10 +276,20 @@ def generate_050_run_task(s: Settings):
 
 
 def generate_060_pack_task(s: Settings):
+    web_or_desktop = {
+        BuildForWeb.YES: "web",
+        BuildForWeb.NO: "desktop",
+    }[s.web.build_for_web]
+
+    depends_on = {
+        BuildForWeb.YES: ["020. (+) Build"],
+        BuildForWeb.NO: ["040. + Copy assets"],
+    }[s.web.build_for_web]
+
     return {
         "label": "060. + Pack",
-        "command": f'{s.path_to_python()} scripts/pack_binaries.py "{s.path_to_7z()}" ${{workspaceFolder}} {s.build_type_name()} {s.executable_name}_{s.build_type_name()}',
-        "dependsOn": ["040. + Copy assets"],
+        "command": f'{s.path_to_python()} scripts/pack_binaries.py "{s.path_to_7z()}" ${{workspaceFolder}} {s.build_folder()} {s.executable_name}_{s.build_type_name()} {web_or_desktop}',
+        "dependsOn": depends_on,
     }
 
 
@@ -312,6 +322,7 @@ def generate_tasks():
         (generate_007_install_vcpkg_as_subfolder_task, None),
         (generate_010_cmake_configure_task, "Configure"),
         (generate_020_cmake_build_task, "Build"),
+        (generate_060_pack_task, "Pack"),
     ]
 
     if settings.web.build_for_web == BuildForWeb.NO:
@@ -319,7 +330,6 @@ def generate_tasks():
             (generate_030_copy_config_json_task, None),
             (generate_040_copy_assets_task, None),
             (generate_050_run_task, "Run"),
-            (generate_060_pack_task, "Pack"),
             (generate_070_just_run_task, None),
         ]
 

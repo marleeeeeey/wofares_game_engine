@@ -2,12 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "000. CONFIG: WIN_DEBUG",
+            "label": "000. CONFIG: WIN_RELEASE",
             "command": "cls",
             "options": {
                 "statusbar": {
                     "hide": false,
-                    "label": "000. CONFIG: WIN_DEBUG"
+                    "label": "000. CONFIG: WIN_RELEASE"
                 }
             },
             "type": "shell"
@@ -35,7 +35,7 @@
         {
             "label": "010. (+) Configure",
             "command": [
-                " cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+                " cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
             ],
             "options": {
                 "statusbar": {
@@ -47,7 +47,7 @@
         },
         {
             "label": "020. (+) Build",
-            "command": " cmake --build build/debug -- -k 0",
+            "command": " cmake --build build/Release -- -k 0",
             "dependsOn": [
                 "010. (+) Configure"
             ],
@@ -60,38 +60,8 @@
             "type": "shell"
         },
         {
-            "label": "030. + Copy config.json",
-            "command": "cmake -E copy config.json build/debug/src/config.json",
-            "dependsOn": [
-                "020. (+) Build"
-            ],
-            "type": "shell"
-        },
-        {
-            "label": "040. + Copy assets",
-            "command": "cmake -E copy_directory assets build/debug/src/assets",
-            "dependsOn": [
-                "030. + Copy config.json"
-            ],
-            "type": "shell"
-        },
-        {
-            "label": "050. + Run",
-            "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe",
-            "dependsOn": [
-                "040. + Copy assets"
-            ],
-            "options": {
-                "statusbar": {
-                    "hide": false,
-                    "label": "Run"
-                }
-            },
-            "type": "shell"
-        },
-        {
             "label": "060. + Pack",
-            "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} Debug LD55_Hungry_Portals_Debug",
+            "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} build/Release LD55_Hungry_Portals_Release desktop",
             "dependsOn": [
                 "040. + Copy assets"
             ],
@@ -99,6 +69,36 @@
                 "statusbar": {
                     "hide": false,
                     "label": "Pack"
+                }
+            },
+            "type": "shell"
+        },
+        {
+            "label": "030. + Copy config.json",
+            "command": "cmake -E copy config.json build/Release/src/config.json",
+            "dependsOn": [
+                "020. (+) Build"
+            ],
+            "type": "shell"
+        },
+        {
+            "label": "040. + Copy assets",
+            "command": "cmake -E copy_directory assets build/Release/src/assets",
+            "dependsOn": [
+                "030. + Copy config.json"
+            ],
+            "type": "shell"
+        },
+        {
+            "label": "050. + Run",
+            "command": "${workspaceFolder}/build/Release/src/LD55_Hungry_Portals.exe",
+            "dependsOn": [
+                "040. + Copy assets"
+            ],
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "label": "Run"
                 }
             },
             "type": "shell"
