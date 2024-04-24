@@ -53,15 +53,16 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 2024-04-16 0217 Integrate fire animation for bullet and grenade. Remove other weapons. Jump - Space.
 2024-04-16 0245 Draw animation for building block.
 2024-04-16 0324 One eating counter for all portals. Decrease portal sleep time.
-2024-10-16 0411 Create game intruction on start.
+2024-04-16 0411 Create game intruction on start.
 
 *** Items implemented after the jam ***
 
-2024-10-16 1250 Fix start menu bug.
-2024-10-16 1317 Remove background from the game.
+2024-04-16 1250 Fix start menu bug.
+2024-04-16 1317 Remove background from the game.
+2024-04-23 1300 Prepare build for web (WASM Emscripten).
+2024-04-23 1400 Remove music fade-in/fade-out.
 
 TODO
-- Implement sound effects.
 - Add short rocket flight for the player on press W button in the air.
 - [POSTONE] Intergrate (if created) animation of appearance and disappearance of the player.
 - [POSTONE] Magnet objects one-by-one but not all at once.
