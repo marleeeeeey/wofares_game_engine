@@ -251,6 +251,57 @@ cmake -E copy_directory assets build/debug/src/assets
 ./build/debug/src/LD55_Hungry_Portals
 ```
 
+## Web build
+
+### Prerequisites for Building the Project (Web)
+
+- Emscripten SDK additionally to Windows/Linux build prerequisites.
+
+### Build, run and debug via VSCode tasks (Web)
+
+- Setup BuildForWeb.YES and other WebRelated options in [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py). Example below:
+
+```python
+
+class WebBuildSettings:
+    def __init__(self):
+        self.build_for_web = BuildForWeb.YES
+        self.emsdk_path = "C:/dev/emsdk"
+        self.compiler = "emcc"
+        self.path_to_ninja = "C:/dev/in_system_path/ninja.exe"  # Fix issue: CMake was unable to find a build program corresponding to "Ninja".  CMAKE_MAKE_PROGRAM is not set.
+
+```
+
+- Run the script [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py) to generate VSCode tasks with your options.
+- Open the project folder in VSCode.
+- Run task: `003. Install vcpkg as subfolder`.
+- Run task: `010. Configure`.
+- Run task: `020. Build`.
+
+### Build, run and debug manually (Web)
+
+```bash
+cd LD55_Hungry_Portals
+
+git submodule update --init --recursive
+
+C:/dev/emsdk/emsdk_env.bat &&  git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=wasm32-emscripten
+
+C:/dev/emsdk/emsdk_env.bat &&  cmake -S . -B build/debug_web -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=C:/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_MAKE_PROGRAM=C:/dev/in_system_path/ninja.exe -DEMSCRIPTEN_HTML=ON  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+C:/dev/emsdk/emsdk_env.bat &&  cmake --build build/debug_web -- -k 0
+```
+
+### Execute the game in the browser
+
+```bash
+python -m http.server
+```
+
+Open the browser and navigate to `http://localhost:8000/LD55_Hungry_Portals.html`
+
+Press `F12` to open the developer console and see the game output.
+
 ## Additional Notes
 
 ### File Structure

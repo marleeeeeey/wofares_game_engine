@@ -2,42 +2,48 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "000. Remove vcpkg folders",
+            "label": "000. CONFIG: WIN_DEBUG",
+            "command": "cls",
+            "options": {
+                "statusbar": {
+                    "hide": false,
+                    "label": "000. CONFIG: WIN_DEBUG"
+                }
+            },
+            "type": "shell"
+        },
+        {
+            "label": "002. Remove vcpkg folders",
             "command": "rmdir /s /q vcpkg vcpkg_installed",
             "type": "shell"
         },
         {
-            "label": "001. Remove build folder",
+            "label": "003. Remove build folder",
             "command": "rmdir /s /q build",
             "type": "shell"
         },
         {
-            "label": "002. Git submodule update",
+            "label": "005. Git submodule update",
             "command": "git submodule update --init --recursive",
             "type": "shell"
         },
         {
-            "label": "003. Install vcpkg as subfolder",
-            "command": "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows",
+            "label": "007. Install vcpkg as subfolder",
+            "command": " git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows",
             "type": "shell"
         },
         {
-            "label": "005. Clear console",
-            "command": "cls",
-            "type": "shell"
-        },
-        {
-            "label": "010. Configure",
+            "label": "010. (+) Configure",
             "command": [
-                "cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+                " cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
             ],
             "type": "shell"
         },
         {
-            "label": "020. + Build",
-            "command": "cmake --build build/debug -- -k 0",
+            "label": "020. (+) Build",
+            "command": " cmake --build build/debug -- -k 0",
             "dependsOn": [
-                "010. Configure"
+                "010. (+) Configure"
             ],
             "options": {
                 "statusbar": {
@@ -51,7 +57,7 @@
             "label": "030. + Copy config.json",
             "command": "cmake -E copy config.json build/debug/src/config.json",
             "dependsOn": [
-                "020. + Build"
+                "020. (+) Build"
             ],
             "type": "shell"
         },

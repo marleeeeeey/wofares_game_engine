@@ -23,56 +23,113 @@ class ExportCompileCommands(Enum):
     NO = auto()
 
 
+class BuildForWeb(Enum):
+    YES = auto()
+    NO = auto()
+
+
 ##################################### SETTINGS #####################################
+
+
+class WebBuildSettings:
+    def __init__(self):
+        self.build_for_web = BuildForWeb.NO
+        self.emsdk_path = "C:/dev/emsdk"
+        self.compiler = "emcc"
+        self.path_to_ninja = "C:/dev/in_system_path/ninja.exe"  # Fix issue: CMake was unable to find a build program corresponding to "Ninja". CMAKE_MAKE_PROGRAM is not set.
 
 
 class Settings:
     def __init__(self):
-        self.current_platform = Platform.WINDOWS
-        self.current_build_type = BuildType.DEBUG
+        self.platform = Platform.WINDOWS
+        self.build_type = BuildType.DEBUG
         self.compiler = "clang++"
         self.make_tool = "Ninja"
         self.toolchain_file = "vcpkg/scripts/buildsystems/vcpkg.cmake"
         self.stop_on_first_error = StopOnFirstError.YES
         self.export_compile_commands = ExportCompileCommands.YES
         self.executable_name = "LD55_Hungry_Portals"
+        self.web = WebBuildSettings()
+
+    def compiler_name(self):
+        if self.web.build_for_web == BuildForWeb.YES:
+            return self.web.compiler
+        return self.compiler
 
     def build_folder(self):
+        suffix = {
+            BuildForWeb.YES: "_web",
+            BuildForWeb.NO: "",
+        }[self.web.build_for_web]
+
         return {
-            BuildType.DEBUG: "build/debug",
-            BuildType.RELEASE: "build/release",
-        }[self.current_build_type]
+            BuildType.DEBUG: f"build/debug{suffix}",
+            BuildType.RELEASE: f"build/release{suffix}",
+        }[self.build_type]
 
     def build_type_name(self):
         return {
             BuildType.DEBUG: "Debug",
             BuildType.RELEASE: "Release",
-        }[self.current_build_type]
+        }[self.build_type]
 
     def path_to_python(self):
         return {
             Platform.WINDOWS: "python",
             Platform.LINUX: "python3",
-        }[self.current_platform]
+        }[self.platform]
 
     def path_to_7z(self):
         return {
             Platform.WINDOWS: "C:\\Program Files\\7-Zip\\7z.exe",
             Platform.LINUX: "7z",
-        }[self.current_platform]
+        }[self.platform]
+
+    def vcpkg_extra_args(self):
+        if self.web.build_for_web == BuildForWeb.YES:
+            return f"-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE={self.web.emsdk_path}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_MAKE_PROGRAM={self.web.path_to_ninja} -DEMSCRIPTEN_HTML=ON"
+        return ""
+
+    def triplet(self):
+        if self.web.build_for_web == BuildForWeb.YES:
+            return "wasm32-emscripten"
+
+        result = {
+            Platform.WINDOWS: "x64-Windows",
+            Platform.LINUX: "x64-linux",
+        }[self.platform]
+
+        return result
+
+    def setup_env(self):
+        if self.web.build_for_web == BuildForWeb.NO:
+            return ""
+        return {
+            Platform.WINDOWS: f"{self.web.emsdk_path}/emsdk_env.bat && ",
+            Platform.LINUX: f"source {self.web.emsdk_path}/emsdk_env.sh && ",
+        }[self.platform]
 
 
 ##################################### COMMON FUNCTIONS #####################################
 
 
 def common_append_vscode_statusbar_label(task, statusbar_label: str = None):
-    if statusbar_label:
-        task["options"] = {
-            "statusbar": {
-                "hide": False,
-                "label": statusbar_label,
-            }
+    if statusbar_label == None:
+        return task
+
+    print(f"task: {task}, statusbar_label: {statusbar_label}")
+
+    if statusbar_label == "":
+        statusbar_label = task["label"]
+        print(f"statusbar_label: {statusbar_label}")
+
+    task["options"] = {
+        "statusbar": {
+            "hide": False,
+            "label": statusbar_label,
         }
+    }
+
     return task
 
 
@@ -84,54 +141,71 @@ def common_set_type_shell(task):
 ##################################### SPECIFIC TASKS #####################################
 
 
-def generate_000_remove_vcpkg_folders_task(s: Settings):
+def generate_001_task_with_config_name(s: Settings):
+
+    config_name = {
+        Platform.WINDOWS: "WIN",
+        Platform.LINUX: "LINUX",
+    }[s.platform]
+
+    config_name += {
+        BuildType.DEBUG: "_DEBUG",
+        BuildType.RELEASE: "_RELEASE",
+    }[s.build_type]
+
+    config_name += {
+        BuildForWeb.YES: "_WEB",
+        BuildForWeb.NO: "",
+    }[s.web.build_for_web]
+
+    cls_command = {
+        Platform.WINDOWS: "cls",
+        Platform.LINUX: "clear",
+    }[s.platform]
+
+    return {
+        "label": f"000. CONFIG: {config_name}",
+        "command": cls_command,
+    }
+
+
+def generate_002_remove_vcpkg_folders_task(s: Settings):
     command = {
         Platform.WINDOWS: "rmdir /s /q vcpkg vcpkg_installed",
         Platform.LINUX: "rm -rf vcpkg vcpkg_installed",
     }
     return {
-        "label": "000. Remove vcpkg folders",
-        "command": command[s.current_platform],
+        "label": "002. Remove vcpkg folders",
+        "command": command[s.platform],
     }
 
 
-def generate_001_remove_build_folder_task(s: Settings):
+def generate_003_remove_build_folder_task(s: Settings):
     command = {
         Platform.WINDOWS: "rmdir /s /q build",
         Platform.LINUX: "rm -rf build",
     }
     return {
-        "label": "001. Remove build folder",
-        "command": command[s.current_platform],
+        "label": "003. Remove build folder",
+        "command": command[s.platform],
     }
 
 
-def generate_002_git_submodule_update_task(s: Settings):
+def generate_005_git_submodule_update_task(s: Settings):
     return {
-        "label": "002. Git submodule update",
+        "label": "005. Git submodule update",
         "command": "git submodule update --init --recursive",
     }
 
 
-def generate_003_install_vcpkg_as_subfolder_task(s: Settings):
+def generate_007_install_vcpkg_as_subfolder_task(s: Settings):
     command = {
-        Platform.WINDOWS: "git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet=x64-Windows",
-        Platform.LINUX: "git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet=x64-linux",
+        Platform.WINDOWS: f"{s.setup_env()} git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet={s.triplet()}",
+        Platform.LINUX: f"{s.setup_env()} git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet={s.triplet()}",
     }
     return {
-        "label": "003. Install vcpkg as subfolder",
-        "command": command[s.current_platform],
-    }
-
-
-def generate_005_clear_console_task(s: Settings):
-    command = {
-        Platform.WINDOWS: "cls",
-        Platform.LINUX: "clear",
-    }
-    return {
-        "label": "005. Clear console",
-        "command": command[s.current_platform],
+        "label": "007. Install vcpkg as subfolder",
+        "command": command[s.platform],
     }
 
 
@@ -142,13 +216,20 @@ def generate_010_cmake_configure_task(s: Settings):
     }[s.export_compile_commands]
 
     command = (
-        f"cmake -S . -B {s.build_folder()} -DCMAKE_BUILD_TYPE={s.build_type_name()} -G{s.make_tool} -DCMAKE_CXX_COMPILER={s.compiler} -DCMAKE_TOOLCHAIN_FILE={s.toolchain_file} {export_compile_commands}",
+        f"{s.setup_env()} cmake -S . -B {s.build_folder()} -DCMAKE_BUILD_TYPE={s.build_type_name()} -G{s.make_tool} -DCMAKE_CXX_COMPILER={s.compiler} -DCMAKE_TOOLCHAIN_FILE={s.toolchain_file} {s.vcpkg_extra_args()} {export_compile_commands}",
     )
 
-    return {
-        "label": "010. Configure",
-        "command": command,
-    }
+    if s.web.build_for_web == BuildForWeb.YES:
+        return {
+            "label": "010. (+) Configure",
+            "command": command,
+            "dependsOn": ["003. Remove build folder"],
+        }
+    else:
+        return {
+            "label": "010. (+) Configure",
+            "command": command,
+        }
 
 
 def generate_020_cmake_build_task(s: Settings):
@@ -157,22 +238,26 @@ def generate_020_cmake_build_task(s: Settings):
         StopOnFirstError.NO: "",
     }[s.stop_on_first_error]
 
-    return {
-        "label": "020. + Build",
-        "command": f"cmake --build {s.build_folder()} -- {stop_on_first_error}",
-        "dependsOn": [
-            "010. Configure",
-        ],
-    }
+    command = f"{s.setup_env()} cmake --build {s.build_folder()} -- {stop_on_first_error}"
+
+    if s.web.build_for_web == BuildForWeb.YES:
+        return {
+            "label": "020. (+) Build",
+            "command": command,
+        }
+    else:
+        return {
+            "label": "020. (+) Build",
+            "command": command,
+            "dependsOn": ["010. (+) Configure"],
+        }
 
 
 def generate_030_copy_config_json_task(s: Settings):
     return {
         "label": "030. + Copy config.json",
         "command": f"cmake -E copy config.json {s.build_folder()}/src/config.json",
-        "dependsOn": [
-            "020. + Build",
-        ],
+        "dependsOn": ["020. (+) Build"],
     }
 
 
@@ -180,9 +265,7 @@ def generate_040_copy_assets_task(s: Settings):
     return {
         "label": "040. + Copy assets",
         "command": f"cmake -E copy_directory assets {s.build_folder()}/src/assets",
-        "dependsOn": [
-            "030. + Copy config.json",
-        ],
+        "dependsOn": ["030. + Copy config.json"],
     }
 
 
@@ -190,9 +273,7 @@ def generate_050_run_task(s: Settings):
     return {
         "label": "050. + Run",
         "command": f"${{workspaceFolder}}/{s.build_folder()}/src/{s.executable_name}.exe",
-        "dependsOn": [
-            "040. + Copy assets",
-        ],
+        "dependsOn": ["040. + Copy assets"],
     }
 
 
@@ -200,9 +281,7 @@ def generate_060_pack_task(s: Settings):
     return {
         "label": "060. + Pack",
         "command": f'{s.path_to_python()} scripts/pack_binaries.py "{s.path_to_7z()}" ${{workspaceFolder}} {s.build_type_name()} {s.executable_name}_{s.build_type_name()}',
-        "dependsOn": [
-            "040. + Copy assets",
-        ],
+        "dependsOn": ["040. + Copy assets"],
     }
 
 
@@ -221,11 +300,11 @@ def generate_tasks():
     settings = Settings()
 
     functions_and_statusbar_name = [
-        (generate_000_remove_vcpkg_folders_task, None),
-        (generate_001_remove_build_folder_task, None),
-        (generate_002_git_submodule_update_task, None),
-        (generate_003_install_vcpkg_as_subfolder_task, None),
-        (generate_005_clear_console_task, None),
+        (generate_001_task_with_config_name, ""),
+        (generate_002_remove_vcpkg_folders_task, None),
+        (generate_003_remove_build_folder_task, None),
+        (generate_005_git_submodule_update_task, None),
+        (generate_007_install_vcpkg_as_subfolder_task, None),
         (generate_010_cmake_configure_task, None),
         (generate_020_cmake_build_task, "Build"),
         (generate_030_copy_config_json_task, None),
@@ -235,10 +314,9 @@ def generate_tasks():
         (generate_070_just_run_task, None),
     ]
 
-    for function, statusbar_visibility in functions_and_statusbar_name:
+    for function, statusbar_name in functions_and_statusbar_name:
         task = function(settings)
-        if statusbar_visibility:
-            task = common_append_vscode_statusbar_label(task, statusbar_visibility)
+        task = common_append_vscode_statusbar_label(task, statusbar_name)
         task = common_set_type_shell(task)
         tasks["tasks"].append(task)
 

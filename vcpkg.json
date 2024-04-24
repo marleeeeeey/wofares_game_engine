@@ -5,7 +5,6 @@
   "dependencies": [
     "box2d",
     "entt",
-    "gamenetworkingsockets",
     "glm",
     "magic-enum",
     "nlohmann-json",

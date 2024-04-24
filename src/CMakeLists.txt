@@ -4,6 +4,10 @@ file(GLOB_RECURSE LD55_Hungry_Portals_SOURCES "*.cpp")
 # Create an executable with the collected source files.
 add_executable(LD55_Hungry_Portals ${LD55_Hungry_Portals_SOURCES})
 
+if(DEFINED EMSCRIPTEN_HTML AND EMSCRIPTEN_HTML)
+    set_target_properties(LD55_Hungry_Portals PROPERTIES SUFFIX ".html")
+endif()
+
 target_compile_definitions(LD55_Hungry_Portals
     PRIVATE
 
@@ -39,7 +43,8 @@ target_link_libraries(LD55_Hungry_Portals
     # vcpkg build libraries:
     box2d::box2d
     EnTT::EnTT
-    GameNetworkingSockets::static
+
+    # GameNetworkingSockets::static # TODO2: Add as submodule.
     $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
