@@ -9,7 +9,6 @@
 #include <utils/sdl/sdl_RAII.h>
 #include <utils/sdl/sdl_colors.h>
 
-
 // High-level resource management. Get resources by friendly names in game like terminolgy.
 // Every Get* method define specific resource type and return it by friendly name.
 // Example of resource map file `resourceMapFilePath` content:

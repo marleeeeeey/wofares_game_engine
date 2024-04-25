@@ -22,13 +22,28 @@
   },
   "maps": [
     {
+      "name": "level0",
+      "tiledMapPath": "assets/maps/map0.tmj",
+      "backgroundPath": "assets/backgrounds/dark_background.png"
+    },
+    {
       "name": "level1",
-      "tiledMapPath": "assets/maps/map.tmj",
+      "tiledMapPath": "assets/maps/map1.tmj",
       "backgroundPath": "assets/backgrounds/dark_background.png"
     },
     {
       "name": "level2",
       "tiledMapPath": "assets/maps/map2.tmj",
+      "backgroundPath": "assets/backgrounds/dark_background.png"
+    },
+    {
+      "name": "level3",
+      "tiledMapPath": "assets/maps/map3.tmj",
+      "backgroundPath": "assets/backgrounds/dark_background.png"
+    },
+    {
+      "name": "level4",
+      "tiledMapPath": "assets/maps/map4.tmj",
       "backgroundPath": "assets/backgrounds/dark_background.png"
     }
   ]
