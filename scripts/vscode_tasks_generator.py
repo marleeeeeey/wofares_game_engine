@@ -38,6 +38,12 @@ class WebBuildSettings:
         self.compiler = "emcc"
         self.path_to_ninja = "C:/dev/in_system_path/ninja.exe"  # Fix issue: CMake was unable to find a build program corresponding to "Ninja". CMAKE_MAKE_PROGRAM is not set.
 
+        if self.build_for_web == BuildForWeb.YES:
+            if not os.path.isdir(self.emsdk_path):
+                raise FileNotFoundError(f"Directory {self.emsdk_path} not found.")
+            if not os.path.isfile(self.path_to_ninja):
+                raise FileNotFoundError(f"File {self.path_to_ninja} not found.")
+
 
 class Settings:
     def __init__(self):
