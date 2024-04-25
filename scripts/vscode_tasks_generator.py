@@ -1,6 +1,7 @@
 import json
 from enum import Enum, auto
 import os
+import sys
 
 
 class Platform(Enum):
@@ -48,7 +49,7 @@ class WebBuildSettings:
 class Settings:
     def __init__(self):
         self.platform = Platform.WINDOWS
-        self.build_type = BuildType.RELEASE
+        self.build_type = BuildType.DEBUG
         self.compiler = "clang++"
         self.make_tool = "Ninja"
         self.toolchain_file = "vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -144,6 +145,45 @@ def common_set_type_shell(task):
 ##################################### SPECIFIC TASKS #####################################
 
 
+def generate_000_switch_build_alias_task(s: Settings):
+    """
+    This task is used to switch between different build aliases in the loop.
+    """
+
+    build_alias_matching = {
+        (Platform.WINDOWS, BuildType.DEBUG, BuildForWeb.NO): "debug",
+        (Platform.WINDOWS, BuildType.RELEASE, BuildForWeb.NO): "release",
+        (Platform.WINDOWS, BuildType.RELEASE, BuildForWeb.YES): "web",
+    }
+
+    current_alias = None
+    if (s.platform, s.build_type, s.web.build_for_web) in build_alias_matching:
+        current_alias = build_alias_matching[(s.platform, s.build_type, s.web.build_for_web)]
+    else:
+        current_alias = "custom"
+
+    label_matching = {
+        "custom": "CUSTOM->debug->release->web",
+        "debug": "DEBUG->release->web",
+        "release": "debug->RELEASE->web",
+        "web": "debug->release->WEB",
+    }
+
+    current_label = label_matching[current_alias]
+
+    next_build_alias = {
+        "custom": "debug",
+        "debug": "release",
+        "release": "web",
+        "web": "debug",
+    }[current_alias]
+
+    return {
+        "label": f"000. {current_label}",
+        "command": f"{s.path_to_python()} scripts/vscode_tasks_generator.py {next_build_alias}",
+    }
+
+
 def generate_001_task_with_config_name(s: Settings):
 
     config_name = {
@@ -167,7 +207,7 @@ def generate_001_task_with_config_name(s: Settings):
     }[s.platform]
 
     return {
-        "label": f"000. CONFIG: {config_name}",
+        "label": f"001. CONFIG: {config_name}",
         "command": cls_command,
     }
 
@@ -219,7 +259,11 @@ def generate_010_cmake_configure_task(s: Settings):
     }[s.export_compile_commands]
 
     command = (
-        f"{s.setup_env()} cmake -S . -B {s.build_folder()} -DCMAKE_BUILD_TYPE={s.build_type_name()} -G{s.make_tool} -DCMAKE_CXX_COMPILER={s.compiler} -DCMAKE_TOOLCHAIN_FILE={s.toolchain_file} {s.vcpkg_extra_args()} {export_compile_commands}",
+        f" {s.setup_env()} cmake -S . -B {s.build_folder()}"
+        f" -DCMAKE_BUILD_TYPE={s.build_type_name()}"
+        f" -G{s.make_tool} -DCMAKE_CXX_COMPILER={s.compiler} -DCMAKE_TOOLCHAIN_FILE={s.toolchain_file}"
+        f" {s.vcpkg_extra_args()} {export_compile_commands}"
+        f" && cmake -E copy {s.build_folder()}/compile_commands.json build/compile_commands.json",  # compile_commands.json is visible from `build` folder only
     )
 
     if s.web.build_for_web == BuildForWeb.YES:
@@ -316,11 +360,20 @@ def generate_080_web_run_server_task(s: Settings):
 ##################################### MAIN FUNCTION #####################################
 
 
-def generate_tasks():
+def generate_tasks(platform: Platform = None, build_type: BuildType = None, build_for_web: BuildForWeb = None):
     tasks = {"version": "2.0.0", "tasks": []}
     settings = Settings()
 
+    # Override settings if arguments are provided
+    if platform:
+        settings.platform = platform
+    if build_type:
+        settings.build_type = build_type
+    if build_for_web:
+        settings.web.build_for_web = build_for_web
+
     functions_and_statusbar_name = [
+        (generate_000_switch_build_alias_task, None),
         (generate_001_task_with_config_name, ""),
         (generate_002_remove_vcpkg_folders_task, None),
         (generate_003_remove_build_folder_task, None),
@@ -354,7 +407,33 @@ def generate_tasks():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        print(R"Usage: scripts\vscode_tasks_generator.py <release/debug/web>")
+        sys.exit(1)
+
+    platform: Platform = None
+    build_type: BuildType = None
+    build_for_web: BuildForWeb = None
+
+    if len(sys.argv) == 2:
+        arg = sys.argv[1]
+        if arg == "release":
+            build_type = BuildType.RELEASE
+            platform = Platform.WINDOWS
+            build_for_web = BuildForWeb.NO
+        elif arg == "debug":
+            build_type = BuildType.DEBUG
+            platform = Platform.WINDOWS
+            build_for_web = BuildForWeb.NO
+        elif arg == "web":
+            build_type = BuildType.RELEASE
+            platform = Platform.WINDOWS
+            build_for_web = BuildForWeb.YES
+        else:
+            print(R"Usage: scripts\vscode_tasks_generator.py <release/debug/web>")
+            sys.exit(1)
+
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    tasks_config = generate_tasks()
+    tasks_config = generate_tasks(platform=platform, build_type=build_type, build_for_web=build_for_web)
     with open(f"{current_file_dir}/../.vscode/tasks.json", "w") as tasks_file:
         json.dump(tasks_config, tasks_file, indent=4)

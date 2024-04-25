@@ -213,7 +213,7 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
 
     // Log names of loaded animations and tags.
     MY_LOG(
-        info, "Loaded animation from '{}': {}", asepriteAnimationJsonPath.string(),
+        debug, "Loaded animation from '{}': {}", asepriteAnimationJsonPath.string(),
         utils::JoinStrings(utils::GetKeys(tagToAnimationDict), ", "));
     for (const auto& [tag, animation] : tagToAnimationDict)
     {

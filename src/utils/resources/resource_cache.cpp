@@ -5,7 +5,6 @@
 #include <utils/sdl/sdl_colors.h>
 #include <utils/sdl/sdl_texture_process.h>
 
-
 namespace details
 {
 
@@ -45,7 +44,7 @@ std::shared_ptr<SDLTextureRAII> ResourceCache::LoadTexture(const std::filesystem
     if (textures.contains(absolutePath))
         return textures[absolutePath];
 
-    MY_LOG(info, "Loading texture: {}", filePath.string());
+    MY_LOG(debug, "Loading texture: {}", filePath.string());
 
     // Load the texture and cache it.
     std::shared_ptr<SDLTextureRAII> textureRAII;

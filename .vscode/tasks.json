@@ -2,12 +2,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "000. CONFIG: WIN_RELEASE",
+            "label": "000. DEBUG->release->web",
+            "command": "python scripts/vscode_tasks_generator.py release",
+            "type": "shell"
+        },
+        {
+            "label": "001. CONFIG: WIN_DEBUG",
             "command": "cls",
             "options": {
                 "statusbar": {
                     "hide": false,
-                    "label": "000. CONFIG: WIN_RELEASE"
+                    "label": "001. CONFIG: WIN_DEBUG"
                 }
             },
             "type": "shell"
@@ -35,7 +40,7 @@
         {
             "label": "010. (+) Configure",
             "command": [
-                " cmake -S . -B build/Release -DCMAKE_BUILD_TYPE=Release -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+                "  cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake -E copy build/Debug/compile_commands.json build/compile_commands.json"
             ],
             "options": {
                 "statusbar": {
@@ -47,7 +52,7 @@
         },
         {
             "label": "020. (+) Build",
-            "command": " cmake --build build/Release -- -k 0",
+            "command": " cmake --build build/Debug -- -k 0",
             "dependsOn": [
                 "010. (+) Configure"
             ],
@@ -61,7 +66,7 @@
         },
         {
             "label": "060. + Pack",
-            "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} build/Release LD55_Hungry_Portals_Release desktop",
+            "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} build/Debug LD55_Hungry_Portals_Debug desktop",
             "dependsOn": [
                 "040. + Copy assets"
             ],
@@ -75,7 +80,7 @@
         },
         {
             "label": "030. + Copy config.json",
-            "command": "cmake -E copy config.json build/Release/src/config.json",
+            "command": "cmake -E copy config.json build/Debug/src/config.json",
             "dependsOn": [
                 "020. (+) Build"
             ],
@@ -83,7 +88,7 @@
         },
         {
             "label": "040. + Copy assets",
-            "command": "cmake -E copy_directory assets build/Release/src/assets",
+            "command": "cmake -E copy_directory assets build/Debug/src/assets",
             "dependsOn": [
                 "030. + Copy config.json"
             ],
@@ -91,7 +96,7 @@
         },
         {
             "label": "050. + Run",
-            "command": "${workspaceFolder}/build/Release/src/LD55_Hungry_Portals.exe",
+            "command": "${workspaceFolder}/build/Debug/src/LD55_Hungry_Portals.exe",
             "dependsOn": [
                 "040. + Copy assets"
             ],
