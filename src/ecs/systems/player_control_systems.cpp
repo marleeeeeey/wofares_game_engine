@@ -16,10 +16,11 @@
 
 PlayerControlSystem::PlayerControlSystem(
     EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
-    Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory)
+    Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), inputEventManager(inputEventManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry),
-    box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory)
+    box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory),
+    audioSystem(audioSystem)
 {
     SubscribeToInputEvents();
     SubscribeToContactListener();
@@ -322,6 +323,9 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     // Create a bullet.
     auto bulletEntity =
         objectsFactory.SpawnBullet(playerEntity, initialBulletSpeed, currentWeaponProps.bulletAnglePolicy);
+
+    audioSystem.PlaySoundEffect(currentWeaponProps.shotSoundName);
+
     return bulletEntity;
 }
 

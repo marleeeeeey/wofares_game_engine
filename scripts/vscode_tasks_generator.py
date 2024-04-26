@@ -142,14 +142,7 @@ def common_set_type_shell(task):
     return task
 
 
-##################################### SPECIFIC TASKS #####################################
-
-
-def generate_000_switch_build_alias_task(s: Settings):
-    """
-    This task is used to switch between different build aliases in the loop.
-    """
-
+def get_build_alias_from_settings(s: Settings):
     build_alias_matching = {
         (Platform.WINDOWS, BuildType.DEBUG, BuildForWeb.NO): "debug",
         (Platform.WINDOWS, BuildType.RELEASE, BuildForWeb.NO): "release",
@@ -162,24 +155,34 @@ def generate_000_switch_build_alias_task(s: Settings):
     else:
         current_alias = "custom"
 
-    label_matching = {
-        "custom": "CUSTOM->debug->release->web",
-        "debug": "DEBUG->release->web",
-        "release": "debug->RELEASE->web",
-        "web": "debug->release->WEB",
-    }
+    return current_alias
 
-    current_label = label_matching[current_alias]
 
-    next_build_alias = {
+def get_next_build_alias(current_alias: str):
+    return {
         "custom": "debug",
         "debug": "release",
         "release": "web",
         "web": "debug",
     }[current_alias]
 
+
+##################################### SPECIFIC TASKS #####################################
+
+
+def generate_000_switch_build_alias_task(s: Settings):
+    """
+    This task is used to switch between different build aliases in the loop.
+    """
+
+    # Replace current alias with upper case.
+    current_alias = get_build_alias_from_settings(s)
+    label = "000. custom->[debug->release->web]"
+    label = label.replace(current_alias, current_alias.upper())
+    next_build_alias = get_next_build_alias(current_alias)
+
     return {
-        "label": f"000. {current_label}",
+        "label": label,
         "command": f"{s.path_to_python()} scripts/vscode_tasks_generator.py {next_build_alias}",
     }
 
@@ -310,9 +313,15 @@ def generate_030_copy_config_json_task(s: Settings):
 
 
 def generate_040_copy_assets_task(s: Settings):
+
+    # Remove all files in target folder before copying.
+    remove_command = f"cmake -E remove_directory {s.build_folder()}/src/assets"
+    # Copy all files from source folder to target folder.
+    copy_command = f"cmake -E copy_directory assets {s.build_folder()}/src/assets"
+
     return {
         "label": "040. + Copy assets",
-        "command": f"cmake -E copy_directory assets {s.build_folder()}/src/assets",
+        "command": f"{remove_command} && {copy_command}",
         "dependsOn": ["030. + Copy config.json"],
     }
 

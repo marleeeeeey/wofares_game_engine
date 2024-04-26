@@ -13,6 +13,7 @@ struct WeaponProps
 public: // Animation.
     std::string animationName = "fireball"; // Name of the animation.
     std::string animationTag = "fire"; // Tag of the animation.
+    std::string shotSoundName = "shot_fire"; // Name of the sound.
 public: // Bullet.
     float bulletMass = 0.1; // Mass of the bullet, kg.
     float bulletEjectionForce = 0.1; // Force of the bullet ejection. For grenades it should be zero.

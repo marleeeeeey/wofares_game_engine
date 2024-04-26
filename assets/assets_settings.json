@@ -15,6 +15,9 @@
     ],
     "evil_laugh": [
       "assets/sound_effects/evil_laugh*.wav"
+    ],
+    "shot_fire": [
+      "assets/sound_effects/shot_fire*.wav"
     ]
   },
   "music": {

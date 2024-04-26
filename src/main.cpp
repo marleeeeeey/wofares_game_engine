@@ -118,7 +118,8 @@ int main([[maybe_unused]] int argc, char* args[])
         EventQueueSystem eventQueueSystem(inputEventManager);
 
         // Subscribe all systems that need to handle input events.
-        PlayerControlSystem playerControlSystem(registryWrapper, inputEventManager, contactListener, objectsFactory);
+        PlayerControlSystem playerControlSystem(
+            registryWrapper, inputEventManager, contactListener, objectsFactory, audioSystem);
         CameraControlSystem cameraControlSystem(registryWrapper.GetRegistry(), inputEventManager);
         GameStateControlSystem gameStateControlSystem(registryWrapper.GetRegistry(), inputEventManager);
 

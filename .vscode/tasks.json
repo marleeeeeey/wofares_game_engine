@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "000. DEBUG->release->web",
+            "label": "000. custom->[DEBUG->release->web]",
             "command": "python scripts/vscode_tasks_generator.py release",
             "type": "shell"
         },
@@ -88,7 +88,7 @@
         },
         {
             "label": "040. + Copy assets",
-            "command": "cmake -E copy_directory assets build/Debug/src/assets",
+            "command": "cmake -E remove_directory build/Debug/src/assets && cmake -E copy_directory assets build/Debug/src/assets",
             "dependsOn": [
                 "030. + Copy config.json"
             ],

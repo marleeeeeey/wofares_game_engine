@@ -1,5 +1,6 @@
 #pragma once
 #include "utils/factories/objects_factory.h"
+#include "utils/systems/audio_system.h"
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <utils/coordinates_transformer.h>
@@ -18,10 +19,11 @@ class PlayerControlSystem
     Box2dBodyCreator box2dBodyCreator;
     Box2dEnttContactListener& contactListener;
     ObjectsFactory& objectsFactory;
+    AudioSystem& audioSystem;
 public:
     PlayerControlSystem(
         EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
-        Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory);
+        Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
 public: // Update.
     void Update(float deltaTime);
 private: // Subscriptions.
