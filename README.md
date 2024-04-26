@@ -62,6 +62,7 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 2024-04-23 1300 Prepare build for web (WASM Emscripten).
 2024-04-23 1400 Remove music fade-in/fade-out.
 2024-04-26 0215 Add maps from easy to dificult level.
+2024-04-27 0228 Improve sound system. Add several sounds (fire, explosion, eating).
 
 TODO
 - Add short rocket flight for the player on press W button in the air.

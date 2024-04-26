@@ -25,7 +25,7 @@
     "playerControlsWorksOnGroundOnly": false
   },
   "AudioSystem": {
-    "masterVolume": 0.3
+    "masterVolume": 0.7
   },
   "RandomEventSystem": {
     "randomSoundEventInterval_sec": 10

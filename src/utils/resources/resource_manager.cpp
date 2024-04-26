@@ -38,24 +38,41 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
     // Load sound effects.
     for (const auto& soundEffectPair : assetsSettingsJson["sound_effects"].items())
     {
+        // "explosion"
         const std::string& soundEffectName = soundEffectPair.key();
-        const auto& soundEffectGlobsJson = soundEffectPair.value();
+        // array of { "glob": "assets/sound_effects/explosion*.wav", "volumeShift": 0.5 }
+        const auto& globAndVolumeShiftList = soundEffectPair.value();
 
-        if (!soundEffectGlobsJson.is_array())
+        if (!globAndVolumeShiftList.is_array())
             throw std::runtime_error(MY_FMT("Sound effect paths for '{}' should be an array", soundEffectName));
 
-        std::vector<std::filesystem::path> paths;
+        std::vector<SoundEffectBatch> soundEffectInfos;
 
         // Load sound effect paths.
-        for (const auto& soundEffectGlobPath : soundEffectGlobsJson)
+        for (const auto& globAndVolumeShift : globAndVolumeShiftList)
         {
-            for (auto& soundEffectPath : glob::glob(soundEffectGlobPath.get<std::string>()))
-            {
-                paths.push_back(soundEffectPath);
-            }
-        }
+            auto globIt = globAndVolumeShift.find("glob");
+            if (globIt == globAndVolumeShift.end())
+                throw std::runtime_error(MY_FMT("Sound effect path should have 'glob' field"));
 
-        soundEffectPaths[soundEffectName] = paths;
+            // "assets/sound_effects/explosion*.wav"
+            auto globPath = globIt->get<std::string>();
+
+            auto volumeShiftIt = globAndVolumeShift.find("volumeShift");
+            float volumeShift = volumeShiftIt != globAndVolumeShift.end() ? volumeShiftIt->get<float>() : 0.0f;
+
+            SoundEffectBatch soundEffectInfo;
+            soundEffectInfo.volumeShift = volumeShift;
+
+            for (auto& soundEffectPath : glob::glob(globPath))
+            {
+                soundEffectInfo.paths.push_back(soundEffectPath);
+            }
+
+            soundEffectInfos.push_back(soundEffectInfo);
+        }
+        MY_LOG(debug, "Sound effect '{}' has {} batch(es)", soundEffectName, soundEffectInfos.size());
+        soundEffectBatchesPerTag[soundEffectName] = soundEffectInfos;
     }
 
     // Load music.
@@ -68,7 +85,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
 
     MY_LOG(
         info, "Game found {} animation(s), {} level(s), {} music(s), {} sound effect(s).", animations.size(),
-        tiledLevels.size(), musicPaths.size(), soundEffectPaths.size());
+        tiledLevels.size(), musicPaths.size(), soundEffectBatchesPerTag.size());
 }
 
 Animation ResourceManager::GetAnimation(const std::string& animationName)
@@ -122,8 +139,8 @@ Animation ResourceManager::GetAnimationByRegexRandomly(
         throw std::runtime_error(
             MY_FMT("Animation tag with regex '{}' does not found in {}", regexTagName, animationName));
 
-    auto randomTag = utils::Random<size_t>(0, foundTags.size() - 1);
-    return animations[animationName][foundTags[randomTag]];
+    auto randomTagOpt = utils::RandomIndexOpt(foundTags);
+    return animations[animationName][foundTags[randomTagOpt.value()]];
 }
 
 namespace
@@ -244,15 +261,26 @@ std::shared_ptr<MusicRAII> ResourceManager::GetMusic(const std::string& name)
     return resourceCashe.LoadMusic(musicPaths[name]);
 }
 
-std::shared_ptr<SoundEffectRAII> ResourceManager::GetSoundEffect(const std::string& name)
+ResourceManager::SoundEffectInfo ResourceManager::GetSoundEffect(const std::string& name)
 {
-    if (!soundEffectPaths.contains(name))
+    if (!soundEffectBatchesPerTag.contains(name))
         throw std::runtime_error(MY_FMT("Sound effect with name '{}' does not found", name));
 
     // Get random sound effect from the list.
-    const auto& sounds = soundEffectPaths[name];
-    auto number = utils::Random<size_t>(0, soundEffectPaths[name].size() - 1);
-    return resourceCashe.LoadSoundEffect(sounds[number]);
+    const auto& soundEffectBatches = soundEffectBatchesPerTag[name];
+    auto batchNumberOpt = utils::RandomIndexOpt(soundEffectBatches);
+    if (!batchNumberOpt.has_value())
+        throw std::runtime_error(MY_FMT("Sound effect batch for '{}' is empty", name));
+    const SoundEffectBatch& soundEffectBatch = soundEffectBatches[batchNumberOpt.value()];
+    auto trackNumberOpt = utils::RandomIndexOpt(soundEffectBatch.paths);
+    if (!trackNumberOpt.has_value())
+        throw std::runtime_error(MY_FMT("Sound effect track number for '{}' is empty", name));
+    const auto& soundEffectPath = soundEffectBatch.paths[trackNumberOpt.value()];
+
+    SoundEffectInfo soundEffectInfo;
+    soundEffectInfo.soundEffect = resourceCashe.LoadSoundEffect(soundEffectPath);
+    soundEffectInfo.volumeShift = soundEffectBatch.volumeShift;
+    return soundEffectInfo;
 }
 
 std::shared_ptr<SDLSurfaceRAII> ResourceManager::GetSurface(const std::filesystem::path& path)

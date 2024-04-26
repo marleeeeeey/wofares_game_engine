@@ -139,7 +139,7 @@ int main([[maybe_unused]] int argc, char* args[])
         MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager, contactListener);
 
         AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry(), resourceManager);
-        GameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory);
+        GameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory, audioSystem);
 
         EventsControlSystem eventsControlSystem(registryWrapper.GetRegistry());
 

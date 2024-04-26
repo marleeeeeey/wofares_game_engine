@@ -11,13 +11,34 @@
   },
   "sound_effects": {
     "explosion": [
-      "assets/sound_effects/explosion*.wav"
+      {
+        "glob": "assets/sound_effects/explosion*.wav",
+        "volumeShift": 0.5
+      }
     ],
     "evil_laugh": [
-      "assets/sound_effects/evil_laugh*.wav"
+      {
+        "glob": "assets/sound_effects/evil_laugh*.wav",
+        "volumeShift": 0.0
+      }
     ],
     "shot_fire": [
-      "assets/sound_effects/shot_fire*.wav"
+      {
+        "glob": "assets/sound_effects/shot_fire*.wav",
+        "volumeShift": -0.1
+      }
+    ],
+    "portal_feeds": [
+      {
+        "glob": "assets/sound_effects/portal_feeds*.wav",
+        "volumeShift": -0.2
+      }
+    ],
+    "portal_go_to_player": [
+      {
+        "glob": "assets/sound_effects/portal_go_to_player*.wav",
+        "volumeShift": -0.4
+      }
     ]
   },
   "music": {

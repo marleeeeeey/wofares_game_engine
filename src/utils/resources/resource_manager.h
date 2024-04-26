@@ -31,14 +31,25 @@
 // }
 class ResourceManager
 {
+public:
+    struct SoundEffectInfo
+    {
+        std::shared_ptr<SoundEffectRAII> soundEffect;
+        float volumeShift = 0.0f;
+    };
+private:
+    struct SoundEffectBatch
+    {
+        std::vector<std::filesystem::path> paths;
+        float volumeShift = 0.0f;
+    };
     details::ResourceCache resourceCashe;
-
     using FriendlyName = std::string;
     using TagToAnimationDict = std::unordered_map<FriendlyName, Animation>;
     std::unordered_map<FriendlyName, TagToAnimationDict> animations;
     std::unordered_map<FriendlyName, LevelInfo> tiledLevels;
     std::unordered_map<FriendlyName, std::filesystem::path> musicPaths;
-    std::unordered_map<std::string, std::vector<std::filesystem::path>> soundEffectPaths;
+    std::unordered_map<std::string, std::vector<SoundEffectBatch>> soundEffectBatchesPerTag;
 public:
     ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson);
 public: // ************************* Animations *************************
@@ -63,5 +74,5 @@ public: // ************************* Textures *************************
     std::shared_ptr<SDLSurfaceRAII> GetSurface(const std::filesystem::path& path);
 public: // ************************* Sounds *************************
     std::shared_ptr<MusicRAII> GetMusic(const std::string& name);
-    std::shared_ptr<SoundEffectRAII> GetSoundEffect(const std::string& name);
+    SoundEffectInfo GetSoundEffect(const std::string& name);
 };

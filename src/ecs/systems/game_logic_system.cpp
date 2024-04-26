@@ -1,4 +1,5 @@
 #include "game_logic_system.h"
+#include "utils/systems/audio_system.h"
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
@@ -10,9 +11,10 @@
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
 
-GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory)
+GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
-    coordinatesTransformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front()))
+    coordinatesTransformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
+    audioSystem(audioSystem)
 {}
 
 void GameLogicSystem::Update(float deltaTime)
@@ -82,7 +84,11 @@ std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
             return body->IsEnabled();
         });
     if (closestPlayer.has_value())
+    {
+        // TODO0: Playing sound here lead to "No available channels" error.
+        // audioSystem.PlaySoundEffect("portal_go_to_player");
         return registry.get<PhysicsComponent>(closestPlayer.value()).bodyRAII->GetBody()->GetPosition();
+    }
 
     return std::nullopt;
 }
@@ -154,6 +160,8 @@ void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
 
                 registryWrapper.Destroy(entityInPortal);
             }
+
+            audioSystem.PlaySoundEffect("portal_feeds");
         });
 
     if (portalToDestroyOpt.has_value())
