@@ -219,10 +219,11 @@ def generate_002_remove_vcpkg_folders_task(s: Settings):
     command = {
         Platform.WINDOWS: "rmdir /s /q vcpkg vcpkg_installed 2>nul & exit 0",
         Platform.LINUX: "rm -rf vcpkg vcpkg_installed",
-    }
+    }[s.platform]
+
     return {
         "label": "002. Remove vcpkg folders",
-        "command": command[s.platform],
+        "command": command,
     }
 
 
@@ -230,10 +231,11 @@ def generate_003_remove_build_folder_task(s: Settings):
     command = {
         Platform.WINDOWS: "rmdir /s /q build 2>nul & exit 0",
         Platform.LINUX: "rm -rf build",
-    }
+    }[s.platform]
+
     return {
         "label": "003. Remove build folder",
-        "command": command[s.platform],
+        "command": command,
     }
 
 
@@ -248,10 +250,11 @@ def generate_007_install_vcpkg_as_subfolder_task(s: Settings):
     command = {
         Platform.WINDOWS: f"{s.setup_env()} git clone https://github.com/microsoft/vcpkg && .\\vcpkg\\bootstrap-vcpkg.bat && .\\vcpkg\\vcpkg install --triplet={s.triplet()}",
         Platform.LINUX: f"{s.setup_env()} git clone https://github.com/microsoft/vcpkg && ./vcpkg/bootstrap-vcpkg.sh && ./vcpkg/vcpkg install --triplet={s.triplet()}",
-    }
+    }[s.platform]
+
     return {
         "label": "007. Install vcpkg as subfolder",
-        "command": command[s.platform],
+        "command": command,
     }
 
 
@@ -269,18 +272,18 @@ def generate_010_cmake_configure_task(s: Settings):
         f" && cmake -E copy {s.build_folder()}/compile_commands.json build/compile_commands.json",  # compile_commands.json is visible from `build` folder only
     )
 
-    if s.web.build_for_web == BuildForWeb.YES:
-        # For emscripten build double configure leads to error. That's why we add dependecy to remove build folder before configure.
-        return {
-            "label": "010. (+) Configure",
-            "command": command,
-            "dependsOn": ["003. Remove build folder"],
-        }
-    else:
-        return {
-            "label": "010. (+) Configure",
-            "command": command,
-        }
+    depends_on = {
+        # For emscripten build double configure leads to error.
+        # That's why we add dependecy to remove build folder before configure.
+        BuildForWeb.YES: ["003. Remove build folder"],
+        BuildForWeb.NO: [],
+    }[s.web.build_for_web]
+
+    return {
+        "label": "010. (+) Configure",
+        "command": command,
+        "dependsOn": depends_on,
+    }
 
 
 def generate_020_cmake_build_task(s: Settings):
@@ -289,19 +292,16 @@ def generate_020_cmake_build_task(s: Settings):
         StopOnFirstError.NO: "",
     }[s.stop_on_first_error]
 
-    command = f"{s.setup_env()} cmake --build {s.build_folder()} -- {stop_on_first_error}"
+    depends_on = {
+        BuildForWeb.YES: [],
+        BuildForWeb.NO: ["010. (+) Configure"],
+    }[s.web.build_for_web]
 
-    if s.web.build_for_web == BuildForWeb.YES:
-        return {
-            "label": "020. (+) Build",
-            "command": command,
-        }
-    else:
-        return {
-            "label": "020. (+) Build",
-            "command": command,
-            "dependsOn": ["010. (+) Configure"],
-        }
+    return {
+        "label": "020. (+) Build",
+        "command": f"{s.setup_env()} cmake --build {s.build_folder()} -- {stop_on_first_error}",
+        "dependsOn": depends_on,
+    }
 
 
 def generate_030_copy_config_json_task(s: Settings):

@@ -42,6 +42,7 @@
             "command": [
                 "  cmake -S . -B build/Debug -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake -E copy build/Debug/compile_commands.json build/compile_commands.json"
             ],
+            "dependsOn": [],
             "options": {
                 "statusbar": {
                     "hide": false,

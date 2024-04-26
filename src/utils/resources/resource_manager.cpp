@@ -53,7 +53,7 @@ ResourceManager::ResourceManager(SDL_Renderer* renderer, const nlohmann::json& a
         {
             auto globIt = globAndVolumeShift.find("glob");
             if (globIt == globAndVolumeShift.end())
-                throw std::runtime_error(MY_FMT("Sound effect path should have 'glob' field"));
+                throw std::runtime_error("Sound effect path should have 'glob' field");
 
             // "assets/sound_effects/explosion*.wav"
             auto globPath = globIt->get<std::string>();
