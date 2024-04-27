@@ -88,7 +88,7 @@ class Settings:
 
     def path_to_7z(self):
         return {
-            Platform.WINDOWS: "C:\\Program Files\\7-Zip\\7z.exe",
+            Platform.WINDOWS: "C:/Program Files/7-Zip/7z.exe",
             Platform.LINUX: "7z",
         }[self.platform]
 
@@ -204,38 +204,25 @@ def generate_001_task_with_config_name(s: Settings):
         BuildForWeb.NO: "",
     }[s.web.build_for_web]
 
-    cls_command = {
-        Platform.WINDOWS: "cls",
-        Platform.LINUX: "clear",
-    }[s.platform]
+    build_alias = get_build_alias_from_settings(s)
 
     return {
         "label": f"001. CONFIG: {config_name}",
-        "command": cls_command,
+        "command": f"{s.path_to_python()} scripts/vscode_tasks_generator.py {build_alias}",
     }
 
 
 def generate_002_remove_vcpkg_folders_task(s: Settings):
-    command = {
-        Platform.WINDOWS: "rmdir /s /q vcpkg vcpkg_installed 2>nul & exit 0",
-        Platform.LINUX: "rm -rf vcpkg vcpkg_installed",
-    }[s.platform]
-
     return {
         "label": "002. Remove vcpkg folders",
-        "command": command,
+        "command": f"cmake -E remove_directory vcpkg && cmake -E remove_directory vcpkg_installed",
     }
 
 
 def generate_003_remove_build_folder_task(s: Settings):
-    command = {
-        Platform.WINDOWS: "rmdir /s /q build 2>nul & exit 0",
-        Platform.LINUX: "rm -rf build",
-    }[s.platform]
-
     return {
-        "label": "003. Remove build folder",
-        "command": command,
+        "label": f"003. Remove {s.build_folder()}",
+        "command": f"cmake -E remove_directory {s.build_folder()}",
     }
 
 
@@ -292,15 +279,15 @@ def generate_020_cmake_build_task(s: Settings):
         StopOnFirstError.NO: "",
     }[s.stop_on_first_error]
 
-    depends_on = {
-        BuildForWeb.YES: [],
-        BuildForWeb.NO: ["010. (+) Configure"],
+    extra_command = {
+        BuildForWeb.YES: f" && {s.path_to_python()} scripts/rename_to_index_html.py ${{workspaceFolder}} {s.build_folder()}",
+        BuildForWeb.NO: "",
     }[s.web.build_for_web]
 
     return {
-        "label": "020. (+) Build",
-        "command": f"{s.setup_env()} cmake --build {s.build_folder()} -- {stop_on_first_error}",
-        "dependsOn": depends_on,
+        "label": "020. + Build",
+        "command": f"{s.setup_env()} cmake --build {s.build_folder()} -- {stop_on_first_error} {extra_command}",
+        "dependsOn": ["010. (+) Configure"],
     }
 
 
@@ -308,7 +295,7 @@ def generate_030_copy_config_json_task(s: Settings):
     return {
         "label": "030. + Copy config.json",
         "command": f"cmake -E copy config.json {s.build_folder()}/src/config.json",
-        "dependsOn": ["020. (+) Build"],
+        "dependsOn": ["020. + Build"],
     }
 
 
@@ -341,7 +328,7 @@ def generate_060_pack_task(s: Settings):
     }[s.web.build_for_web]
 
     depends_on = {
-        BuildForWeb.YES: ["020. (+) Build"],
+        BuildForWeb.YES: ["020. + Build"],
         BuildForWeb.NO: ["040. + Copy assets"],
     }[s.web.build_for_web]
 
@@ -363,6 +350,13 @@ def generate_080_web_run_server_task(s: Settings):
     return {
         "label": "080. Run web server",
         "command": f"{s.path_to_python()} -m http.server 8000 --directory {s.build_folder()}/src",
+    }
+
+
+def generate_090_open_game_link_task(s: Settings):
+    return {
+        "label": "090. Open game link",
+        "command": "start http://localhost:8000/index.html",
     }
 
 
@@ -404,6 +398,7 @@ def generate_tasks(platform: Platform = None, build_type: BuildType = None, buil
     if settings.web.build_for_web == BuildForWeb.YES:
         functions_and_statusbar_name += [
             (generate_080_web_run_server_task, "RunWebServer"),
+            (generate_090_open_game_link_task, "OpenGameLink"),
         ]
 
     for function, statusbar_name in functions_and_statusbar_name:

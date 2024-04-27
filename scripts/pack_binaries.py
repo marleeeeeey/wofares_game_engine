@@ -24,17 +24,6 @@ def pack_binaries(path_to_7z, root_folder, build_folder, achive_name, web_or_des
             f"*.tiled-project",
         ]
     elif web_or_desktop == "web":
-
-        # Search *.html file in the src_path and rename it to index.html.
-        html_files = glob.glob(f"{src_path}/*.html")
-        if len(html_files) == 1:
-            for html_file in html_files:
-                os.rename(html_file, f"{src_path}/index.html")
-        else:
-            raise ValueError(
-                f"There should be exactly one html file in the web build. Found: {len(html_files)}: {html_files}",
-            )
-
         exclude_paths += [
             f"{root_folder}/{build_folder}/src/assets",
             f"{root_folder}/{build_folder}/src/CMakeFiles",

@@ -8,7 +8,7 @@
         },
         {
             "label": "001. CONFIG: WIN_DEBUG",
-            "command": "cls",
+            "command": "python scripts/vscode_tasks_generator.py debug",
             "options": {
                 "statusbar": {
                     "hide": false,
@@ -19,12 +19,12 @@
         },
         {
             "label": "002. Remove vcpkg folders",
-            "command": "rmdir /s /q vcpkg vcpkg_installed 2>nul & exit 0",
+            "command": "cmake -E remove_directory vcpkg && cmake -E remove_directory vcpkg_installed",
             "type": "shell"
         },
         {
-            "label": "003. Remove build folder",
-            "command": "rmdir /s /q build 2>nul & exit 0",
+            "label": "003. Remove build/Debug",
+            "command": "cmake -E remove_directory build/Debug",
             "type": "shell"
         },
         {
@@ -52,8 +52,8 @@
             "type": "shell"
         },
         {
-            "label": "020. (+) Build",
-            "command": " cmake --build build/Debug -- -k 0",
+            "label": "020. + Build",
+            "command": " cmake --build build/Debug -- -k 0 ",
             "dependsOn": [
                 "010. (+) Configure"
             ],
@@ -67,7 +67,7 @@
         },
         {
             "label": "060. + Pack",
-            "command": "python scripts/pack_binaries.py \"C:\\Program Files\\7-Zip\\7z.exe\" ${workspaceFolder} build/Debug LD55_Hungry_Portals_Debug desktop",
+            "command": "python scripts/pack_binaries.py \"C:/Program Files/7-Zip/7z.exe\" ${workspaceFolder} build/Debug LD55_Hungry_Portals_Debug desktop",
             "dependsOn": [
                 "040. + Copy assets"
             ],
@@ -83,7 +83,7 @@
             "label": "030. + Copy config.json",
             "command": "cmake -E copy config.json build/Debug/src/config.json",
             "dependsOn": [
-                "020. (+) Build"
+                "020. + Build"
             ],
             "type": "shell"
         },
