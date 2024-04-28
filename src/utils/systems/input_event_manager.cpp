@@ -159,3 +159,9 @@ void InputEventManager::UpdateButtonHoldStaticInfo(const SDL_Event& event)
         }
     }
 }
+
+void InputEventManager::Reset()
+{
+    keyboardButtonHoldInfo.clear();
+    mouseButtonHoldInfo.clear();
+}

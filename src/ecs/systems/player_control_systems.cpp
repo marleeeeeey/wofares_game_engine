@@ -1,4 +1,5 @@
 #include "player_control_systems.h"
+#include "my_cpp_utils/logger.h"
 #include <SDL.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
@@ -98,16 +99,21 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
             originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
         {
             if (playerInfo.countOfGroundContacts > 0)
+            {
+                MY_LOG(trace, "Player {} jumped", playerInfo.number);
                 body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
+            }
         }
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_A)
         {
+            MY_LOG(trace, "Player {} moved left", playerInfo.number);
             body->ApplyForceToCenter(b2Vec2(-movingForce, 0), true);
         }
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_D)
         {
+            MY_LOG(trace, "Player {} moved right", playerInfo.number);
             body->ApplyForceToCenter(b2Vec2(movingForce, 0), true);
         }
     }

@@ -157,6 +157,7 @@ int main([[maybe_unused]] int argc, char* args[])
                 auto level = resourceManager.GetTiledLevel(gameOptions.levelOptions.mapName);
                 mapLoaderSystem.LoadMap(level);
                 gameOptions.controlOptions.reloadMap = false;
+                inputEventManager.Reset();
             }
 
             // Handle input events.

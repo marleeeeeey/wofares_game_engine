@@ -32,6 +32,10 @@ public: // Methods to translate SDL events to the EventInfo and notify listeners
     // This method should be called every frame after updateRawEvent.
     // It updates hold durations and notifies listeners with hold durations.
     void UpdateСontinuousEvents(float deltaTime);
+public: // Hacks.
+    // Reset all the hold durations and flags. Should be called on level restart.
+    // TODO1: This looks like a bad design. The main reason is not clear.
+    void Reset();
 private:
     struct PrivateEventInfo
     {
