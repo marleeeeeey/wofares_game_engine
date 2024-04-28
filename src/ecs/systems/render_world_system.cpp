@@ -61,9 +61,6 @@ void RenderWorldSystem::RenderPlayerWeaponDirection()
         auto [physicalBody, playerInfo, animationComponent] =
             players.get<PhysicsComponent, PlayerComponent, AnimationComponent>(entity);
 
-        if (!physicalBody.bodyRAII->GetBody()->IsEnabled())
-            continue;
-
         // Draw the weapon.
         // TODO1: Currently we are always get the animation in initial state. So it always draws the first frame.
         // We should use AnimationComponent to make weapon animation runnable.
@@ -87,9 +84,6 @@ void RenderWorldSystem::RenderAnimations()
 
         // Caclulate the position and angle of the animation.
         auto body = physicsInfo.bodyRAII->GetBody();
-
-        if (!body->IsEnabled())
-            continue;
 
         glm::vec2 physicsBodyCenterWorld = coordinatesTransformer.PhysicsToWorld(body->GetPosition());
         const float angle = body->GetAngle();

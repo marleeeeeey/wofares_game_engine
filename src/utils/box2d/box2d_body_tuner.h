@@ -29,7 +29,6 @@ public: // Options setters.
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::CollisionPolicy& option);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::BulletPolicy& option);
     void ApplyOption(entt::entity entity, const Box2dBodyOptions::Hitbox& hitbox);
-    void ApplyOption(entt::entity entity, const Box2dBodyOptions::EnabledPolicy& option);
 private: // Create empty physics body.
     b2Body* CreatePhysicsBodyWithNoShape(entt::entity entity, const glm::vec2& posWorld);
 private: // Add simple fixtures to the body.

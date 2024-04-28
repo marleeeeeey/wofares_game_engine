@@ -29,7 +29,7 @@ void AudioSystem::PlaySoundEffect(const std::string& soundEffectName)
     int channel = Mix_PlayChannel(-1, soundEffectInfo.soundEffect->get(), 0);
     if (channel == -1)
     {
-        MY_LOG(error, "Failed to play sound effect: No available channels.");
+        MY_LOG(debug, "Failed to play sound effect: No available channels.");
         return;
     }
 

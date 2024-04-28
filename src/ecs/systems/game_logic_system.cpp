@@ -82,15 +82,7 @@ void GameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
         portal.target =
             std::make_pair(PortalComponent::PortalTargetType::DestructibleParticle, closestStickyPos.value());
 
-    auto closestPlayer = request::FindClosestEntityWithAllComponents<PlayerComponent>(
-        registry, portalPos,
-        [this](auto entity)
-        {
-            // Check if the player is enabled.
-            auto& physicsComponent = registry.get<PhysicsComponent>(entity);
-            auto body = physicsComponent.bodyRAII->GetBody();
-            return body->IsEnabled();
-        });
+    auto closestPlayer = request::FindClosestEntityWithAllComponents<PlayerComponent>(registry, portalPos);
     if (!newTarget && closestPlayer.has_value())
     {
         const auto& playerPos =
@@ -247,14 +239,7 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
             auto portalBody = physicsComponent.bodyRAII->GetBody();
             auto portalPos = portalBody->GetPosition();
 
-            auto playerEntityOpt = request::FindClosestEntityWithAllComponents<PlayerComponent>(
-                registry, portalPos,
-                [this]([[maybe_unused]] auto entity)
-                {
-                    auto& physicsComponent = registry.get<PhysicsComponent>(entity);
-                    auto body = physicsComponent.bodyRAII->GetBody();
-                    return body->IsEnabled();
-                });
+            auto playerEntityOpt = request::FindClosestEntityWithAllComponents<PlayerComponent>(registry, portalPos);
 
             if (!playerEntityOpt.has_value())
                 return;
@@ -263,8 +248,6 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
 
             auto& playerPhysicsComponent = registry.get<PhysicsComponent>(playerEntity);
             auto playerBody = playerPhysicsComponent.bodyRAII->GetBody();
-            if (!playerBody->IsEnabled())
-                return;
             auto playerBodyPos = playerBody->GetPosition();
 
             auto portalEatPlayerWithDistance = utils::GetConfig<float, "GameLogicSystem.portalEatPlayerWithDistance">();

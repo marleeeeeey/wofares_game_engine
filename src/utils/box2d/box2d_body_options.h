@@ -54,10 +54,4 @@ struct Box2dBodyOptions
     {
         glm::vec2 sizeWorld; // Size of the hitbox in the world coordinates.
     } hitbox;
-
-    enum class EnabledPolicy
-    {
-        Enable,
-        Disable,
-    } enabledPolicy = EnabledPolicy::Enable;
 };

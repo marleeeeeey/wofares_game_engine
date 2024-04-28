@@ -23,7 +23,6 @@ PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
     ApplyOption(entity, options.collisionPolicy);
     ApplyOption(entity, options.bulletPolicy);
     ApplyOption(entity, options.hitbox);
-    ApplyOption(entity, options.enabledPolicy);
 
     return physicsComponent;
 }
@@ -163,20 +162,6 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hi
     objectHitbox = hitbox;
 
     ApplyOption(entity, physicsComponent.options.shape);
-}
-
-void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::EnabledPolicy& option)
-{
-    auto& physicsComponent = GetPhysicsComponent(entity);
-    auto body = physicsComponent.bodyRAII->GetBody();
-    physicsComponent.options.enabledPolicy = option;
-
-    if (option == Box2dBodyOptions::EnabledPolicy::Enable)
-        body->SetEnabled(true);
-    else if (option == Box2dBodyOptions::EnabledPolicy::Disable)
-        body->SetEnabled(false);
-    else
-        throw std::runtime_error("[ApplyOption] Unknown activation policy");
 }
 
 // ************************************* Create empty physics body. *************************************

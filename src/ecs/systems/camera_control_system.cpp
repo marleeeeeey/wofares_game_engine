@@ -90,9 +90,6 @@ void CameraControlSystem::PositioningCameraToPlayer(float deltaTime)
         const auto& physicsInfo = players.get<PhysicsComponent>(entity);
         auto playerBody = physicsInfo.bodyRAII->GetBody();
 
-        if (!playerBody->IsEnabled())
-            continue;
-
         auto playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
 
         glm::vec2 cameraAnchorPosWorld = playerPosWorld;
