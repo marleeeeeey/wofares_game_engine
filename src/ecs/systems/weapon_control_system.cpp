@@ -2,9 +2,9 @@
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
+#include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/rendering_components.h>
-#include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
@@ -114,10 +114,10 @@ void WeaponControlSystem::AppendToExplosionQueue(const ExplosionEntityWithContac
 
 void WeaponControlSystem::CheckTimerExplosionEntities()
 {
-    auto entityWithTimers = registry.view<TimerComponent, ExplosionOnTimerComponent>();
+    auto entityWithTimers = registry.view<TimeEventComponent, ExplosionOnTimerComponent>();
     for (auto& timerExplosionEntity : entityWithTimers)
     {
-        auto timerComponent = entityWithTimers.get<TimerComponent>(timerExplosionEntity);
+        auto timerComponent = entityWithTimers.get<TimeEventComponent>(timerExplosionEntity);
         if (!timerComponent.isActivated)
             continue;
 

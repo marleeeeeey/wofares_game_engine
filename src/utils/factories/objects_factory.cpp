@@ -1,10 +1,10 @@
 #include "objects_factory.h"
 #include "ecs/components/animation_components.h"
+#include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
 #include <ecs/components/rendering_components.h>
-#include <ecs/components/timer_components.h>
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
@@ -192,7 +192,7 @@ entt::entity ObjectsFactory::SpawnBullet(
         break;
     case WeaponType::Grenade:
         registry.emplace<DamageComponent>(bulletEntity, damageComponent);
-        registry.emplace<TimerComponent>(bulletEntity, 3.0f);
+        registry.emplace<TimeEventComponent>(bulletEntity, 3.0f);
         registry.emplace<ExplosionOnTimerComponent>(bulletEntity);
         break;
     }
@@ -237,7 +237,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG(debug, "Create Portal body with bbox: {}", playerHitboxSizeWorld);
 
-    registry.emplace<TimerComponent>(
+    registry.emplace<TimeEventComponent>(
         entity, 0,
         [this](entt::entity timedPortal)
         {
@@ -246,7 +246,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
             portalComponent.speed = utils::Random<float>(0.5, 1.5);
 
             // Reset the timer.
-            auto& timerComponent = registry.get<TimerComponent>(timedPortal);
+            auto& timerComponent = registry.get<TimeEventComponent>(timedPortal);
             timerComponent.timeToActivation = utils::Random<float>(4, 20);
             timerComponent.isActivated = false;
 

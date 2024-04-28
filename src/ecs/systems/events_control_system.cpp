@@ -15,7 +15,7 @@ void EventsControlSystem::Update([[maybe_unused]] float deltaTime)
         {
             eventComponent.onEvent();
 
-            if (!!(eventComponent.options & EventComponent::Opt::CheckOnceAndRemove))
+            if (!!(eventComponent.options & EventComponent::Opt::OneTimeOnPredicate))
             {
                 registry.remove<EventComponent>(entity);
             }

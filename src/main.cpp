@@ -26,7 +26,6 @@
 #include <utils/systems/event_queue_system.h>
 #include <utils/systems/game_state_control_system.h>
 #include <utils/systems/input_event_manager.h>
-#include <utils/systems/random_event_system.h>
 #include <utils/systems/screen_mode_control_system.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -126,7 +125,6 @@ int main([[maybe_unused]] int argc, char* args[])
         // Create a systems with no input events.
         SdlPrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
         PhysicsSystem physicsSystem(registryWrapper);
-        RandomEventSystem randomEventSystem(registryWrapper.GetRegistry(), audioSystem);
         RenderWorldSystem RenderWorldSystem(
             registryWrapper.GetRegistry(), renderer.get(), resourceManager, primitivesRenderer);
         RenderHUDSystem RenderHUDSystem(registryWrapper.GetRegistry(), renderer.get(), assetsSettingsJson);
@@ -166,7 +164,6 @@ int main([[maybe_unused]] int argc, char* args[])
             // Auxiliary systems.
             timersControlSystem.Update(deltaTime);
             eventsControlSystem.Update(deltaTime);
-            randomEventSystem.Update(deltaTime);
 
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);

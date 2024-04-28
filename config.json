@@ -27,9 +27,6 @@
   "AudioSystem": {
     "masterVolume": 0.7
   },
-  "RandomEventSystem": {
-    "randomSoundEventInterval_sec": 10
-  },
   "PhysicsSystem": {
     "velocityIterations": 1,
     "positionIterations": 1

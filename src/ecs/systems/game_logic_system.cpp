@@ -1,15 +1,16 @@
 #include "game_logic_system.h"
 #include "utils/systems/audio_system.h"
+#include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
-#include <ecs/components/timer_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/math_utils.h>
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
+
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
@@ -215,7 +216,7 @@ void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
                 // Sleep the portal for a while.
                 auto& portalComponent = registry.get<PortalComponent>(portal);
                 portalComponent.isSleeping = true;
-                registry.emplace_or_replace<TimerComponent>(
+                registry.emplace_or_replace<TimeEventComponent>(
                     portal, utils::Random<float>(0.2f, 0.5f),
                     [this](entt::entity portalEntity)
                     {

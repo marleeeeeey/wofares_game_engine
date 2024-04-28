@@ -6,12 +6,19 @@ struct EventComponent
 {
     enum class Opt
     {
-        None = 0,
-        CheckOnceAndRemove = 1 << 0,
+        AnyTimeOnPredicate = 0,
+        OneTimeOnPredicate = 1 << 0,
         _entt_enum_as_bitmask
     };
 
     std::function<bool(void)> predicate;
     std::function<void(void)> onEvent;
-    Opt options = Opt::None;
+    Opt options = Opt::AnyTimeOnPredicate;
+};
+
+struct TimeEventComponent
+{
+    float timeToActivation = 3.0f; // Time in seconds to call the callback.
+    std::function<void(entt::entity)> onTimerEnd; // Callback on timer end.
+    bool isActivated = false; // Is the timer activated.
 };

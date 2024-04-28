@@ -16,12 +16,6 @@
         "volumeShift": 0.5
       }
     ],
-    "evil_laugh": [
-      {
-        "glob": "assets/sound_effects/evil_laugh*.wav",
-        "volumeShift": 0.0
-      }
-    ],
     "shot_fire": [
       {
         "glob": "assets/sound_effects/shot_fire*.wav",
