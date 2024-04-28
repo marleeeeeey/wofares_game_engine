@@ -23,8 +23,8 @@ public:
 private: // Portal logic
     void UpdatePortalsPosition(float deltaTime);
     void UpdatePortalTarget(entt::entity portalEntity);
-    void MagnetDesctructibleParticlesToPortal(float deltaTime);
-    void DestroyClosestDestructibleParticlesInPortal();
+    void MagnetFoodToPortal(float deltaTime);
+    void DestroyClosestFoodInPortal();
     void ScatterPortalsIsTheyCloseToEachOther();
     void EatThePlayerByPortalIfCloser();
     void CheckGameCompletness();

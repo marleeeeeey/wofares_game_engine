@@ -9,7 +9,7 @@ enum class ZOrderingType
 {
     Background,
     Interiors,
-    Terrain
+    Terrain,
 };
 
 struct RenderingComponent

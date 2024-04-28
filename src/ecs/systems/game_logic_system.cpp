@@ -20,8 +20,8 @@ GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objec
 void GameLogicSystem::Update(float deltaTime)
 {
     UpdatePortalsPosition(deltaTime);
-    MagnetDesctructibleParticlesToPortal(deltaTime);
-    DestroyClosestDestructibleParticlesInPortal();
+    MagnetFoodToPortal(deltaTime);
+    DestroyClosestFoodInPortal();
     ScatterPortalsIsTheyCloseToEachOther();
     EatThePlayerByPortalIfCloser();
     CheckGameCompletness();
@@ -108,7 +108,7 @@ void GameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
     portal.target = newTarget;
 }
 
-void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)
+void GameLogicSystem::MagnetFoodToPortal(float deltaTime)
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
     for (auto entity : portalEntities)
@@ -138,7 +138,7 @@ void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)
     }
 }
 
-void GameLogicSystem::DestroyClosestDestructibleParticlesInPortal()
+void GameLogicSystem::DestroyClosestFoodInPortal()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
 

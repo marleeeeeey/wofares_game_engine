@@ -169,7 +169,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     MY_LOG(debug, "[DoExplosion] FindEntitiesInRadius count {}", allOriginalBodiesInRadius.size());
 
     auto destructibleOriginalBodies =
-        request::GetEntitiesWithAllComponents<DestructibleByPlayerComponent>(registry, allOriginalBodiesInRadius);
+        request::GetEntitiesWithAllComponents<DestructibleComponent>(registry, allOriginalBodiesInRadius);
     destructibleOriginalBodies =
         request::RemoveEntitiesWithAllComponents<ExplostionParticlesComponent>(registry, destructibleOriginalBodies);
     MY_LOG(debug, "[DoExplosion] Getting destructible objects. Count {}", destructibleOriginalBodies.size());

@@ -43,14 +43,27 @@ entt::entity ObjectsFactory::SpawnTile(
     {
     case SpawnTileOption::DesctructibleOption::Destructible:
         options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
-        registry.emplace<DestructibleByPlayerComponent>(entity);
+        registry.emplace<DestructibleComponent>(entity);
         break;
-    case SpawnTileOption::DesctructibleOption::NoDestructible:
+    case SpawnTileOption::DesctructibleOption::Indestructible:
         options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
         options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
-        options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
+        registry.emplace<IndestructibleComponent>(entity);
         break;
     }
+
+    switch (tileOptions.collidableOption)
+    {
+    case SpawnTileOption::CollidableOption::Collidable:
+        // Default collision flags for options.collisionPolicy
+        registry.emplace<CollidableComponent>(entity);
+        break;
+    case SpawnTileOption::CollidableOption::Transparent:
+        options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
+        registry.emplace<TransparentComponent>(entity);
+        break;
+    }
+
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld, options);
 
     return entity;
@@ -199,7 +212,7 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
         CreateAnimationInfo("buildingBlock", "block", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, buildingBlockAnimation);
 
-    registry.emplace<DestructibleByPlayerComponent>(entity);
+    registry.emplace<DestructibleComponent>(entity);
 
     return entity;
 }

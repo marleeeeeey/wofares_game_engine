@@ -58,15 +58,23 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
             if (layer["name"] == "background")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::DesctructibleOption::NoDestructible, ZOrderingType::Background});
+                    {ObjectsFactory::SpawnTileOption::CollidableOption::Transparent,
+                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Background});
             if (layer["name"] == "interiors")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::DesctructibleOption::NoDestructible, ZOrderingType::Interiors});
+                    {ObjectsFactory::SpawnTileOption::CollidableOption::Transparent,
+                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Interiors});
             if (layer["name"] == "terrain")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::DesctructibleOption::Destructible, ZOrderingType::Terrain});
+                    {ObjectsFactory::SpawnTileOption::CollidableOption::Collidable,
+                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Destructible, ZOrderingType::Terrain});
+            if (layer["name"] == "terrain_no_destructible")
+                ParseTileLayer(
+                    layer,
+                    {ObjectsFactory::SpawnTileOption::CollidableOption::Collidable,
+                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Terrain});
         }
         else if (layer["type"] == "objectgroup")
         {

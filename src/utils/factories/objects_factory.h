@@ -27,10 +27,16 @@ public:
 public: // Main game objects.
     struct SpawnTileOption
     {
+        enum class CollidableOption
+        {
+            Collidable,
+            Transparent,
+        } collidableOption = CollidableOption::Collidable;
+
         enum class DesctructibleOption
         {
             Destructible,
-            NoDestructible,
+            Indestructible,
         } destructibleOption = DesctructibleOption::Destructible;
 
         ZOrderingType zOrderingType = ZOrderingType::Terrain;
