@@ -125,7 +125,7 @@ def common_append_vscode_statusbar_label(task, statusbar_label: str = None):
         return task
 
     if statusbar_label == "":
-        statusbar_label = task["label"]
+        return task
 
     task["options"] = {
         "statusbar": {
@@ -206,9 +206,19 @@ def generate_001_task_with_config_name(s: Settings):
 
     build_alias = get_build_alias_from_settings(s)
 
+    statusbar_label = f"Config: {config_name}"
+
+    status_bar_options = {
+        "statusbar": {
+            "hide": False,
+            "label": statusbar_label,
+        }
+    }
+
     return {
-        "label": f"001. CONFIG: {config_name}",
+        "label": f"001. {statusbar_label}",
         "command": f"{s.path_to_python()} scripts/vscode_tasks_generator.py {build_alias}",
+        "options": status_bar_options,
     }
 
 

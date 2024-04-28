@@ -7,12 +7,12 @@
             "type": "shell"
         },
         {
-            "label": "001. CONFIG: WIN_DEBUG",
+            "label": "001. Config: WIN_DEBUG",
             "command": "python scripts/vscode_tasks_generator.py debug",
             "options": {
                 "statusbar": {
                     "hide": false,
-                    "label": "001. CONFIG: WIN_DEBUG"
+                    "label": "Config: WIN_DEBUG"
                 }
             },
             "type": "shell"
