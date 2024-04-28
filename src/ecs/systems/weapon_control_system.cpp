@@ -12,7 +12,6 @@
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt/entt_collect_objects.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
@@ -27,7 +26,7 @@ WeaponControlSystem::WeaponControlSystem(
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
     audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry),
-    collectObjects(registry), physicsBodyTuner(registry)
+    physicsBodyTuner(registry)
 {
     SubscribeToContactEvents();
 }

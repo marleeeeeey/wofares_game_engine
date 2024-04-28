@@ -22,7 +22,7 @@ public:
     void Update(float deltaTime);
 private: // Portal logic
     void UpdatePortalsPosition(float deltaTime);
-    std::optional<b2Vec2> FindPortalTargetPos(b2Vec2 portalPos);
+    void UpdatePortalTarget(entt::entity portalEntity);
     void MagnetDesctructibleParticlesToPortal(float deltaTime);
     void DestroyClosestDestructibleParticlesInPortal();
     void ScatterPortalsIsTheyCloseToEachOther();

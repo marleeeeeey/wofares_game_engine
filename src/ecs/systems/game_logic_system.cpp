@@ -33,22 +33,21 @@ void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
         return;
 
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
-    for (auto entity : portalEntities)
+    for (auto portalEntity : portalEntities)
     {
-        auto& portalComponent = portalEntities.get<PortalComponent>(entity);
+        auto& portalComponent = portalEntities.get<PortalComponent>(portalEntity);
         if (portalComponent.isSleeping)
             continue;
 
-        auto& physicsComponent = portalEntities.get<PhysicsComponent>(entity);
-        auto portalBody = physicsComponent.bodyRAII->GetBody();
-        auto portalPos = portalBody->GetPosition();
-
-        auto closestTargetPosOpt = FindPortalTargetPos(portalPos);
-        if (!closestTargetPosOpt.has_value())
+        UpdatePortalTarget(portalEntity);
+        if (!portalComponent.target)
             continue;
 
         // Apply the force to phiysics body to move it to the closest target
-        b2Vec2 direction = closestTargetPosOpt.value() - portalPos;
+        auto& physicsComponent = portalEntities.get<PhysicsComponent>(portalEntity);
+        auto portalBody = physicsComponent.bodyRAII->GetBody();
+        auto portalPos = portalBody->GetPosition();
+        b2Vec2 direction = portalComponent.target->second - portalPos;
         direction.Normalize();
         // change object speed to the target speed
         b2Vec2 speed = portalBody->GetLinearVelocity();
@@ -59,20 +58,29 @@ void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
     }
 }
 
-std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
+void GameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
 {
+    auto& portal = registry.get<PortalComponent>(portalEntity);
+    auto& physicsComponent = registry.get<PhysicsComponent>(portalEntity);
+    auto portalBody = physicsComponent.bodyRAII->GetBody();
+    auto portalPos = portalBody->GetPosition();
+
+    std::optional<std::pair<PortalComponent::PortalTargetType, b2Vec2>> newTarget;
+
     auto closestExplosionParticlesPos =
         request::FindClosestEntityPosWithAllComponents<ExplostionParticlesComponent>(registry, portalPos);
     if (closestExplosionParticlesPos.has_value())
     {
         // If the closest explosion particles are too close to the portal, return this position.
         if (b2Distance(closestExplosionParticlesPos.value(), portalPos) < 3.0f)
-            return closestExplosionParticlesPos;
+            newTarget = std::make_pair(
+                PortalComponent::PortalTargetType::DestructibleParticle, closestExplosionParticlesPos.value());
     }
 
     auto closestStickyPos = request::FindClosestEntityPosWithAllComponents<StickyComponent>(registry, portalPos);
-    if (closestStickyPos.has_value())
-        return closestStickyPos;
+    if (!newTarget && closestStickyPos.has_value())
+        portal.target =
+            std::make_pair(PortalComponent::PortalTargetType::DestructibleParticle, closestStickyPos.value());
 
     auto closestPlayer = request::FindClosestEntityWithAllComponents<PlayerComponent>(
         registry, portalPos,
@@ -83,14 +91,21 @@ std::optional<b2Vec2> GameLogicSystem::FindPortalTargetPos(b2Vec2 portalPos)
             auto body = physicsComponent.bodyRAII->GetBody();
             return body->IsEnabled();
         });
-    if (closestPlayer.has_value())
+    if (!newTarget && closestPlayer.has_value())
     {
-        // TODO0: Playing sound here lead to "No available channels" error.
-        // audioSystem.PlaySoundEffect("portal_go_to_player");
-        return registry.get<PhysicsComponent>(closestPlayer.value()).bodyRAII->GetBody()->GetPosition();
+        const auto& playerPos =
+            registry.get<PhysicsComponent>(closestPlayer.value()).bodyRAII->GetBody()->GetPosition();
+        newTarget = std::make_pair(PortalComponent::PortalTargetType::Player, playerPos);
     }
 
-    return std::nullopt;
+    // Play the sound effect if the target is changed to the player.
+    if (newTarget && newTarget->first == PortalComponent::PortalTargetType::Player)
+    {
+        if ((portal.target && portal.target->first != PortalComponent::PortalTargetType::Player) || !portal.target)
+            audioSystem.PlaySoundEffect("portal_go_to_player");
+    }
+
+    portal.target = newTarget;
 }
 
 void GameLogicSystem::MagnetDesctructibleParticlesToPortal(float deltaTime)

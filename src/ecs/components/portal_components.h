@@ -1,4 +1,6 @@
 #pragma once
+#include <box2d/box2d.h>
+#include <optional>
 
 struct PortalComponent
 {
@@ -7,4 +9,11 @@ struct PortalComponent
     float magnetForce = 150.0f;
     bool isSleeping = false;
     size_t foodCounter = 0;
+
+    enum class PortalTargetType
+    {
+        Player,
+        DestructibleParticle,
+    };
+    std::optional<std::pair<PortalTargetType, b2Vec2>> target;
 };

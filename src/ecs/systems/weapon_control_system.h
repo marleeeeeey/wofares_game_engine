@@ -2,7 +2,6 @@
 #include <entt/entt.hpp>
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
-#include <utils/entt/entt_collect_objects.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/game_options.h>
@@ -24,7 +23,6 @@ class WeaponControlSystem
     AudioSystem& audioSystem;
     ObjectsFactory& objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
-    EnttCollectObjects collectObjects;
     Box2dBodyTuner physicsBodyTuner;
 private: // Queues for entities that should be processed when contact event completed.
     std::map<entt::entity, ExplosionEntityWithContactPoint> explosionEntitiesQueue;
