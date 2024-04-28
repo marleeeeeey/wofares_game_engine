@@ -172,7 +172,7 @@ int main([[maybe_unused]] int argc, char* args[])
             physicsSystem.Update(deltaTime);
             playerControlSystem.Update(deltaTime);
             gameLogicSystem.Update(deltaTime);
-            weaponControlSystem.Update(deltaTime);
+            weaponControlSystem.Update();
             cameraControlSystem.Update(deltaTime);
 
             // Update animation.

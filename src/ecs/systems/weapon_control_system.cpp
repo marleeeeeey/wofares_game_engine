@@ -31,10 +31,9 @@ WeaponControlSystem::WeaponControlSystem(
     SubscribeToContactEvents();
 }
 
-void WeaponControlSystem::Update(float deltaTime)
+void WeaponControlSystem::Update()
 {
     CheckTimerExplosionEntities();
-    UpdateCollisionDisableTimerComponent(deltaTime);
     ProcessEntitiesQueues();
 }
 
@@ -98,11 +97,11 @@ void WeaponControlSystem::SubscribeToContactEvents()
         {
             for (const auto& entity : {contactInfo.entityA, contactInfo.entityB})
             {
-                // If the entity contains the CollisionDisableHitCountComponent.
-                if (!registry.all_of<CollisionDisableHitCountComponent>(entity))
-                    continue;
+                auto hitCountComponent = registry.try_get<HitCountComponent>(entity);
+                if (!hitCountComponent)
+                    return;
 
-                UpdateCollisionDisableHitCountComponent(entity);
+                hitCountComponent->hitCount++;
             }
         });
 }
@@ -111,21 +110,6 @@ void WeaponControlSystem::SubscribeToContactEvents()
 void WeaponControlSystem::AppendToExplosionQueue(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
     explosionEntitiesQueue[explosionEntityWithContactPoint.explosionEntity] = explosionEntityWithContactPoint;
-}
-
-void WeaponControlSystem::UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity)
-{
-    auto hitCount = registry.try_get<CollisionDisableHitCountComponent>(hitCountEntity);
-    if (!hitCount)
-        return;
-
-    hitCount->hitCount--;
-
-    if (hitCount->hitCount <= 0)
-    {
-        registry.remove<CollisionDisableHitCountComponent>(hitCountEntity);
-        physicsBodyTuner.ApplyOption(hitCountEntity, {CollisionFlags::None, CollisionFlags::None});
-    }
 }
 
 void WeaponControlSystem::CheckTimerExplosionEntities()
@@ -261,20 +245,4 @@ void WeaponControlSystem::ProcessEntitiesQueues()
 
     explosionEntitiesQueue.clear();
     becomeStaticEntitiesQueue.clear();
-}
-
-void WeaponControlSystem::UpdateCollisionDisableTimerComponent(float deltaTime)
-{
-    auto collisionDisableTimers = registry.view<CollisionDisableTimerComponent>();
-    for (auto entity : collisionDisableTimers)
-    {
-        auto& collisionDisableTimer = collisionDisableTimers.get<CollisionDisableTimerComponent>(entity);
-        collisionDisableTimer.timeToDisableCollision -= deltaTime;
-
-        if (collisionDisableTimer.timeToDisableCollision <= 0.0f)
-        {
-            registry.remove<CollisionDisableTimerComponent>(entity);
-            physicsBodyTuner.ApplyOption(entity, {CollisionFlags::None, CollisionFlags::None});
-        }
-    }
 }

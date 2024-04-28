@@ -31,14 +31,12 @@ public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
         ObjectsFactory& objectsFactory);
-    void Update(float deltaTime);
+    void Update();
 private:
     void SubscribeToContactEvents();
     void AppendToExplosionQueue(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
 private:
     void CheckTimerExplosionEntities();
-    void UpdateCollisionDisableTimerComponent(float deltaTime);
-    void UpdateCollisionDisableHitCountComponent(entt::entity hitCountEntity);
     void ProcessEntitiesQueues();
     void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
     void DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);

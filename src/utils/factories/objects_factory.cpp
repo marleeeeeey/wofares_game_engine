@@ -103,8 +103,6 @@ entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& posWor
     auto entity = registryWrapper.Create("ExplosionFragment");
     registry.emplace<AnimationComponent>(entity, fragmentAnimation);
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentSizeWorld);
-    registry.emplace<CollisionDisableHitCountComponent>(
-        entity, utils::GetConfig<size_t, "ObjectsFactory.numberOfHitsToDisableCollisionsForFragments">());
     return entity;
 }
 

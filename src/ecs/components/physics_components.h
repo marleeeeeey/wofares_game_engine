@@ -9,12 +9,7 @@ struct PhysicsComponent
     Box2dBodyOptions options;
 };
 
-struct CollisionDisableTimerComponent
-{
-    float timeToDisableCollision = 1.1f; // Time in seconds to disable collision.
-};
-
-struct CollisionDisableHitCountComponent
+struct HitCountComponent
 {
     size_t hitCount = 0; // Number of hits before the collision is disabled.
 };
