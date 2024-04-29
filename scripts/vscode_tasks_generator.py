@@ -231,7 +231,7 @@ def generate_002_remove_vcpkg_folders_task(s: Settings):
 
 def generate_003_remove_build_folder_task(s: Settings):
     return {
-        "label": f"003. Remove {s.build_folder()}",
+        "label": f"003. Remove build folder",
         "command": f"cmake -E remove_directory {s.build_folder()}",
     }
 
