@@ -39,6 +39,7 @@ entt::entity ObjectsFactory::SpawnTile(
         entity, glm::vec2(sizeWorld, sizeWorld), textureRect.texture, textureRect.rect, tileOptions.zOrderingType);
 
     Box2dBodyOptions options;
+    options.fixture.restitution = 0.0f;
     switch (tileOptions.destructibleOption)
     {
     case SpawnTileOption::DesctructibleOption::Destructible:
