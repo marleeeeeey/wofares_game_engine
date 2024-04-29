@@ -22,7 +22,8 @@
     "mousePosImpactOnCameraAnchor": false
   },
   "PlayerControlSystem": {
-    "playerControlsWorksOnGroundOnly": false
+    "allowLeftRightMovementInAir": true,
+    "maxHorizontalSpeed": 3
   },
   "AudioSystem": {
     "masterVolume": 0.7
@@ -53,7 +54,8 @@
   "GameLogicSystem":
   {
     "portalEatPlayerWithDistance": 0.4,
-    "portalMaxFoodCounter": 70
+    "portalMaxFoodCounter": 70,
+    "debugOnlyNoTargetForPortal": true
   },
   "WeaponPropsFactory":
   {

@@ -2,6 +2,7 @@
 #include "my_cpp_utils/logger.h"
 #include <SDL.h>
 #include <ecs/components/animation_components.h>
+#include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <entt/entt.hpp>
@@ -32,35 +33,71 @@ void PlayerControlSystem::Update(float deltaTime)
     const auto& players = registry.view<PlayerComponent>();
     for (auto entity : players)
     {
+        ProcessEventsQueue(deltaTime);
         UpdateFireRateAndReloadTime(entity, deltaTime);
+        RestrictPlayerHorizontalSpeed(entity);
+    }
+}
+
+void PlayerControlSystem::ProcessEventsQueue(float deltaTime)
+{
+    for (auto& [eventType, eventsQueue] : eventsQueueByType)
+    {
+        while (!eventsQueue.empty())
+        {
+            auto eventInfo = eventsQueue.front();
+            eventsQueue.pop();
+            if (eventType == InputEventManager::EventType::ButtonHold)
+            {
+                HandlePlayerMovement(eventInfo, deltaTime);
+                HandlePlayerChangeWeapon(eventInfo);
+                HandlePlayerAttackOnHoldButton(eventInfo);
+            }
+            else if (eventType == InputEventManager::EventType::ButtonReleaseAfterHold)
+            {
+                HandlePlayerAttackOnReleaseButton(eventInfo);
+            }
+            else if (eventType == InputEventManager::EventType::RawSdlEvent)
+            {
+                HandlePlayerBuildingAction(eventInfo);
+                HandlePlayerWeaponDirection(eventInfo);
+            }
+        }
+    }
+}
+
+void PlayerControlSystem::RestrictPlayerHorizontalSpeed(entt::entity playerEntity)
+{
+    const auto& [player, physicalBody] = registry.get<PlayerComponent, PhysicsComponent>(playerEntity);
+    auto body = physicalBody.bodyRAII->GetBody();
+
+    auto velocity = body->GetLinearVelocity();
+    float maxHorizontalSpeed = utils::GetConfig<float, "PlayerControlSystem.maxHorizontalSpeed">();
+
+    if (std::abs(velocity.x) > maxHorizontalSpeed)
+    {
+        velocity.x = std::copysign(maxHorizontalSpeed, velocity.x);
+        body->SetLinearVelocity(velocity);
     }
 }
 
 void PlayerControlSystem::SubscribeToInputEvents()
 {
+    // TODO2: Think. Maybe move this logic to the InputEventManager.
     inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonHold,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerMovement(eventInfo); });
-
-    inputEventManager.Subscribe(
-        InputEventManager::EventType::ButtonHold,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerChangeWeapon(eventInfo); });
+        [this](const InputEventManager::EventInfo& eventInfo)
+        { eventsQueueByType[InputEventManager::EventType::ButtonHold].push(eventInfo); });
 
     inputEventManager.Subscribe(
         InputEventManager::EventType::ButtonReleaseAfterHold,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttackOnReleaseButton(eventInfo); });
-
-    inputEventManager.Subscribe(
-        InputEventManager::EventType::ButtonHold,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerAttackOnHoldButton(eventInfo); });
+        [this](const InputEventManager::EventInfo& eventInfo)
+        { eventsQueueByType[InputEventManager::EventType::ButtonReleaseAfterHold].push(eventInfo); });
 
     inputEventManager.Subscribe(
         InputEventManager::EventType::RawSdlEvent,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerBuildingAction(eventInfo); });
-
-    inputEventManager.Subscribe(
-        InputEventManager::EventType::RawSdlEvent,
-        [this](const InputEventManager::EventInfo& eventInfo) { HandlePlayerWeaponDirection(eventInfo); });
+        [this](const InputEventManager::EventInfo& eventInfo)
+        { eventsQueueByType[InputEventManager::EventType::RawSdlEvent].push(eventInfo); });
 }
 
 void PlayerControlSystem::SubscribeToContactListener()
@@ -75,46 +112,69 @@ void PlayerControlSystem::SubscribeToContactListener()
         { HandlePlayerEndPlayerContact(contactInfo); });
 }
 
-void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo)
+void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo, float deltaTime)
 {
     auto& originalEvent = eventInfo.originalEvent;
 
     const auto& players = registry.view<PlayerComponent, PhysicsComponent>();
     for (auto entity : players)
     {
-        const auto& [playerInfo, physicalBody] = players.get<PlayerComponent, PhysicsComponent>(entity);
+        const auto& [player, physicalBody] = players.get<PlayerComponent, PhysicsComponent>(entity);
         auto body = physicalBody.bodyRAII->GetBody();
 
-        // If the player is not on the ground, then don't allow to move or jump.
-        bool playerControlsWorksOnGroundOnly =
-            utils::GetConfig<bool, "PlayerControlSystem.playerControlsWorksOnGroundOnly">();
-        if (playerControlsWorksOnGroundOnly && playerInfo.countOfGroundContacts <= 0)
-            continue;
+        bool allowLeftRightMovement =
+            utils::GetConfig<bool, "PlayerControlSystem.allowLeftRightMovementInAir">() || player.OnGround();
 
         auto mass = body->GetMass();
-        float movingForce = 10.0f * mass;
-        float jumpForce = 80.0f * mass;
 
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W ||
             originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
         {
-            if (playerInfo.countOfGroundContacts > 0)
+            if (player.OnGround())
+                player.allowContinueJumpInAir = false;
+
+            if (player.OnGround() || player.allowContinueJumpInAir)
             {
-                MY_LOG(trace, "Player {} jumped", playerInfo.number);
+                float jumpForce = 1500.0f * mass * deltaTime;
+
+                // If time event component is present then it impact on the player jump force.
+                // Less time to activation - less jump force.
+                auto timeEventComponent = registry.try_get<TimeEventComponent>(entity);
+                if (timeEventComponent && timeEventComponent->isActivated)
+                    jumpForce *= std::pow(timeEventComponent->timeToActivation, 2);
+
+                MY_LOG(trace, "Player {} jumped", player.number);
                 body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
+
+                if (!player.allowContinueJumpInAir)
+                {
+                    player.allowContinueJumpInAir = true;
+                    registry.emplace_or_replace<TimeEventComponent>(
+                        entity, 0.13f,
+                        [this](entt::entity playerEntity)
+                        {
+                            auto& playerComponent = registry.get<PlayerComponent>(playerEntity);
+                            playerComponent.allowContinueJumpInAir = false;
+                        });
+                }
             }
         }
 
-        if (originalEvent.key.keysym.scancode == SDL_SCANCODE_A)
+        if (allowLeftRightMovement)
         {
-            MY_LOG(trace, "Player {} moved left", playerInfo.number);
-            body->ApplyForceToCenter(b2Vec2(-movingForce, 0), true);
-        }
+            float movingForce = 600.0f * mass * deltaTime;
 
-        if (originalEvent.key.keysym.scancode == SDL_SCANCODE_D)
-        {
-            MY_LOG(trace, "Player {} moved right", playerInfo.number);
-            body->ApplyForceToCenter(b2Vec2(movingForce, 0), true);
+            if (originalEvent.key.keysym.scancode == SDL_SCANCODE_A)
+            {
+                MY_LOG(trace, "Player {} moved left", player.number);
+                body->ApplyForceToCenter(b2Vec2(-movingForce, 0), true);
+            }
+
+            if (originalEvent.key.keysym.scancode == SDL_SCANCODE_D)
+            {
+                MY_LOG(trace, "Player {} moved right", player.number);
+                body->ApplyForceToCenter(b2Vec2(movingForce, 0), true);
+            }
         }
     }
 }

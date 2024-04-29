@@ -10,10 +10,12 @@ CameraControlSystem::CameraControlSystem(entt::registry& registry, InputEventMan
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     inputEventManager(inputEventManager), coordinatesTransformer(registry)
 {
-    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
-                                { HandleCameraMovementAndScale(eventInfo.originalEvent); });
-    inputEventManager.Subscribe([this](const InputEventManager::EventInfo& eventInfo)
-                                { HandleMouseScreenPosition(eventInfo.originalEvent); });
+    inputEventManager.Subscribe(
+        [this](const InputEventManager::EventInfo& eventInfo)
+        {
+            HandleCameraMovementAndScale(eventInfo.originalEvent);
+            HandleMouseScreenPosition(eventInfo.originalEvent);
+        });
 }
 
 void CameraControlSystem::HandleCameraMovementAndScale(const SDL_Event& event)

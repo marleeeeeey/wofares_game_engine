@@ -11,7 +11,6 @@
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
 
-
 GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
     coordinatesTransformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
@@ -61,6 +60,9 @@ void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
 
 void GameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
 {
+    if (utils::GetConfig<bool, "GameLogicSystem.debugOnlyNoTargetForPortal">())
+        return;
+
     auto& portal = registry.get<PortalComponent>(portalEntity);
     auto& physicsComponent = registry.get<PhysicsComponent>(portalEntity);
     auto portalBody = physicsComponent.bodyRAII->GetBody();
