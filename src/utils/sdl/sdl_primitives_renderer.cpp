@@ -1,5 +1,7 @@
 #include "sdl_primitives_renderer.h"
+#include <SDL2_gfxPrimitives.h>
 #include <numbers>
+#include <utils/sdl/sdl_colors.h>
 
 SdlPrimitivesRenderer::SdlPrimitivesRenderer(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
@@ -42,10 +44,12 @@ void SdlPrimitivesRenderer::RenderSquare(
 
 void SdlPrimitivesRenderer::RenderCircle(const glm::vec2& centerWorld, float radiusWorld, ColorName color)
 {
-    // TODO4: Now the circle is rendered as a square. Fix it.
-    std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
-    SDL_Rect destRect = GetRectWithCameraTransform(centerWorld, glm::vec2(radiusWorld * 2, radiusWorld * 2));
-    SDL_RenderCopy(renderer, pixelTexture->get(), nullptr, &destRect);
+    auto sdlColor = GetSDLColor(color);
+    auto centerScreen = coordinatesTransformer.WorldToScreen(centerWorld);
+    auto radiusScreen = coordinatesTransformer.WorldToScreen(radiusWorld);
+    // circleRGBA or filledCircleRGBA
+    filledCircleRGBA(
+        renderer, centerScreen.x, centerScreen.y, radiusScreen, sdlColor.r, sdlColor.g, sdlColor.b, sdlColor.a);
 }
 
 void SdlPrimitivesRenderer::RenderTiledSquare(
