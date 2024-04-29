@@ -97,7 +97,7 @@ int main([[maybe_unused]] int argc, char* args[])
         SDLWindowRAII window(
             "`LD55 Hungry Portals` game by marleeeeeey, jsCommander and SdCorpse",
             gameOptions.windowOptions.windowSize);
-        SDLRendererRAII renderer(window.get());
+        SDLRendererRAII renderer(window.get(), SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 
         std::filesystem::path assetsSettingsFilePath = "assets/assets_settings.json";

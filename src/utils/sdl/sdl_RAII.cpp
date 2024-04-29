@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <utils/logger.h>
 
-
 SDLInitializerRAII::SDLInitializerRAII(Uint32 flags)
 {
     if (SDL_Init(flags) < 0)
@@ -44,9 +43,9 @@ void SDLWindowRAII::init(const std::string& title, int width, int height)
     }
 }
 
-SDLRendererRAII::SDLRendererRAII(SDL_Window* window)
+SDLRendererRAII::SDLRendererRAII(SDL_Window* window, Uint32 flags)
 {
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, flags);
     if (!renderer)
     {
         throw std::runtime_error(MY_FMT("Failed to create SDL Renderer: {}", SDL_GetError()));

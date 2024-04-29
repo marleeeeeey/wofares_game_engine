@@ -148,7 +148,7 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
                     // If time event component is present then it impact on the player jump force.
                     // Less time to activation - less jump force.
                     if (timeEventComponent && timeEventComponent->isActivated)
-                        jumpForce *= std::pow(timeEventComponent->timeToActivation, 2);
+                        jumpForce *= std::pow(timeEventComponent->timeToActivation, 1);
                 }
 
                 body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);

@@ -34,7 +34,7 @@ class SDLRendererRAII
 {
     SDL_Renderer* renderer = nullptr;
 public:
-    explicit SDLRendererRAII(SDL_Window* window);
+    explicit SDLRendererRAII(SDL_Window* window, Uint32 flags);
     ~SDLRendererRAII();
     SDLRendererRAII(const SDLRendererRAII&) = delete;
     SDLRendererRAII& operator=(const SDLRendererRAII&) = delete;

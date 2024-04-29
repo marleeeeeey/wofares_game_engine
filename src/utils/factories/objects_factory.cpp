@@ -84,7 +84,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
 
     // PhysicsInfo.
     Box2dBodyOptions options;
-    options.fixture.restitution = 0.0f;
+    options.fixture.restitution = 0.05f;
     options.shape = Box2dBodyOptions::Shape::Capsule;
     options.sensor = Box2dBodyOptions::Sensor::ThinSensorBelow;
     options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;

@@ -56,7 +56,7 @@
   "GameLogicSystem": {
     "portalEatPlayerWithDistance": 0.4,
     "portalMaxFoodCounter": 70,
-    "debugOnlyNoTargetForPortal": true
+    "debugOnlyNoTargetForPortal": false
   },
   "WeaponPropsFactory": {
     "grenadeExplosionRadiusPixels": 30,
