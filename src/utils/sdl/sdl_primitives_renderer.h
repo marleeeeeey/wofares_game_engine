@@ -22,6 +22,8 @@ public:
 public:
     void RenderSquare(const glm::vec2& posWorld, const glm::vec2& sizeWorld, ColorName color, float angle);
     void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sizeWorld, ColorName color);
+    // primitivesRenderer.RenderCircle(centerWorld, radiusWorld, ColorName::Red);
+    void RenderCircle(const glm::vec2& centerWorld, float radiusWorld, ColorName color);
     void RenderTiledSquare(
         const glm::vec2& centerWorld, const float angle, const RenderingComponent& tileInfo,
         const SDL_RendererFlip& flip = SDL_FLIP_NONE);

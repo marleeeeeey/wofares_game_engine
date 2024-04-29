@@ -1,4 +1,6 @@
 #include "render_world_system.h"
+#include "utils/debug_draw/draw_bounding_box.h"
+#include "utils/sdl/sdl_colors.h"
 #include <SDL_render.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
@@ -26,6 +28,11 @@ void RenderWorldSystem::Render()
     RenderTiles();
     RenderAnimations();
     RenderPlayerWeaponDirection();
+
+    if (utils::GetConfig<bool, "RenderWorldSystem.debugDrawBoundingBoxes">())
+        RenderBoudingBoxes();
+    if (utils::GetConfig<bool, "RenderWorldSystem.debugDrawBox2dSensors">())
+        RenderBox2dSensors();
 }
 
 void RenderWorldSystem::RenderBackground()
@@ -96,4 +103,19 @@ void RenderWorldSystem::RenderAnimations()
                 physicsBodyCenterWorld, animationInfo.GetHitboxSize(), ColorName::Green, angle);
         }
     }
+}
+
+void RenderWorldSystem::RenderBoudingBoxes()
+{
+    auto& pr = primitivesRenderer;
+    auto& ct = coordinatesTransformer;
+    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, PlayerComponent>());
+    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, DestructibleComponent>());
+}
+
+void RenderWorldSystem::RenderBox2dSensors()
+{
+    auto& pr = primitivesRenderer;
+    auto& ct = coordinatesTransformer;
+    DrawSensorBoxes(pr, ct, registry.view<PhysicsComponent>(), ColorName::Red);
 }

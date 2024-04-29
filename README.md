@@ -122,6 +122,7 @@ TODO
 
 - In `config.json`, section names should correspond to the class names that use them.
 - Variable naming in `config.json` should be a direct copy of the variable names in the code.
+- Debug options should start with `debug` and may be located in every section.
 
 #### Animation Editor and Engine Integration
 

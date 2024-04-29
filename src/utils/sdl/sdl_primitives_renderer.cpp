@@ -40,6 +40,14 @@ void SdlPrimitivesRenderer::RenderSquare(
     RenderSquare(posWorld, sizeWorld, color, angle);
 }
 
+void SdlPrimitivesRenderer::RenderCircle(const glm::vec2& centerWorld, float radiusWorld, ColorName color)
+{
+    // TODO4: Now the circle is rendered as a square. Fix it.
+    std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
+    SDL_Rect destRect = GetRectWithCameraTransform(centerWorld, glm::vec2(radiusWorld * 2, radiusWorld * 2));
+    SDL_RenderCopy(renderer, pixelTexture->get(), nullptr, &destRect);
+}
+
 void SdlPrimitivesRenderer::RenderTiledSquare(
     const glm::vec2& centerWorld, const float angle, const RenderingComponent& tileInfo, const SDL_RendererFlip& flip)
 {

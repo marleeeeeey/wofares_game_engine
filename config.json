@@ -49,16 +49,16 @@
     "showDebugMenus": false
   },
   "RenderWorldSystem": {
-    "renderPlayerHitbox": false
+    "renderPlayerHitbox": false,
+    "debugDrawBoundingBoxes": false,
+    "debugDrawBox2dSensors": false
   },
-  "GameLogicSystem":
-  {
+  "GameLogicSystem": {
     "portalEatPlayerWithDistance": 0.4,
     "portalMaxFoodCounter": 70,
     "debugOnlyNoTargetForPortal": true
   },
-  "WeaponPropsFactory":
-  {
+  "WeaponPropsFactory": {
     "grenadeExplosionRadiusPixels": 30,
     "grenadeReloadTimeSeconds": 1,
     "bazookaExplosionRadiusPixels": 15,

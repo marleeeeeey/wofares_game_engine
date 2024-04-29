@@ -10,6 +10,7 @@
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
+#include <utils/vec_math.h>
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
