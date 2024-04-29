@@ -231,13 +231,15 @@ void Box2dBodyTuner::AddVerticalCapsuleFixtureToBody(b2Body* body, b2FixtureDef&
 
 void Box2dBodyTuner::AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& sizeWorld)
 {
+    // Parameters for the sensor.
+    float widthFillKoef = 0.75f; // Use to prevent collision with left and right walls.
+    float hh = 0.015f; // Half height of the sensor.
+
     b2PolygonShape sensorShape;
     b2Vec2 sizePhysics = coordinatesTransformer.WorldToPhysics(sizeWorld);
-    float widthFillKoef = 0.9f; // Use to prevent collision with left and right walls.
     float hw = sizePhysics.x / 2.0f * widthFillKoef;
-    float hh = 0.1f;
     // Move center of polygon to the bottom of the body. Slighly above the ground.
-    b2Vec2 center(0, sizePhysics.y / 2.0f);
+    b2Vec2 center(0, sizePhysics.y / 2.0f + hh);
     float angle = 0;
     sensorShape.SetAsBox(hw, hh, center, angle);
 

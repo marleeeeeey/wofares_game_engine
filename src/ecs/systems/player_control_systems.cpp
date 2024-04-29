@@ -130,31 +130,38 @@ void PlayerControlSystem::HandlePlayerMovement(const InputEventManager::EventInf
         if (originalEvent.key.keysym.scancode == SDL_SCANCODE_W ||
             originalEvent.key.keysym.scancode == SDL_SCANCODE_SPACE)
         {
-            if (player.OnGround())
-                player.allowContinueJumpInAir = false;
-
-            if (player.OnGround() || player.allowContinueJumpInAir)
+            if (player.OnGround() || player.allowJumpForceInAir)
             {
-                float jumpForce = 1500.0f * mass * deltaTime;
+                float jumpForce = 1900.0f * mass * deltaTime;
 
-                // If time event component is present then it impact on the player jump force.
-                // Less time to activation - less jump force.
                 auto timeEventComponent = registry.try_get<TimeEventComponent>(entity);
-                if (timeEventComponent && timeEventComponent->isActivated)
-                    jumpForce *= std::pow(timeEventComponent->timeToActivation, 2);
 
-                MY_LOG(trace, "Player {} jumped", player.number);
+                if (player.OnGround())
+                {
+                    player.allowJumpForceInAir = false;
+                    // remove time event component if it is present
+                    if (timeEventComponent)
+                        registry.remove<TimeEventComponent>(entity);
+                }
+                else
+                {
+                    // If time event component is present then it impact on the player jump force.
+                    // Less time to activation - less jump force.
+                    if (timeEventComponent && timeEventComponent->isActivated)
+                        jumpForce *= std::pow(timeEventComponent->timeToActivation, 2);
+                }
+
                 body->ApplyForceToCenter(b2Vec2(0, -jumpForce), true);
 
-                if (!player.allowContinueJumpInAir)
+                if (!player.allowJumpForceInAir)
                 {
-                    player.allowContinueJumpInAir = true;
+                    player.allowJumpForceInAir = true;
                     registry.emplace_or_replace<TimeEventComponent>(
                         entity, 0.13f,
                         [this](entt::entity playerEntity)
                         {
                             auto& playerComponent = registry.get<PlayerComponent>(playerEntity);
-                            playerComponent.allowContinueJumpInAir = false;
+                            playerComponent.allowJumpForceInAir = false;
                         });
                 }
             }
