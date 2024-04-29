@@ -23,7 +23,7 @@
             "type": "shell"
         },
         {
-            "label": "003. Remove build/Debug",
+            "label": "003. Remove build folder",
             "command": "cmake -E remove_directory build/Debug",
             "type": "shell"
         },

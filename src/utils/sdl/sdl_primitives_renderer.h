@@ -14,7 +14,7 @@ class SdlPrimitivesRenderer
 {
     [[maybe_unused]] entt::registry& registry;
     SDL_Renderer* renderer;
-    ResourceManager& resourceManager;
+    [[maybe_unused]] ResourceManager& resourceManager;
     GameOptions& gameState;
     CoordinatesTransformer coordinatesTransformer;
 public:

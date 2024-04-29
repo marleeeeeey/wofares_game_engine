@@ -109,8 +109,8 @@ void RenderWorldSystem::RenderBoudingBoxes()
 {
     auto& pr = primitivesRenderer;
     auto& ct = coordinatesTransformer;
-    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, PlayerComponent>());
-    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, DestructibleComponent>());
+    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, PlayerComponent>(), ColorName::Green);
+    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, DestructibleComponent>(), ColorName::Yellow);
 }
 
 void RenderWorldSystem::RenderBox2dSensors()

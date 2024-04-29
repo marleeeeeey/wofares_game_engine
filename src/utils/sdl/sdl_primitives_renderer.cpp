@@ -1,7 +1,9 @@
 #include "sdl_primitives_renderer.h"
-#include <SDL2_gfxPrimitives.h>
+#include <glm/fwd.hpp>
 #include <numbers>
 #include <utils/sdl/sdl_colors.h>
+#include <utils/sdl/sdl_gfx_wrapper.h>
+#include <vector>
 
 SdlPrimitivesRenderer::SdlPrimitivesRenderer(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
@@ -24,14 +26,56 @@ SDL_Rect SdlPrimitivesRenderer::GetRectWithCameraTransform(const glm::vec2& posW
     return rect;
 }
 
+void rotatePoint(glm::vec2& point, const glm::vec2& center, float angleRadians)
+{
+    float s = sin(angleRadians);
+    float c = cos(angleRadians);
+
+    // Translate point back to origin:
+    point.x -= center.x;
+    point.y -= center.y;
+
+    // Rotate point
+    float xnew = point.x * c - point.y * s;
+    float ynew = point.x * s + point.y * c;
+
+    // Translate point back:
+    point.x = xnew + center.x;
+    point.y = ynew + center.y;
+}
+
 void SdlPrimitivesRenderer::RenderSquare(
     const glm::vec2& posWorld, const glm::vec2& sizeWorld, ColorName color, float angle)
 {
-    std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
-    double angleDegrees = angle * (180.0 / M_PI);
-    SDL_Rect destRect = GetRectWithCameraTransform(posWorld, sizeWorld);
-    SDL_Point center = {destRect.w / 2, destRect.h / 2};
-    SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
+    bool defaultImplementation = false;
+
+    if (defaultImplementation)
+    {
+        std::shared_ptr<SDLTextureRAII> pixelTexture = resourceManager.GetColoredPixelTexture(color);
+        double angleDegrees = angle * (180.0 / M_PI);
+        SDL_Rect destRect = GetRectWithCameraTransform(posWorld, sizeWorld);
+        SDL_Point center = {destRect.w / 2, destRect.h / 2};
+        SDL_RenderCopyEx(renderer, pixelTexture->get(), nullptr, &destRect, angleDegrees, &center, SDL_FLIP_NONE);
+        return;
+    }
+
+    auto sdlColor = GetSDLColor(color);
+    auto centerPosScreen = coordinatesTransformer.WorldToScreen(posWorld);
+    auto sizeScreen = coordinatesTransformer.WorldToScreen(sizeWorld, CoordinatesTransformer::Type::Length);
+    auto centerOfRotation = centerPosScreen;
+
+    // Coordinates of the vertices of the rectangle
+    std::vector<glm::vec2> vertices = {
+        {centerPosScreen.x - sizeScreen.x / 2, centerPosScreen.y - sizeScreen.y / 2},
+        {centerPosScreen.x + sizeScreen.x / 2, centerPosScreen.y - sizeScreen.y / 2},
+        {centerPosScreen.x + sizeScreen.x / 2, centerPosScreen.y + sizeScreen.y / 2},
+        {centerPosScreen.x - sizeScreen.x / 2, centerPosScreen.y + sizeScreen.y / 2}};
+
+    // Rotate the vertices
+    for (auto& vertex : vertices)
+        rotatePoint(vertex, centerOfRotation, angle);
+
+    polygonRGBA(renderer, vertices, sdlColor);
 }
 
 void SdlPrimitivesRenderer::RenderSquare(
@@ -44,12 +88,10 @@ void SdlPrimitivesRenderer::RenderSquare(
 
 void SdlPrimitivesRenderer::RenderCircle(const glm::vec2& centerWorld, float radiusWorld, ColorName color)
 {
-    auto sdlColor = GetSDLColor(color);
     auto centerScreen = coordinatesTransformer.WorldToScreen(centerWorld);
     auto radiusScreen = coordinatesTransformer.WorldToScreen(radiusWorld);
-    // circleRGBA or filledCircleRGBA
-    filledCircleRGBA(
-        renderer, centerScreen.x, centerScreen.y, radiusScreen, sdlColor.r, sdlColor.g, sdlColor.b, sdlColor.a);
+    auto sdlColor = GetSDLColor(color);
+    circleRGBA(renderer, centerScreen, radiusScreen, sdlColor);
 }
 
 void SdlPrimitivesRenderer::RenderTiledSquare(
