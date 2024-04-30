@@ -39,7 +39,7 @@ entt::entity ObjectsFactory::SpawnTile(
         entity, glm::vec2(sizeWorld, sizeWorld), textureRect.texture, textureRect.rect, tileOptions.zOrderingType);
 
     Box2dBodyOptions options;
-    options.fixture.restitution = 0.0f;
+    options.fixture.restitution = 0.05f;
     switch (tileOptions.destructibleOption)
     {
     case SpawnTileOption::DesctructibleOption::Destructible:
@@ -89,6 +89,7 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
     options.sensor = Box2dBodyOptions::Sensor::ThinSensorBelow;
     options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
+    options.collisionPolicy.collideWith = CollisionFlags::Default; // No collision with bullets.
     glm::vec2 playerHitboxSizeWorld = playerAnimation.GetHitboxSize();
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, options);
     MY_LOG(debug, "Create player body with bbox: {}", playerHitboxSizeWorld);
@@ -170,7 +171,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     glm::vec2 playerSizeWorld = playerAnimationComponent.GetHitboxSize();
     const auto& weaponDirection = playerInfo.weaponDirection;
     glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
-    auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x / 2.0f + fireballHitboxSizeWorld.x);
+    auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x + fireballHitboxSizeWorld.x) / 2.0f;
     glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponInitialPointShift;
     entt::entity bulletEntity = SpawnFlyingEntity(
         positionInFrontOfPlayer, fireballHitboxSizeWorld, weaponDirection, initialBulletSpeed, anglePolicy);
