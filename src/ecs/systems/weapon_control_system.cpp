@@ -125,12 +125,6 @@ void WeaponControlSystem::CheckTimerExplosionEntities()
     }
 }
 
-void WeaponControlSystem::OnBazookaContactWithTile(
-    [[maybe_unused]] entt::entity bazookaEntity, [[maybe_unused]] entt::entity tileEntity)
-{
-    MY_LOG(info, "Bazooka contact with tile");
-}
-
 void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint)
 {
     auto& explosionEntity = explosionEntityWithContactPoint.explosionEntity;

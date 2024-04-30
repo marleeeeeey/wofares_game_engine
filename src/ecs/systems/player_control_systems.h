@@ -13,7 +13,6 @@
 
 class PlayerControlSystem
 {
-    [[maybe_unused]] EnttRegistryWrapper& registryWrapper;
     entt::registry& registry;
     InputEventManager& inputEventManager;
     GameOptions& gameState;

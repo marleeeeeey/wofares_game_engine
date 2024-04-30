@@ -7,7 +7,7 @@
 
 SdlPrimitivesRenderer::SdlPrimitivesRenderer(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager)
-  : registry(registry), renderer(renderer), resourceManager(resourceManager),
+  : renderer(renderer), resourceManager(resourceManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry)
 {}
 

@@ -4,7 +4,7 @@
 EventsControlSystem::EventsControlSystem(entt::registry& registry) : registry(registry)
 {}
 
-void EventsControlSystem::Update([[maybe_unused]] float deltaTime)
+void EventsControlSystem::Update()
 {
     auto eventEntities = registry.view<EventComponent>();
 

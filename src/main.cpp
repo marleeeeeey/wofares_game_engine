@@ -163,7 +163,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
             // Auxiliary systems.
             timersControlSystem.Update(deltaTime);
-            eventsControlSystem.Update(deltaTime);
+            eventsControlSystem.Update();
 
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);

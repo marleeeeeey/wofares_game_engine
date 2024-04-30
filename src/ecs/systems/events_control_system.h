@@ -6,5 +6,5 @@ class EventsControlSystem
     entt::registry& registry;
 public:
     EventsControlSystem(entt::registry& registry);
-    void Update(float deltaTime);
+    void Update();
 };

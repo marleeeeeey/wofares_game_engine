@@ -38,6 +38,5 @@ private:
 private:
     void CheckTimerExplosionEntities();
     void ProcessEntitiesQueues();
-    void OnBazookaContactWithTile(entt::entity bazookaEntity, entt::entity tileEntity);
     void DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
 };

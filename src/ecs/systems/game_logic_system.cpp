@@ -142,8 +142,7 @@ void GameLogicSystem::DestroyClosestFoodInPortal()
 
     portalEntities.each(
         [this, &portalToDestroyOpt](
-            [[maybe_unused]] entt::entity portalEntity, PhysicsComponent& portalPhysics,
-            PortalComponent& portalComponent)
+            entt::entity portalEntity, PhysicsComponent& portalPhysics, PortalComponent& portalComponent)
         {
             if (portalComponent.isSleeping)
                 return;
