@@ -16,7 +16,9 @@
   "WeaponControlSystem": {
     "cellSizeForMicroDistruction": 2,
     "createSyntheticExplosionFragments": false,
-    "keepTilesAliveOnExplosion": true
+    "keepTilesAliveOnExplosion": true,
+    "debugDrawExplosionInitiator" : false,
+    "explosionPointAlwaysAtCenterOfExplosionEntity": true
   },
   "CameraControlSystem": {
     "mousePosImpactOnCameraAnchor": false
@@ -26,7 +28,7 @@
     "maxHorizontalSpeed": 3
   },
   "AudioSystem": {
-    "masterVolume": 0.7
+    "masterVolume": 0.2
   },
   "PhysicsSystem": {
     "velocityIterations": 1,
@@ -46,12 +48,13 @@
   },
   "RenderHUDSystem": {
     "showGrid": false,
-    "showDebugMenus": false
+    "debugMenuShow": false
   },
   "RenderWorldSystem": {
-    "renderPlayerHitbox": false,
+    "debugRenderPlayerHitbox": false,
     "debugDrawBoundingBoxes": false,
-    "debugDrawBox2dSensors": false
+    "debugDrawBox2dSensors": false,
+    "debugDrawDebugVisualObjects": false
   },
   "GameLogicSystem": {
     "portalEatPlayerWithDistance": 0.4,

@@ -26,4 +26,5 @@ private: // Render game objects methods.
     void RenderPlayerWeaponDirection();
     void RenderBoudingBoxes();
     void RenderBox2dSensors();
+    void RenderDebugVisualObjects();
 };

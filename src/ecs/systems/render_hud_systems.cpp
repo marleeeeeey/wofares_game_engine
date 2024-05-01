@@ -20,7 +20,7 @@ void RenderHUDSystem::Render()
     if (utils::GetConfig<bool, "RenderHUDSystem.showGrid">())
         RenderGrid();
 
-    if (utils::GetConfig<bool, "RenderHUDSystem.showDebugMenus">())
+    if (utils::GetConfig<bool, "RenderHUDSystem.debugMenuShow">())
     {
         RenderDebugMenu();
         DrawPlayersWindowInfo();
@@ -48,7 +48,7 @@ void RenderHUDSystem::RenderDebugMenu()
         gameState.controlOptions.reloadMap = true;
 
     // Caclulare count of tiles, players and dynamic bodies:
-    auto tiles = registry.view<RenderingComponent>();
+    auto tiles = registry.view<TileComponent>();
     auto players = registry.view<PlayerComponent>();
     auto dynamicBodies = registry.view<PhysicsComponent>();
     size_t dynamicBodiesCount = 0;

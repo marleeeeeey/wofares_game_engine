@@ -65,7 +65,7 @@ void DrawBoudingBoxesAdvanced(
                 auto rectangleCenterPixel = ct.PhysicsToWorld(centerPhysics);
                 auto rectangleSizePixel = ct.PhysicsToWorld(rectPhysics);
 
-                pr.RenderSquare(rectangleCenterPixel, rectangleSizePixel, color, body->GetAngle());
+                pr.RenderRect(rectangleCenterPixel, rectangleSizePixel, body->GetAngle(), color);
             }
         }
     }

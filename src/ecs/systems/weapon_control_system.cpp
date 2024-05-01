@@ -8,6 +8,7 @@
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/fwd.hpp>
 #include <my_cpp_utils/config.h>
+#include <my_cpp_utils/logger.h>
 #include <my_cpp_utils/math_utils.h>
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/box2d/box2d_glm_conversions.h>
@@ -15,6 +16,7 @@
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
+#include <utils/factories/objects_factory.h>
 #include <utils/logger.h>
 #include <utils/sdl/sdl_colors.h>
 #include <utils/sdl/sdl_texture_process.h>
@@ -43,16 +45,16 @@ void WeaponControlSystem::SubscribeToContactEvents()
         Box2dEnttContactListener::ContactType::Begin,
         [this](const Box2dEnttContactListener::ContactInfo& contactInfo)
         {
+            // Check if any entity is ExplostionParticlesComponent. If so, then do not trigger the explosion.
+            if (registry.any_of<ExplostionParticlesComponent>(contactInfo.entityA) ||
+                registry.any_of<ExplostionParticlesComponent>(contactInfo.entityB))
+                return;
+
             for (const auto& explosionEntity : {contactInfo.entityA, contactInfo.entityB})
             {
                 // If the entity contains the ExplosionOnContactComponent.
                 if (!registry.all_of<ExplosionOnContactComponent, PhysicsComponent>(explosionEntity))
                     continue;
-
-                // Check if any entity is ExplostionParticlesComponent. If so, then do not trigger the explosion.
-                if (registry.any_of<ExplostionParticlesComponent>(contactInfo.entityA) ||
-                    registry.any_of<ExplostionParticlesComponent>(contactInfo.entityB))
-                    return;
 
                 // If the entity contains the StickyComponent, check if it is sticked.
                 bool shouldExplode = true;
@@ -84,6 +86,8 @@ void WeaponControlSystem::SubscribeToContactEvents()
                     {
                         auto localPoint = contactInfo.contact->GetManifold()->points[0].localPoint;
                         contactPointPhysics = physicsComponent.bodyRAII->GetBody()->GetWorldPoint(localPoint);
+                        auto contactPointWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics.value());
+                        MY_LOG(debug, "[ExplosionOnContact] Contact Point World: {}", contactPointWorld);
                     }
 
                     AppendToExplosionQueue({explosionEntity, contactPointPhysics});
@@ -135,17 +139,40 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     if (!damageComponent || !physicsInfo)
         return;
 
-    // Get all physical bodies in the explosion radius.
-    const b2Vec2 grenadePosPhysics =
-        explosionEntityWithContactPoint.contactPointPhysics.value_or(physicsInfo->bodyRAII->GetBody()->GetPosition());
+    // Calculate the contact point in the physics world.
+    b2Vec2 contactPointPhysics = {0.0f, 0.0f};
+    if (utils::GetConfig<bool, "WeaponControlSystem.explosionPointAlwaysAtCenterOfExplosionEntity">())
+    {
+        contactPointPhysics = physicsInfo->bodyRAII->GetBody()->GetPosition();
+    }
+    else
+    {
+        contactPointPhysics = explosionEntityWithContactPoint.contactPointPhysics.value_or(
+            physicsInfo->bodyRAII->GetBody()->GetPosition());
+    }
 
+    if (utils::GetConfig<bool, "WeaponControlSystem.debugDrawExplosionInitiator">())
+    {
+        ObjectsFactory::DebugSpawnOptions options;
+        options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::This;
+
+        objectsFactory.SpawnDebugVisualObject(explosionEntity, MY_FMT("ExplosionEntity {}", explosionEntity), options);
+
+        auto contactPointWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics);
+        objectsFactory.SpawnDebugVisualObject(
+            contactPointWorld, {2.f, 2.f}, 0.0f, MY_FMT("ExplosionContactPoint {}", explosionEntity), options);
+    }
+
+    // TODO1: It is possuble to rewrite next code to use entt::view.
+
+    // Get all physical bodies in the explosion radius.
     float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
                              // calculated from the center of the texture.
-
     std::vector<entt::entity> allOriginalBodiesInRadius = request::FindEntitiesWithAllComponentsInRadius(
-        registry, grenadePosPhysics, damageComponent->radius * radiusCoef);
+        registry, contactPointPhysics, damageComponent->radius * radiusCoef);
     MY_LOG(debug, "[DoExplosion] FindEntitiesInRadius count {}", allOriginalBodiesInRadius.size());
 
+    // Get destructible objects.
     auto destructibleOriginalBodies =
         request::GetEntitiesWithAllComponents<DestructibleComponent>(registry, allOriginalBodiesInRadius);
     destructibleOriginalBodies =
@@ -160,7 +187,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     // Get micro objects in the explosion radius.
     auto newMicroBodiesToDestroy = request::FilterEntitiesWithAllComponentsInRadius(
-        registry, newMicroBodies, grenadePosPhysics, damageComponent->radius);
+        registry, newMicroBodies, contactPointPhysics, damageComponent->radius);
 
     // Destroy micro objects in the explosion radius.
     MY_LOG(debug, "[DoExplosion] Destroing {} micro objects", newMicroBodiesToDestroy.size());
@@ -190,7 +217,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
             auto bodyPos = body->GetPosition();
 
             // Apply force to the body.
-            auto vec = bodyPos - grenadePosPhysics;
+            auto vec = bodyPos - contactPointPhysics;
             vec.Normalize();
             float force = damageComponent->force;
             body->ApplyLinearImpulseToCenter(force * vec, true);
@@ -207,7 +234,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     if (utils::GetConfig<bool, "WeaponControlSystem.createSyntheticExplosionFragments">())
     {
-        glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(grenadePosPhysics);
+        glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics);
         float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(damageComponent->radius);
         objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
     }

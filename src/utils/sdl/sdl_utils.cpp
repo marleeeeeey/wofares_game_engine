@@ -47,4 +47,21 @@ std::vector<SDL_Rect> DivideRectByCellSize(const SDL_Rect& rect, const SDL_Point
     return cells;
 }
 
+void RotatePoint(glm::vec2& point, const glm::vec2& center, float angleRadians)
+{
+    float s = sin(angleRadians);
+    float c = cos(angleRadians);
+
+    // Translate point back to origin:
+    point.x -= center.x;
+    point.y -= center.y;
+
+    // Rotate point
+    float xnew = point.x * c - point.y * s;
+    float ynew = point.x * s + point.y * c;
+
+    // Translate point back:
+    point.x = xnew + center.x;
+    point.y = ynew + center.y;
+}
 } // namespace utils

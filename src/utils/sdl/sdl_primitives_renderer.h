@@ -13,22 +13,20 @@
 class SdlPrimitivesRenderer
 {
     SDL_Renderer* renderer;
-    ResourceManager& resourceManager;
     GameOptions& gameState;
     CoordinatesTransformer coordinatesTransformer;
 public:
-    SdlPrimitivesRenderer(entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager);
+    SdlPrimitivesRenderer(entt::registry& registry, SDL_Renderer* renderer);
 public:
-    void RenderSquare(const glm::vec2& posWorld, const glm::vec2& sizeWorld, ColorName color, float angle);
-    void RenderSquare(std::shared_ptr<Box2dObjectRAII> body, const glm::vec2& sizeWorld, ColorName color);
+    void RenderRect(const glm::vec2& posWorld, const glm::vec2& sizeWorld, float angle, ColorName color);
     void RenderCircle(const glm::vec2& centerWorld, float radiusWorld, ColorName color);
-    void RenderTiledSquare(
-        const glm::vec2& centerWorld, const float angle, const RenderingComponent& tileInfo,
+    void RenderTile(
+        const TileComponent& tileInfo, const glm::vec2& centerWorld, const float angle,
         const SDL_RendererFlip& flip = SDL_FLIP_NONE);
-    void RenderAnimation(const AnimationComponent& animationInfo, glm::vec2 centerWorld, float angle);
+    void RenderAnimationComponent(const AnimationComponent& animationInfo, glm::vec2 centerWorld, float angle);
     void RenderAnimationFirstFrame(
         const Animation& animation, glm::vec2 centerWorld, float angle, const SDL_RendererFlip& flip = SDL_FLIP_NONE);
     void RenderBackground(const BackgroundInfo& backgroundInfo);
-private:
+private: // Helper methods.
     SDL_Rect GetRectWithCameraTransform(const glm::vec2& posWorld, const glm::vec2& sizeWorld);
 };

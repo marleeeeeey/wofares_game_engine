@@ -1,7 +1,7 @@
 #include "sdl_gfx_wrapper.h"
 #include <SDL2_gfxPrimitives.h>
 
-int polygonRGBA(SDL_Renderer* renderer, std::vector<glm::vec2> vertices, SDL_Color color, FillOption fillOption)
+int DrawPoligon(SDL_Renderer* renderer, std::vector<glm::vec2> vertices, SDL_Color color, FillOption fillOption)
 {
     int n = vertices.size();
 
@@ -19,7 +19,7 @@ int polygonRGBA(SDL_Renderer* renderer, std::vector<glm::vec2> vertices, SDL_Col
         return polygonRGBA(renderer, vertX.data(), vertY.data(), n, color.r, color.g, color.b, color.a);
 }
 
-int circleRGBA(SDL_Renderer* renderer, glm::vec2 center, float radius, SDL_Color color, FillOption fillOption)
+int DrawCircle(SDL_Renderer* renderer, glm::vec2 center, float radius, SDL_Color color, FillOption fillOption)
 {
     if (fillOption == FillOption::Filled)
         return filledCircleRGBA(renderer, center.x, center.y, radius, color.r, color.g, color.b, color.a);

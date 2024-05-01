@@ -1,5 +1,6 @@
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
+#include <ecs/systems/debug_system.h>
 #include <ecs/systems/events_control_system.h>
 #include <ecs/systems/game_logic_system.h>
 #include <ecs/systems/map_loader_system.h>
@@ -123,7 +124,7 @@ int main([[maybe_unused]] int argc, char* args[])
         GameStateControlSystem gameStateControlSystem(registryWrapper.GetRegistry(), inputEventManager);
 
         // Create a systems with no input events.
-        SdlPrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get(), resourceManager);
+        SdlPrimitivesRenderer primitivesRenderer(registryWrapper.GetRegistry(), renderer.get());
         PhysicsSystem physicsSystem(registryWrapper);
         RenderWorldSystem RenderWorldSystem(
             registryWrapper.GetRegistry(), renderer.get(), resourceManager, primitivesRenderer);
@@ -140,6 +141,8 @@ int main([[maybe_unused]] int argc, char* args[])
         GameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory, audioSystem);
 
         EventsControlSystem eventsControlSystem(registryWrapper.GetRegistry());
+
+        DebugSystem debugSystem(registryWrapper.GetRegistry(), objectsFactory);
 
         // Set the main loop lambda.
         Uint32 lastTick = SDL_GetTicks();
@@ -174,6 +177,8 @@ int main([[maybe_unused]] int argc, char* args[])
 
             // Update animation.
             animationUpdateSystem.Update(deltaTime);
+
+            debugSystem.Update();
 
             // Render the scene and the HUD.
             imguiSDL.startFrame();

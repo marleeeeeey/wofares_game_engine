@@ -1,6 +1,4 @@
 #include "render_world_system.h"
-#include "utils/debug_draw/draw_bounding_box.h"
-#include "utils/sdl/sdl_colors.h"
 #include <SDL_render.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
@@ -8,7 +6,9 @@
 #include <ecs/components/rendering_components.h>
 #include <my_cpp_utils/config.h>
 #include <utils/box2d/box2d_glm_conversions.h>
+#include <utils/debug_draw/draw_bounding_box.h>
 #include <utils/logger.h>
+#include <utils/sdl/sdl_colors.h>
 
 RenderWorldSystem::RenderWorldSystem(
     entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager,
@@ -33,6 +33,8 @@ void RenderWorldSystem::Render()
         RenderBoudingBoxes();
     if (utils::GetConfig<bool, "RenderWorldSystem.debugDrawBox2dSensors">())
         RenderBox2dSensors();
+    if (utils::GetConfig<bool, "RenderWorldSystem.debugDrawDebugVisualObjects">())
+        RenderDebugVisualObjects();
 }
 
 void RenderWorldSystem::RenderBackground()
@@ -45,17 +47,17 @@ void RenderWorldSystem::RenderTiles()
 {
     for (const auto zOrderingType : magic_enum::enum_values<ZOrderingType>())
     {
-        auto tilesView = registry.view<RenderingComponent, PhysicsComponent>();
+        auto tilesView = registry.view<TileComponent, PhysicsComponent>();
         for (auto entity : tilesView)
         {
-            const auto& [tileInfo, physicalBody] = tilesView.get<RenderingComponent, PhysicsComponent>(entity);
-            if (tileInfo.zOrderingType != zOrderingType)
+            const auto& [tileComponent, physicalBody] = tilesView.get<TileComponent, PhysicsComponent>(entity);
+            if (tileComponent.zOrderingType != zOrderingType)
                 continue;
 
             const glm::vec2 posWorld =
                 coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
             const float angle = physicalBody.bodyRAII->GetBody()->GetAngle();
-            primitivesRenderer.RenderTiledSquare(posWorld, angle, tileInfo);
+            primitivesRenderer.RenderTile(tileComponent, posWorld, angle);
         }
     }
 }
@@ -95,12 +97,12 @@ void RenderWorldSystem::RenderAnimations()
         glm::vec2 physicsBodyCenterWorld = coordinatesTransformer.PhysicsToWorld(body->GetPosition());
         const float angle = body->GetAngle();
 
-        primitivesRenderer.RenderAnimation(animationInfo, physicsBodyCenterWorld, angle);
+        primitivesRenderer.RenderAnimationComponent(animationInfo, physicsBodyCenterWorld, angle);
 
-        if (utils::GetConfig<bool, "RenderWorldSystem.renderPlayerHitbox">())
+        if (utils::GetConfig<bool, "RenderWorldSystem.debugRenderPlayerHitbox">())
         {
-            primitivesRenderer.RenderSquare(
-                physicsBodyCenterWorld, animationInfo.GetHitboxSize(), ColorName::Green, angle);
+            primitivesRenderer.RenderRect(
+                physicsBodyCenterWorld, animationInfo.GetHitboxSize(), angle, ColorName::Green);
         }
     }
 }
@@ -118,4 +120,11 @@ void RenderWorldSystem::RenderBox2dSensors()
     auto& pr = primitivesRenderer;
     auto& ct = coordinatesTransformer;
     DrawSensorBoxes(pr, ct, registry.view<PhysicsComponent>(), ColorName::Red);
+}
+
+void RenderWorldSystem::RenderDebugVisualObjects()
+{
+    auto& pr = primitivesRenderer;
+    auto& ct = coordinatesTransformer;
+    DrawBoudingBoxes(pr, ct, registry.view<PhysicsComponent, DebugVisualObjectComponent>(), ColorName::Yellow);
 }

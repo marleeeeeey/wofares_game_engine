@@ -17,7 +17,7 @@ public: // Constructor.
     Box2dBodyTuner(entt::registry& registry);
 public: // Create physics component.
     PhysicsComponent& CreatePhysicsComponent(
-        entt::entity entity, const glm::vec2& posWorld, const Box2dBodyOptions& options);
+        entt::entity entity, const glm::vec2& posWorld, float angle, const Box2dBodyOptions& options);
 public: // Get physics component or throw exception. May be used to get options.
     PhysicsComponent& GetPhysicsComponent(entt::entity entity);
 public: // Options setters.

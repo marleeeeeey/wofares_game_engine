@@ -150,9 +150,9 @@ AnimationFrame GetAnimationFrameFromAsepriteFrame(
     const AsepriteData::Frame& asepriteFrame, std::shared_ptr<SDLTextureRAII> textureRAII)
 {
     AnimationFrame animationFrame;
-    animationFrame.renderingInfo.texturePtr = textureRAII;
-    animationFrame.renderingInfo.textureRect = asepriteFrame.rectInTexture;
-    animationFrame.renderingInfo.sizeWorld = {asepriteFrame.rectInTexture.w, asepriteFrame.rectInTexture.h};
+    animationFrame.tileComponent.texturePtr = textureRAII;
+    animationFrame.tileComponent.textureRect = asepriteFrame.rectInTexture;
+    animationFrame.tileComponent.sizeWorld = {asepriteFrame.rectInTexture.w, asepriteFrame.rectInTexture.h};
     animationFrame.duration = asepriteFrame.duration_seconds;
     return animationFrame;
 }
@@ -208,8 +208,8 @@ ResourceManager::TagToAnimationDict ResourceManager::ReadAsepriteAnimation(
 
                 MY_LOG(
                     debug, "Frame {} has texture rect: x={}, y={}, w={}, h={}", i,
-                    animationFrame.renderingInfo.textureRect.x, animationFrame.renderingInfo.textureRect.y,
-                    animationFrame.renderingInfo.textureRect.w, animationFrame.renderingInfo.textureRect.h);
+                    animationFrame.tileComponent.textureRect.x, animationFrame.tileComponent.textureRect.y,
+                    animationFrame.tileComponent.textureRect.w, animationFrame.tileComponent.textureRect.h);
 
                 animation.frames.push_back(std::move(animationFrame));
             }

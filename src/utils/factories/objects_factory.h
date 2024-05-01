@@ -41,6 +41,24 @@ public: // Main game objects.
 
         ZOrderingType zOrderingType = ZOrderingType::Terrain;
     };
+    enum class SpawnPolicyBase
+    {
+        // Spawn the one object when the function is called first time.
+        This,
+        // Spawn the new object every frame. Don't delete the old objects.
+        All,
+        // Spawn the new object every frame. Delete the old objects if limit is reached.
+        Last,
+        // Spawn the new object every frame. Delete the new objects if limit is reached.
+        First,
+    };
+
+    struct DebugSpawnOptions
+    {
+        size_t trailSize = 10;
+        SpawnPolicyBase spawnPolicy = SpawnPolicyBase::This;
+    };
+
     entt::entity SpawnTile(
         glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, SpawnTileOption tileOptions,
         const std::string& name = "Tile");
@@ -49,13 +67,21 @@ public: // Main game objects.
         entt::entity playerEntity, float initialBulletSpeed, Box2dBodyOptions::AnglePolicy anglePolicy);
     entt::entity SpawnBuildingBlock(glm::vec2 posWorld);
     entt::entity SpawnPortal(const glm::vec2& posWorld, const std::string& debugName);
+    // `nameAsKey` is used as a key in entt registry to search in NameComponent.
+    entt::entity SpawnDebugVisualObject(
+        const glm::vec2& posWorld, const glm::vec2& sizeWorld, float angle, const std::string& nameAsKey,
+        const DebugSpawnOptions& debugSpawnOptions);
+    // `nameAsKey` is used as a key in entt registry to search in NameComponent.
+    entt::entity SpawnDebugVisualObject(
+        entt::entity entity, const std::string& nameAsKey, const DebugSpawnOptions& debugSpawnOptions);
 public: // Explosions.
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
     std::vector<entt::entity> SpawnSplittedPhysicalEnteties(
         const std::vector<entt::entity>& entities, SDL_Point cellSizeWorld);
-    entt::entity SpawnFragmentAfterExplosion(const glm::vec2& posWorld);
     std::vector<entt::entity> SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld);
-private: // Helpers
+private: // Explosions. Helpers.
+    entt::entity SpawnFragmentAfterExplosion(const glm::vec2& posWorld);
+private: // Common. Helpers
     AnimationComponent CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
     entt::entity SpawnFlyingEntity(

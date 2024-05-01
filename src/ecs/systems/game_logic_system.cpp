@@ -1,5 +1,4 @@
 #include "game_logic_system.h"
-#include "utils/systems/audio_system.h"
 #include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
@@ -10,7 +9,8 @@
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/logger.h>
-#include <utils/vec_math.h>
+#include <utils/systems/audio_system.h>
+#include <utils/vec_operators.h>
 
 GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),

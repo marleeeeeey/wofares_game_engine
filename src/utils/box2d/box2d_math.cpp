@@ -1,6 +1,6 @@
 #include "box2d_math.h"
 #include <limits>
-#include <utils/vec_math.h>
+#include <utils/vec_operators.h>
 
 b2Vec2 TranformBox2dPolygonShapeToRectagleSize(const b2PolygonShape* polygonShape)
 {

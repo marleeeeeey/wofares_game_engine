@@ -5,7 +5,7 @@
 
 struct AnimationFrame
 {
-    RenderingComponent renderingInfo; // Rendering information for the frame.
+    TileComponent tileComponent; // Rendering information for the frame.
     float duration; // Duration of the frame in seconds.
 };
 

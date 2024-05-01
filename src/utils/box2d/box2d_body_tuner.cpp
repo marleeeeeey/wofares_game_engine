@@ -9,11 +9,12 @@ Box2dBodyTuner::Box2dBodyTuner(entt::registry& registry)
 {}
 
 PhysicsComponent& Box2dBodyTuner::CreatePhysicsComponent(
-    entt::entity entity, const glm::vec2& posWorld, const Box2dBodyOptions& options)
+    entt::entity entity, const glm::vec2& posWorld, float angle, const Box2dBodyOptions& options)
 {
     b2Body* body = CreatePhysicsBodyWithNoShape(entity, posWorld);
     auto box2dObjectRAII = std::make_shared<Box2dObjectRAII>(body, gameState.physicsWorld);
     PhysicsComponent& physicsComponent = registry.emplace<PhysicsComponent>(entity, box2dObjectRAII, options);
+    body->SetTransform(body->GetPosition(), angle);
 
     ApplyOption(entity, options.fixture);
     ApplyOption(entity, options.shape);

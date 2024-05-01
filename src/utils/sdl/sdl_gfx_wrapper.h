@@ -9,10 +9,10 @@ enum class FillOption
     Outlined
 };
 
-int polygonRGBA(
+int DrawPoligon(
     SDL_Renderer* renderer, std::vector<glm::vec2> vertices, SDL_Color color,
     FillOption fillOption = FillOption::Outlined);
 
-int circleRGBA(
+int DrawCircle(
     SDL_Renderer* renderer, glm::vec2 center, float radius, SDL_Color color,
     FillOption fillOption = FillOption::Outlined);

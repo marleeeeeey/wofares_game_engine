@@ -2,7 +2,7 @@
 #include <ecs/components/physics_components.h>
 #include <utils/box2d/box2d_glm_conversions.h>
 #include <utils/math_utils.h>
-#include <utils/vec_math.h>
+#include <utils/vec_operators.h>
 
 Box2dUtils::Box2dUtils(entt::registry& registry)
   : registry(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
