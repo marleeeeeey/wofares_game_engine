@@ -41,7 +41,8 @@
     // Gap between physical and visual objects. Used to prevent dragging of physical objects.
     // Also affects the destructibility of stacks of tiles. The smaller the gap, the easier it is to destroy the stack.
     // The bigger the gap, the harder it is to destroy the stack => less random destruction.
-    "gapBetweenPhysicalAndVisual": 0
+    "gapBetweenPhysicalAndVisual": 0,
+    "debugTraceBulletPath": false
   },
   "CoordinatesTransformer": {
     "box2DtoWorld": 48
@@ -53,8 +54,7 @@
   "RenderWorldSystem": {
     "debugRenderPlayerHitbox": false,
     "debugDrawBoundingBoxes": false,
-    "debugDrawBox2dSensors": false,
-    "debugDrawDebugVisualObjects": false
+    "debugDrawBox2dSensors": false
   },
   "GameLogicSystem": {
     "portalEatPlayerWithDistance": 0.4,

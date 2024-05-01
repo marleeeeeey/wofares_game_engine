@@ -179,7 +179,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     glm::vec2 playerSizeWorld = playerAnimationComponent.GetHitboxSize();
     const auto& weaponDirection = playerInfo.weaponDirection;
     glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
-    auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x + fireballHitboxSizeWorld.x) / 2.0f;
+    auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x) / 2.0f;
     glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponInitialPointShift;
     entt::entity bulletEntity = SpawnFlyingEntity(
         positionInFrontOfPlayer, fireballHitboxSizeWorld, weaponDirection, initialBulletSpeed, anglePolicy);
@@ -208,7 +208,8 @@ entt::entity ObjectsFactory::SpawnBullet(
         break;
     }
 
-    registry.emplace<MarkedForTrailDebugComponent>(bulletEntity, 100);
+    if (utils::GetConfig<bool, "ObjectsFactory.debugTraceBulletPath">())
+        registry.emplace<MarkForTrailDebugComponent>(bulletEntity, 30);
 
     return bulletEntity;
 }

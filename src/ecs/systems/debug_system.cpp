@@ -14,14 +14,16 @@ void DebugSystem::Update()
 
 void DebugSystem::SpawnTrailsForMarkedEntities()
 {
-    auto view = registry.view<PhysicsComponent, MarkedForTrailDebugComponent>();
+    auto view = registry.view<PhysicsComponent, MarkForTrailDebugComponent>();
     for (auto entity : view)
     {
-        auto markedForTrailDebugComponent = view.get<MarkedForTrailDebugComponent>(entity);
+        auto trailDebugComponent = view.get<MarkForTrailDebugComponent>(entity);
         std::string name = MY_FMT("Trail{}", entity);
         ObjectsFactory::DebugSpawnOptions options;
-        options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::Last;
-        options.trailSize = markedForTrailDebugComponent.trailSize;
+        options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::First;
+        options.trailSize = trailDebugComponent.trailSize;
+        if (trailDebugComponent.trailSize == 0)
+            options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::All;
         objectsFactory.SpawnDebugVisualObject(entity, name, options);
     }
 }

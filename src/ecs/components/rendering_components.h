@@ -36,7 +36,7 @@ struct CreationTimeComponent
     std::chrono::milliseconds creationTime = std::chrono::milliseconds(0);
 };
 
-struct MarkedForTrailDebugComponent
+struct MarkForTrailDebugComponent
 {
-    size_t trailSize = 3;
+    size_t trailSize = 0;
 };

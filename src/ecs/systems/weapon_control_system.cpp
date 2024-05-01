@@ -140,24 +140,15 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
         return;
 
     // Calculate the contact point in the physics world.
-    b2Vec2 contactPointPhysics = {0.0f, 0.0f};
+    b2Vec2 contactPointPhysics =
+        explosionEntityWithContactPoint.contactPointPhysics.value_or(physicsInfo->bodyRAII->GetBody()->GetPosition());
     if (utils::GetConfig<bool, "WeaponControlSystem.explosionPointAlwaysAtCenterOfExplosionEntity">())
-    {
         contactPointPhysics = physicsInfo->bodyRAII->GetBody()->GetPosition();
-    }
-    else
-    {
-        contactPointPhysics = explosionEntityWithContactPoint.contactPointPhysics.value_or(
-            physicsInfo->bodyRAII->GetBody()->GetPosition());
-    }
 
     if (utils::GetConfig<bool, "WeaponControlSystem.debugDrawExplosionInitiator">())
     {
         ObjectsFactory::DebugSpawnOptions options;
         options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::This;
-
-        objectsFactory.SpawnDebugVisualObject(explosionEntity, MY_FMT("ExplosionEntity {}", explosionEntity), options);
-
         auto contactPointWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics);
         objectsFactory.SpawnDebugVisualObject(
             contactPointWorld, {2.f, 2.f}, 0.0f, MY_FMT("ExplosionContactPoint {}", explosionEntity), options);
@@ -166,10 +157,11 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     // TODO1: It is possuble to rewrite next code to use entt::view.
 
     // Get all physical bodies in the explosion radius.
-    float radiusCoef = 1.2f; // TODO0: hack. Need to calculate it based on the texture size. Because position is
-                             // calculated from the center of the texture.
-    std::vector<entt::entity> allOriginalBodiesInRadius = request::FindEntitiesWithAllComponentsInRadius(
-        registry, contactPointPhysics, damageComponent->radius * radiusCoef);
+    float damageRadius =
+        damageComponent->radius * 1.5; // TODO0: hack. Need to calculate it based on the texture size.
+                                       // Because position is calculated from the center of the texture.
+    std::vector<entt::entity> allOriginalBodiesInRadius =
+        request::FindEntitiesWithAllComponentsInRadius(registry, contactPointPhysics, damageRadius);
     MY_LOG(debug, "[DoExplosion] FindEntitiesInRadius count {}", allOriginalBodiesInRadius.size());
 
     // Get destructible objects.
@@ -186,8 +178,8 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     MY_LOG(debug, "[DoExplosion] Spawn micro splittedEntities count {}", newMicroBodies.size());
 
     // Get micro objects in the explosion radius.
-    auto newMicroBodiesToDestroy = request::FilterEntitiesWithAllComponentsInRadius(
-        registry, newMicroBodies, contactPointPhysics, damageComponent->radius);
+    auto newMicroBodiesToDestroy =
+        request::FilterEntitiesWithAllComponentsInRadius(registry, newMicroBodies, contactPointPhysics, damageRadius);
 
     // Destroy micro objects in the explosion radius.
     MY_LOG(debug, "[DoExplosion] Destroing {} micro objects", newMicroBodiesToDestroy.size());
@@ -235,7 +227,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     if (utils::GetConfig<bool, "WeaponControlSystem.createSyntheticExplosionFragments">())
     {
         glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics);
-        float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(damageComponent->radius);
+        float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(damageRadius);
         objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
     }
 

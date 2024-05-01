@@ -33,8 +33,8 @@ void RenderWorldSystem::Render()
         RenderBoudingBoxes();
     if (utils::GetConfig<bool, "RenderWorldSystem.debugDrawBox2dSensors">())
         RenderBox2dSensors();
-    if (utils::GetConfig<bool, "RenderWorldSystem.debugDrawDebugVisualObjects">())
-        RenderDebugVisualObjects();
+
+    RenderDebugVisualObjects();
 }
 
 void RenderWorldSystem::RenderBackground()
