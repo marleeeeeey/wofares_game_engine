@@ -28,7 +28,7 @@
     "maxHorizontalSpeed": 3
   },
   "AudioSystem": {
-    "masterVolume": 0.2
+    "masterVolume": 0.7
   },
   "PhysicsSystem": {
     "velocityIterations": 1,
