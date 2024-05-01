@@ -1,6 +1,6 @@
 ### LD55 Hungry Portals
 
-**Welcome to the LD55 Hungry Portals Game**, a creation by marleeeeeey, jsCommander, and SdCorpse for Ludum Dare 55. Dive into our action-packed, fully destructible world on GitHub: [LD55 Hungry Portals on GitHub](https://github.com/marleeeeeey/LD55_Hungry_Portals)
+**Welcome to the LD55 Hungry Portals Game**, a creation by [marleeeeeey](https://www.linkedin.com/in/marleeeeeey), jsCommander, and SdCorpse for Ludum Dare 55. Dive into our action-packed, fully destructible world on GitHub: [LD55 Hungry Portals on GitHub](https://github.com/marleeeeeey/LD55_Hungry_Portals)
 
 ![game screenshot](LD55_Hungry_Portals_screenshot.png)
 
@@ -9,6 +9,12 @@
 ### Gameplay Overview
 
 **Hungry Portals** from the dark realm are out for blood, and they've turned their attention to your home, trapping your demonic family within their shadowy depths. You start as a lone survivor with a chance to save your kin and reclaim your home.
+
+### Strategy Tips:
+
+- **Ascend to Safety:** Climb as high as you can to escape the gluttonous portals that feed on anything at ground level.
+- **Strategic Construction:** Use building blocks to seal floor gaps, preventing potential portal feed from falling through.
+- **Heed the Warnings:** Pay attention to the sounds; a siren-like wail indicates a portal is on your trail.
 
 #### Objective:
 
@@ -29,21 +35,6 @@
 - **Toggle Fullscreen:** F11
 - **Drag the screen:** Hold Mouse Middle Button
 - **Quit game:** ESC
-
-### Game Mechanics:
-
-- **Portal Dynamics:** Portals that collide with each other disperse chaotically. Stay alert!
-- **Building on the Fly:** Construct small platforms to navigate and trap portals.
-- **Feeding the Portals:** Without sufficient debris to consume, portals will hunt you down.
-
-### Strategy Tips:
-
-- **Adapt Your Arsenal:** Use the right tools for the right obstacles. Switch between weapons to maximize destruction.
-- **Resource Management:** Building materials are infinite. Use them to create platforms and move around the map.
-- **Stay Mobile:** Keep moving to avoid being overwhelmed by the portals' influence.
-- **Master Your Movements:** Jump frequently; demons move swiftly in the air, allowing for quick navigation and escape. However, exercise caution to avoid accidentally leaping out of the level bounds.
-
-These strategies will help you manage the challenges of the game effectively, making use of your abilities and resources to outmaneuver the dark forces and protect your territory.
 
 ### Enjoyment Guaranteed:
 

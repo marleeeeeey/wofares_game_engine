@@ -63,11 +63,15 @@ Hungry Portals from the dark realm are out for blood, and they’ve turned their
 2024-04-23 1400 Remove music fade-in/fade-out.
 2024-04-26 0215 Add maps from easy to dificult level.
 2024-04-27 0228 Improve sound system. Add several sounds (fire, explosion, eating).
-
-TODO
-- Add short rocket flight for the player on press W button in the air.
-- [POSTONE] Intergrate (if created) animation of appearance and disappearance of the player.
-- [POSTONE] Magnet objects one-by-one but not all at once.
+2024-04-29 1300 Add layer with indestructible tiles.
+2024-04-29 1400 Fix bug with control buttons sticking when reloading the level.
+2024-04-29 1500 Improve player jump. Now it depends on the duration of pressing the key.
+2024-04-29 1600 Add debug functions for drawing sensors and bounding boxes.
+2024-04-29 1700 Enable VSync.
+2024-04-30 1800 Disable bullet collisions with the player.
+2024-05-01 1900 Major improvement of debugging tools: added the ability to track objects.
+2024-05-01 2000 Fix bugs in the explosion mechanics.
+2024-05-01 2100 Expand the building block.
 ```
 
 ### Development Guidelines
@@ -305,31 +309,3 @@ python -m http.server
 Open the browser and navigate to `http://localhost:8000/LD55_Hungry_Portals.html`
 
 Press `F12` to open the developer console and see the game output.
-
-## Additional Notes
-
-### File Structure
-
-```
-
-LD55_Hungry_Portals/
-├── CMakeLists.txt          # Main CMakeLists file for the project. Used to search dependencies and set up the project.
-├── thirdparty/
-│   ├── SDL/
-│   ├── glm/
-│   ├── entt/
-│   └── ...
-├── src/
-│   ├── CMakeLists.txt      # Main CMakeLists file for the game. Used to determine build targets and copy assets.
-│   ├── main.cpp            # Entry point of the game.
-│   ├── ecs/                # Entity Component System (ECS) items.
-│   │   ├── systems/        # ECS systems.
-│   │   └── conponents/     # ECS components.
-│   └── utils/              # Utility classes - theoretically, may be moved to a separate library.
-│       ├── factories/      # Factories for creating game objects.
-│       ├── RAII/           # RAII wrappers for third-party libraries.
-│       ├── resources/      # Resource management, like loading textures, sounds, etc.
-│       └── systems/        # More widely used systems that has less dependencies from ECS and game specific code.
-└── docs/                   # Include media files for general documentation.
-    └── *.*
-```
