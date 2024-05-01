@@ -1,8 +1,8 @@
 # Recursively collect all .cpp files from the current source directory and subdirectories.
-file(GLOB_RECURSE LD55_Hungry_Portals_SOURCES "*.cpp")
+file(GLOB_RECURSE wofares_game_engine_SOURCES "*.cpp")
 
 # Create an executable with the collected source files.
-add_executable(LD55_Hungry_Portals ${LD55_Hungry_Portals_SOURCES})
+add_executable(wofares_game_engine ${wofares_game_engine_SOURCES})
 
 if(EMSCRIPTEN)
     # To copy the assets and config.json to the WASM's virtual filesystem.
@@ -15,21 +15,21 @@ if(EMSCRIPTEN)
     set(EM_LINK_FLAGS "${EM_LINK_FLAGS} -s ABORTING_MALLOC=0")
 
     # Set the flags.
-    set_target_properties(LD55_Hungry_Portals PROPERTIES LINK_FLAGS "${EM_LINK_FLAGS}")
+    set_target_properties(wofares_game_engine PROPERTIES LINK_FLAGS "${EM_LINK_FLAGS}")
 
     # Enable the HTML output.
-    set_target_properties(LD55_Hungry_Portals PROPERTIES SUFFIX ".html")
+    set_target_properties(wofares_game_engine PROPERTIES SUFFIX ".html")
 endif()
 
-target_compile_definitions(LD55_Hungry_Portals
+target_compile_definitions(wofares_game_engine
     PRIVATE
 
-    DisableSteamNetworkingSockets # TODO2: Temporary disable SteamNetworkingSockets for LD55_Hungry_Portals.
+    DisableSteamNetworkingSockets # TODO2: Temporary disable SteamNetworkingSockets for wofares_game_engine.
 
     # MY_DEBUG # TODO5: Uncomment this to enable extra debug mode.
 )
 
-target_compile_options(LD55_Hungry_Portals PRIVATE
+target_compile_options(wofares_game_engine PRIVATE
     -Wall
     -Wextra
     -Werror
@@ -50,7 +50,7 @@ target_compile_options(LD55_Hungry_Portals PRIVATE
     $<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations> # TODO4. Remove this. glob/glob.hpp:173:28: warning: 'getenv' is deprecated
 )
 
-target_link_libraries(LD55_Hungry_Portals
+target_link_libraries(wofares_game_engine
     PRIVATE
 
     # vcpkg build libraries:
@@ -68,20 +68,20 @@ target_link_libraries(LD55_Hungry_Portals
     my_cpp_utils
 )
 
-target_include_directories(LD55_Hungry_Portals
+target_include_directories(wofares_game_engine
     PRIVATE
     ${PROJECT_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/thirdparty/glob/single_include
 )
 
 # copy assets
-add_custom_command(TARGET LD55_Hungry_Portals POST_BUILD
+add_custom_command(TARGET wofares_game_engine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/assets"
-    "$<TARGET_FILE_DIR:LD55_Hungry_Portals>/assets")
+    "$<TARGET_FILE_DIR:wofares_game_engine>/assets")
 
 # copy config.json
-add_custom_command(TARGET LD55_Hungry_Portals POST_BUILD
+add_custom_command(TARGET wofares_game_engine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_SOURCE_DIR}/config.json"
-    "$<TARGET_FILE_DIR:LD55_Hungry_Portals>/config.json")
+    "$<TARGET_FILE_DIR:wofares_game_engine>/config.json")

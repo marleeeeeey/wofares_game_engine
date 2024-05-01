@@ -50,7 +50,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Set the paths to the configuration and log files.
         std::filesystem::path configFilePath = "config.json";
-        std::filesystem::path logFilePath = "logs/LD55_Hungry_Portals.log";
+        std::filesystem::path logFilePath = "logs/wofares_game_engine.log";
 
         // Initialize the logger and the configuration.
         utils::Config::InitInstanceFromFile(configFilePath);
@@ -64,7 +64,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Log initial information.
         MY_LOG(info, "*********************************************");
-        MY_LOG(info, "****** LD55 Hungry Portals game started *****");
+        MY_LOG(info, "****** Wofares Game Engine started *****");
         MY_LOG(info, "*********************************************");
         MY_LOG(info, "Current directory set to: {}", execDir);
         MY_LOG(info, "Config file loaded: {}", configFilePath.string());
@@ -95,9 +95,7 @@ int main([[maybe_unused]] int argc, char* args[])
         // Initialize SDL, create a window and a renderer. Initialize ImGui.
         SDLInitializerRAII sdlInitializer(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
         SDLAudioInitializerRAII sdlAudioInitializer;
-        SDLWindowRAII window(
-            "`LD55 Hungry Portals` game by marleeeeeey, jsCommander and SdCorpse",
-            gameOptions.windowOptions.windowSize);
+        SDLWindowRAII window("Wofares Game Engine created by marleeeeeey", gameOptions.windowOptions.windowSize);
         SDLRendererRAII renderer(window.get(), SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
         ImGuiSDLRAII imguiSDL(window.get(), renderer.get());
 

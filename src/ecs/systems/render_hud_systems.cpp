@@ -164,12 +164,12 @@ void RenderHUDSystem::ShowGameInstructions()
     ImGui::SetWindowFontScale(2.5);
 
     ImGui::TextWrapped(
-        "Welcome to the `LD55 Hungry Portals` Game created by marleeeeeey, jsCommander and SdCorpse for Ludum Dare 55! "
-        "Visit the game repository on GitHub:\nhttps://github.com/marleeeeeey/LD55_Hungry_Portals");
+        "Welcome to the `Wofares Game Engine` created by marleeeeeey. "
+        "Visit the game repository on GitHub:\nhttps://github.com/marleeeeeey/wofares_game_engine");
     ImGui::Separator();
 
     ImGui::TextWrapped(
-        "Hungry Portals to the dark realm are desperate for fresh blood. They've reached your home and swallowed your family. "
+        "Hungry Portals (Wofares Game Engine based) to the dark realm are desperate for fresh blood. They've reached your home and swallowed your family. "
         "You stand alone. Yet, there is a chance to save them. These portals consume everything they can lift, so destroy everything around you. "
         "Let them choke and burst, and then your family will return. Good luck!");
     ImGui::Separator();

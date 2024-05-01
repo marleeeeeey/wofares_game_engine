@@ -55,7 +55,7 @@ class Settings:
         self.toolchain_file = "vcpkg/scripts/buildsystems/vcpkg.cmake"
         self.stop_on_first_error = StopOnFirstError.YES
         self.export_compile_commands = ExportCompileCommands.YES
-        self.executable_name = "LD55_Hungry_Portals"
+        self.executable_name = "wofares_game_engine"
         self.web = WebBuildSettings()
 
     def compiler_name(self):

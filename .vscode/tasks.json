@@ -67,7 +67,7 @@
         },
         {
             "label": "060. + Pack",
-            "command": "python scripts/pack_binaries.py \"C:/Program Files/7-Zip/7z.exe\" ${workspaceFolder} build/Debug LD55_Hungry_Portals_Debug desktop",
+            "command": "python scripts/pack_binaries.py \"C:/Program Files/7-Zip/7z.exe\" ${workspaceFolder} build/Debug wofares_game_engine_Debug desktop",
             "dependsOn": [
                 "040. + Copy assets"
             ],
@@ -97,7 +97,7 @@
         },
         {
             "label": "050. + Run",
-            "command": "${workspaceFolder}/build/Debug/src/LD55_Hungry_Portals.exe",
+            "command": "${workspaceFolder}/build/Debug/src/wofares_game_engine.exe",
             "dependsOn": [
                 "040. + Copy assets"
             ],
@@ -111,7 +111,7 @@
         },
         {
             "label": "070. Run",
-            "command": "${workspaceFolder}/build/debug/src/LD55_Hungry_Portals.exe",
+            "command": "${workspaceFolder}/build/debug/src/wofares_game_engine.exe",
             "type": "shell"
         }
     ]
