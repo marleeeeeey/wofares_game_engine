@@ -217,13 +217,13 @@ entt::entity ObjectsFactory::SpawnBullet(
 entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
 {
     auto entity = registryWrapper.Create("BuildingBlock");
-    glm::vec2 sizeWorld(10.0f, 10.0f);
-    float angle = 0.0f;
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld, angle);
 
     AnimationComponent buildingBlockAnimation =
         CreateAnimationInfo("buildingBlock", "block", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, buildingBlockAnimation);
+
+    float angle = 0.0f;
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, buildingBlockAnimation.GetHitboxSize(), angle);
 
     registry.emplace<DestructibleComponent>(entity);
 
