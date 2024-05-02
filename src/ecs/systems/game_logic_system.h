@@ -20,7 +20,7 @@ class GameLogicSystem
 public:
     GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
     void Update(float deltaTime);
-private: // Portal logic
+private: ///////////////////////////////////////// Portal logic. ///////////////////////////////////////
     void UpdatePortalsPosition(float deltaTime);
     void UpdatePortalTarget(entt::entity portalEntity);
     void MagnetFoodToPortal(float deltaTime);

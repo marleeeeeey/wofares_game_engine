@@ -74,14 +74,14 @@ public: // Main game objects.
     // `nameAsKey` is used as a key in entt registry to search in NameComponent.
     entt::entity SpawnDebugVisualObject(
         entt::entity entity, const std::string& nameAsKey, const DebugSpawnOptions& debugSpawnOptions);
-public: // Explosions.
+public: //////////////////////////////////////////////// Explosions. //////////////////////////////////////////////
     // Split physical entities into smaller ones. Return new entities. Used for explosion effect.
     std::vector<entt::entity> SpawnSplittedPhysicalEnteties(
         const std::vector<entt::entity>& entities, SDL_Point cellSizeWorld);
     std::vector<entt::entity> SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld);
-private: // Explosions. Helpers.
+private: /////////////////////////////////////////// Explosions. Helpers. /////////////////////////////////////////
     entt::entity SpawnFragmentAfterExplosion(const glm::vec2& posWorld);
-private: // Common. Helpers
+private: ///////////////////////////////////////////// Common. Helpers. ///////////////////////////////////////////
     AnimationComponent CreateAnimationInfo(
         const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps);
     entt::entity SpawnFlyingEntity(

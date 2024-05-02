@@ -50,7 +50,7 @@ private:
     Box2dEnttContactListener& operator=(const Box2dEnttContactListener&) = delete;
     Box2dEnttContactListener(Box2dEnttContactListener&&) = delete;
     Box2dEnttContactListener& operator=(Box2dEnttContactListener&&) = delete;
-private: // Interacting with Box2D. These methods are called by Box2D during the simulation.
+private: ////////////// Interacting with Box2D. These methods are called by Box2D during the simulation. //////////////
     void BeginContact(b2Contact* contact) override;
     void EndContact(b2Contact* contact) override;
     std::optional<std::pair<EntityWithProperties, EntityWithProperties>> GetValidEntities(b2Contact* contact);

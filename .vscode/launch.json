@@ -5,7 +5,7 @@
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      "program": "build/debug/src/LD55_Hungry_Portals.exe",
+      "program": "build/Debug/src/wofares_game_engine.exe",
       "args": [],
       "preLaunchTask": "040. + Copy assets"
     },
@@ -13,7 +13,7 @@
       "type": "lldb",
       "request": "launch",
       "name": "Release",
-      "program": "build/release/src/LD55_Hungry_Portals.exe",
+      "program": "build/Release/src/wofares_game_engine.exe",
       "args": [],
       "preLaunchTask": "040. + Copy assets"
     }

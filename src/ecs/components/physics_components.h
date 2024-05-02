@@ -26,7 +26,8 @@ struct ExplostionParticlesComponent
 struct PixeledTileComponent
 {};
 
-// Pair DestructibleComponent and IndestructibleComponent to make the entity destructible or indestructible.
+///// Pair DestructibleComponent and IndestructibleComponent to make the entity destructible or indestructible. ///
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct DestructibleComponent
 {};
@@ -34,7 +35,8 @@ struct DestructibleComponent
 struct IndestructibleComponent
 {};
 
-// Pair CollidableComponent and TransparentComponent to make the entity collidable and transparent.
+///////// Pair CollidableComponent and TransparentComponent to make the entity collidable and transparent. ///////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CollidableComponent
 {};

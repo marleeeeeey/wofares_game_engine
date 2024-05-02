@@ -5,7 +5,7 @@
 #include <box2d/box2d.h>
 #include <ecs/components/physics_components.h>
 #include <entt/entt.hpp>
-#include <utils/box2d/box2d_glm_conversions.h>
+#include <utils/box2d/box2d_glm_operators.h>
 #include <utils/sdl/sdl_primitives_renderer.h>
 
 namespace details

@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <my_cpp_utils/config.h>
 #include <utils/box2d/box2d_body_options.h>
-#include <utils/box2d/box2d_glm_conversions.h>
+#include <utils/box2d/box2d_glm_operators.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/math_utils.h>
 

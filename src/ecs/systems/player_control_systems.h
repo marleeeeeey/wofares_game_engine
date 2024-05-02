@@ -26,25 +26,25 @@ public:
     PlayerControlSystem(
         EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
         Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
-public: // Update.
+public: ///////////////////////////////////////////////// Update. ///////////////////////////////////////////////
     void Update(float deltaTime);
     void ProcessEventsQueue(float deltaTime);
     void RestrictPlayerHorizontalSpeed(entt::entity playerEntity);
-private: // Subscriptions.
+private: ///////////////////////////////////////////// Subscriptions. ///////////////////////////////////////////
     void SubscribeToInputEvents();
     void SubscribeToContactListener();
-private: // Callbacks for the InputEventManager.
+private: ////////////////////////////////// Callbacks for the InputEventManager. ////////////////////////////////
     void HandlePlayerMovement(const InputEventManager::EventInfo& eventInfo, float deltaTime);
     void HandlePlayerAttackOnReleaseButton(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerAttackOnHoldButton(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerBuildingAction(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerWeaponDirection(const InputEventManager::EventInfo& eventInfo);
     void HandlePlayerChangeWeapon(const InputEventManager::EventInfo& eventInfo);
-private: // Callback for contact listener. Uses to set the ground contact flag.
+private: /////////////////// Callback for contact listener. Uses to set the ground contact flag. /////////////////
     void HandlePlayerBeginPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo);
     void HandlePlayerEndPlayerContact(const Box2dEnttContactListener::ContactInfo& contactInfo);
     void SetGroundContactFlagIfEntityIsPlayer(entt::entity entity, bool value);
-private: // Shooting.
+private: //////////////////////////////////////////////// Shooting. //////////////////////////////////////////////
     entt::entity MakeShotIfPossible(entt::entity playerEntity, float throwingForce);
     void UpdateFireRateAndReloadTime(entt::entity playerEntity, float deltaTime);
 };

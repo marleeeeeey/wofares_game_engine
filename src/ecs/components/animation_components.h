@@ -11,6 +11,6 @@ struct AnimationComponent
     bool loop = true; // Should the animation loop.
     SDL_RendererFlip flip = SDL_FLIP_NONE; // Flip of the animation.
     float speedFactor = 1.0f;
-public: // Helpers.
+public: ///////////////////////////////////////////////// Helpers. ///////////////////////////////////////////////
     inline glm::vec2 GetHitboxSize() const { return glm::vec2(animation.hitboxRect->w, animation.hitboxRect->h); }
 };

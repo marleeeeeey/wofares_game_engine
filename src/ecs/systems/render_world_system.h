@@ -19,7 +19,7 @@ public:
         entt::registry& registry, SDL_Renderer* renderer, ResourceManager& resourceManager,
         SdlPrimitivesRenderer& primitivesRenderer);
     void Render();
-private: // Render game objects methods.
+private: //////////////////////////// Render game objects methods. //////////////////////////
     void RenderBackground();
     void RenderTiles();
     void RenderAnimations();

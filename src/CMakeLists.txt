@@ -35,18 +35,14 @@ target_compile_options(wofares_game_engine PRIVATE
     -Werror
     -Wpedantic
 
-    # ***********************************************
-    # *** Some warnings from HolyBlackCat's code. ***
-    # ***********************************************
+    # ################ Some warnings from HolyBlackCat's code. ################
     -Wdeprecated # search for deprecated functions.
     -Wextra-semi # search for unused `;` in the code.
     -Wimplicit-fallthrough # search for missing `break` and `cases` in switch cases.
 
     # -Wconversion # search for implicit conversions. Hard to fix everything if not applying from scratch.
 
-    # ******************************************
-    # *** Disable some warnings temporarily. ***
-    # ******************************************
+    # ################### Disable some warnings temporarily. ##################
     $<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations> # TODO4. Remove this. glob/glob.hpp:173:28: warning: 'getenv' is deprecated
 )
 

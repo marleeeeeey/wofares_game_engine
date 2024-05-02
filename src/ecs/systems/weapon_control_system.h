@@ -24,7 +24,7 @@ class WeaponControlSystem
     ObjectsFactory& objectsFactory;
     CoordinatesTransformer coordinatesTransformer;
     Box2dBodyTuner physicsBodyTuner;
-private: // Queues for entities that should be processed when contact event completed.
+private: /////////////// Queues for entities that should be processed when Box2D calc step has complete. /////////////
     std::map<entt::entity, ExplosionEntityWithContactPoint> explosionEntitiesQueue;
     std::set<entt::entity> becomeStaticEntitiesQueue;
 public:

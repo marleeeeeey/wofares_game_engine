@@ -8,7 +8,7 @@
 #include <utils/imgui/imgui_RAII.h>
 #include <utils/logger.h>
 #include <utils/sdl/sdl_colors.h>
-#include <utils/sdl/sdl_draw.h>
+#include <utils/sdl/sdl_gfx_wrapper.h>
 
 RenderHUDSystem::RenderHUDSystem(entt::registry& registry, SDL_Renderer* renderer, nlohmann::json assetsSettingsJson)
   : registry(registry), renderer(renderer), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),

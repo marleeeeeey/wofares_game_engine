@@ -52,7 +52,7 @@ private:
     std::unordered_map<std::string, std::vector<SoundEffectBatch>> soundEffectBatchesPerTag;
 public:
     ResourceManager(SDL_Renderer* renderer, const nlohmann::json& assetsSettingsJson);
-public: // ************************* Animations *************************
+public: // //////////////////////////////////////// Animations ////////////////////////////////////////
     enum class TagProps
     {
         ExactMatch,
@@ -66,13 +66,13 @@ private:
     Animation GetAnimationExactMatch(const std::string& animationName, const std::string& tagName);
     Animation GetAnimationByRegexRandomly(const std::string& animationName, const std::string& regexTagName);
     TagToAnimationDict ReadAsepriteAnimation(const std::filesystem::path& asepriteAnimationJsonPath);
-public: // ************************* Tiled levels *************************
+public: // //////////////////////////////////////// Tiled levels ////////////////////////////////////////
     LevelInfo GetTiledLevel(const std::string& name);
-public: // ************************* Textures *************************
+public: // ////////////////////////////////////////// Textures //////////////////////////////////////////
     std::shared_ptr<SDLTextureRAII> GetColoredPixelTexture(ColorName color);
     std::shared_ptr<SDLTextureRAII> GetTexture(const std::filesystem::path& path);
     std::shared_ptr<SDLSurfaceRAII> GetSurface(const std::filesystem::path& path);
-public: // ************************* Sounds *************************
+public: // /////////////////////////////////////////// Sounds ///////////////////////////////////////////
     std::shared_ptr<MusicRAII> GetMusic(const std::string& name);
     SoundEffectInfo GetSoundEffect(const std::string& name);
 };

@@ -1,18 +1,37 @@
 # Wofares Game Engine
 
+- [Overview](#overview)
+- [Tools](#tools)
+- [Guidelines](#guidelines)
+  - [Development Guidelines](#development-guidelines)
+  - [Assets Editing Guidelines](#assets-editing-guidelines)
+  - [Comments](#comments)
+- [Build](#build)
+  - [Windows build](#windows-build)
+  - [Linux build](#linux-build)
+  - [Web build](#web-build)
+- [Change Log](#change-log)
+
+## Overview
+
 **WOFARES** - **W**orld **OF** squ**ARES** is a platformer game engine innovatively designed around the concept of level destruction. It features a unique mechanism where tiles shatter into pieces, with fragments dispersing realistically thanks to the integration of the Box2D physics engine. This game engine is envisioned to support hot seat gameplay and single-player mode.
 
 At the core of WOFARES's engine lies a robust foundation constructed using C++ and leveraging libraries such as SDL, EnTT, gml, imgui, and Box2D. A pivotal aspect of the game's design is the extensive application of the Entity Component System (ECS) pattern. This architectural approach significantly reduces component coupling and simplifies engine maintenance, ensuring a seamless and immersive gaming experience.
 
-Here is a link to the game created with this engine for [LD55 championship](https://ldjam.com/events/ludum-dare/55/ld55-hungry-portals): [Hungry Portals](https://marleeeeeey.itch.io/ld55-hungry-portals). Source code for the game is available [here](https://github.com/marleeeeeey/LD55_Hungry_Portals).
-
-### Screenshot
+Here is a link to the game created with this engine for [LD55](https://ldjam.com/events/ludum-dare/55/ld55-hungry-portals) championship: [Hungry Portals (Web/Desktop)](https://marleeeeeey.itch.io/ld55-hungry-portals). Source code for the game is available [here](https://github.com/marleeeeeey/LD55_Hungry_Portals).
 
 ![game screenshot](docs/wofares_game_engine_screenshot.png)
 
-### Platform Support
+## Tools
 
-- This game has been developed, built, and tested on **Windows** and **Web(Emscripten)**. Build also works on **Linux(Ubuntu)** but not tested yet.
+- [Aseprite](https://www.aseprite.org/) - Animated sprite editor & pixel art tool.
+- [Tiled](https://www.mapeditor.org/) - Flexible level editor.
+- [Box2D](https://box2d.org/) - A 2D physics engine for games.
+- [SDL](https://www.libsdl.org/) - Simple DirectMedia Layer.
+- [EnTT](https://github.com/skypjack/entt) - A fast and reliable entity-component system (ECS).
+- [sfxr](https://sfxr.me/) - Sound effect generator.
+
+## Guidelines
 
 ### Development Guidelines
 
@@ -88,15 +107,40 @@ Here is a link to the game created with this engine for [LD55 championship](http
   - `terrain`: For the main walkable and interactive layer of the game environment.
   - `objects`: For movable or interactive objects that players can interact with during the game.
 
-## Windows build
+### Comments
 
-### Clone the Repository
+- **Code Block Comments**: Surround the comments for a block of code with repeating // or # symbols depending on the programming language. This practice helps in maintaining visibility of the block's purpose when code folding is enabled in the editor.
+
+```
+
+# #################### Setup compiler options #######################
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generate compile_commands.json.
+
+public: ///////////////////////////////////////// Damage. /////////////////////////////////////////
+    size_t damageRadiusWorld = 10; // Radius of the damage in pixels.
+    float damageForce = 0.5; // Force of the damage.
+public: ///////////////////////////////////////// Ammo. ///////////////////////////////////////////
+    size_t ammoInStorage = 100; // Current number of bullets except in the clip.
+    size_t ammoInClip = 10; // Current number of bullets in the clip.
+    size_t clipSize = 10; // Max number of bullets in the clip.
+
+```
+
+## Build
+
+Wofares Game Engine has been developed, built, and tested on **Windows** and **Web(Emscripten)**. Build also works on **Linux(Ubuntu)** but not tested yet.
+
+### Windows build
+
+#### Clone the Repository
 
 ```
 git clone --recursive https://github.com/marleeeeeey/wofares-game-engine.git
 ```
 
-### Prerequisites for Building the Project (Windows)
+#### Prerequisites for Building the Project (Windows)
 
 - CMake.
 - Ninja.
@@ -106,7 +150,7 @@ git clone --recursive https://github.com/marleeeeeey/wofares-game-engine.git
   - Clangd extension (recommended for code analysis).
 - Python and 7zip (for packaging game to achive).
 
-### Build, run and debug via VSCode tasks (Windows)
+#### Build, run and debug via VSCode tasks (Windows)
 
 - Setup user friendly options via editing file [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py).
 - Run the script [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py) to generate VSCode tasks with your options.
@@ -115,7 +159,7 @@ git clone --recursive https://github.com/marleeeeeey/wofares-game-engine.git
 - Run task: `050. + Run`.
 - For debugging press `F5`.
 
-### Build, run and debug manually (Windows)
+#### Build, run and debug manually (Windows)
 
 To build Wofares Game Engine on Windows, it's recommended to obtain the dependencies by using vcpkg. The following instructions assume that you will follow the vcpkg recommendations and install vcpkg as a subfolder. If you want to use "classic mode" or install vcpkg somewhere else, you're on your own.
 
@@ -162,15 +206,15 @@ Run the game:
 src\wofares_game_engine.exe
 ```
 
-## Linux build
+### Linux build
 
-### Clone the Repository
+#### Clone the Repository
 
 ```
 git clone --recursive https://github.com/marleeeeeey/wofares_game_engine.git
 ```
 
-### Prerequisites for Building the Project (Linux)
+#### Prerequisites for Building the Project (Linux)
 
 ```bash
 sudo apt update
@@ -178,7 +222,7 @@ sudo apt-get install python3 clang ninja-build curl zip unzip tar autoconf autom
 pip install jinja2
 ```
 
-### Build, run and debug via VSCode tasks (Linux)
+#### Build, run and debug via VSCode tasks (Linux)
 
 - Setup user friendly options via editing file [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py).
 - Run the script [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py) to generate VSCode tasks with your options.
@@ -187,7 +231,7 @@ pip install jinja2
 - Run task: `050. + Run`.
 - For debugging press `F5`.
 
-### Build, run and debug manually (Linux)
+#### Build, run and debug manually (Linux)
 
 ```bash
 cd wofares_game_engine
@@ -199,13 +243,13 @@ cmake -E copy_directory assets build/debug/src/assets
 ./build/debug/src/wofares_game_engine
 ```
 
-## Web build
+### Web build
 
-### Prerequisites for Building the Project (Web)
+#### Prerequisites for Building the Project (Web)
 
-- Emscripten SDK additionally to Windows/Linux build prerequisites.
+- Emscripten SDK additionally to [Windows build prerequisites](#prerequisites-for-building-the-project-windows).
 
-### Build, run and debug via VSCode tasks (Web)
+#### Build, run and debug via VSCode tasks (Web)
 
 - Set `self.build_for_web = BuildForWeb.YES` and other WebRelated options in [scripts/vscode_tasks_generator.py](scripts/vscode_tasks_generator.py). Example below:
 
@@ -226,7 +270,7 @@ class WebBuildSettings:
 - Run task: `010. Configure`.
 - Run task: `020. Build`.
 
-### Build, run and debug manually (Web)
+#### Build, run and debug manually (Web)
 
 ```bash
 cd wofares_game_engine
@@ -240,7 +284,7 @@ C:/dev/emsdk/emsdk_env.bat &&  cmake -S . -B build/debug_web -DCMAKE_BUILD_TYPE=
 C:/dev/emsdk/emsdk_env.bat &&  cmake --build build/debug_web -- -k 0
 ```
 
-### Execute the game in the browser
+#### Execute the game in the browser
 
 ```bash
 python -m http.server
@@ -250,7 +294,7 @@ Open the browser and navigate to `http://localhost:8000/index.html`
 
 Press `F12` to open the developer console and see the game output.
 
-### Change Log
+## Change Log
 
 ```
 

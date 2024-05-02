@@ -11,7 +11,7 @@
 #include <my_cpp_utils/logger.h>
 #include <my_cpp_utils/math_utils.h>
 #include <utils/box2d/box2d_body_tuner.h>
-#include <utils/box2d/box2d_glm_conversions.h>
+#include <utils/box2d/box2d_glm_operators.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/entt/entt_registry_wrapper.h>

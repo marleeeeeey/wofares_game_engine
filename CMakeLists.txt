@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(wofares_game_engine VERSION 1.0)
 
-# ###################################################################
 # #################### Setup compiler options #######################
-# ###################################################################
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generate compile_commands.json.
 
-# ###################################################################
 # ############### Searching some packages in system #################
-# ###################################################################
 find_package(box2d CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 
@@ -20,15 +16,11 @@ find_package(SDL2_image CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
 find_package(sdl2-gfx CONFIG REQUIRED)
 
-# ###################################################################
 # ####################### Add subdirectories ########################
-# ###################################################################
 add_subdirectory(thirdparty/my_cpp_utils)
 add_subdirectory(src)
 
-# ###################################################################
 # ################# Build imgui from submodules #####################
-# ###################################################################
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui)
 
 add_library(imgui STATIC

@@ -5,8 +5,8 @@
 #include <ecs/components/player_components.h>
 #include <ecs/components/rendering_components.h>
 #include <my_cpp_utils/config.h>
-#include <utils/box2d/box2d_glm_conversions.h>
-#include <utils/debug_draw/draw_bounding_box.h>
+#include <utils/box2d/box2d_glm_operators.h>
+#include <utils/debug_tools/debug_draw_bounding_box.h>
 #include <utils/logger.h>
 #include <utils/sdl/sdl_colors.h>
 

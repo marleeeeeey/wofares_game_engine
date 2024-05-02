@@ -20,19 +20,19 @@ public:
         ButtonHold,
         ButtonReleaseAfterHold
     };
-public: // Methods to subscribe to the events.
+public: ////////////////////////////// Methods to subscribe to the events. //////////////////////////////
     using EventListener = std::function<void(const EventInfo&)>;
     // Subscribe to raw SDL events.
     void Subscribe(EventListener listener);
     // Subscribe to specific event type.
     void Subscribe(EventType eventType, EventListener listener);
-public: // Methods to translate SDL events to the EventInfo and notify listeners.
+public: ///////////// Methods to translate SDL events to the EventInfo and notify listeners. /////////////
     // This method should be called on every SDL_Event in the event queue.
     void UpdateRawEvent(const SDL_Event& event);
     // This method should be called every frame after updateRawEvent.
     // It updates hold durations and notifies listeners with hold durations.
     void UpdateСontinuousEvents(float deltaTime);
-public: // Hacks.
+public: ///////////////////////////////////////////// Hacks. /////////////////////////////////////////////
     // Reset all the hold durations and flags. Should be called on level restart.
     // TODO1: This looks like a bad design. The main reason is not clear.
     void Reset();

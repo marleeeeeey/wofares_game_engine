@@ -33,7 +33,7 @@ PhysicsComponent& Box2dBodyTuner::GetPhysicsComponent(entt::entity entity)
     return registry.get<PhysicsComponent>(entity);
 }
 
-// ************************************* Options setters. *************************************
+/////////////////////////////////////// Options setters. /////////////////////////////////////
 
 void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Fixture& fixtureOptions)
 {
@@ -165,7 +165,7 @@ void Box2dBodyTuner::ApplyOption(entt::entity entity, const Box2dBodyOptions::Hi
     ApplyOption(entity, physicsComponent.options.shape);
 }
 
-// ************************************* Create empty physics body. *************************************
+/////////////////////////////////////// Create empty physics body. /////////////////////////////////////
 
 b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(entt::entity entity, const glm::vec2& posWorld)
 {
@@ -179,7 +179,7 @@ b2Body* Box2dBodyTuner::CreatePhysicsBodyWithNoShape(entt::entity entity, const 
     return body;
 }
 
-// ************************************* Add simple fixtures to the body. *************************************
+/////////////////////////////////////// Add simple fixtures to the body. /////////////////////////////////////
 
 void Box2dBodyTuner::AddBoxFixtureToBody(b2Body* body, b2FixtureDef& fixtureDef, const glm::vec2& sizeWorld)
 {
@@ -252,7 +252,7 @@ void Box2dBodyTuner::AddThinSensorBelowTheBody(b2Body* body, const glm::vec2& si
     body->CreateFixture(&sensorDef);
 }
 
-// ************************************* Remove fixtures from the body. *************************************
+/////////////////////////////////////// Remove fixtures from the body. /////////////////////////////////////
 
 void Box2dBodyTuner::RemoveAllFixturesExceptSensorsFromTheBody(b2Body* body)
 {
@@ -288,7 +288,7 @@ void Box2dBodyTuner::RemoveAllSensorsFromTheBody(b2Body* body)
     }
 }
 
-// ************************************* Get fixture def. *************************************
+/////////////////////////////////////// Get fixture def. /////////////////////////////////////
 
 b2FixtureDef Box2dBodyTuner::CalcFixtureDefFromOptions(const Box2dBodyOptions::Fixture& options)
 {

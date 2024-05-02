@@ -13,7 +13,7 @@ class Box2dUtils
     CoordinatesTransformer coordinatesTransformer;
 public:
     Box2dUtils(entt::registry& registry);
-public: // Client methods.
+public: ////////////////////////////////////////// Client methods. ////////////////////////////////////////
     void ApplyForceToPhysicalBodies(
         std::vector<entt::entity> physicalEntities, const glm::vec2& forceCenterWorld, float force);
 };
