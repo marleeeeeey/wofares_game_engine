@@ -1,4 +1,5 @@
 #include "map_loader_system.h"
+#include "utils/factories/base_objects_factory.h"
 #include <SDL_image.h>
 #include <box2d/b2_math.h>
 #include <ecs/components/physics_components.h>
@@ -13,10 +14,11 @@
 #include <utils/sdl/sdl_texture_process.h>
 
 MapLoaderSystem::MapLoaderSystem(
-    EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager, Box2dEnttContactListener& contactListener)
+    EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager, Box2dEnttContactListener& contactListener,
+    ObjectsFactory& objectsFactory, BaseObjectsFactory& baseObjectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     contactListener(contactListener), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    objectsFactory(registryWrapper, resourceManager), coordinatesTransformer(registry)
+    objectsFactory(objectsFactory), baseObjectsFactory(baseObjectsFactory), coordinatesTransformer(registry)
 {}
 
 void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
@@ -58,23 +60,23 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
             if (layer["name"] == "background")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::CollidableOption::Transparent,
-                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Background});
+                    {SpawnTileOption::CollidableOption::Transparent,
+                     SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Background});
             if (layer["name"] == "interiors")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::CollidableOption::Transparent,
-                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Interiors});
+                    {SpawnTileOption::CollidableOption::Transparent,
+                     SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Interiors});
             if (layer["name"] == "terrain")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::CollidableOption::Collidable,
-                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Destructible, ZOrderingType::Terrain});
+                    {SpawnTileOption::CollidableOption::Collidable, SpawnTileOption::DesctructibleOption::Destructible,
+                     ZOrderingType::Terrain});
             if (layer["name"] == "terrain_no_destructible")
                 ParseTileLayer(
                     layer,
-                    {ObjectsFactory::SpawnTileOption::CollidableOption::Collidable,
-                     ObjectsFactory::SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Terrain});
+                    {SpawnTileOption::CollidableOption::Collidable,
+                     SpawnTileOption::DesctructibleOption::Indestructible, ZOrderingType::Terrain});
         }
         else if (layer["type"] == "objectgroup")
         {
@@ -95,7 +97,7 @@ void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
     }
 }
 
-void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer, ObjectsFactory::SpawnTileOption tileOptions)
+void MapLoaderSystem::ParseTileLayer(const nlohmann::json& layer, SpawnTileOption tileOptions)
 {
     auto physicsWorld = gameState.physicsWorld;
 
@@ -136,6 +138,13 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
             auto posWorld = glm::vec2(object["x"], object["y"]);
             objectsFactory.SpawnPortal(posWorld, objectName);
         }
+
+        if (object["type"] == "Turret")
+        {
+            std::string objectName = object["name"];
+            auto posWorld = glm::vec2(object["x"], object["y"]);
+            objectsFactory.SpawnTurret(posWorld, objectName);
+        }
     }
 }
 
@@ -150,7 +159,7 @@ void MapLoaderSystem::CalculateLevelBoundsWithBufferZone()
         debug, "Level bounds with buffer zone: min: ({}, {}), max: ({}, {})", lb.min.x, lb.min.y, lb.max.x, lb.max.y);
 }
 
-void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow, ObjectsFactory::SpawnTileOption tileOptions)
+void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow, SpawnTileOption tileOptions)
 {
     auto physicsWorld = gameState.physicsWorld;
 
@@ -183,7 +192,7 @@ void MapLoaderSystem::ParseTile(int tileId, int layerCol, int layerRow, ObjectsF
             float miniTileWorldPositionY = layerRow * tileHeight + miniRow * miniHeight;
             glm::vec2 miniTileWorldPosition{miniTileWorldPositionX, miniTileWorldPositionY};
             auto textureRect = TextureRect{tilesetTexture, miniTextureSrcRect};
-            auto tileEntity = objectsFactory.SpawnTile(miniTileWorldPosition, miniWidth, textureRect, tileOptions);
+            auto tileEntity = baseObjectsFactory.SpawnTile(miniTileWorldPosition, miniWidth, textureRect, tileOptions);
 
             // Update level bounds.
             auto bodyRAII = registry.get<PhysicsComponent>(tileEntity).bodyRAII;

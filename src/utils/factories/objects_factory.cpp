@@ -1,10 +1,12 @@
 #include "objects_factory.h"
+#include "ecs/components/turret_component.h"
 #include <ecs/components/animation_components.h>
 #include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
 #include <ecs/components/portal_components.h>
 #include <ecs/components/rendering_components.h>
+#include <ecs/components/turret_component.h>
 #include <ecs/components/weapon_components.h>
 #include <entt/entity/entity.hpp>
 #include <entt/entity/fwd.hpp>
@@ -23,62 +25,21 @@
 #include <utils/sdl/sdl_utils.h>
 #include <utils/time_utils.h>
 
-ObjectsFactory::ObjectsFactory(EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager)
-  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
+ObjectsFactory::ObjectsFactory(
+    EnttRegistryWrapper& registryWrapper, ComponentsFactory& componentsFactory, BaseObjectsFactory& baseObjectsFactory)
+  : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), box2dBodyCreator(registry),
-    coordinatesTransformer(registry), bodyTuner(registry)
+    coordinatesTransformer(registry), bodyTuner(registry), componentsFactory(componentsFactory),
+    baseObjectsFactory(baseObjectsFactory)
 {}
-
-entt::entity ObjectsFactory::SpawnTile(
-    glm::vec2 posWorld, float sizeWorld, const TextureRect& textureRect, SpawnTileOption tileOptions,
-    const std::string& name)
-{
-    auto& gap = utils::GetConfig<float, "ObjectsFactory.gapBetweenPhysicalAndVisual">();
-    glm::vec2 bodySizeWorld(sizeWorld - gap, sizeWorld - gap);
-
-    auto entity = registryWrapper.Create(name);
-    registry.emplace<TileComponent>(
-        entity, glm::vec2(sizeWorld, sizeWorld), textureRect.texture, textureRect.rect, tileOptions.zOrderingType);
-
-    Box2dBodyOptions options;
-    options.fixture.restitution = 0.05f;
-    switch (tileOptions.destructibleOption)
-    {
-    case SpawnTileOption::DesctructibleOption::Destructible:
-        options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
-        registry.emplace<DestructibleComponent>(entity);
-        break;
-    case SpawnTileOption::DesctructibleOption::Indestructible:
-        options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
-        options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
-        registry.emplace<IndestructibleComponent>(entity);
-        break;
-    }
-
-    switch (tileOptions.collidableOption)
-    {
-    case SpawnTileOption::CollidableOption::Collidable:
-        // Default collision flags for options.collisionPolicy
-        registry.emplace<CollidableComponent>(entity);
-        break;
-    case SpawnTileOption::CollidableOption::Transparent:
-        options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
-        registry.emplace<TransparentComponent>(entity);
-        break;
-    }
-
-    float angle = 0.0f;
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, bodySizeWorld, angle, options);
-
-    return entity;
-}
 
 entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::string& debugName)
 {
     auto entity = registryWrapper.Create(debugName);
 
     // AnimationInfo.
-    AnimationComponent playerAnimation = CreateAnimationInfo("player", "Run", ResourceManager::TagProps::ExactMatch);
+    AnimationComponent playerAnimation =
+        componentsFactory.CreateAnimationComponent("player", "Run", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, playerAnimation);
 
     // PlayerInfo.
@@ -99,53 +60,6 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
     MY_LOG(debug, "Create player body with bbox: {}", playerHitboxSizeWorld);
 
     return entity;
-}
-
-entt::entity ObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& posWorld)
-{
-    AnimationComponent fragmentAnimation =
-        CreateAnimationInfo("explosionFragments", "Fragment[\\d]+", ResourceManager::TagProps::RandomByRegex);
-    glm::vec2 fragmentSizeWorld = fragmentAnimation.GetHitboxSize();
-
-    auto entity = registryWrapper.Create("ExplosionFragment");
-    registry.emplace<AnimationComponent>(entity, fragmentAnimation);
-    float angle = utils::Random<float>(0, 2 * M_PI);
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentSizeWorld, angle);
-    return entity;
-}
-
-AnimationComponent ObjectsFactory::CreateAnimationInfo(
-    const std::string& animationName, const std::string& tagName, ResourceManager::TagProps tagProps)
-{
-    AnimationComponent animationInfo;
-    animationInfo.animation = resourceManager.GetAnimation(animationName, tagName, tagProps);
-    animationInfo.isPlaying = true;
-    return animationInfo;
-}
-
-entt::entity ObjectsFactory::SpawnFlyingEntity(
-    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float initialSpeed,
-    Box2dBodyOptions::AnglePolicy anglePolicy)
-{
-    // Create the flying entity.
-    auto flyingEntity = registryWrapper.Create("flyingEntity");
-
-    // Create a Box2D body for the flying entity.
-    Box2dBodyOptions options;
-    options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
-    options.shape = Box2dBodyOptions::Shape::Box;
-    options.anglePolicy = anglePolicy;
-
-    // Calc angle from force direction.
-    float angle = atan2(forceDirection.y, forceDirection.x);
-    auto& physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, angle, options);
-
-    // Apply the force to the flying entity.
-    b2Vec2 speedVec = b2Vec2(initialSpeed, 0);
-    speedVec = b2Mul(b2Rot(angle), speedVec);
-    physicsBody.bodyRAII->GetBody()->SetLinearVelocity(speedVec);
-
-    return flyingEntity;
 }
 
 entt::entity ObjectsFactory::SpawnBullet(
@@ -169,8 +83,8 @@ entt::entity ObjectsFactory::SpawnBullet(
     const WeaponProps& weaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
 
     // Prepare the bullet animation.
-    AnimationComponent fireballAnimation =
-        CreateAnimationInfo(weaponProps.animationName, weaponProps.animationTag, ResourceManager::TagProps::ExactMatch);
+    AnimationComponent fireballAnimation = componentsFactory.CreateAnimationComponent(
+        weaponProps.animationName, weaponProps.animationTag, ResourceManager::TagProps::ExactMatch);
     glm::vec2 fireballHitboxSizeWorld = fireballAnimation.GetHitboxSize();
 
     // Spawn flying entity.
@@ -181,7 +95,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
     auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x) / 2.0f;
     glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponInitialPointShift;
-    entt::entity bulletEntity = SpawnFlyingEntity(
+    entt::entity bulletEntity = baseObjectsFactory.SpawnFlyingEntity(
         positionInFrontOfPlayer, fireballHitboxSizeWorld, weaponDirection, initialBulletSpeed, anglePolicy);
     bodyTuner.ApplyOption(bulletEntity, Box2dBodyOptions::BulletPolicy::Bullet);
     bodyTuner.ApplyOption(
@@ -219,7 +133,7 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
     auto entity = registryWrapper.Create("BuildingBlock");
 
     AnimationComponent buildingBlockAnimation =
-        CreateAnimationInfo("buildingBlock", "block", ResourceManager::TagProps::ExactMatch);
+        componentsFactory.CreateAnimationComponent("buildingBlock", "block", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, buildingBlockAnimation);
 
     float angle = 0.0f;
@@ -236,7 +150,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
 
     // AnimationInfo.
     AnimationComponent portalAnimation =
-        CreateAnimationInfo("portal", "Suction", ResourceManager::TagProps::ExactMatch);
+        componentsFactory.CreateAnimationComponent("portal", "Suction", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, portalAnimation);
 
     // PortalComponent.
@@ -272,159 +186,26 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     return entity;
 }
 
-entt::entity ObjectsFactory::SpawnDebugVisualObject(
-    const glm::vec2& posWorld, const glm::vec2& sizeWorld, float angle, const std::string& nameAsKey,
-    const DebugSpawnOptions& debugSpawnOptions)
+entt::entity ObjectsFactory::SpawnTurret(const glm::vec2& posWorld, const std::string& debugName)
 {
-    // Search for entity with the same name component.
-    auto namedComponents = registry.view<NameComponent, CreationTimeComponent>();
-    std::vector<entt::entity> sameNameEntities = {namedComponents.begin(), namedComponents.end()};
-    sameNameEntities.erase(
-        std::remove_if(
-            sameNameEntities.begin(), sameNameEntities.end(),
-            [nameAsKey, this](entt::entity e) { return registry.get<NameComponent>(e).name != nameAsKey; }),
-        sameNameEntities.end());
+    auto entity = registryWrapper.Create(debugName);
 
-    // Check if the entity with the same name already exists.
-    if (debugSpawnOptions.spawnPolicy == ObjectsFactory::SpawnPolicyBase::This && sameNameEntities.size() > 0)
-    {
-        MY_LOG(
-            info, "[SpawnDebugVisualObject] Entity with the same name already exists. Entity: {}, SpawnPolicy: {}",
-            nameAsKey, debugSpawnOptions.spawnPolicy);
-        return entt::null;
-    }
+    // AnimationInfo.
+    AnimationComponent portalAnimation =
+        componentsFactory.CreateAnimationComponent("turret", "Idle", ResourceManager::TagProps::ExactMatch);
+    registry.emplace<AnimationComponent>(entity, portalAnimation);
 
-    // Destroy some entities with the same name if the limit is reached.
-    if (debugSpawnOptions.spawnPolicy != ObjectsFactory::SpawnPolicyBase::All)
-    {
-        // Sort components by creation time.
-        std::sort(
-            sameNameEntities.begin(), sameNameEntities.end(),
-            [this](entt::entity a, entt::entity b) {
-                return registry.get<CreationTimeComponent>(a).creationTime >
-                    registry.get<CreationTimeComponent>(b).creationTime;
-            });
-
-        auto trailSize = debugSpawnOptions.trailSize;
-
-        if (debugSpawnOptions.spawnPolicy == ObjectsFactory::SpawnPolicyBase::First)
-        {
-            // Not nessesary to create new entity. Limit is reached.
-            if (sameNameEntities.size() > trailSize)
-                return entt::null;
-
-            std::reverse(sameNameEntities.begin(), sameNameEntities.end());
-        }
-
-        if (sameNameEntities.size() > trailSize)
-        {
-            for (size_t i = trailSize; i < sameNameEntities.size(); ++i)
-            {
-                auto itemToRemove = sameNameEntities[i];
-                auto creationTime = registry.get<CreationTimeComponent>(itemToRemove).creationTime;
-                MY_LOG(
-                    trace,
-                    "[SpawnDebugVisualObject] Destroying entity with the same name. Entity: {}, CreationTime: {}",
-                    nameAsKey, creationTime);
-                registryWrapper.Destroy(itemToRemove);
-            }
-            sameNameEntities.resize(trailSize);
-        }
-    }
-
-    auto entity = registryWrapper.Create(nameAsKey);
-    registry.emplace<DebugVisualObjectComponent>(entity);
-    registry.emplace<NameComponent>(entity, nameAsKey);
-    registry.emplace<CreationTimeComponent>(entity, utils::CurrentTimeMilliseconds());
+    // TurretComponent.
+    registry.emplace<TurretComponent>(entity);
 
     // PhysicsInfo.
     Box2dBodyOptions options;
     options.shape = Box2dBodyOptions::Shape::Box;
-    options.dynamic = Box2dBodyOptions::MovementPolicy::Manual;
-    options.anglePolicy = Box2dBodyOptions::AnglePolicy::Fixed;
-    options.collisionPolicy = {CollisionFlags::None, CollisionFlags::None};
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, sizeWorld, angle, options);
+    options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
+    options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
+    glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();
+    float angle = 0.0f;
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, angle, options);
 
-    MY_LOG(
-        trace, "[SpawnDebugVisualObject] Created new DebugVisualObjectComponent: Name {}, Policy {}, Size {}",
-        nameAsKey, debugSpawnOptions.spawnPolicy, sameNameEntities.size());
     return entity;
-}
-
-entt::entity ObjectsFactory::SpawnDebugVisualObject(
-    entt::entity entity, const std::string& nameAsKey, const DebugSpawnOptions& debugSpawnOptions)
-{
-    auto& physicsComponent = registry.get<PhysicsComponent>(entity);
-    auto body = physicsComponent.bodyRAII->GetBody();
-    auto bodyPosPhysics = body->GetPosition();
-    auto bodyAnglePhysics = body->GetAngle();
-    auto sizeWorld = physicsComponent.options.hitbox.sizeWorld;
-
-    auto posWorld = coordinatesTransformer.PhysicsToWorld(bodyPosPhysics);
-    auto newEntity = SpawnDebugVisualObject(posWorld, sizeWorld, bodyAnglePhysics, nameAsKey, debugSpawnOptions);
-    return newEntity;
-}
-
-std::vector<entt::entity> ObjectsFactory::SpawnFragmentsAfterExplosion(glm::vec2 centerWorld, float radiusWorld)
-{
-    size_t fragmentsCount = static_cast<size_t>(radiusWorld * 0.2f * utils::Random<float>(1, 1.2));
-    std::vector<entt::entity> fragments;
-    for (size_t i = 0; i < fragmentsCount; ++i)
-    {
-        auto fragmentRandomPosWorld = utils::GetRandomCoordinateAround(centerWorld, radiusWorld);
-        auto fragmentEntity = SpawnFragmentAfterExplosion(fragmentRandomPosWorld);
-        fragments.push_back(fragmentEntity);
-    }
-    Box2dUtils physicsMethods(registry);
-    physicsMethods.ApplyForceToPhysicalBodies(fragments, centerWorld, 500.0f);
-
-    return fragments;
-}
-
-std::vector<entt::entity> ObjectsFactory::SpawnSplittedPhysicalEnteties(
-    const std::vector<entt::entity>& physicalEntities, SDL_Point cellSizeWorld)
-{
-    assert(cellSizeWorld.x == cellSizeWorld.y);
-
-    std::vector<entt::entity> splittedEntities;
-
-    for (auto& entity : physicalEntities)
-    {
-        if (!registry.all_of<PhysicsComponent, TileComponent>(entity))
-            continue;
-
-        auto originalObjPhysicsInfo = registry.get<PhysicsComponent>(entity).bodyRAII->GetBody();
-        auto& originalObjRenderingInfo = registry.get<TileComponent>(entity);
-        const b2Vec2& posPhysics = originalObjPhysicsInfo->GetPosition();
-        const glm::vec2 originalObjCenterWorld = coordinatesTransformer.PhysicsToWorld(posPhysics);
-        const SDL_Rect& originalTextureRect = originalObjRenderingInfo.textureRect;
-
-        // Check if the original object is big enough to be splitted.
-        if (originalTextureRect.w <= cellSizeWorld.x || originalTextureRect.h <= cellSizeWorld.y)
-            continue;
-
-        auto originalRectCenterInTexture = utils::GetCenterOfRect(originalTextureRect);
-
-        auto pixelTextureRects = utils::DivideRectByCellSize(originalTextureRect, cellSizeWorld);
-        for (auto& pixelTextureRect : pixelTextureRects)
-        {
-            auto pixelRectCenterInTexture = utils::GetCenterOfRect(pixelTextureRect);
-            auto pixelCenterShift = pixelRectCenterInTexture - originalRectCenterInTexture;
-            glm::vec2 pixelCenterWorld = originalObjCenterWorld + pixelCenterShift;
-
-            ObjectsFactory::SpawnTileOption spawnTileOptions;
-            spawnTileOptions.destructibleOption = ObjectsFactory::SpawnTileOption::DesctructibleOption::Destructible;
-            spawnTileOptions.zOrderingType = ZOrderingType::Terrain;
-
-            auto pixelEntity = SpawnTile(
-                pixelCenterWorld, cellSizeWorld.x, TextureRect{originalObjRenderingInfo.texturePtr, pixelTextureRect},
-                spawnTileOptions, "PixeledTile");
-
-            registry.emplace<PixeledTileComponent>(pixelEntity);
-
-            splittedEntities.push_back(pixelEntity);
-        }
-    }
-
-    return splittedEntities;
 }

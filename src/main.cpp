@@ -1,11 +1,12 @@
+#include "utils/factories/base_objects_factory.h"
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
 #include <ecs/systems/debug_system.h>
 #include <ecs/systems/events_control_system.h>
-#include <ecs/systems/game_logic_system.h>
 #include <ecs/systems/map_loader_system.h>
 #include <ecs/systems/phisics_systems.h>
 #include <ecs/systems/player_control_systems.h>
+#include <ecs/systems/portals_game_logic_system.h>
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/render_world_system.h>
 #include <ecs/systems/timers_control_system.h>
@@ -15,9 +16,11 @@
 #include <my_cpp_utils/config.h>
 #include <my_cpp_utils/json_utils.h>
 #include <utils/entt/entt_registry_wrapper.h>
+#include <utils/factories/components_factory.h>
 #include <utils/factories/objects_factory.h>
 #include <utils/file_system.h>
 #include <utils/logger.h>
+
 // #include <utils/network/steam_networking_init_RAII.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl/sdl_RAII.h>
@@ -106,10 +109,12 @@ int main([[maybe_unused]] int argc, char* args[])
         AudioSystem audioSystem(resourceManager);
         audioSystem.PlayMusic("background_music");
 
-        ObjectsFactory objectsFactory(registryWrapper, resourceManager);
+        ComponentsFactory componentsFactory(resourceManager);
+        BaseObjectsFactory baseObjectsFactory(registryWrapper, componentsFactory);
+        ObjectsFactory objectsFactory(registryWrapper, componentsFactory, baseObjectsFactory);
 
         // Create a weapon control system and subscribe it to the contact listener.
-        WeaponControlSystem weaponControlSystem(registryWrapper, contactListener, audioSystem, objectsFactory);
+        WeaponControlSystem weaponControlSystem(registryWrapper, contactListener, audioSystem, baseObjectsFactory);
 
         // Create an input event manager and an event queue system.
         InputEventManager inputEventManager;
@@ -133,14 +138,15 @@ int main([[maybe_unused]] int argc, char* args[])
         TimersControlSystem timersControlSystem(registryWrapper.GetRegistry());
 
         // Load the map.
-        MapLoaderSystem mapLoaderSystem(registryWrapper, resourceManager, contactListener);
+        MapLoaderSystem mapLoaderSystem(
+            registryWrapper, resourceManager, contactListener, objectsFactory, baseObjectsFactory);
 
         AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry(), resourceManager);
-        GameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory, audioSystem);
+        PortalsGameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory, audioSystem);
 
         EventsControlSystem eventsControlSystem(registryWrapper.GetRegistry());
 
-        DebugSystem debugSystem(registryWrapper.GetRegistry(), objectsFactory);
+        DebugSystem debugSystem(registryWrapper.GetRegistry(), baseObjectsFactory);
 
         // Set the main loop lambda.
         Uint32 lastTick = SDL_GetTicks();

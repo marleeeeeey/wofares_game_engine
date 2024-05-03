@@ -90,8 +90,8 @@
                  "type":"Portal",
                  "visible":true,
                  "width":0,
-                 "x":449.060941828255,
-                 "y":291.381578947368
+                 "x":39,
+                 "y":38.75
                 }, 
                 {
                  "height":0,
@@ -108,14 +108,14 @@
                 {
                  "height":0,
                  "id":23,
-                 "name":"Portal1",
+                 "name":"Turret",
                  "point":true,
                  "rotation":0,
-                 "type":"Portal",
+                 "type":"Turret",
                  "visible":true,
                  "width":0,
-                 "x":39.8891966759003,
-                 "y":34.5706371191136
+                 "x":370.341237709659,
+                 "y":84.3956043956044
                 }],
          "opacity":1,
          "type":"objectgroup",

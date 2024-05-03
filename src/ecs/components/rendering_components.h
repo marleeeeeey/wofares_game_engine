@@ -14,6 +14,23 @@ enum class ZOrderingType
     Terrain,
 };
 
+struct SpawnTileOption
+{
+    enum class CollidableOption
+    {
+        Collidable,
+        Transparent,
+    } collidableOption = CollidableOption::Collidable;
+
+    enum class DesctructibleOption
+    {
+        Destructible,
+        Indestructible,
+    } destructibleOption = DesctructibleOption::Destructible;
+
+    ZOrderingType zOrderingType = ZOrderingType::Terrain;
+};
+
 struct TileComponent
 {
     glm::vec2 sizeWorld = {0, 0}; // Must be installed manually. Hard to retrieve from Box2D body.

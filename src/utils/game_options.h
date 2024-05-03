@@ -21,7 +21,7 @@ struct BackgroundInfo
 
 struct LevelOptions
 {
-    std::string mapName{"level0"};
+    std::string mapName{"level1"};
     BackgroundInfo backgroundInfo;
     LevelPhysicsBounds levelBox2dBounds;
     b2Vec2 bufferZone{10.0f, 10.0f};

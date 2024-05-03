@@ -56,7 +56,8 @@
     "debugDrawBoundingBoxes": false,
     "debugDrawBox2dSensors": false
   },
-  "GameLogicSystem": {
+  "PortalsGameLogicSystem": {
+    "enabled": false,
     "portalEatPlayerWithDistance": 0.4,
     "portalMaxFoodCounter": 70,
     "debugOnlyNoTargetForPortal": false

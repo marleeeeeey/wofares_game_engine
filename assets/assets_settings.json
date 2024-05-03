@@ -7,7 +7,8 @@
     "scepter": "assets/animations/scepter.json",
     "fireball": "assets/animations/fireball.json",
     "fire-bomb": "assets/animations/fire-bomb.json",
-    "buildingBlock": "assets/animations/building_block.json"
+    "buildingBlock": "assets/animations/building_block.json",
+    "turret": "assets/animations/turret.json"
   },
   "sound_effects": {
     "explosion": [
@@ -40,28 +41,8 @@
   },
   "maps": [
     {
-      "name": "level0",
-      "tiledMapPath": "assets/maps/map0.tmj",
-      "backgroundPath": "assets/backgrounds/dark_background.png"
-    },
-    {
       "name": "level1",
       "tiledMapPath": "assets/maps/map1.tmj",
-      "backgroundPath": "assets/backgrounds/dark_background.png"
-    },
-    {
-      "name": "level2",
-      "tiledMapPath": "assets/maps/map2.tmj",
-      "backgroundPath": "assets/backgrounds/dark_background.png"
-    },
-    {
-      "name": "level3",
-      "tiledMapPath": "assets/maps/map3.tmj",
-      "backgroundPath": "assets/backgrounds/dark_background.png"
-    },
-    {
-      "name": "level4",
-      "tiledMapPath": "assets/maps/map4.tmj",
       "backgroundPath": "assets/backgrounds/dark_background.png"
     }
   ]

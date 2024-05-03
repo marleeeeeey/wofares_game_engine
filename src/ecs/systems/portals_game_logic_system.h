@@ -8,7 +8,8 @@
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/objects_factory.h>
 
-class GameLogicSystem
+// TODO1: Remove this class later because of implementing new game.
+class PortalsGameLogicSystem
 {
     entt::registry& registry;
     EnttRegistryWrapper registryWrapper;
@@ -18,7 +19,7 @@ class GameLogicSystem
     GameOptions& gameState;
     AudioSystem& audioSystem;
 public:
-    GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
+    PortalsGameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
     void Update(float deltaTime);
 private: ///////////////////////////////////////// Portal logic. ///////////////////////////////////////
     void UpdatePortalsPosition(float deltaTime);

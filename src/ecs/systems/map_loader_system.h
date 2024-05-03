@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/factories/base_objects_factory.h"
 #include <entt/entt.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -17,7 +18,8 @@ class MapLoaderSystem
     ResourceManager& resourceManager;
     Box2dEnttContactListener& contactListener;
     GameOptions& gameState;
-    ObjectsFactory objectsFactory;
+    ObjectsFactory& objectsFactory;
+    BaseObjectsFactory& baseObjectsFactory;
     CoordinatesTransformer coordinatesTransformer;
     int tileWidth;
     int tileHeight;
@@ -32,13 +34,14 @@ class MapLoaderSystem
 public:
     MapLoaderSystem(
         EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager,
-        Box2dEnttContactListener& contactListener);
+        Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory,
+        BaseObjectsFactory& baseObjectsFactory);
     void LoadMap(const LevelInfo& levelInfo);
 private:
-    void ParseTileLayer(const nlohmann::json& layer, ObjectsFactory::SpawnTileOption tileOptions);
+    void ParseTileLayer(const nlohmann::json& layer, SpawnTileOption tileOptions);
     void ParseObjectLayer(const nlohmann::json& layer);
     void CalculateLevelBoundsWithBufferZone();
-    void ParseTile(int tileId, int layerCol, int layerRow, ObjectsFactory::SpawnTileOption tileOptions);
+    void ParseTile(int tileId, int layerCol, int layerRow, SpawnTileOption tileOptions);
 private: // Low level functions.
     std::filesystem::path ReadPathToTileset(const nlohmann::json& mapJson);
     void RecreateBox2dWorld();

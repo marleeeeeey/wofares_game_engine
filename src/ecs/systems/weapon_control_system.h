@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/factories/base_objects_factory.h"
 #include <entt/entt.hpp>
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
@@ -21,7 +22,7 @@ class WeaponControlSystem
     GameOptions& gameState;
     Box2dEnttContactListener& contactListener;
     AudioSystem& audioSystem;
-    ObjectsFactory& objectsFactory;
+    BaseObjectsFactory& baseObjectsFactory;
     CoordinatesTransformer coordinatesTransformer;
     Box2dBodyTuner physicsBodyTuner;
 private: /////////////// Queues for entities that should be processed when Box2D calc step has complete. /////////////
@@ -30,7 +31,7 @@ private: /////////////// Queues for entities that should be processed when Box2D
 public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
-        ObjectsFactory& objectsFactory);
+        BaseObjectsFactory& baseObjectsFactory);
     void Update();
 private:
     void SubscribeToContactEvents();

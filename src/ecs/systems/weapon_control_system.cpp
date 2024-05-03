@@ -1,4 +1,5 @@
 #include "weapon_control_system.h"
+#include "utils/factories/base_objects_factory.h"
 #include <SDL_rect.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_math.h>
@@ -24,10 +25,10 @@
 
 WeaponControlSystem::WeaponControlSystem(
     EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
-    ObjectsFactory& objectsFactory)
+    BaseObjectsFactory& baseObjectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), contactListener(contactListener),
-    audioSystem(audioSystem), objectsFactory(objectsFactory), coordinatesTransformer(registry),
+    audioSystem(audioSystem), baseObjectsFactory(baseObjectsFactory), coordinatesTransformer(registry),
     physicsBodyTuner(registry)
 {
     SubscribeToContactEvents();
@@ -147,10 +148,10 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
 
     if (utils::GetConfig<bool, "WeaponControlSystem.debugDrawExplosionInitiator">())
     {
-        ObjectsFactory::DebugSpawnOptions options;
-        options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::This;
+        BaseObjectsFactory::DebugSpawnOptions options;
+        options.spawnPolicy = BaseObjectsFactory::SpawnPolicyBase::This;
         auto contactPointWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics);
-        objectsFactory.SpawnDebugVisualObject(
+        baseObjectsFactory.SpawnDebugVisualObject(
             contactPointWorld, {2.f, 2.f}, 0.0f, MY_FMT("ExplosionContactPoint {}", explosionEntity), options);
     }
 
@@ -174,7 +175,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     // Split original objects to micro objects.
     auto& cellSizeForMicroDistruction = utils::GetConfig<int, "WeaponControlSystem.cellSizeForMicroDistruction">();
     SDL_Point cellSize = {cellSizeForMicroDistruction, cellSizeForMicroDistruction};
-    auto newMicroBodies = objectsFactory.SpawnSplittedPhysicalEnteties(destructibleOriginalBodies, cellSize);
+    auto newMicroBodies = baseObjectsFactory.SpawnSplittedPhysicalEnteties(destructibleOriginalBodies, cellSize);
     MY_LOG(debug, "[DoExplosion] Spawn micro splittedEntities count {}", newMicroBodies.size());
 
     // Get micro objects in the explosion radius.
@@ -228,7 +229,7 @@ void WeaponControlSystem::DoExplosion(const ExplosionEntityWithContactPoint& exp
     {
         glm::vec2 fragmentsCenterWorld = coordinatesTransformer.PhysicsToWorld(contactPointPhysics);
         float fragmentRadiusWorld = coordinatesTransformer.PhysicsToWorld(damageRadius);
-        objectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
+        baseObjectsFactory.SpawnFragmentsAfterExplosion(fragmentsCenterWorld, fragmentRadiusWorld);
     }
 
     // Destroy the explosion entity.

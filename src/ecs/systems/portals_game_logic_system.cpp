@@ -1,4 +1,4 @@
-#include "game_logic_system.h"
+#include "portals_game_logic_system.h"
 #include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
 #include <ecs/components/player_components.h>
@@ -12,14 +12,19 @@
 #include <utils/systems/audio_system.h>
 #include <utils/vec_operators.h>
 
-GameLogicSystem::GameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
+PortalsGameLogicSystem::PortalsGameLogicSystem(
+    entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
   : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
     coordinatesTransformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     audioSystem(audioSystem)
 {}
 
-void GameLogicSystem::Update(float deltaTime)
+void PortalsGameLogicSystem::Update(float deltaTime)
 {
+    bool enabled = utils::GetConfig<bool, "PortalsGameLogicSystem.enabled">();
+    if (!enabled)
+        return;
+
     UpdatePortalsPosition(deltaTime);
     MagnetFoodToPortal(deltaTime);
     DestroyClosestFoodInPortal();
@@ -28,7 +33,7 @@ void GameLogicSystem::Update(float deltaTime)
     CheckGameCompletness();
 }
 
-void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
+void PortalsGameLogicSystem::UpdatePortalsPosition(float deltaTime)
 {
     if (deltaTime == 0.0f)
         return;
@@ -59,9 +64,9 @@ void GameLogicSystem::UpdatePortalsPosition(float deltaTime)
     }
 }
 
-void GameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
+void PortalsGameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
 {
-    if (utils::GetConfig<bool, "GameLogicSystem.debugOnlyNoTargetForPortal">())
+    if (utils::GetConfig<bool, "PortalsGameLogicSystem.debugOnlyNoTargetForPortal">())
         return;
 
     auto& portal = registry.get<PortalComponent>(portalEntity);
@@ -104,7 +109,7 @@ void GameLogicSystem::UpdatePortalTarget(entt::entity portalEntity)
     portal.target = newTarget;
 }
 
-void GameLogicSystem::MagnetFoodToPortal(float deltaTime)
+void PortalsGameLogicSystem::MagnetFoodToPortal(float deltaTime)
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
     for (auto entity : portalEntities)
@@ -134,7 +139,7 @@ void GameLogicSystem::MagnetFoodToPortal(float deltaTime)
     }
 }
 
-void GameLogicSystem::DestroyClosestFoodInPortal()
+void PortalsGameLogicSystem::DestroyClosestFoodInPortal()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
 
@@ -159,7 +164,8 @@ void GameLogicSystem::DestroyClosestFoodInPortal()
             {
                 portalComponent.foodCounter++;
 
-                const auto& portalMaxFoodCounter = utils::GetConfig<size_t, "GameLogicSystem.portalMaxFoodCounter">();
+                const auto& portalMaxFoodCounter =
+                    utils::GetConfig<size_t, "PortalsGameLogicSystem.portalMaxFoodCounter">();
                 if (portalComponent.foodCounter >= portalMaxFoodCounter)
                 {
                     auto portalPosWorld = coordinatesTransformer.PhysicsToWorld(portalPos);
@@ -184,7 +190,7 @@ void GameLogicSystem::DestroyClosestFoodInPortal()
     }
 }
 
-void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
+void PortalsGameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
     for (auto entity : portalEntities)
@@ -230,7 +236,7 @@ void GameLogicSystem::ScatterPortalsIsTheyCloseToEachOther()
     }
 }
 
-void GameLogicSystem::EatThePlayerByPortalIfCloser()
+void PortalsGameLogicSystem::EatThePlayerByPortalIfCloser()
 {
     auto portalEntities = registry.view<PhysicsComponent, PortalComponent>();
     portalEntities.each(
@@ -253,7 +259,8 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
             auto playerBody = playerPhysicsComponent.bodyRAII->GetBody();
             auto playerBodyPos = playerBody->GetPosition();
 
-            auto portalEatPlayerWithDistance = utils::GetConfig<float, "GameLogicSystem.portalEatPlayerWithDistance">();
+            auto portalEatPlayerWithDistance =
+                utils::GetConfig<float, "PortalsGameLogicSystem.portalEatPlayerWithDistance">();
             if (b2Distance(portalPos, playerBodyPos) < portalEatPlayerWithDistance)
             {
                 MY_LOG(debug, "Player {} is eaten by the portal {}!", playerEntity, portalEntity);
@@ -266,7 +273,7 @@ void GameLogicSystem::EatThePlayerByPortalIfCloser()
         });
 }
 
-void GameLogicSystem::CheckGameCompletness()
+void PortalsGameLogicSystem::CheckGameCompletness()
 {
     auto playerEntities = registry.view<PlayerComponent>();
     if (playerEntities.size() == 0)

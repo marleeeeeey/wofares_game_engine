@@ -3,32 +3,6 @@ from enum import Enum, auto
 import os
 import sys
 
-
-class Platform(Enum):
-    WINDOWS = auto()
-    LINUX = auto()
-
-
-class BuildType(Enum):
-    DEBUG = auto()
-    RELEASE = auto()
-
-
-class StopOnFirstError(Enum):
-    YES = auto()
-    NO = auto()
-
-
-class ExportCompileCommands(Enum):
-    YES = auto()
-    NO = auto()
-
-
-class BuildForWeb(Enum):
-    YES = auto()
-    NO = auto()
-
-
 ##################################### SETTINGS #####################################
 
 
@@ -115,6 +89,34 @@ class Settings:
             Platform.WINDOWS: f"{self.web.emsdk_path}/emsdk_env.bat && ",
             Platform.LINUX: f"source {self.web.emsdk_path}/emsdk_env.sh && ",
         }[self.platform]
+
+
+####################################### COMMON TYPES #######################################
+
+
+class Platform(Enum):
+    WINDOWS = auto()
+    LINUX = auto()
+
+
+class BuildType(Enum):
+    DEBUG = auto()
+    RELEASE = auto()
+
+
+class StopOnFirstError(Enum):
+    YES = auto()
+    NO = auto()
+
+
+class ExportCompileCommands(Enum):
+    YES = auto()
+    NO = auto()
+
+
+class BuildForWeb(Enum):
+    YES = auto()
+    NO = auto()
 
 
 ##################################### COMMON FUNCTIONS #####################################

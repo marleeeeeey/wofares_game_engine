@@ -3,8 +3,8 @@
 #include <my_cpp_utils/logger.h>
 #include <utils/factories/objects_factory.h>
 
-DebugSystem::DebugSystem(entt::registry& registry, ObjectsFactory& objectsFactory)
-  : registry(registry), objectsFactory(objectsFactory)
+DebugSystem::DebugSystem(entt::registry& registry, BaseObjectsFactory& baseObjectsFactory)
+  : registry(registry), baseObjectsFactory(baseObjectsFactory)
 {}
 
 void DebugSystem::Update()
@@ -19,11 +19,11 @@ void DebugSystem::SpawnTrailsForMarkedEntities()
     {
         auto trailDebugComponent = view.get<MarkForTrailDebugComponent>(entity);
         std::string name = MY_FMT("Trail{}", entity);
-        ObjectsFactory::DebugSpawnOptions options;
-        options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::First;
+        BaseObjectsFactory::DebugSpawnOptions options;
+        options.spawnPolicy = BaseObjectsFactory::SpawnPolicyBase::First;
         options.trailSize = trailDebugComponent.trailSize;
         if (trailDebugComponent.trailSize == 0)
-            options.spawnPolicy = ObjectsFactory::SpawnPolicyBase::All;
-        objectsFactory.SpawnDebugVisualObject(entity, name, options);
+            options.spawnPolicy = BaseObjectsFactory::SpawnPolicyBase::All;
+        baseObjectsFactory.SpawnDebugVisualObject(entity, name, options);
     }
 }
