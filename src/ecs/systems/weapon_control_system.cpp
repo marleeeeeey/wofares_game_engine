@@ -17,7 +17,7 @@
 #include <utils/entt/entt_registry_requests.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/box2d_body_creator.h>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 #include <utils/logger.h>
 #include <utils/sdl/sdl_colors.h>
 #include <utils/sdl/sdl_texture_process.h>
@@ -34,10 +34,11 @@ WeaponControlSystem::WeaponControlSystem(
     SubscribeToContactEvents();
 }
 
-void WeaponControlSystem::Update()
+void WeaponControlSystem::Update(float deltaTime)
 {
     CheckTimerExplosionEntities();
     ProcessEntitiesQueues();
+    UpdateFireRateComponents(deltaTime);
 }
 
 void WeaponControlSystem::SubscribeToContactEvents()
@@ -259,4 +260,17 @@ void WeaponControlSystem::ProcessEntitiesQueues()
 
     explosionEntitiesQueue.clear();
     becomeStaticEntitiesQueue.clear();
+}
+
+void WeaponControlSystem::UpdateFireRateComponents(float deltaTime)
+{
+    auto view = registry.view<FireRateComponent>();
+    view.each(
+        [deltaTime](FireRateComponent& fireRate)
+        {
+            if (fireRate.remainingFireRate > 0.0f)
+                fireRate.remainingFireRate -= deltaTime;
+            else
+                fireRate.remainingFireRate = fireRate.fireRate;
+        });
 }

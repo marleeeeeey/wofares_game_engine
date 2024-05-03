@@ -1,4 +1,4 @@
-#include "objects_factory.h"
+#include "game_objects_factory.h"
 #include "ecs/components/turret_component.h"
 #include <ecs/components/animation_components.h>
 #include <ecs/components/event_components.h>
@@ -25,7 +25,7 @@
 #include <utils/sdl/sdl_utils.h>
 #include <utils/time_utils.h>
 
-ObjectsFactory::ObjectsFactory(
+GameObjectsFactory::GameObjectsFactory(
     EnttRegistryWrapper& registryWrapper, ComponentsFactory& componentsFactory, BaseObjectsFactory& baseObjectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), box2dBodyCreator(registry),
@@ -33,7 +33,7 @@ ObjectsFactory::ObjectsFactory(
     baseObjectsFactory(baseObjectsFactory)
 {}
 
-entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::string& debugName)
+entt::entity GameObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::string& debugName)
 {
     auto entity = registryWrapper.Create(debugName);
 
@@ -62,44 +62,22 @@ entt::entity ObjectsFactory::SpawnPlayer(const glm::vec2& posWorld, const std::s
     return entity;
 }
 
-entt::entity ObjectsFactory::SpawnBullet(
-    entt::entity playerEntity, float initialBulletSpeed, Box2dBodyOptions::AnglePolicy anglePolicy)
+entt::entity GameObjectsFactory::SpawnBullet(
+    glm::vec2 initialBulletPosWorld, float initialBulletSpeed, float weaponDirection, const WeaponProps& weaponProps)
 {
-    if (!registry.all_of<PlayerComponent, PhysicsComponent, AnimationComponent>(playerEntity))
-    {
-        MY_LOG(warn, "[CreateBullet] Player does not have all of the required components. Entity: {}", playerEntity);
-        return entt::null;
-    }
-    const auto& playerInfo = registry.get<PlayerComponent>(playerEntity);
-
-    // 1. Check if player has weapon set as current.
-    if (!playerInfo.weapons.contains(playerInfo.currentWeapon))
-    {
-        MY_LOG(
-            trace, "[CreateBullet] Player does not have {} weapon set as current. Entity: {}", playerInfo.currentWeapon,
-            playerEntity);
-        return entt::null;
-    }
-    const WeaponProps& weaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
-
     // Prepare the bullet animation.
     AnimationComponent fireballAnimation = componentsFactory.CreateAnimationComponent(
         weaponProps.animationName, weaponProps.animationTag, ResourceManager::TagProps::ExactMatch);
     glm::vec2 fireballHitboxSizeWorld = fireballAnimation.GetHitboxSize();
 
-    // Spawn flying entity.
-    const auto& playerBody = registry.get<PhysicsComponent>(playerEntity).bodyRAII->GetBody();
-    const auto& playerAnimationComponent = registry.get<AnimationComponent>(playerEntity);
-    glm::vec2 playerSizeWorld = playerAnimationComponent.GetHitboxSize();
-    const auto& weaponDirection = playerInfo.weaponDirection;
-    glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
-    auto weaponInitialPointShift = weaponDirection * (playerSizeWorld.x) / 2.0f;
-    glm::vec2 positionInFrontOfPlayer = playerPosWorld + weaponInitialPointShift;
     entt::entity bulletEntity = baseObjectsFactory.SpawnFlyingEntity(
-        positionInFrontOfPlayer, fireballHitboxSizeWorld, weaponDirection, initialBulletSpeed, anglePolicy);
+        initialBulletPosWorld, fireballHitboxSizeWorld, weaponDirection, initialBulletSpeed,
+        weaponProps.bulletAnglePolicy);
     bodyTuner.ApplyOption(bulletEntity, Box2dBodyOptions::BulletPolicy::Bullet);
-    bodyTuner.ApplyOption(
-        bulletEntity, Box2dBodyOptions::CollisionPolicy{CollisionFlags::Bullet, CollisionFlags::Default});
+    Box2dBodyOptions::CollisionPolicy collisionPolicy;
+    collisionPolicy.ownCategoryOfCollision = CollisionFlags::Bullet;
+    collisionPolicy.collideWith = CollisionFlags::Default;
+    bodyTuner.ApplyOption(bulletEntity, collisionPolicy);
 
     // Add the bullet animation to the bullet entity.
     registry.emplace<AnimationComponent>(bulletEntity, fireballAnimation);
@@ -109,7 +87,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     damageComponent.force = weaponProps.damageForce;
     damageComponent.radius = coordinatesTransformer.WorldToPhysics(weaponProps.damageRadiusWorld);
 
-    switch (playerInfo.currentWeapon)
+    switch (weaponProps.type)
     {
     case WeaponType::Bazooka:
         registry.emplace<DamageComponent>(bulletEntity, damageComponent);
@@ -128,7 +106,7 @@ entt::entity ObjectsFactory::SpawnBullet(
     return bulletEntity;
 }
 
-entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
+entt::entity GameObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
 {
     auto entity = registryWrapper.Create("BuildingBlock");
 
@@ -136,15 +114,16 @@ entt::entity ObjectsFactory::SpawnBuildingBlock(glm::vec2 posWorld)
         componentsFactory.CreateAnimationComponent("buildingBlock", "block", ResourceManager::TagProps::ExactMatch);
     registry.emplace<AnimationComponent>(entity, buildingBlockAnimation);
 
+    Box2dBodyOptions options;
     float angle = 0.0f;
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, buildingBlockAnimation.GetHitboxSize(), angle);
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, buildingBlockAnimation.GetHitboxSize(), angle, options);
 
     registry.emplace<DestructibleComponent>(entity);
 
     return entity;
 }
 
-entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::string& debugName)
+entt::entity GameObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::string& debugName)
 {
     auto entity = registryWrapper.Create(debugName);
 
@@ -186,7 +165,7 @@ entt::entity ObjectsFactory::SpawnPortal(const glm::vec2& posWorld, const std::s
     return entity;
 }
 
-entt::entity ObjectsFactory::SpawnTurret(const glm::vec2& posWorld, const std::string& debugName)
+entt::entity GameObjectsFactory::SpawnTurret(const glm::vec2& posWorld, const std::string& debugName)
 {
     auto entity = registryWrapper.Create(debugName);
 
@@ -197,15 +176,40 @@ entt::entity ObjectsFactory::SpawnTurret(const glm::vec2& posWorld, const std::s
 
     // TurretComponent.
     registry.emplace<TurretComponent>(entity);
+    registry.emplace<FireRateComponent>(entity, 0.2f);
 
     // PhysicsInfo.
     Box2dBodyOptions options;
     options.shape = Box2dBodyOptions::Shape::Box;
     options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
     options.anglePolicy = Box2dBodyOptions::AnglePolicy::Dynamic;
+    options.collisionPolicy.collideWith = CollisionFlags::Default; // No collision with bullets.
+    options.collisionPolicy.ownCategoryOfCollision = CollisionFlags::Default;
     glm::vec2 playerHitboxSizeWorld = portalAnimation.GetHitboxSize();
     float angle = 0.0f;
     box2dBodyCreator.CreatePhysicsBody(entity, posWorld, playerHitboxSizeWorld, angle, options);
+
+    registry.emplace<TimeEventComponent>(
+        entity, utils::Random<float>(0, 2),
+        [this](entt::entity timedPortal)
+        {
+            // Update the speed of the portal object randomly.
+            auto& turretComponent = registry.get<TurretComponent>(timedPortal);
+            auto& timerComponent = registry.get<TimeEventComponent>(timedPortal);
+
+            if (turretComponent.shooting)
+            {
+                turretComponent.shooting = false;
+                timerComponent.timeToActivation = utils::Random<float>(2, 4);
+            }
+            else
+            {
+                turretComponent.shooting = true;
+                timerComponent.timeToActivation = utils::Random<float>(0.5, 1.5);
+            }
+
+            timerComponent.isActivated = false;
+        });
 
     return entity;
 }

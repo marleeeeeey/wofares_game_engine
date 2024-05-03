@@ -2,6 +2,8 @@
 #include <SDL.h>
 #include <algorithm>
 #include <box2d/box2d.h>
+#include <glm/fwd.hpp>
+#include <glm/glm.hpp>
 
 namespace utils
 {
@@ -25,6 +27,22 @@ template <typename Point, typename Bounds>
 bool IsPointInsideBounds(const Point& point, const Bounds& bounds)
 {
     return point.x >= bounds.min.x && point.x <= bounds.max.x && point.y >= bounds.min.y && point.y <= bounds.max.y;
+}
+
+template <typename Vec2>
+Vec2 GetDirectionFromAngle(float angle)
+{
+    return {cos(angle), sin(angle)};
+}
+
+template <typename Vec2>
+    requires requires(Vec2 v) {
+        v.x;
+        v.y;
+    }
+float GetAngleFromDirection(const Vec2& direction)
+{
+    return atan2(direction.y, direction.x);
 }
 
 } // namespace utils

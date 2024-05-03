@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/factories/base_objects_factory.h"
 #include <entt/entity/fwd.hpp>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 
 class DebugSystem
 {

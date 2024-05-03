@@ -1,7 +1,7 @@
 #include "debug_system.h"
 #include <ecs/components/physics_components.h>
 #include <my_cpp_utils/logger.h>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 
 DebugSystem::DebugSystem(entt::registry& registry, BaseObjectsFactory& baseObjectsFactory)
   : registry(registry), baseObjectsFactory(baseObjectsFactory)

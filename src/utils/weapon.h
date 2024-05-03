@@ -10,6 +10,8 @@ enum class WeaponType
 
 struct WeaponProps
 {
+public: //////////////////////////////////////////// Type. ////////////////////////////////////////////
+    WeaponType type = WeaponType::Bazooka; // Type of the weapon.
 public: ///////////////////////////////////////// Animation. //////////////////////////////////////
     std::string animationName = "fireball"; // Name of the animation.
     std::string animationTag = "fire"; // Tag of the animation.

@@ -70,7 +70,7 @@ void PhysicsSystem::UpdateAngleRegardingWithAnglePolicy()
         if (physicsComponent.options.anglePolicy == Box2dBodyOptions::AnglePolicy::VelocityDirection)
         {
             b2Vec2 velocity = body->GetLinearVelocity();
-            float angle = atan2(velocity.y, velocity.x);
+            float angle = utils::GetAngleFromDirection(velocity);
             body->SetTransform(body->GetPosition(), angle);
         }
 

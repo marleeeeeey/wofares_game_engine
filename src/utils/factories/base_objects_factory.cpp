@@ -1,4 +1,5 @@
 #include "base_objects_factory.h"
+#include "utils/math_utils.h"
 #include <ecs/components/animation_components.h>
 #include <ecs/components/event_components.h>
 #include <ecs/components/physics_components.h>
@@ -82,12 +83,13 @@ entt::entity BaseObjectsFactory::SpawnFragmentAfterExplosion(const glm::vec2& po
     auto entity = registryWrapper.Create("ExplosionFragment");
     registry.emplace<AnimationComponent>(entity, fragmentAnimation);
     float angle = utils::Random<float>(0, 2 * M_PI);
-    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentSizeWorld, angle);
+    Box2dBodyOptions options;
+    box2dBodyCreator.CreatePhysicsBody(entity, posWorld, fragmentSizeWorld, angle, options);
     return entity;
 }
 
 entt::entity BaseObjectsFactory::SpawnFlyingEntity(
-    const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float initialSpeed,
+    const glm::vec2& posWorld, const glm::vec2& sizeWorld, float forceDirection, float initialSpeed,
     Box2dBodyOptions::AnglePolicy anglePolicy)
 {
     // Create the flying entity.
@@ -98,14 +100,11 @@ entt::entity BaseObjectsFactory::SpawnFlyingEntity(
     options.dynamic = Box2dBodyOptions::MovementPolicy::Box2dPhysics;
     options.shape = Box2dBodyOptions::Shape::Box;
     options.anglePolicy = anglePolicy;
-
-    // Calc angle from force direction.
-    float angle = atan2(forceDirection.y, forceDirection.x);
-    auto& physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, angle, options);
+    auto& physicsBody = box2dBodyCreator.CreatePhysicsBody(flyingEntity, posWorld, sizeWorld, forceDirection, options);
 
     // Apply the force to the flying entity.
     b2Vec2 speedVec = b2Vec2(initialSpeed, 0);
-    speedVec = b2Mul(b2Rot(angle), speedVec);
+    speedVec = b2Mul(b2Rot(forceDirection), speedVec);
     physicsBody.bodyRAII->GetBody()->SetLinearVelocity(speedVec);
 
     return flyingEntity;

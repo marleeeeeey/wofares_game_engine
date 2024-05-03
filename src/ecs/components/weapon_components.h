@@ -14,3 +14,10 @@ struct ExplosionOnContactComponent
 // Like a grenade. Explodes after a certain time.
 struct ExplosionOnTimerComponent
 {};
+
+// TODO1: Reuse instead of weapon props.
+struct FireRateComponent
+{
+    float fireRate = 0.0f; // Time in seconds between shots.
+    float remainingFireRate = 0.0f; // Remaining time in seconds to fire the next shot.
+};

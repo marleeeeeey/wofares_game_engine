@@ -1,5 +1,5 @@
 #pragma once
-#include "utils/factories/objects_factory.h"
+#include "utils/factories/game_objects_factory.h"
 #include "utils/systems/audio_system.h"
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -19,13 +19,13 @@ class PlayerControlSystem
     CoordinatesTransformer coordinatesTransformer;
     Box2dBodyCreator box2dBodyCreator;
     Box2dEnttContactListener& contactListener;
-    ObjectsFactory& objectsFactory;
+    GameObjectsFactory& gameObjectsFactory;
     AudioSystem& audioSystem;
     std::unordered_map<InputEventManager::EventType, std::queue<InputEventManager::EventInfo>> eventsQueueByType;
 public:
     PlayerControlSystem(
         EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
-        Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
+        Box2dEnttContactListener& contactListener, GameObjectsFactory& gameObjectsFactory, AudioSystem& audioSystem);
 public: ///////////////////////////////////////////////// Update. ///////////////////////////////////////////////
     void Update(float deltaTime);
     void ProcessEventsQueue(float deltaTime);

@@ -15,10 +15,10 @@
 
 MapLoaderSystem::MapLoaderSystem(
     EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager, Box2dEnttContactListener& contactListener,
-    ObjectsFactory& objectsFactory, BaseObjectsFactory& baseObjectsFactory)
+    GameObjectsFactory& gameObjectsFactory, BaseObjectsFactory& baseObjectsFactory)
   : registryWrapper(registryWrapper), registry(registryWrapper.GetRegistry()), resourceManager(resourceManager),
     contactListener(contactListener), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
-    objectsFactory(objectsFactory), baseObjectsFactory(baseObjectsFactory), coordinatesTransformer(registry)
+    gameObjectsFactory(gameObjectsFactory), baseObjectsFactory(baseObjectsFactory), coordinatesTransformer(registry)
 {}
 
 void MapLoaderSystem::LoadMap(const LevelInfo& levelInfo)
@@ -129,21 +129,21 @@ void MapLoaderSystem::ParseObjectLayer(const nlohmann::json& layer)
         {
             std::string objectName = object["name"];
             auto posWorld = glm::vec2(object["x"], object["y"]);
-            objectsFactory.SpawnPlayer(posWorld, objectName);
+            gameObjectsFactory.SpawnPlayer(posWorld, objectName);
         }
 
         if (object["type"] == "Portal")
         {
             std::string objectName = object["name"];
             auto posWorld = glm::vec2(object["x"], object["y"]);
-            objectsFactory.SpawnPortal(posWorld, objectName);
+            gameObjectsFactory.SpawnPortal(posWorld, objectName);
         }
 
         if (object["type"] == "Turret")
         {
             std::string objectName = object["name"];
             auto posWorld = glm::vec2(object["x"], object["y"]);
-            objectsFactory.SpawnTurret(posWorld, objectName);
+            gameObjectsFactory.SpawnTurret(posWorld, objectName);
         }
     }
 }

@@ -19,5 +19,5 @@ public:
     // Overwrite size of object in options.hitbox.sizeWorld with sizeWorld.
     PhysicsComponent& CreatePhysicsBody(
         entt::entity entity, const glm::vec2& posWorld, const glm::vec2& sizeWorld, float angle,
-        Box2dBodyOptions options = {});
+        Box2dBodyOptions options);
 };

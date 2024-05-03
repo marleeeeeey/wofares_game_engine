@@ -1,3 +1,4 @@
+#include "utils/coordinates_transformer.h"
 #include "utils/factories/base_objects_factory.h"
 #include <ecs/systems/animation_update_system.h>
 #include <ecs/systems/camera_control_system.h>
@@ -10,6 +11,7 @@
 #include <ecs/systems/render_hud_systems.h>
 #include <ecs/systems/render_world_system.h>
 #include <ecs/systems/timers_control_system.h>
+#include <ecs/systems/turret_game_logic_system.h>
 #include <ecs/systems/weapon_control_system.h>
 #include <iostream>
 #include <magic_enum.hpp>
@@ -17,7 +19,7 @@
 #include <my_cpp_utils/json_utils.h>
 #include <utils/entt/entt_registry_wrapper.h>
 #include <utils/factories/components_factory.h>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 #include <utils/file_system.h>
 #include <utils/logger.h>
 
@@ -111,7 +113,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         ComponentsFactory componentsFactory(resourceManager);
         BaseObjectsFactory baseObjectsFactory(registryWrapper, componentsFactory);
-        ObjectsFactory objectsFactory(registryWrapper, componentsFactory, baseObjectsFactory);
+        GameObjectsFactory gameObjectsFactory(registryWrapper, componentsFactory, baseObjectsFactory);
 
         // Create a weapon control system and subscribe it to the contact listener.
         WeaponControlSystem weaponControlSystem(registryWrapper, contactListener, audioSystem, baseObjectsFactory);
@@ -122,7 +124,7 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Subscribe all systems that need to handle input events.
         PlayerControlSystem playerControlSystem(
-            registryWrapper, inputEventManager, contactListener, objectsFactory, audioSystem);
+            registryWrapper, inputEventManager, contactListener, gameObjectsFactory, audioSystem);
         CameraControlSystem cameraControlSystem(registryWrapper.GetRegistry(), inputEventManager);
         GameStateControlSystem gameStateControlSystem(registryWrapper.GetRegistry(), inputEventManager);
 
@@ -139,10 +141,14 @@ int main([[maybe_unused]] int argc, char* args[])
 
         // Load the map.
         MapLoaderSystem mapLoaderSystem(
-            registryWrapper, resourceManager, contactListener, objectsFactory, baseObjectsFactory);
+            registryWrapper, resourceManager, contactListener, gameObjectsFactory, baseObjectsFactory);
+
+        CoordinatesTransformer coordinatesTransformer(registryWrapper.GetRegistry());
 
         AnimationUpdateSystem animationUpdateSystem(registryWrapper.GetRegistry(), resourceManager);
-        PortalsGameLogicSystem gameLogicSystem(registryWrapper.GetRegistry(), objectsFactory, audioSystem);
+        PortalsGameLogicSystem portalsGameLogicSystem(registryWrapper.GetRegistry(), gameObjectsFactory, audioSystem);
+        TurretGameLogicSystem turretGameLogicSystem(
+            registryWrapper.GetRegistry(), gameObjectsFactory, coordinatesTransformer);
 
         EventsControlSystem eventsControlSystem(registryWrapper.GetRegistry());
 
@@ -175,8 +181,9 @@ int main([[maybe_unused]] int argc, char* args[])
             // Update the physics and post-physics systems to prepare the render.
             physicsSystem.Update(deltaTime);
             playerControlSystem.Update(deltaTime);
-            gameLogicSystem.Update(deltaTime);
-            weaponControlSystem.Update();
+            portalsGameLogicSystem.Update(deltaTime);
+            turretGameLogicSystem.Update();
+            weaponControlSystem.Update(deltaTime);
             cameraControlSystem.Update(deltaTime);
 
             // Update animation.

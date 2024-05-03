@@ -30,6 +30,7 @@ std::unordered_map<WeaponType, WeaponProps> WeaponPropsFactory::CreateAllWeapons
 WeaponProps WeaponPropsFactory::CreateBazooka()
 {
     WeaponProps props;
+    props.type = WeaponType::Bazooka;
     props.bulletMass = 0.3;
     props.bulletEjectionForce = 0.05;
     props.bulletAnglePolicy = Box2dBodyOptions::AnglePolicy::VelocityDirection;
@@ -46,6 +47,7 @@ WeaponProps WeaponPropsFactory::CreateBazooka()
 WeaponProps WeaponPropsFactory::CreateGrenade()
 {
     WeaponProps props = CreateBazooka();
+    props.type = WeaponType::Grenade;
     props.animationName = "fire-bomb";
     props.bulletMass = 0.3;
     props.bulletEjectionForce = 0.0;

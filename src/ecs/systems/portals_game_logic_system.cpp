@@ -13,8 +13,8 @@
 #include <utils/vec_operators.h>
 
 PortalsGameLogicSystem::PortalsGameLogicSystem(
-    entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
-  : registry(registry), registryWrapper(registry), bodyTuner(registry), objectsFactory(objectsFactory),
+    entt::registry& registry, GameObjectsFactory& gameObjectsFactory, AudioSystem& audioSystem)
+  : registry(registry), registryWrapper(registry), bodyTuner(registry), gameObjectsFactory(gameObjectsFactory),
     coordinatesTransformer(registry), gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())),
     audioSystem(audioSystem)
 {}
@@ -169,7 +169,7 @@ void PortalsGameLogicSystem::DestroyClosestFoodInPortal()
                 if (portalComponent.foodCounter >= portalMaxFoodCounter)
                 {
                     auto portalPosWorld = coordinatesTransformer.PhysicsToWorld(portalPos);
-                    objectsFactory.SpawnPlayer(portalPosWorld, "Rescued player");
+                    gameObjectsFactory.SpawnPlayer(portalPosWorld, "Rescued player");
                     portalToDestroyOpt = portalEntity;
                     return;
                 }
@@ -268,7 +268,7 @@ void PortalsGameLogicSystem::EatThePlayerByPortalIfCloser()
 
                 // Spawn a new portal near thisw place.
                 auto portalPosWorld = coordinatesTransformer.PhysicsToWorld(portalPos);
-                objectsFactory.SpawnPortal(portalPosWorld, "Respawned portal");
+                gameObjectsFactory.SpawnPortal(portalPosWorld, "Respawned portal");
             }
         });
 }

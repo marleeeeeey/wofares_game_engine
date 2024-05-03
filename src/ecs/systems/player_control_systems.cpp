@@ -1,5 +1,6 @@
 #include "player_control_systems.h"
 #include "my_cpp_utils/logger.h"
+#include "utils/math_utils.h"
 #include <SDL.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/event_components.h>
@@ -18,10 +19,10 @@
 
 PlayerControlSystem::PlayerControlSystem(
     EnttRegistryWrapper& registryWrapper, InputEventManager& inputEventManager,
-    Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory, AudioSystem& audioSystem)
+    Box2dEnttContactListener& contactListener, GameObjectsFactory& gameObjectsFactory, AudioSystem& audioSystem)
   : registry(registryWrapper.GetRegistry()), inputEventManager(inputEventManager),
     gameState(registry.get<GameOptions>(registry.view<GameOptions>().front())), coordinatesTransformer(registry),
-    box2dBodyCreator(registry), contactListener(contactListener), objectsFactory(objectsFactory),
+    box2dBodyCreator(registry), contactListener(contactListener), gameObjectsFactory(gameObjectsFactory),
     audioSystem(audioSystem)
 {
     SubscribeToInputEvents();
@@ -222,7 +223,7 @@ void PlayerControlSystem::HandlePlayerBuildingAction(const InputEventManager::Ev
     {
         glm::vec2 posWindow = glm::vec2(event.button.x, event.button.y);
         glm::vec2 posWorld = coordinatesTransformer.ScreenToWorld(posWindow);
-        objectsFactory.SpawnBuildingBlock(posWorld);
+        gameObjectsFactory.SpawnBuildingBlock(posWorld);
     }
 }
 
@@ -303,7 +304,7 @@ void PlayerControlSystem::SetGroundContactFlagIfEntityIsPlayer(entt::entity enti
 
 entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, float throwingForce)
 {
-    if (!registry.all_of<PlayerComponent>(playerEntity))
+    if (!registry.all_of<PlayerComponent, PhysicsComponent, AnimationComponent>(playerEntity))
     {
         MY_LOG(
             trace, "[MakeShotIfPossible] entity does not have all of the required components. Entity: {}",
@@ -373,9 +374,27 @@ entt::entity PlayerControlSystem::MakeShotIfPossible(entt::entity playerEntity, 
     initialBulletSpeed += throwingForce; // Add throwing force for the grenade with zero initial speed.
     initialBulletSpeed *= 40; // TODO2: Remove this magic number.
 
+    // Check if player has weapon set as current.
+    if (!playerInfo.weapons.contains(playerInfo.currentWeapon))
+    {
+        MY_LOG(
+            trace, "[CreateBullet] Player does not have {} weapon set as current. Entity: {}", playerInfo.currentWeapon,
+            playerEntity);
+        return entt::null;
+    }
+    const WeaponProps& weaponProps = playerInfo.weapons.at(playerInfo.currentWeapon);
+
+    // Caclulate initial bullet position.
+    const auto& playerBody = registry.get<PhysicsComponent>(playerEntity).bodyRAII->GetBody();
+    const auto& playerAnimationComponent = registry.get<AnimationComponent>(playerEntity);
+    glm::vec2 playerSizeWorld = playerAnimationComponent.GetHitboxSize();
+    glm::vec2 playerPosWorld = coordinatesTransformer.PhysicsToWorld(playerBody->GetPosition());
+    auto weaponInitialPointShift = playerInfo.weaponDirection * (playerSizeWorld.x) / 2.0f;
+    glm::vec2 initialPosWorld = playerPosWorld + weaponInitialPointShift;
+
     // Create a bullet.
-    auto bulletEntity =
-        objectsFactory.SpawnBullet(playerEntity, initialBulletSpeed, currentWeaponProps.bulletAnglePolicy);
+    float angle = utils::GetAngleFromDirection(playerInfo.weaponDirection);
+    auto bulletEntity = gameObjectsFactory.SpawnBullet(initialPosWorld, initialBulletSpeed, angle, weaponProps);
 
     audioSystem.PlaySoundEffect(currentWeaponProps.shotSoundName);
 

@@ -6,7 +6,7 @@
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt/entt_registry_wrapper.h>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 
 // TODO1: Remove this class later because of implementing new game.
 class PortalsGameLogicSystem
@@ -14,12 +14,12 @@ class PortalsGameLogicSystem
     entt::registry& registry;
     EnttRegistryWrapper registryWrapper;
     Box2dBodyTuner bodyTuner;
-    ObjectsFactory& objectsFactory;
+    GameObjectsFactory& gameObjectsFactory;
     CoordinatesTransformer coordinatesTransformer;
     GameOptions& gameState;
     AudioSystem& audioSystem;
 public:
-    PortalsGameLogicSystem(entt::registry& registry, ObjectsFactory& objectsFactory, AudioSystem& audioSystem);
+    PortalsGameLogicSystem(entt::registry& registry, GameObjectsFactory& gameObjectsFactory, AudioSystem& audioSystem);
     void Update(float deltaTime);
 private: ///////////////////////////////////////// Portal logic. ///////////////////////////////////////
     void UpdatePortalsPosition(float deltaTime);

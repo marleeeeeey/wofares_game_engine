@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt/entt_registry_wrapper.h>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 #include <utils/level_info.h>
 #include <utils/resources/resource_manager.h>
 #include <utils/sdl/sdl_RAII.h>
@@ -18,7 +18,7 @@ class MapLoaderSystem
     ResourceManager& resourceManager;
     Box2dEnttContactListener& contactListener;
     GameOptions& gameState;
-    ObjectsFactory& objectsFactory;
+    GameObjectsFactory& gameObjectsFactory;
     BaseObjectsFactory& baseObjectsFactory;
     CoordinatesTransformer coordinatesTransformer;
     int tileWidth;
@@ -34,7 +34,7 @@ class MapLoaderSystem
 public:
     MapLoaderSystem(
         EnttRegistryWrapper& registryWrapper, ResourceManager& resourceManager,
-        Box2dEnttContactListener& contactListener, ObjectsFactory& objectsFactory,
+        Box2dEnttContactListener& contactListener, GameObjectsFactory& gameObjectsFactory,
         BaseObjectsFactory& baseObjectsFactory);
     void LoadMap(const LevelInfo& levelInfo);
 private:

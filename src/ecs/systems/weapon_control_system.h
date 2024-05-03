@@ -4,7 +4,7 @@
 #include <utils/box2d/box2d_body_tuner.h>
 #include <utils/coordinates_transformer.h>
 #include <utils/entt/entt_registry_wrapper.h>
-#include <utils/factories/objects_factory.h>
+#include <utils/factories/game_objects_factory.h>
 #include <utils/game_options.h>
 #include <utils/systems/audio_system.h>
 #include <utils/systems/box2d_entt_contact_listener.h>
@@ -32,7 +32,7 @@ public:
     WeaponControlSystem(
         EnttRegistryWrapper& registryWrapper, Box2dEnttContactListener& contactListener, AudioSystem& audioSystem,
         BaseObjectsFactory& baseObjectsFactory);
-    void Update();
+    void Update(float deltaTime);
 private:
     void SubscribeToContactEvents();
     void AppendToExplosionQueue(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
@@ -40,4 +40,5 @@ private:
     void CheckTimerExplosionEntities();
     void ProcessEntitiesQueues();
     void DoExplosion(const ExplosionEntityWithContactPoint& explosionEntityWithContactPoint);
+    void UpdateFireRateComponents(float deltaTime);
 };

@@ -1,4 +1,5 @@
 #include "render_world_system.h"
+#include "utils/math_utils.h"
 #include <SDL_render.h>
 #include <ecs/components/animation_components.h>
 #include <ecs/components/physics_components.h>
@@ -75,7 +76,7 @@ void RenderWorldSystem::RenderPlayerWeaponDirection()
         // We should use AnimationComponent to make weapon animation runnable.
         const glm::vec2 playerPosWorld =
             coordinatesTransformer.PhysicsToWorld(physicalBody.bodyRAII->GetBody()->GetPosition());
-        float angle = atan2(playerInfo.weaponDirection.y, playerInfo.weaponDirection.x);
+        float angle = utils::GetAngleFromDirection(playerInfo.weaponDirection);
         auto weaponAnimation = resourceManager.GetAnimation("scepter");
         SDL_RendererFlip weaponFlip =
             animationComponent.flip == SDL_FLIP_HORIZONTAL ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;

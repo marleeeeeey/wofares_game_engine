@@ -61,6 +61,6 @@ public: /////////////////////////////////////////// Explosions. Helpers. ///////
     entt::entity SpawnFragmentAfterExplosion(const glm::vec2& posWorld);
 public: ///////////////////////////////////////////// Common. Helpers. ///////////////////////////////////////////
     entt::entity SpawnFlyingEntity(
-        const glm::vec2& posWorld, const glm::vec2& sizeWorld, const glm::vec2& forceDirection, float force,
+        const glm::vec2& posWorld, const glm::vec2& sizeWorld, float forceDirection, float force,
         Box2dBodyOptions::AnglePolicy anglePolicy);
 };
