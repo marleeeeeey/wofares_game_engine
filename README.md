@@ -111,7 +111,7 @@ Here is a link to the game created with this engine for [LD55](https://ldjam.com
 
 - **Code Block Comments**: Surround the comments for a block of code with repeating // or # symbols depending on the programming language. This practice helps in maintaining visibility of the block's purpose when code folding is enabled in the editor.
 
-```
+```js
 
 # #################### Setup compiler options #######################
 set(CMAKE_CXX_STANDARD 20)
@@ -136,7 +136,7 @@ Wofares Game Engine has been developed, built, and tested on **Windows** and **W
 
 #### Clone the Repository
 
-```
+```bash
 git clone --recursive https://github.com/marleeeeeey/wofares-game-engine.git
 ```
 
@@ -169,7 +169,7 @@ This project define it's dependences:
 
 First, we bootstrap a project-specific installation of vcpkg ("manifest mode") in the default location, `<project root>/vcpkg`. From the project root, run these commands:
 
-```
+```bash
 cd wofares_game_engine
 git clone https://github.com/microsoft/vcpkg
 .\vcpkg\bootstrap-vcpkg.bat
@@ -177,7 +177,7 @@ git clone https://github.com/microsoft/vcpkg
 
 Now we ask vcpkg to install of the dependencies for our project, which are described by the file `<project root>/vcpkg.json`.  Note that this step is optional, as cmake will automatically do this.  But here we are doing it in a separate step so that we can isolate any problems, because if problems happen here don't have anything to do with your cmake files.
 
-```
+```bash
 .\vcpkg\vcpkg install --triplet=x64-windows
 ```
 
@@ -195,14 +195,14 @@ cmake --build .
 
 Finally, we copy the assets and configuration file to the build directory.
 
-```
+```bash
 cmake -E copy ../config.json ./src/config.json
 cmake -E copy_directory ../assets ./src/assets
 ```
 
 Run the game:
 
-```
+```bash
 src\wofares_game_engine.exe
 ```
 
@@ -210,7 +210,7 @@ src\wofares_game_engine.exe
 
 #### Clone the Repository
 
-```
+```bash
 git clone --recursive https://github.com/marleeeeeey/wofares_game_engine.git
 ```
 
